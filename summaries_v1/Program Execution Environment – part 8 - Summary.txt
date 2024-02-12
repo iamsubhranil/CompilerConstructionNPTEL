@@ -1,0 +1,23 @@
+ Technical Terms Explained:
+
+1. Data Types: Variable categories determining how data is stored and accessed, such as int, float, char, and struct.
+2. ABI (Application Binary Interface): Defines details about data types, including size and alignment requirements, left to be specified by the target platform.
+3. Structure Alignment: Ensuring that structure members begin at memory addresses aligned to their respective size requirements, potentially leading to padding between members.
+4. Type Punning: Accessing memory containing one data type as if it were a different data type, exploiting implicit conversions and byte representations.
+5. Strict Aliasing Rule: Language rule stating that two pointers must point to different locations if they have different types, allowing certain compiler optimizations.
+6. Name Mangling: Process of modifying symbol names in object files to accommodate overloading, namespaces, and other advanced C++ features.
+7. Restrict Keyword: A C++ keyword providing a hint to the compiler that a given pointer is the sole pointer to a particular memory location.
+8. Inline Functions: Special functions marked for potential inlining by the compiler to remove function call overhead, primarily used for small functions.
+9. Template Functions: Generic functions in C++ using placeholders (e.g., 't') for data types, allowing for flexible, reusable code across varying data types.
+10. Dynamic Initialization: Runtime evaluation and initialization of global variables, especially relevant when initializing globals with function return values.
+11. Virtual Functions: Features in C++ enabling polymorphism and late binding, allowing for dispatching of function calls based on object type rather than pointer type.
+12. VPTR (Virtual Pointer): Hidden pointer within objects pointing to a virtual function table (vtable) containing addresses of virtual functions.
+13. VTABLE (Virtual Function Table): Table listing addresses of virtual functions pertaining to a specific class, used in conjunction with vptr for virtual function dispatch.
+14. Common Linker Optimizations: Efficiency improvements applied by linkers, including dead code elimination and redundant computation removal.
+15. Link Time Optimizations (LTO): Advanced linker optimizations utilizing intermediate representation (IR) for improved analysis and optimization capabilities.
+16. Debug Information: Detailed metadata accompanying compiled binaries, facilitating accurate correlation between high-level source code and lower-level assembly code.
+17. DWARF: Standard debug information format used by compilers to embed detailed debugging data alongside machine code.
+
+Exam Notes:
+
+Data types in C and C++ involve several intricate concepts related to memory management, structure packing, type punning, strict aliasing rules, name mangling, and inline functions. Understanding these mechanisms provides insight into how the compiler organizes data, performs optimizations, and implements language features such as virtual functions, vtables, and debug information. Recognition of these principles helps navigate challenges encountered while coding in C and C++, ensuring effective utilization of language features and avoiding pitfalls stemming from misunderstandings. Moreover, comprehending linker optimizations and LTO assists developers in producing performant code and diagnosing potential issues during development.

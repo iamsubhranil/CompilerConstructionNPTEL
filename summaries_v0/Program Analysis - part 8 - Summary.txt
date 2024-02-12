@@ -1,0 +1,19 @@
+ Dynamic analysis is a method of analyzing a program by executing it on various inputs and observing its behavior. This contrasts with static analysis, where the program is analyzed without executing it. Dynamic analysis can provide insights into the program's behavior on specific inputs and can help identify issues such as bugs, security vulnerabilities, or performance bottlenecks.
+
+The advantages of dynamic analysis include its ability to handle complex interactions between components, its ability to handle real-world inputs, and its potential for automation. However, dynamic analysis also has limitations. It may not cover all possible inputs or edge cases, and it can be time-consuming and resource-intensive. Moreover, dynamic analysis alone is usually not sufficient to guarantee the absence of defects or vulnerabilities; it is often used in conjunction with static analysis and testing.
+
+There are several types of dynamic analysis, including:
+
+* Function coverage: measuring which functions are executed during testing
+* Statement coverage: measuring which statements are executed during testing
+* Path coverage: measuring which paths through the code are exercised during testing
+* Exception handling: checking whether exceptions are handled correctly
+* Resource usage: monitoring the consumption of resources such as CPU, memory, disk, or network bandwidth
+* Performance profiling: measuring the time spent in different parts of the code
+* Security testing: attempting to exploit security vulnerabilities in the code
+
+Dynamic analysis can be performed manually or automatically. Manual dynamic analysis involves running the program and observing its behavior, possibly using debugging tools or logging mechanisms. Automated dynamic analysis involves using automated tools such as test harnesses, load generators, or fuzzers to execute the program and gather data.
+
+Dynamic analysis is widely used in software development, quality assurance, and maintenance. It is particularly useful for complex, large-scale systems where exhaustive testing is impractical. Dynamic analysis can complement other software engineering activities such as requirements elicitation, design, coding, testing, and maintenance.
+
+In conclusion, dynamic analysis is a valuable tool for understanding and improving the behavior of software systems. While it has some limitations, it can provide unique insights and complement other approaches such as static analysis and testing.

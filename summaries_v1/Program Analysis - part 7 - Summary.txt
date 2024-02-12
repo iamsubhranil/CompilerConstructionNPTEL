@@ -1,0 +1,19 @@
+ Exam Notes:
+
+* Data flow analysis uses lattice theory and fixed point theory to solve systems of data flow equations.
+* A lattice is a partially ordered set where every non-empty finite subset has a least upper bound (join) and a greatest lower bound (meet).
+* A complete lattice is a lattice where all subsets, not just finite ones, have a join and meet.
+* Monotonic functions preserve the partial order of a lattice, i.e., if x <= y then f(x) <= f(y).
+* The Knaster-Tarski fixed point theorem states that every monotonic function on a complete lattice has a least and greatest fixed point.
+* The Kleene fixed point theorem states that every monotonic function on a complete lattice with a least element has a least fixed point that can be constructed as the limit of a sequence obtained by repeated application of the function to the least element.
+* Reaching definitions, available expressions, constant propagation, and interval analysis are all instances of data flow analysis that can be solved using lattice and fixed point theory.
+* ASCC (ascending chain condition) is a sufficient condition for the convergence of the Kleene fixed point theorem.
+* Clean iteration is an algorithm for computing the least fixed point of a monotonic function on a complete lattice satisfying ACC.
+* Distributive lattices have the property that the meet and join operators distribute over each other, i.e., a ^ (b v c) = (a ^ b) v (a ^ c) and a v (b ^ c) = (a v b) ^ (a v c).
+* Distributive laws are important for ensuring that the meet over all paths (MOP) solution and the meet over all feasible paths (MFP) solution coincide in data flow analysis.
+* Abstract interpretation is a theoretical framework for developing static analyses that balance scalability and precision.
+* Abstraction is the process of simplifying a system by discarding irrelevant details.
+* Interval analysis is a numerical abstraction technique that replaces concrete numeric values with intervals of possible values.
+* Context sensitivity is a type of static analysis that distinguishes between different calling contexts of a function.
+* Flow sensitivity is a type of static analysis that considers the order of statements in a program.
+* Context-insensitive and flow-insensitive analyses are coarser grained and less precise than context-sensitive and flow-sensitive analyses, respectively, but are usually faster and require less memory.

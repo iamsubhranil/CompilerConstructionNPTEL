@@ -1,0 +1,2776 @@
+1
+00:00:00,000 --> 00:00:11,480
+So, let us do a few more definitions. Just to revise I mean we construct these gen and
+
+2
+00:00:11,480 --> 00:00:15,200
+kill sets. So, all definitions that are generated and do not get killed before reaching the
+
+3
+00:00:15,200 --> 00:00:18,640
+end of the basic block are put in the gen set you know how to construct it and kill
+
+4
+00:00:18,640 --> 00:00:22,400
+is all definition that killed whose area was resigned in the basic block as simple as that.
+
+5
+00:00:22,400 --> 00:00:26,760
+Again as you understand that it is on that in the on this particular equation I mean
+
+6
+00:00:26,760 --> 00:00:39,960
+if you say out of n is equals in of n minus kill of n union gen of n. So, given this equation
+
+7
+00:00:39,960 --> 00:00:43,480
+these are the definitions, but if you change the equation you do the gen first and the
+
+8
+00:00:43,480 --> 00:00:49,480
+equation like you have to do it differently. So, if you do this for instance then your
+
+9
+00:00:49,480 --> 00:00:54,960
+kill should not contain the ones which get generated right. So, those are so nothing
+
+10
+00:00:54,960 --> 00:00:58,000
+is set in stone you can define things the way you want to, but you have to make sure
+
+11
+00:00:58,000 --> 00:01:05,319
+the other things are also consistent that is all.
+
+12
+00:01:05,319 --> 00:01:11,879
+So, how to compute we have done that. So, there are many abstraction techniques about
+
+13
+00:01:11,879 --> 00:01:18,879
+for arrays like for instance one abstraction is that you assume that each array is one
+
+14
+00:01:18,879 --> 00:01:26,519
+variable right one large variable. So, any update so you forget what happens on an index
+
+15
+00:01:26,519 --> 00:01:34,000
+you just say that if I have written a of 2 it is just writing to a right. So, essentially
+
+16
+00:01:34,000 --> 00:01:40,519
+what will happen is even if it is writing to like a of 2 a of 3 will also get killed.
+
+17
+00:01:40,519 --> 00:01:45,439
+So, you are your precision of an analysis will decrease, but you have to design analysis
+
+18
+00:01:45,439 --> 00:01:49,920
+so that it remains sound even in under those constraints, but again there are other abstraction
+
+19
+00:01:49,920 --> 00:01:53,959
+techniques of arrays which essentially make it better. So, you can so there is something
+
+20
+00:01:53,959 --> 00:01:58,959
+called recency abstraction which essentially says that let me just keep the first few array
+
+21
+00:01:58,959 --> 00:02:03,640
+indices separate I will treat them as separate variables and the rest of the array again
+
+22
+00:02:03,640 --> 00:02:09,000
+I will merge into a one big aggregate variable. So, there are such techniques. So, in fact
+
+23
+00:02:09,000 --> 00:02:13,879
+abstracting array is abstracting heap these are research topics by their own right and
+
+24
+00:02:13,960 --> 00:02:18,039
+how to do it well and what applications they will work well at different things or different
+
+25
+00:02:18,039 --> 00:02:23,159
+thing or so very good observation. So, at this point in time we will only restrict
+
+26
+00:02:23,159 --> 00:02:30,439
+ourselves to scalar variables right, but there are modeling techniques which can reduce these
+
+27
+00:02:30,439 --> 00:02:35,439
+accesses of these aggregate data structures also into an array or into scalars or something
+
+28
+00:02:35,439 --> 00:02:41,120
+similar. So, you have to modify your transfer function similarly for these guys right.
+
+29
+00:02:41,120 --> 00:02:49,719
+So, this we have finished right. So, essentially finally, we in summary the reaching definition
+
+30
+00:02:49,719 --> 00:02:55,319
+analysis is a analysis which is done in the forward direction it is an any path analysis
+
+31
+00:02:55,319 --> 00:03:00,319
+which meaning that reaching definitions arrive at any path I would put it in my set and it
+
+32
+00:03:00,319 --> 00:03:06,240
+always tries to get you the meaningful solution is the smallest solution right where the size
+
+33
+00:03:06,240 --> 00:03:10,560
+of the sets are the smallest right those are solutions which we are which we really want
+
+34
+00:03:10,560 --> 00:03:16,879
+if you really desire. Now, let us come to available expressions. So, again the idea
+
+35
+00:03:16,879 --> 00:03:20,960
+we have discussed it yesterday. So, I will not get into too much the idea is very similar
+
+36
+00:03:20,960 --> 00:03:26,400
+you generate your gen and kill sets and your global equations look a bit different. So,
+
+37
+00:03:26,400 --> 00:03:32,280
+you do an intersection over your outs instead of taking a union and the transfer function
+
+38
+00:03:32,280 --> 00:03:38,000
+remains the same and the direction available expression is which direction it is also forward
+
+39
+00:03:38,000 --> 00:03:44,879
+direction it is a any path or all path it is all path analysis and in this case do you
+
+40
+00:03:44,879 --> 00:03:49,240
+want the largest solution or the smallest solution think about it. Now, again like I
+
+41
+00:03:49,240 --> 00:03:52,280
+said whenever you are asked this question you should think about what applications you
+
+42
+00:03:52,280 --> 00:03:58,439
+can put it to use. So, you can do this something called redundancy elimination right. So, what
+
+43
+00:03:58,439 --> 00:04:02,280
+you can do is if there are. So, remember the example I talked about yesterday. So, if you
+
+44
+00:04:02,280 --> 00:04:12,439
+have a equals x plus y here and you have another b equals x plus y and at some later point you say
+
+45
+00:04:12,439 --> 00:04:20,920
+c equals x plus y then essentially there are two computations of x plus y along these two paths
+
+46
+00:04:20,920 --> 00:04:29,519
+right. So, if I know that x plus y is surely available here then what I can do is I can simply
+
+47
+00:04:29,519 --> 00:04:40,799
+do this optimization I can define an h equals x plus y b equals sorry h equals x plus y this I
+
+48
+00:04:40,799 --> 00:04:50,639
+move to h this I move to h and this also I move to h this is an possible optimization. Now,
+
+49
+00:04:50,639 --> 00:04:57,079
+the good part is I compute x plus y only once no matter which path I take instead of computing
+
+50
+00:04:57,079 --> 00:05:06,879
+twice. So, for this particular case what will. So, now let us think about the safe solution which
+
+51
+00:05:06,879 --> 00:05:11,240
+is the safe solution for a safe solution will should be smaller than the required thing or
+
+52
+00:05:11,240 --> 00:05:16,039
+the larger than the required thing. So, it will be larger why larger why smaller. So,
+
+53
+00:05:16,039 --> 00:05:21,159
+what can go wrong if with this analysis. So, what can go wrong. So, if I say that it is
+
+54
+00:05:21,160 --> 00:05:28,720
+ok no. So, let us say n solution what what would like like it to be larger than the actual
+
+55
+00:05:28,720 --> 00:05:35,280
+solution or smaller than the actual solution smaller than the actual solution why is that
+
+56
+00:05:35,280 --> 00:05:41,640
+if it is larger than what happens yeah then we will think that x plus y was not available
+
+57
+00:05:41,640 --> 00:05:46,600
+we might think it is available and we might just put a computation of something which is not even
+
+58
+00:05:46,600 --> 00:05:53,080
+computed yet then it will put a garbage value in that location right. So, now the safe solution
+
+59
+00:05:53,080 --> 00:06:00,160
+must be smaller so anything anything larger is unsafe that is what I am saying anything larger
+
+60
+00:06:00,160 --> 00:06:08,160
+than the optimal size is unsafe what about the best solution the largest right the largest possible
+
+61
+00:06:08,160 --> 00:06:13,080
+solution because it will enable me to do the most optimization larger than the largest would be
+
+62
+00:06:13,079 --> 00:06:19,599
+unsafe right. So, the solutions can be from you can say that nothing is available that is a solution
+
+63
+00:06:19,599 --> 00:06:26,479
+right I would I will not do the optimization anywhere that is ok that is safe right but
+
+64
+00:06:26,479 --> 00:06:31,799
+universal set is not safe because then I would say anything everything is computed and I do not
+
+65
+00:06:31,799 --> 00:06:35,240
+need to do any computation at all then everything is wrong you have not done any computation at all
+
+66
+00:06:35,240 --> 00:06:41,959
+and you try to use use values which are not even computed. So, the so now we desire a solution which
+
+67
+00:06:41,959 --> 00:06:50,279
+is the largest possible solution any solution beyond that the best solution is going to be bad
+
+68
+00:06:50,279 --> 00:06:55,799
+is going to be unsafe that is not even a solution that is not even a correct solution the problem
+
+69
+00:06:55,799 --> 00:07:03,439
+is I might assume here that say x plus y and x star y are available which was not the case right.
+
+70
+00:07:03,439 --> 00:07:09,799
+So, then maybe there is a computation of d is equal to x star y then I will try to replace this
+
+71
+00:07:09,800 --> 00:07:13,720
+x star y because I say that this is already available. So, I try to replace it by some h2
+
+72
+00:07:13,720 --> 00:07:23,840
+but then this one will be garbage because it was not even computed. So, let us say that it comes
+
+73
+00:07:23,840 --> 00:07:30,960
+here maybe what happened was that there was a x star y here and I said h1 equals h star y. So,
+
+74
+00:07:30,960 --> 00:07:36,480
+let us say the h was h1 was initially set to 0 initialized to 0 then it went here then it went
+
+75
+00:07:36,480 --> 00:07:43,160
+here on this part it got computed to x star y on this part it never got computed right.
+
+76
+00:07:43,160 --> 00:07:49,800
+But my available expression analysis is bad and it says that x plus y is available right. So,
+
+77
+00:07:49,800 --> 00:07:55,080
+I see it is available in h1 good I substitute with h1 which is wrong because along this path
+
+78
+00:07:55,080 --> 00:08:03,480
+there was no computation of that particular expression cannot be enough because what in
+
+79
+00:08:03,480 --> 00:08:16,879
+the program executes along this path right then I then h is not even computed yes that is true
+
+80
+00:08:16,879 --> 00:08:25,240
+but so okay. So, one way to think about it is yeah by definition that is not an available
+
+81
+00:08:25,240 --> 00:08:32,360
+expression but I am saying see whenever we were computing things we saw that there may not be a
+
+82
+00:08:32,360 --> 00:08:38,440
+unique solution there may be multiple solutions right. So, now I should have a way of saying just
+
+83
+00:08:38,440 --> 00:08:44,560
+picking an arbitrary assignment to my sets and we should be able to say that is it even a solution
+
+84
+00:08:44,560 --> 00:08:52,159
+which means that is it a sound solution or is it not a solution or it is a extra solution or a bad
+
+85
+00:08:52,159 --> 00:09:01,840
+solution right. So, I should be able to say it is not a solution or not a sound solution I should
+
+86
+00:09:01,840 --> 00:09:10,480
+be able to say that it is the right solution or it is a bad solution. So, I am trying to classify
+
+87
+00:09:10,480 --> 00:09:16,759
+these three things right. So, a bad solution is a solution which is fine but it will inhibit your
+
+88
+00:09:16,759 --> 00:09:25,280
+optimizations right. So, if you remove something from the available expression set that is fine
+
+89
+00:09:25,280 --> 00:09:30,600
+why is that fine you will say that let us say x plus 1 was available but you said it is not
+
+90
+00:09:30,600 --> 00:09:34,840
+available you have a smaller set then what will happen you will not do this optimization you will
+
+91
+00:09:34,840 --> 00:09:40,759
+not do this replacement I lost opportunity but I did not harm anything now I mean my program
+
+92
+00:09:40,759 --> 00:09:45,720
+is still run correctly but the dangerous part is if I extend the solution with something which
+
+93
+00:09:45,720 --> 00:09:51,600
+was not even available if I extend it by x star y that is a dangerous case because then I would
+
+94
+00:09:51,600 --> 00:09:58,440
+start doing replacements of things which are not even computed. So, whenever any sequence set of
+
+95
+00:09:58,440 --> 00:10:02,760
+equations has multiple solutions that question is always there that what is which one is the
+
+96
+00:10:02,760 --> 00:10:07,560
+right solution see the problem is that there is a engineering problem right at the beginning there
+
+97
+00:10:07,560 --> 00:10:13,280
+is a engineering problem you translate that into a mathematical formulation to a mathematical
+
+98
+00:10:13,280 --> 00:10:18,680
+form mathematical problem right. Now when you are analyzing this mathematical problem this
+
+99
+00:10:18,680 --> 00:10:23,400
+mathematical problem can allow for multiple solutions right but all the solutions may not
+
+100
+00:10:23,399 --> 00:10:28,360
+be the right solution for the engineering problem right so there is this modeling step
+
+101
+00:10:28,360 --> 00:10:35,159
+where you model engineering problem into mathematical problem right. So, the multiple solution business
+
+102
+00:10:35,159 --> 00:10:38,679
+I am talking about in this mathematical space which does not know what was the original problem
+
+103
+00:10:38,679 --> 00:10:42,759
+I came from it does not know are you doing digital information are you doing our available
+
+104
+00:10:42,759 --> 00:10:46,480
+expression the machinery is the same for all of them you give it to the solver fixed point solver
+
+105
+00:10:46,480 --> 00:10:50,480
+it will compute something and give you the result back it does not know which one is the best one
+
+106
+00:10:50,720 --> 00:10:55,440
+so you have to tell it that okay give me a solution which is the optimal solution is best in this
+
+107
+00:10:55,440 --> 00:11:00,720
+time you tell me again why did we want that what was the optimization we were trying to do with
+
+108
+00:11:00,720 --> 00:11:06,920
+that yes when can we replace it when it is a singleton set anything bigger than a singleton
+
+109
+00:11:06,920 --> 00:11:14,360
+set we would not have been able to do it now here we are doing the other way around we are
+
+110
+00:11:14,360 --> 00:11:19,120
+this is a all path solution all path problem right we say something is available if it is
+
+111
+00:11:19,120 --> 00:11:25,840
+available along all paths right reaching definition was any path problem right we say something is
+
+112
+00:11:25,840 --> 00:11:34,519
+reachable if it is reaches to any path right so here what we want to do is I do not want to see
+
+113
+00:11:34,519 --> 00:11:39,200
+in this all path problem essentially we can say something is available if my if along all paths
+
+114
+00:11:39,200 --> 00:11:46,919
+I get that expression if I miss any one path that is no more unavailable expression so had it been
+
+115
+00:11:46,919 --> 00:11:53,279
+the case that I there is one path one path I miss that solution in that case that optimization
+
+116
+00:11:53,279 --> 00:11:56,639
+may not be possible I may not be able to do that optimization because my set size is not
+
+117
+00:11:56,639 --> 00:12:04,120
+the optimal set do we get this so this is confusing now your brain will get twisted because
+
+118
+00:12:04,120 --> 00:12:09,439
+these four are like this that's why these are called these four classical problems and any
+
+119
+00:12:09,439 --> 00:12:13,679
+data flow analysis you see they will always start talking about these four problems because
+
+120
+00:12:13,679 --> 00:12:20,599
+like they like they try to really twist our brain around in a big way because these are four two
+
+121
+00:12:20,599 --> 00:12:26,919
+of them in forward two of them back two of them are all two of them are any right so you get all
+
+122
+00:12:26,919 --> 00:12:31,479
+the combinations so that is why it becomes so you have to keep on thinking which is the largest
+
+123
+00:12:31,479 --> 00:12:36,839
+which is the smallest which case what happens are we good with this okay so let us go to the next
+
+124
+00:12:36,840 --> 00:12:45,480
+one so here the I am sure you guys can write these equations now right again in this case
+
+125
+00:12:45,480 --> 00:12:51,360
+what is my initialization for all basic blocks I start with the universal solution universal
+
+126
+00:12:51,360 --> 00:12:58,759
+set why is that it is a solution in some cases not always no but your initialization is different
+
+127
+00:12:58,759 --> 00:13:06,439
+right so initialization of your will it work for all cases at the beginning the initialize
+
+128
+00:13:06,439 --> 00:13:13,240
+your initial set is empty no but still something will become available and that will seep in right
+
+129
+00:13:13,240 --> 00:13:19,319
+so think about the case like you have x equals y plus z then something will get generated right
+
+130
+00:13:19,320 --> 00:13:29,160
+so gents will be there but it can be yes yes so essentially one way to think about it is that
+
+131
+00:13:29,160 --> 00:13:33,280
+you should not start from a point which is a potential solution start from point which
+
+132
+00:13:33,280 --> 00:13:38,879
+is not a solution right remember anything larger it was not a solution was not a safe solution so
+
+133
+00:13:38,879 --> 00:13:43,760
+it was not a solution allowed by the system equations right so if you start with that the
+
+134
+00:13:43,760 --> 00:13:48,280
+system will do something and reach a solution and hopefully we are hoping that we reach the
+
+135
+00:13:48,279 --> 00:13:53,240
+best solution which you do not know why should it reach the best solution but looks like think
+
+136
+00:13:53,240 --> 00:14:01,959
+that it does so you guys are going to work it out right ok so next now quickly move to the next one
+
+137
+00:14:01,959 --> 00:14:10,039
+but you guys should go back and think about it as slightly more deeply like what is going on ok
+
+138
+00:14:10,039 --> 00:14:19,360
+live variable analysis so live variable analysis is the same business so this is the summary so
+
+139
+00:14:19,360 --> 00:14:28,480
+you have in this case it is a backward direction problem and it is a any path problem so a variable
+
+140
+00:14:28,480 --> 00:14:37,799
+is live if it is live along any path right so the analysis the transfer function and the meter you
+
+141
+00:14:37,799 --> 00:14:43,240
+can understand and in this case we would like the smallest possible solution why is that again
+
+142
+00:14:43,240 --> 00:14:48,319
+what is optimization we are doing with live variable analysis dead code elimination right
+
+143
+00:14:48,319 --> 00:14:56,000
+so smaller is the set of live variables the more are the dead variables if more are the dead
+
+144
+00:14:56,000 --> 00:15:01,399
+variables I can do more dead code elimination I can do the optimization more and what will be
+
+145
+00:15:01,399 --> 00:15:06,919
+a bad solution yeah so if I have more dead variables then what was allowed or my live
+
+146
+00:15:06,919 --> 00:15:13,519
+variable set is smaller right then I have a problem because I eliminate statements which
+
+147
+00:15:13,519 --> 00:15:20,159
+have uses which are going to be used later those I will remove that is dangerous that will make
+
+148
+00:15:20,159 --> 00:15:29,759
+the program go wrong agree cool so that is done so last is very busy expressions so very busy
+
+149
+00:15:29,759 --> 00:15:37,039
+expressions let us now just go down to the definition ok so in this case again I am sure
+
+150
+00:15:37,039 --> 00:15:40,919
+you can understand this you can figure out the reason for this it is a backward analysis
+
+151
+00:15:40,919 --> 00:15:50,679
+and it is a any path or all path so it is an all path analysis this case we need the
+
+152
+00:15:50,679 --> 00:15:55,480
+largest solution why what was the optimization we are doing with very busy expressions
+
+153
+00:16:00,279 --> 00:16:12,519
+right so why do we need it to be largest more wasting I can do more code I can move to the
+
+154
+00:16:12,519 --> 00:16:19,080
+earlier blocks right bigger is the set more is the more variables more expressions I can waste up
+
+155
+00:16:19,080 --> 00:16:29,039
+what will be the bad case the bad solution right so we should not waste any expression
+
+156
+00:16:29,039 --> 00:16:35,879
+which is not computed along all paths right so if my set is larger we are solved with respect
+
+157
+00:16:35,879 --> 00:16:40,959
+to the correctness of the problem but not sound with respect to the like additional
+
+158
+00:16:40,959 --> 00:16:50,199
+statements that you might add so there is a there is this ok so there is this what should
+
+159
+00:16:50,199 --> 00:16:57,279
+I say requirement of an program optimization so whenever you do an optimization so generally
+
+160
+00:16:57,279 --> 00:17:02,639
+the requirement is and that is what you prove whenever you have to design an optimization you
+
+161
+00:17:02,639 --> 00:17:10,279
+have to prove that this optimization is one it is sound which means that for every possible input
+
+162
+00:17:10,279 --> 00:17:16,160
+that this optimization can be run with the optimized program and the original program
+
+163
+00:17:16,160 --> 00:17:22,839
+will match up on their outputs for every possible inputs their output should match up so this is
+
+164
+00:17:22,839 --> 00:17:33,119
+what is referred to as semantic equivalence so that is one proof soundness proof you have to do
+
+165
+00:17:33,119 --> 00:17:44,000
+the other proof generally you have to do is that it is beneficial which means that once I do this
+
+166
+00:17:44,000 --> 00:17:55,160
+optimization there is at least there is so there is no path where I will increase computation so
+
+167
+00:17:55,160 --> 00:17:59,920
+it is ok to do a null optimization which does not do anything that is ok but it is not allowed to
+
+168
+00:17:59,920 --> 00:18:06,000
+do an optimization which increases computation along any path right even if you take computation
+
+169
+00:18:06,000 --> 00:18:10,720
+from one path and put it in another that ok the time for this has reduced the time of this other
+
+170
+00:18:10,720 --> 00:18:17,400
+thing has increased that is not allowed so either it should remain the same or decrease
+
+171
+00:18:17,400 --> 00:18:24,640
+along all paths only then it is supposed to be a valid optimization so there is a separate
+
+172
+00:18:24,640 --> 00:18:30,720
+class of optimizations called speculative optimizations where essentially sometimes
+
+173
+00:18:30,720 --> 00:18:37,720
+you can use like data about frequency of paths that which paths are more frequent and you can
+
+174
+00:18:37,720 --> 00:18:43,440
+do such weird things where you can increase the cost of one path but by decreasing something else
+
+175
+00:18:43,440 --> 00:18:50,200
+maybe decrease the cost on the frequent paths but increase the cost on infrequent paths you
+
+176
+00:18:50,200 --> 00:18:54,200
+can do such things in this class of optimizations but in traditional optimizations you are not
+
+177
+00:18:54,200 --> 00:18:59,880
+allowed to do that so in that sense very busy expression is a problem because you are not
+
+178
+00:18:59,880 --> 00:19:05,960
+allowed to increase computation so now essentially if you think about this whole gamut of optimizations
+
+179
+00:19:05,960 --> 00:19:15,880
+we have sort of seen a wide spectrum of analysis and let us try to summarize how do these optimizations
+
+180
+00:19:15,880 --> 00:19:22,960
+fit in the whole map right so first is direction the direction we have seen there are analysis
+
+181
+00:19:22,960 --> 00:19:29,759
+which are forward analysis there are analysis which are backward analysis the thing is that
+
+182
+00:19:29,759 --> 00:19:36,960
+whenever you have forward analysis there is a particular order okay let me just come here there
+
+183
+00:19:36,960 --> 00:19:43,160
+are also analysis which are what are called bi-directional analysis these are very weird
+
+184
+00:19:43,160 --> 00:19:49,240
+analysis their equations look very messy so there is how can you imagine what the these might look
+
+185
+00:19:49,240 --> 00:20:03,880
+like so the equation might look like something like union over P which is like out of n is
+
+186
+00:20:03,880 --> 00:20:21,360
+equal to union over predecessors of n of some n1 let us say and let us say union intersection
+
+187
+00:20:21,360 --> 00:20:28,960
+over s elements successor of n in of some other set n2 so you are combining multiple
+
+188
+00:20:28,960 --> 00:20:37,120
+analysis and so this becomes very weird and there are analysis like that which are what
+
+189
+00:20:37,120 --> 00:20:41,440
+are called bi-directional they are some of them are coming from their predecessors some
+
+190
+00:20:41,440 --> 00:20:47,759
+of them are coming from the successors what is bad with this I mean yeah I mean we had
+
+191
+00:20:47,759 --> 00:20:52,120
+equations here we had equation we had equation here I mean at the end of the day this is
+
+192
+00:20:52,120 --> 00:20:56,840
+a set of equation we are working with and would the same equation the same strategy
+
+193
+00:20:56,919 --> 00:21:03,959
+I can still compute the same fixed point solution the same algorithm we can use yeah the same
+
+194
+00:21:03,959 --> 00:21:10,119
+equipment some equation does not matter what they are what they are taking things from but
+
+195
+00:21:10,119 --> 00:21:16,959
+what is not so good about these bi-directional analysis can you think of something you can get
+
+196
+00:21:16,959 --> 00:21:21,679
+updated sample things here you can get the updated value of this updated value of this so I mean you
+
+197
+00:21:21,680 --> 00:21:28,120
+are right but I just want to deal you more so what what is so what can I do in forward analysis
+
+198
+00:21:28,120 --> 00:21:34,440
+or backward analysis that I cannot do in that in by that yes I can come up with a good ordering
+
+199
+00:21:34,440 --> 00:21:39,320
+of these basic blocks in case of forward and backward analysis I can decide that either my
+
+200
+00:21:39,320 --> 00:21:43,039
+predecessor should be computed before I do the particular node or the successor should be done
+
+201
+00:21:43,039 --> 00:21:48,920
+but in bi-directional analysis what we do they are in both directions right so now we are stuck
+
+202
+00:21:48,920 --> 00:21:59,279
+so that is why bi-directional analysis is becomes trickier to use the next is that it is about the
+
+203
+00:21:59,279 --> 00:22:05,120
+property that we want so essentially we do we want the property to hold along any path or do you want
+
+204
+00:22:05,120 --> 00:22:12,480
+it to hold along all paths that is one characterization of data flow problems and the next is the solution
+
+205
+00:22:12,480 --> 00:22:17,400
+set do we want the smallest solution set or do we want the largest solution set right that is
+
+206
+00:22:17,400 --> 00:22:21,840
+another characterization of data flow problems right and you can have a product of any of these
+
+207
+00:22:21,840 --> 00:22:26,519
+possible combinations right we can have a bi-directional analysis which is any path
+
+208
+00:22:26,519 --> 00:22:35,040
+and compute the largest or whatever you can come up with right so this is the roadmap so whenever
+
+209
+00:22:35,040 --> 00:22:39,759
+you have a new problem to attack a new data flow problem to attack so these problems that we looked
+
+210
+00:22:39,759 --> 00:22:44,600
+at were already done so we do not care about them so the question is now if you have a new
+
+211
+00:22:44,599 --> 00:22:49,839
+analysis that you want to design how will you go about with designing that is important right
+
+212
+00:22:49,839 --> 00:22:55,319
+now whenever you have a problem you should first try to answer them along these directions right
+
+213
+00:22:55,319 --> 00:23:00,240
+and then you have to think about how to design the analysis so because there is so much commonality
+
+214
+00:23:00,240 --> 00:23:07,000
+along for the different problems the question is that can I have a unified framework which can
+
+215
+00:23:07,000 --> 00:23:14,439
+answer with where I can sort of abstract out the commonalities whatever are common I can separate
+
+216
+00:23:14,440 --> 00:23:19,360
+out and I can plug in what are different I can just plug in those things and the whole framework
+
+217
+00:23:19,360 --> 00:23:24,759
+will just work on its own right can I do that so that is the next question so can we detect
+
+218
+00:23:24,759 --> 00:23:31,160
+common patterns right we have to figure out what is the initialization the so there is something
+
+219
+00:23:31,160 --> 00:23:35,400
+about the initialization there is something about the fixed band computation and something about
+
+220
+00:23:35,400 --> 00:23:42,960
+how many iterations it takes to civilize so essentially so these are the important things
+
+221
+00:23:42,960 --> 00:23:47,680
+you have to keep in mind you have to keep in mind whether how do we initialize it the fixed
+
+222
+00:23:47,680 --> 00:23:52,920
+band computation almost remains the same but what is what changes are these transfer functions
+
+223
+00:23:52,920 --> 00:24:04,680
+and the meet operation so if you for the same framework that we discussed the same algorithm
+
+224
+00:24:04,680 --> 00:24:11,319
+that we saw that would simply work for any dataflow problem if you plug in these three
+
+225
+00:24:11,319 --> 00:24:17,879
+things the how we are going to initialize the problems the thus initial sets how what
+
+226
+00:24:17,879 --> 00:24:24,119
+is going to be my transfer function and how do I join multiple solutions along successors
+
+227
+00:24:24,119 --> 00:24:30,720
+of the decision to get the solution for the meter the in and out for respective sets okay
+
+228
+00:24:30,720 --> 00:24:35,919
+so now let us look at what I promised that we will look at something called constant propagation
+
+229
+00:24:35,920 --> 00:24:42,560
+so let us look at that analysis and I will ask you to design this analysis can you now think
+
+230
+00:24:42,560 --> 00:24:47,240
+of coming up with this analysis so what is the constant propagation problem the constant
+
+231
+00:24:47,240 --> 00:24:56,000
+propagation problem is that if I have some use of a variable let us say a use of y I would like
+
+232
+00:24:56,000 --> 00:25:03,600
+to find out is it possible that y is a constant and if yes what is that constant value so can
+
+233
+00:25:03,599 --> 00:25:20,279
+you come up with this I come up with this can you think how to do this analysis that
+
+234
+00:25:20,279 --> 00:25:26,919
+too we saw but I want a more more powerful analysis so now you have to come you have
+
+235
+00:25:26,919 --> 00:25:30,519
+to tell me these three things other things were done you have to tell me how to initialize
+
+236
+00:25:30,519 --> 00:25:37,599
+it so you have to tell me what are the dataflow facts first so over what are we doing this
+
+237
+00:25:37,599 --> 00:25:43,599
+computation then you have to tell me what is the initialization then you have to tell me the
+
+238
+00:25:43,599 --> 00:25:50,680
+transfer functions and you have to give me the meet operations what are dataflow facts
+
+239
+00:25:50,680 --> 00:25:55,400
+dataflow facts are whatever we are computing on like for instance in live variable analysis
+
+240
+00:25:55,400 --> 00:26:01,160
+it was a set of all live variables for reaching definitions it was a set of all definitions
+
+241
+00:26:01,160 --> 00:26:06,320
+or reaching definitions all definitions that reach in available expression and busy expressions
+
+242
+00:26:06,320 --> 00:26:11,000
+these are the set of expressions right so these are the facts that that what are we
+
+243
+00:26:11,000 --> 00:26:20,200
+interested in understanding no no reaching definition was one way of arriving at constant
+
+244
+00:26:20,200 --> 00:26:24,880
+propagation but I want to now I want a more powerful constant propagation which is the
+
+245
+00:26:24,880 --> 00:26:30,120
+analysis is designed to do constant propagation so now let's go to the basic question the basic
+
+246
+00:26:30,120 --> 00:26:36,760
+question constant propagation asks is that can the value so the query would look like this so you
+
+247
+00:26:36,760 --> 00:26:45,480
+will ask that for this value of y what is is it possible that this value is constant no matter
+
+248
+00:26:45,480 --> 00:26:53,280
+what execution path I take and if yes then what is the constant that is the question I need to
+
+249
+00:26:53,279 --> 00:27:04,359
+answer that is the problem I have so reaching definition is one way to answer it but what
+
+250
+00:27:04,359 --> 00:27:12,319
+other other than that but can I like from grounds up can I build a constant so let's start with
+
+251
+00:27:12,319 --> 00:27:27,279
+what are the set of data flow facts so what are what will you compute the value of so mathematically
+
+252
+00:27:27,279 --> 00:27:37,759
+can tell me what is the set look like what would the set look like variable common values very good
+
+253
+00:27:37,759 --> 00:27:52,119
+so the set of v1 value 1 v2 value 2 something like this and what can these values be what
+
+254
+00:27:52,119 --> 00:28:06,279
+is this possible set of values but expression I cannot do anything with that no but I just
+
+255
+00:28:06,279 --> 00:28:18,680
+want this answer that is it a constant or not I cannot say anything else like x is a constant
+
+256
+00:28:18,680 --> 00:28:25,359
+or not that question is not important because I redefining x so had it been 2 or 3 I don't care
+
+257
+00:28:25,359 --> 00:28:34,639
+but if y was 2 then I can do some nice computation here at compile time right so I only find out I
+
+258
+00:28:35,120 --> 00:28:43,880
+will be more interested in wearing the constant values for users not so much for definitions so
+
+259
+00:28:43,880 --> 00:28:53,080
+the question is that how would I so I would like to find out so this is my this is what my solution
+
+260
+00:28:53,080 --> 00:28:59,580
+would look like at every basic block right so every basic block I'd like or every basic block
+
+261
+00:29:00,259 --> 00:29:09,659
+I would like to find out that what value can take what variable can take what value and the
+
+262
+00:29:09,659 --> 00:29:16,579
+question is that what can this be but that is not enough right I need to meet that value also right
+
+263
+00:29:16,579 --> 00:29:22,619
+anything in the domain right so if it is a into variable that it can be anything right from like
+
+264
+00:29:22,619 --> 00:29:29,819
+minus infinity to plus infinity or if you really think about like how to get integers fine right
+
+265
+00:29:29,819 --> 00:29:37,459
+but mathematically let's keep it right so it is set of any constant can I give it a give it a
+
+266
+00:29:37,459 --> 00:29:44,099
+constant in this range so it will be one constant value from there or let's say I define something
+
+267
+00:29:44,099 --> 00:29:50,059
+called top and I'll tell you why I use top later hopefully which will which means that it is not
+
+268
+00:29:50,059 --> 00:30:00,460
+a constant or let me just call it NC not constant right there is some value which may not be
+
+269
+00:30:00,460 --> 00:30:07,819
+constant why cannot maybe not constant because let's say I have x equals 29 x equals 42 and
+
+270
+00:30:07,819 --> 00:30:15,859
+this value is reaching here z equals x it is not a constant it can either if it comes to this part
+
+271
+00:30:15,859 --> 00:30:24,539
+then it follow to if it comes to this part then it is 29 then I don't know so so I will either it
+
+272
+00:30:24,539 --> 00:30:28,500
+will either be a value from this range or it will be just marked as not constant I don't know it's
+
+273
+00:30:28,500 --> 00:30:42,019
+a constant it is not constant so what's the point which value do I put no I'm keeping it simple so
+
+274
+00:30:42,019 --> 00:30:48,660
+let's say it's a vector of finite size I just keep all my variables and I for each variable I
+
+275
+00:30:48,660 --> 00:30:55,379
+update it where with saying that it is not constant or if it is a value in that range
+
+276
+00:30:55,379 --> 00:31:04,700
+so we are done with the dataflow facts the next things let's think about the initialization how
+
+277
+00:31:04,700 --> 00:31:13,940
+do I initialize this set what where what do I know not constant is a trouble because if
+
+278
+00:31:13,940 --> 00:31:19,420
+something is not constant then it can never become a constant right because it was already
+
+279
+00:31:19,420 --> 00:31:23,900
+not constant so for initialization actually I need a different value which says that I don't
+
+280
+00:31:23,900 --> 00:31:30,620
+know what this is right so I like when you get the full algorithm you will see why you need this
+
+281
+00:31:30,619 --> 00:31:37,859
+separate value so I will say don't know dn right so I have so this initially it will be every
+
+282
+00:31:37,859 --> 00:31:49,379
+variable marked to dn which says I don't know what this values yes yes yes yes NC value means
+
+283
+00:31:49,379 --> 00:31:53,979
+I definitely know it is not going to be constant so now it's like a Poisson bit right so if
+
+284
+00:31:53,980 --> 00:32:02,339
+something is not constant I do any operation with that that cannot be a constant anymore okay so
+
+285
+00:32:02,339 --> 00:32:10,180
+now you have we have done with initialization now let's talk about the meet operator how will be so
+
+286
+00:32:10,180 --> 00:32:18,700
+now I will have these solutions coming from two basic blocks and I want to find out what is going
+
+287
+00:32:18,700 --> 00:32:26,380
+to be my solution here how do how will I merge so again it's is it a forward analysis or is
+
+288
+00:32:26,380 --> 00:32:32,420
+it a backward analysis forward right I will keep on computing things as they go and if I want to
+
+289
+00:32:32,420 --> 00:32:45,059
+meet how would I do the meet yeah yeah now you need the section each other so you need a more
+
+290
+00:32:45,059 --> 00:33:02,619
+like a more sophisticated meet operator right so now you have to define a meet operator by
+
+291
+00:33:02,619 --> 00:33:12,179
+giving a table right so that is the way to do it there is no other option so so you say this is
+
+292
+00:33:12,180 --> 00:33:19,420
+the meet operation so the value can be actually a constant value say CI or it can be NC for one
+
+293
+00:33:19,420 --> 00:33:29,900
+one path one of the predecessors and for the other predecessor it can be CK and NC then how
+
+294
+00:33:29,900 --> 00:33:38,779
+will it happen how will I populate this table what is NC and NC this is NC right if both the
+
+295
+00:33:38,779 --> 00:33:45,579
+direction I am getting NC then I this is going to be NC what is CK and NC NC there is nothing I
+
+296
+00:33:45,579 --> 00:33:50,299
+can do one of them is not constant so no matter what happens I don't care what about this guy is
+
+297
+00:33:50,299 --> 00:34:03,740
+again the same case what about CK and CI yes yes so here I will say that it is it is it is NC if CI
+
+298
+00:34:03,740 --> 00:34:19,139
+is not equal to CK and it is CI if CI is equal to CK right so I wanted to take you out of the comfort
+
+299
+00:34:19,139 --> 00:34:24,139
+zone things are not as simple as union intersection always your meet operator can be a slightly more
+
+300
+00:34:24,139 --> 00:34:41,579
+sophisticated meet operation yeah yeah why not so this is the case right I just that does the
+
+301
+00:34:41,579 --> 00:34:47,179
+next with this example in one one place it is assigned 29 the other place it is assigned 42
+
+302
+00:34:47,179 --> 00:34:51,819
+but you don't know runtime you do not know which path will be taken so I cannot surely say that
+
+303
+00:34:51,820 --> 00:35:03,780
+this value is going to be 29 42 what about ha right sorry sorry I am sorry I should have made
+
+304
+00:35:03,780 --> 00:35:17,140
+the don't know column also so tell me what should happen we don't know that was easy thing that
+
+305
+00:35:17,139 --> 00:35:29,579
+okay now I can relax I've done one okay don't know don't know don't know don't know NC NC I
+
+306
+00:35:29,579 --> 00:35:38,139
+don't care I can't do anything don't know an NC again NC okay then what I was on this table is
+
+307
+00:35:38,139 --> 00:35:44,779
+symmetric so I did not actually feel both sides I can just fill the upper triangular so what about
+
+308
+00:35:44,780 --> 00:35:53,580
+constant and don't know so it cannot be NC because don't know you don't know right what
+
+309
+00:35:53,580 --> 00:35:59,019
+if it becomes CI you write don't know what is the value no but if you say don't know then it
+
+310
+00:35:59,019 --> 00:36:10,060
+will always remain don't know because maybe that guy is eventually become CI so for the time being
+
+311
+00:36:10,059 --> 00:36:17,299
+you can actually put it as CI if it gets later this don't know will turn into something eventually
+
+312
+00:36:17,299 --> 00:36:23,500
+it will either turn to some other come other constant or some not constant so at the end of
+
+313
+00:36:23,500 --> 00:36:27,340
+the analysis you will never have don't know anywhere right everything will get propagated
+
+314
+00:36:27,340 --> 00:36:33,820
+right so then you will eventually be able to tell you that the final meet will happen and
+
+315
+00:36:33,820 --> 00:36:42,380
+eventually some things can be NC things can remain NC right things can be not constant
+
+316
+00:36:42,380 --> 00:36:51,900
+like this guy is not constant right this particular location this this particular location right you
+
+317
+00:36:51,900 --> 00:37:01,180
+are getting from you are getting X equal to 42 and X equals 29 was somewhere right so then
+
+318
+00:37:01,179 --> 00:37:09,779
+it will remain NC eventually so I am being optimistic let's put instead of putting don't
+
+319
+00:37:09,779 --> 00:37:16,099
+know let's put CI which is the data here eventually that don't know will resolve something else and
+
+320
+00:37:16,099 --> 00:37:24,699
+will update get updated anyway so I don't care so I do the same business right so I have a meet
+
+321
+00:37:24,699 --> 00:37:29,619
+table now and you have to look up this table yeah it's constant but constant can move to
+
+322
+00:37:29,619 --> 00:37:35,819
+NC no no no even at this location we when do when does analysis terminate when nothing changes
+
+323
+00:37:35,819 --> 00:37:39,819
+across any basic block and in the while loop we revisit every basic block again and again
+
+324
+00:37:39,819 --> 00:37:47,699
+when this location will get updated later but in that case it would not have been like the other
+
+325
+00:37:47,699 --> 00:37:52,419
+edge would not have been in so if you're getting a don't know from one of the sites it means that
+
+326
+00:37:52,420 --> 00:37:59,220
+basic block has not got traversed yet otherwise it cannot have remained don't know that's what
+
+327
+00:37:59,220 --> 00:38:03,059
+I'm saying at the end of the analysis you'll never have don't know anywhere other than maybe
+
+328
+00:38:03,059 --> 00:38:09,980
+unreachable code right everywhere else you will have certain value you'll either have a constant
+
+329
+00:38:09,980 --> 00:38:14,700
+value or you'll have not constant you cannot it cannot remain don't know excellent question
+
+330
+00:38:14,700 --> 00:38:20,700
+guys are asking really good questions so okay so what if we take input from the user what is
+
+331
+00:38:20,699 --> 00:38:27,500
+that going to be what is that variable going to be don't know not constant not constant you
+
+332
+00:38:27,500 --> 00:38:32,219
+immediately tell it not constant for parameters I mean if you're doing interprocedural analysis
+
+333
+00:38:32,219 --> 00:38:38,980
+and those are the inputs for a function the parameters are the inputs if you consider the
+
+334
+00:38:38,980 --> 00:38:44,379
+effect of other functions so right now we're doing this intra procedure analysis which is
+
+335
+00:38:44,379 --> 00:38:49,259
+not looking at other functions what other functions are so again the other question is safety right so
+
+336
+00:38:49,260 --> 00:38:54,620
+what is more safe putting a variable to don't know or sorry don't know is not even in the picture
+
+337
+00:38:54,620 --> 00:39:01,500
+is it to putting a variable to a constant or putting it to a not constant which is safe not
+
+338
+00:39:01,500 --> 00:39:09,940
+constant I'll run with optimization right but if I put it to like constant it's propagated and I'll
+
+339
+00:39:09,940 --> 00:39:15,860
+reduce it and I'll replace it by wrong things that is dangerous I can't allow that to happen
+
+340
+00:39:15,860 --> 00:39:22,980
+right so by same direction is putting something to not constant is always safe so putting the
+
+341
+00:39:22,980 --> 00:39:28,820
+parameters to not constants is always safe I don't have a problem right so I'll not be
+
+342
+00:39:28,820 --> 00:39:33,700
+able to do some optimization yes fine so if you are if you are ready to do an interprocedural
+
+343
+00:39:33,700 --> 00:39:37,260
+analysis which looks at the effect of other procedures then maybe some of them will turn
+
+344
+00:39:37,260 --> 00:39:43,019
+into constants great you can make use of it but till then you can keep it as constant if you don't
+
+345
+00:39:43,019 --> 00:39:55,780
+want to do right okay so good so we have now the meat table now the other question is the transfer
+
+346
+00:39:55,780 --> 00:40:00,259
+function more than two predecessors that was that was the case right why have predecessor one and
+
+347
+00:40:00,259 --> 00:40:06,500
+predecessor two that was the meat is always between two predecessors the meat operation is
+
+348
+00:40:06,500 --> 00:40:11,179
+always between two predecessors right or you are saying more than two so you take first take the
+
+349
+00:40:11,179 --> 00:40:17,579
+meat of two and then apply that to the third apply that to the fourth take pairs like pair
+
+350
+00:40:17,579 --> 00:40:28,659
+wise reduces right so where are we sorry I lost that the transfer function so transfer function
+
+351
+00:40:28,659 --> 00:40:33,460
+how do we how do we model the transfer function so what is the transfer function given such a
+
+352
+00:40:33,460 --> 00:40:39,699
+solution given you know this variable value binding at the beginning of the basic block you
+
+353
+00:40:39,699 --> 00:40:46,539
+would like to find out the variable bind value binding at the end of the basic block so how do
+
+354
+00:40:46,539 --> 00:40:54,939
+we do this why should you make it NC okay previous so what is so how do I write it you want to dictate
+
+355
+00:40:54,939 --> 00:41:03,539
+me which one which one what for a variable assignment okay why NC why why if that gets
+
+356
+00:41:03,539 --> 00:41:09,659
+calculated to the same constant if that expression that evaluate maybe it computes the same constant
+
+357
+00:41:09,659 --> 00:41:17,420
+very good very good if it is a constant then yeah so we have to look at now this is very tricky
+
+358
+00:41:17,420 --> 00:41:23,379
+because I will have to look at what is the operation happening right so essentially now
+
+359
+00:41:23,379 --> 00:41:32,779
+let's say I have plus operator which is that I have expression like X equals a plus B right in
+
+360
+00:41:32,779 --> 00:41:38,539
+that case I will have to decide that what is the value of what are the values of a possible what
+
+361
+00:41:38,539 --> 00:41:50,420
+are the values of B possible if value of a is c1 this is c2 let's say c a cb then we have this
+
+362
+00:41:50,420 --> 00:41:58,059
+can be not constant this can be don't know and it can be not constant and it can be don't know I
+
+363
+00:41:58,059 --> 00:42:05,420
+have to write such a table for every single operation that I want to model because now you
+
+364
+00:42:05,420 --> 00:42:13,820
+have yes so you have to do this is going to be c a plus cb you have to add them at runtime sorry
+
+365
+00:42:13,820 --> 00:42:21,460
+compile time like analysis time you have to actually add 2 and 3 figure out that value and
+
+366
+00:42:21,460 --> 00:42:30,500
+put it in the constant right what about NC business NC is going to be NC don't know is
+
+367
+00:42:30,500 --> 00:42:36,019
+that troublesome thing so let's keep it don't know I don't even know what to do with it I mean
+
+368
+00:42:36,019 --> 00:42:45,500
+let's not even bother so this will eventually get resolved anyway I mean I can be totally get a
+
+369
+00:42:45,500 --> 00:42:51,219
+value and get result I don't that's not matter that's what I am saying so for the moment we
+
+370
+00:42:51,219 --> 00:42:57,619
+just put a constant but eventually even that will get revaluated in here I mean you can change the
+
+371
+00:42:57,619 --> 00:43:02,259
+I mean these are not set in stone it's just that I was trying to be like slightly more optimistic
+
+372
+00:43:02,259 --> 00:43:08,099
+correct which is the again a little all the things will come and I'll eventually figure out but you
+
+373
+00:43:08,099 --> 00:43:13,019
+can even that does not hurt because eventually things will get resolved only if all the branches
+
+374
+00:43:13,019 --> 00:43:18,940
+are not don't know only then will that actual value be computed till then whatever it is there
+
+375
+00:43:18,940 --> 00:43:29,820
+it will get overwritten by the next iteration so right so this becomes don't know NC k satas
+
+376
+00:43:29,820 --> 00:43:42,659
+everything becomes NC I don't know why I'm filling this table but yeah but he get and this is the
+
+377
+00:43:42,659 --> 00:43:54,099
+case right so you see that this part will be common to every operator no matter what the
+
+378
+00:43:54,099 --> 00:43:58,739
+operator is this part remains constant I don't care right as long as one of the operators have
+
+379
+00:43:58,739 --> 00:44:04,219
+any of these patterns I can pick a value from here only this particular part how would the
+
+380
+00:44:04,219 --> 00:44:08,619
+constants have to be manipulated to get the new constant value changes depending on what operator
+
+381
+00:44:08,619 --> 00:44:21,219
+means right awesome so that is my transfer function so now can you define precisely what
+
+382
+00:44:21,219 --> 00:44:28,420
+my transfer function is so it's a big switch case it's a big switch case on the operator
+
+383
+00:44:28,420 --> 00:44:41,300
+right okay if both the both are constants if the both the operands are constants then it's a large
+
+384
+00:44:41,300 --> 00:44:47,780
+switch case depending on what case you land up with you will have to return that particular
+
+385
+00:44:47,780 --> 00:44:55,980
+output that is how you will define your transfer function and how will define your meet operation
+
+386
+00:44:55,980 --> 00:45:01,099
+the meet operation is also going to be a big if and else ladder depending on what values you
+
+387
+00:45:01,099 --> 00:45:05,300
+get for these two things you'll have to compute and give the value whatever you know we are
+
+388
+00:45:05,300 --> 00:45:09,659
+yeah like this is the meet operation is always a column predecessors so this is predecessor 1
+
+389
+00:45:09,659 --> 00:45:19,820
+predecessor 2 enough so so I get a constant value at the end of something only if I get a constant
+
+390
+00:45:19,820 --> 00:45:27,780
+value for the same variable from the in of both the predecessors so the whole framework remains
+
+391
+00:45:27,780 --> 00:45:32,980
+the same there is only thing see the how beautiful this framework is right my algorithm also doesn't
+
+392
+00:45:32,980 --> 00:45:38,260
+change the algorithm that I put here except the place where I computed the the transfer function
+
+393
+00:45:38,260 --> 00:45:43,780
+and the meat right other than that place everything remains the same all I need to do is I need to
+
+394
+00:45:43,780 --> 00:45:49,260
+plug in these new guys these are the four so it's a very beautiful framework and all the correctness
+
+395
+00:45:49,260 --> 00:45:58,860
+proofs I talked about all the termination things I talked about all of them work so again why should
+
+396
+00:45:58,860 --> 00:46:04,660
+this algorithm terminate remember what was the termination argument there were two things right
+
+397
+00:46:04,660 --> 00:46:13,780
+why why would it terminate what was the reason things would terminate bounded nature of the
+
+398
+00:46:14,100 --> 00:46:26,940
+the data flow facts and and what was the other thing yes so about the nature of the function
+
+399
+00:46:26,940 --> 00:46:35,700
+right these are the two things okay so now about the set of data flow facts is it finite
+
+400
+00:46:35,699 --> 00:46:53,419
+or is it infinite finite yeah but every such mapping is a is a possible solution there my
+
+401
+00:46:53,419 --> 00:47:03,179
+data flow the set of definitions was finite but now my set of values are not finite do you see
+
+402
+00:47:03,179 --> 00:47:11,059
+this so I can assign a variable to any infinite any of the infinite values from minus infinity
+
+403
+00:47:11,059 --> 00:47:19,659
+to infinity so does it break our correctness proof that is dangerous correct the termination
+
+404
+00:47:19,659 --> 00:47:25,019
+proof no no we need the value otherwise how will it do the constant rotation I of course
+
+405
+00:47:25,019 --> 00:47:33,780
+need that value so this is my solution this is what my solution looks like and it is an
+
+406
+00:47:33,780 --> 00:47:38,300
+infinite set yes it is very much an infinite set because my variables can be mapped to any
+
+407
+00:47:38,300 --> 00:47:53,219
+possible value from the infinite set so now just think about you have some idea no okay so what
+
+408
+00:47:53,259 --> 00:47:58,859
+about my so what is the what about the nature of the computation can you think about the function
+
+409
+00:47:58,859 --> 00:48:08,219
+f that we discussed for so long what does it what does that look like can you give some now these
+
+410
+00:48:08,219 --> 00:48:13,819
+are not sets that you can say smaller larger you cannot say that unfortunately but still can you
+
+411
+00:48:13,819 --> 00:48:22,419
+say something about what this thing is doing like for instance let's say at some point in time my
+
+412
+00:48:22,420 --> 00:48:34,940
+for a given variable vi my current binding to the vi is don't know due to an update where can it go
+
+413
+00:48:34,940 --> 00:48:42,820
+which all possible values can it get so it can become not constant or it can become some
+
+414
+00:48:42,820 --> 00:48:52,980
+constant CI right if it is not constant then when can it go it cannot go anywhere it is not
+
+415
+00:48:52,980 --> 00:48:58,539
+constant it has to sit in non-constant there is no way it can move what if it is a constant
+
+416
+00:48:58,539 --> 00:49:12,140
+it can either go to not constant or it can remain at the same constant so though the total set is
+
+417
+00:49:12,139 --> 00:49:21,500
+infinite but the sort of movement I can see of my data flow values that is sort of bounded right
+
+418
+00:49:21,500 --> 00:49:29,259
+that is that is very interesting right because I can my don't know can at most become not I can
+
+419
+00:49:29,259 --> 00:49:33,859
+act more the what is the largest path that can happen but don't know becomes constant and becomes
+
+420
+00:49:33,859 --> 00:49:40,659
+not constant so three rather two transitions at most two possible transitions and within that
+
+421
+00:49:40,659 --> 00:49:51,460
+something will terminate or not terminate I am seeing the worst case and the worst case it is
+
+422
+00:49:51,460 --> 00:49:55,960
+this is the longest path right so the don't know can directly become not constant but that is the
+
+423
+00:49:55,960 --> 00:50:00,500
+shortest path only one transition but I am saying the worst case the worst case it will be two
+
+424
+00:50:00,500 --> 00:50:04,940
+transitions it can become a constant first time one edge becomes constant so I give it constant
+
+425
+00:50:04,940 --> 00:50:08,739
+and then the second edge becomes some other constant and becomes not constant and after that
+
+426
+00:50:08,739 --> 00:50:23,259
+it cannot move can it can it look at all your rules so you are you are at meet operation C1
+
+427
+00:50:23,259 --> 00:50:29,019
+and C2 right so so remember the algorithm where was the change the flag was checked on the ins
+
+428
+00:50:29,019 --> 00:50:36,419
+right you were computing a new in which you are getting by taking a mute over the outs and then
+
+429
+00:50:36,420 --> 00:50:42,780
+you were checking it with the old in old value of in right so let's look at the meet operator can
+
+430
+00:50:42,780 --> 00:50:50,740
+it ever allow something else to happen so for instance if it is CI then there are two possibilities
+
+431
+00:50:50,740 --> 00:50:55,340
+if CI and CK are not the same it becomes not constant and if CI and CK becomes same it becomes
+
+432
+00:50:55,340 --> 00:51:07,140
+the same constant so there is no way that one constant can become another constant again remember
+
+433
+00:51:07,140 --> 00:51:13,740
+the algorithm where was that flag being set let me just pull out that it's little far but maybe
+
+434
+00:51:13,740 --> 00:51:23,500
+it's worth it oh shit this is the other direction don't don't look at this now forget forget forget
+
+435
+00:51:23,500 --> 00:51:35,739
+yeah so this was algorithm right so this is not the whole algorithm but there is no space
+
+436
+00:51:35,739 --> 00:51:49,019
+okay so so but whatever we can look at this now should be able to see the black from the red so
+
+437
+00:51:49,019 --> 00:51:55,659
+essentially what are we going to do now my ins and outs would sort of change right I don't know my
+
+438
+00:51:55,659 --> 00:52:08,099
+mouse works on yeah mouse works so okay so you have this ins and the outs will be initialized
+
+439
+00:52:08,099 --> 00:52:12,739
+to what you will be initialized to the what is what what will they how will you rewrite this
+
+440
+00:52:12,739 --> 00:52:18,659
+algorithm for that so ins and outs in me and out we will be rewritten to what all variables
+
+441
+00:52:18,659 --> 00:52:27,059
+to do not know and the only thing will be different will be the input the the in in of B in of entry
+
+442
+00:52:27,059 --> 00:52:36,339
+enough entry will be what so there are two possibilities either you put them to all constant
+
+443
+00:52:36,339 --> 00:52:41,179
+so those both answers are right you can either put it to all constant as don't knows or you can
+
+444
+00:52:41,179 --> 00:52:48,619
+put all constant as all variables to don't pose or you can put all variables to not constants both
+
+445
+00:52:48,619 --> 00:52:52,019
+of them are correct solutions but you have to understand what is the implication of that so in
+
+446
+00:52:52,019 --> 00:52:56,619
+the mathematical model we are doing this but what does it mean for the program putting all variables
+
+447
+00:52:56,619 --> 00:53:05,579
+to don't knows means what no so think about un initialized values right so then what can happen
+
+448
+00:53:05,739 --> 00:53:11,179
+is at the end of your analysis you can leave some values might be left off with don't knows
+
+449
+00:53:11,179 --> 00:53:19,940
+right assume that there is some variable which has not even been used anywhere right so that
+
+450
+00:53:19,940 --> 00:53:25,739
+variable will live in all the sets marked as don't knows so don't don't knows at what told
+
+451
+00:53:25,739 --> 00:53:31,659
+that's okay but if something the analysis terminates and it remains don't know what it means is that it
+
+452
+00:53:32,139 --> 00:53:38,219
+so it's an analysis which can give you garbage value also that's interesting thing right it's
+
+453
+00:53:38,219 --> 00:53:43,940
+high-def of it right you simply set it to don't knows and at the desktop at the end of it if
+
+454
+00:53:43,940 --> 00:53:48,539
+there are variables which are set to don't knows okay these are garbage values so you get it
+
+455
+00:53:48,539 --> 00:53:56,059
+un initialized variables the other option is to set it to not constants right you can be treating
+
+456
+00:53:56,059 --> 00:53:59,940
+garbage values are not constants can garbage value I don't know what value it is so I set it to not
+
+457
+00:53:59,940 --> 00:54:04,539
+constants then your analysis will be clean in the sense that you will not be left with any don't
+
+458
+00:54:04,539 --> 00:54:15,579
+knows at the end of the analysis both of them are right depends on what you want right no it
+
+459
+00:54:15,579 --> 00:54:20,980
+will get assigned somewhere anyway now so somewhere X will become equal to 5 right so
+
+460
+00:54:20,980 --> 00:54:26,780
+so the transfer function will make it 5 so okay so I really not tried it now so what is the
+
+461
+00:54:26,780 --> 00:54:38,060
+transfer function for assignment X equals 5 how it will just make it that constant right we just
+
+462
+00:54:38,060 --> 00:54:46,700
+do it for operators but similarly it had it been just X equals 5 it will simply set X to 5 yes
+
+463
+00:54:46,700 --> 00:54:54,900
+the engine to the outset right so that's now for the rest of the analysis so in the beginning it
+
+464
+00:54:54,900 --> 00:55:08,260
+will remain not constant but later it will become some value yes yes and that should surely happen
+
+465
+00:55:08,260 --> 00:55:12,660
+because a variable state change changes right a variable becomes variables are meant to be
+
+466
+00:55:12,660 --> 00:55:17,340
+updated whether because a variable can become one in some part and can become another constant
+
+467
+00:55:17,340 --> 00:55:22,059
+two in some other part so when I said that it cannot become another constant it means at the
+
+468
+00:55:22,059 --> 00:55:27,099
+same program point it cannot become another constant leader right please understand this
+
+469
+00:55:27,099 --> 00:55:31,820
+difference this is a very important difference all my students get confused with this right so
+
+470
+00:55:31,820 --> 00:55:37,259
+whenever I say that a variable cannot become if it's a constant two it cannot become a constant
+
+471
+00:55:37,259 --> 00:55:42,539
+five later what it means is I am saying at the same program point it cannot become a constant
+
+472
+00:55:42,539 --> 00:55:47,019
+five leaders but it should surely have two different values a constant two here a constant
+
+473
+00:55:47,019 --> 00:55:53,139
+five here why not right I can set X equal to here and X equals 5 here after executing it the value
+
+474
+00:55:53,139 --> 00:55:59,380
+will be 2 after executing the value will be 5 that is not a problem so the stabilization if you look
+
+475
+00:55:59,380 --> 00:56:05,780
+at it the stabilization check is only here right it is only here where I'm checking the new in at
+
+476
+00:56:05,780 --> 00:56:11,860
+the same location is the same as the what I got in the same location earlier the check is for the
+
+477
+00:56:11,860 --> 00:56:16,820
+same location it is for the same program point not across program points I do not ever check
+
+478
+00:56:16,820 --> 00:56:24,940
+across program points it does not make sense to check across program points right okay so okay
+
+479
+00:56:24,940 --> 00:56:33,140
+good so now right so now what we check so we have run through the initialization after the
+
+480
+00:56:33,140 --> 00:56:37,940
+initialization the flag true flag false all this business remains the same how will you
+
+481
+00:56:37,940 --> 00:56:41,980
+change the transfer function after that is the update of the transfer function so how will you
+
+482
+00:56:41,980 --> 00:56:46,940
+update the transfer function we'll have a big switch case no first is the meat so how will you
+
+483
+00:56:46,940 --> 00:56:52,340
+change the meat now you have the table which tells you how to apply the new min create then
+
+484
+00:56:52,340 --> 00:57:00,700
+the new in using the meat of the predecessors so we have you look up the table apply compute the
+
+485
+00:57:00,700 --> 00:57:07,300
+table using a function as a sequence of ifs or a switch or whatever it is and then get this right
+
+486
+00:57:07,300 --> 00:57:13,860
+then the final thing remains is to apply the transfer function so out B equals in B whatever
+
+487
+00:57:13,860 --> 00:57:22,620
+so out here this will be a large switch case for every operation that you want to handle and again
+
+488
+00:57:22,620 --> 00:57:26,380
+say your analysis you can decide okay I can only I want me want to do it with plus and minus with
+
+489
+00:57:26,380 --> 00:57:33,340
+nothing else your choice right so you have a big switch case which will say for the given operators
+
+490
+00:57:33,340 --> 00:57:45,019
+what are how do I transform my state my analysis right so this is the thing but why did we come
+
+491
+00:57:45,019 --> 00:57:51,019
+here what did I want to show you what was the question so this all we can remember but there
+
+492
+00:57:51,019 --> 00:57:59,940
+was one thing I wanted to mention which I am yes yes yes yes exactly right so check the case
+
+493
+00:57:59,940 --> 00:58:05,500
+where the flag is being set look at line number 10 this is the place where the flag is being set
+
+494
+00:58:05,500 --> 00:58:13,260
+it is set at the whenever the input differs right whenever the input differs I set the
+
+495
+00:58:13,260 --> 00:58:19,139
+flag I don't care about the outs because input differs outputs output can possibly differ and
+
+496
+00:58:19,139 --> 00:58:25,019
+I'll go to another iteration anyway right because our out is completely dependent on the input right
+
+497
+00:58:25,019 --> 00:58:30,900
+completely dictated by the input of the given basic block right so my check is only on the on
+
+498
+00:58:30,900 --> 00:58:44,460
+my input now let us go back to our so here we were so now the thing is that so because it is checked
+
+499
+00:58:44,460 --> 00:58:49,739
+at the in the in can change only due to the meet operator right because of the operation of meet
+
+500
+00:58:49,739 --> 00:58:56,419
+operator so now the meet operator check what can happen it can never move from one constant to the
+
+501
+00:58:56,419 --> 00:59:05,659
+other because if it is not a constant other things will happen and if it is a constant so this is the
+
+502
+00:59:05,659 --> 00:59:09,699
+case so if there are there the constants are different it will become not constant if the
+
+503
+00:59:09,699 --> 00:59:13,819
+constants are the same it will become the same constant so there is no way this at the same
+
+504
+00:59:13,820 --> 00:59:22,460
+program point it can move from 2 to 5 right so the longest path my updates can take is this
+
+505
+00:59:22,460 --> 00:59:31,460
+path don't know to some constant to not constant right so it can at most have two updates if all
+
+506
+00:59:31,460 --> 00:59:41,180
+variables so number of variables are bounded all variables can at most have two updates right so
+
+507
+00:59:41,179 --> 00:59:46,899
+I must reach stabilizers so I should be able to stabilize it cannot become constant that's what
+
+508
+00:59:46,899 --> 00:59:52,259
+so once I got a get a not constant any of them is not constant it can never become constant see
+
+509
+00:59:52,259 --> 01:00:02,579
+the table see the meet table this is the meet table right again again that this is exactly
+
+510
+01:00:02,579 --> 01:00:09,819
+what I am saying I only compare values at the same program point but down below is a different
+
+511
+01:00:09,820 --> 01:00:14,740
+program point right I never it does not make sense to compare things across program points
+
+512
+01:00:14,740 --> 01:00:26,580
+they are bound to be different actor at where at at so I am saying that where was flag set as true
+
+513
+01:00:26,580 --> 01:00:33,460
+that is why I showed you that algorithm flag was set as true when the value of the in changed right
+
+514
+01:00:33,460 --> 01:00:37,960
+at the beginning of the basic block how can the value of in change when you apply the meet operation
+
+515
+01:00:37,960 --> 01:00:46,440
+right so so that was the argument so it means that my data flow fact the set of my data flow
+
+516
+01:00:46,440 --> 01:00:57,240
+facts need not be finite even if it is not finite but if I can find out that there is the the number
+
+517
+01:00:57,240 --> 01:01:05,760
+of updates to so there is a ceiling on where I reach finally and if I can take a finite number
+
+518
+01:01:05,760 --> 01:01:12,520
+of steps to that particular final state at most if that thing is bounded number of steps I can
+
+519
+01:01:12,520 --> 01:01:20,800
+take at most is bounded even then my algorithm will stabilize so constant propagation is an
+
+520
+01:01:20,800 --> 01:01:27,520
+example of that does it make sense guys again please don't make this mistake I mean we never
+
+521
+01:01:27,520 --> 01:01:33,400
+never never never never never never never never never never compare values across basic across
+
+522
+01:01:33,400 --> 01:01:38,599
+program points right it does not make sense to talk about what happens here and what happens
+
+523
+01:01:38,599 --> 01:01:43,280
+here this is less than this so what will happen this does not make sense right we only talk about
+
+524
+01:01:43,280 --> 01:01:48,039
+has the value at the same program point change to something different that is all I care about
+
+525
+01:01:48,039 --> 01:01:56,400
+right and every program point we can see the value can at most go through to updates if the total
+
+526
+01:01:56,400 --> 01:02:02,960
+number of basic blocks are finite and if every location can at most go through to updates of
+
+527
+01:02:02,960 --> 01:02:10,920
+every variable then I can this algorithm must stabilize so how many iterations at most two
+
+528
+01:02:10,920 --> 01:02:21,240
+times the number of basic block or more constant variable right so it is times the number of
+
+529
+01:02:21,239 --> 01:02:27,359
+variables right because it can happen that only one variable changes state then some other
+
+530
+01:02:27,359 --> 01:02:32,599
+variable changes state and so on so I was asking that what on what the number of iterations would
+
+531
+01:02:32,599 --> 01:02:40,079
+depend on so it can at most so every way so there are number of variables and every variable can go
+
+532
+01:02:40,079 --> 01:02:45,399
+through an update and every variable can get updated at most twice right so every location
+
+533
+01:02:45,400 --> 01:02:55,599
+can at most see number of variables times to number of updates and then there are basic blocks
+
+534
+01:02:55,599 --> 01:03:03,400
+which can affect it so this is idea you start discovering constants and now this is the quiz
+
+535
+01:03:03,400 --> 01:03:07,840
+question can you think of some difference other than the transfer function and all this business
+
+536
+01:03:07,840 --> 01:03:14,440
+in how the analysis is structured can you think about difference in the interaction of the
+
+537
+01:03:14,440 --> 01:03:23,480
+data flow facts between reaching definitions and constant like for instance again let us go to it
+
+538
+01:03:23,480 --> 01:03:30,320
+so our the data flow set you can think of what I can think let me just put them in a similar
+
+539
+01:03:30,320 --> 01:03:40,920
+manner for reaching definitions I can simply say that I have definitions d1 d2 dn and I can say
+
+540
+01:03:40,920 --> 01:03:46,880
+that this reaches this does not reach this reaches this reaches this does not reach and so on for
+
+541
+01:03:46,880 --> 01:03:54,200
+constant propagation I will have a similar thing for variables and I will say that this can well
+
+542
+01:03:54,200 --> 01:03:59,680
+have a value 2 this can have a value 42 this is not constant this is don't know something like
+
+543
+01:03:59,679 --> 01:04:12,839
+this right that is the difference now I'm sorry I did that is not what I wanted to say
+
+544
+01:04:12,839 --> 01:04:20,799
+so sorry sorry sorry how do I wrap this yeah I can wrap this like this
+
+545
+01:04:29,679 --> 01:04:51,239
+okay fine so now can you sort of see any difference between the nature of these updates of what
+
+546
+01:04:51,239 --> 01:04:54,319
+happens in case of reaching definition and what happens in case of constant propagation
+
+547
+01:04:54,320 --> 01:05:12,720
+so there is a big difference yeah agreed so that is sort of the any path all path sort of
+
+548
+01:05:12,720 --> 01:05:19,240
+business but but that is let's say I'm saying factored in into the unified framework but I'm
+
+549
+01:05:19,239 --> 01:05:24,959
+saying whatever whatever like this four analysis we had seen from there can you see how constant
+
+550
+01:05:24,959 --> 01:05:30,559
+propagation is different it has it's slightly different read altogether there is one difference
+
+551
+01:05:30,559 --> 01:05:51,759
+which is yeah but this set is finite if you think about this tuple is finite because this
+
+552
+01:05:51,759 --> 01:05:58,000
+is a couple of all variables so this this tuple is finite so it just says key for so this is a
+
+553
+01:05:58,000 --> 01:06:02,920
+tuple of all variables and it says that what value this variable has currently what this
+
+554
+01:06:02,920 --> 01:06:07,000
+value this variable has okay maybe I'm not leading you the right direction but essentially
+
+555
+01:06:07,000 --> 01:06:17,239
+what I wanted to say is think about the case here so does like let's say at certain point
+
+556
+01:06:17,239 --> 01:06:36,279
+in time at a program point this is my yeah okay hold on to that thought I'll come to that later
+
+557
+01:06:36,279 --> 01:06:42,319
+yeah but that can even happen here because through different paths the same definition
+
+558
+01:06:42,320 --> 01:06:48,720
+right but okay there is something there I'll come to it but here one idea is there is that
+
+559
+01:06:48,720 --> 01:06:57,720
+think about let's say my definition D1 was initially 0 and in the next iteration when
+
+560
+01:06:57,720 --> 01:07:05,760
+I updated this particular basic block this became 1 can this change in D1 effect that
+
+561
+01:07:05,760 --> 01:07:17,600
+some other definition D4 got in or did not get in can it no but that cannot ever have come there
+
+562
+01:07:17,600 --> 01:07:22,480
+right even in the initial case it could not have arrived at that location so let's say I have a
+
+563
+01:07:22,480 --> 01:07:31,720
+location at this location I say that let's say initially it was 1 1 0 1 sorry 1 1 0 0 and later
+
+564
+01:07:31,719 --> 01:07:42,000
+it changed to 1 1 0 1 can this change to 1 effect something here at the same basic at the same
+
+565
+01:07:42,000 --> 01:07:49,679
+program point not at somewhere else no maybe the I'm saying the future iteration so this happens
+
+566
+01:07:49,679 --> 01:07:55,679
+in the future so so in the current iteration this is a transition that happened right and I say that
+
+567
+01:07:55,679 --> 01:08:01,399
+later this particular update affected this other updates other affected something can it happen
+
+568
+01:08:01,400 --> 01:08:11,760
+doesn't matter out is completely dependent on in so we argue about in or out it's a basically
+
+569
+01:08:11,760 --> 01:08:19,520
+same thing I'm saying initially the set was 1 1 0 0 and later it moved to 1 1 0 1 so now what
+
+570
+01:08:19,520 --> 01:08:25,920
+happened was this particular data flow fact initially we did not know it reaches but now
+
+571
+01:08:25,920 --> 01:08:34,159
+I see that it got reached right can it affect the reachability of some other definition no
+
+572
+01:08:34,159 --> 01:08:39,680
+right and that is why we were able to use this nice bit vectors because all of them I can just
+
+573
+01:08:39,680 --> 01:08:46,079
+update in one shot I did not have to really worry about what can happen to the other but
+
+574
+01:08:46,079 --> 01:08:53,079
+in case of constant propagation can that happen that because one variable I made it not constant
+
+575
+01:08:53,079 --> 01:09:02,680
+some other variable can get affected because of that yes yes because it can go into a loop
+
+576
+01:09:02,680 --> 01:09:10,559
+and then it can say okay now I see like simple case simple cases think of I plus plus initially
+
+577
+01:09:10,559 --> 01:09:18,039
+you come here it will be say it I 0 and you will let's say this is happening in a loop right so
+
+578
+01:09:18,039 --> 01:09:27,119
+it will say okay I can see a value of I as 0 and this guys don't know so fine then no this
+
+579
+01:09:27,119 --> 01:09:36,279
+is affecting the same variable that is not saying that yeah but I had to say something like maybe
+
+580
+01:09:36,279 --> 01:09:44,800
+I need a couple of statements I need I equals I plus plus so I plus plus become not constant
+
+581
+01:09:44,800 --> 01:09:55,480
+and then X is equal to I right so now initially I was 1 and then X became 1 that was good but
+
+582
+01:09:55,480 --> 01:10:03,760
+later because I became 2 like it became 1 here and then it became plus plus became 2 because
+
+583
+01:10:03,760 --> 01:10:11,600
+I became 2 this guy becomes a not constant X has to become a not constant why is that because this
+
+584
+01:10:11,600 --> 01:10:15,200
+becomes not constant right this will become not constant and X is equal to I this is not constant
+
+585
+01:10:15,200 --> 01:10:22,640
+so the LHS also become not constant am I you guys have gone very quiet so I don't like quite
+
+586
+01:10:22,640 --> 01:10:29,920
+no no no there are finite number of variables variables mean the same it is still I yeah
+
+587
+01:10:29,920 --> 01:10:38,720
+so initially look at think of this particular set that the beginning of the basic block I is
+
+588
+01:10:38,720 --> 01:10:49,400
+bounded to 0 because after this X I will become 1 right and then this loop will take it and again
+
+589
+01:10:49,400 --> 01:10:56,760
+you take a merge with I is I equal 0 and that becomes NC two different constants one is 0 one
+
+590
+01:10:56,760 --> 01:11:02,600
+is 1 it becomes not constant even before that even at the entry to the basic block entry to the basic
+
+591
+01:11:02,600 --> 01:11:07,840
+block initially everything is don't know then initially the value X equals I seems in and then
+
+592
+01:11:07,840 --> 01:11:12,960
+it becomes I plus plus that is taken out back into that branch so now on one branch it gets
+
+593
+01:11:12,960 --> 01:11:21,600
+0 the other branch it gets 1 and then I 1 is not equal 0 so it becomes not constant right and and
+
+594
+01:11:21,600 --> 01:11:29,400
+see why did X become not constant why did X become not constant X did not do anything it did not
+
+595
+01:11:29,400 --> 01:11:36,440
+change anything poor thing it became not constant because I became not constant this could not
+
+596
+01:11:36,439 --> 01:11:42,359
+happened in case of a in case of reaching definitions right so this brings into a very
+
+597
+01:11:42,359 --> 01:11:53,439
+interesting feature called separability so I we call analysis where one data flow fact cannot
+
+598
+01:11:53,439 --> 01:12:00,879
+influence the other as separable data flow analysis frameworks reaching definitions available
+
+599
+01:12:00,880 --> 01:12:08,680
+expression very busy expressions liveness analysis are all separable however constant
+
+600
+01:12:08,680 --> 01:12:16,359
+propagation is an example of a non separable analysis right in fact there is a very interesting
+
+601
+01:12:16,359 --> 01:12:23,640
+analysis called faint variable analysis faint variable analysis says that so live variable
+
+602
+01:12:23,640 --> 01:12:30,720
+analysis we say that okay it is live if there is a use of a variable in the future if there
+
+603
+01:12:30,720 --> 01:12:36,760
+is no use of a variable in the future it is dead faint variable analysis says the variable
+
+604
+01:12:36,760 --> 01:12:46,199
+is faint if either it is dead that's okay or it is used in a used in an expression on a of a
+
+605
+01:12:46,199 --> 01:12:56,400
+variable where the operands are also faint so if you have X equals Y plus Z if Y and Z are also
+
+606
+01:12:56,399 --> 01:13:02,079
+faint then X becomes also becomes faint so it's used in a computation where others are also faint
+
+607
+01:13:02,079 --> 01:13:07,559
+so it's like you are fainting they are not dead yet but like if too many people faint then they
+
+608
+01:13:07,559 --> 01:13:14,279
+can already moved out so I can do a more like so there are cluster of statements who are not so
+
+609
+01:13:14,279 --> 01:13:21,319
+useful but that will very well will not be able to use it because there is a cyclic so that becomes
+
+610
+01:13:21,319 --> 01:13:26,559
+non separable why because something becoming faint depends on something else becoming faint
+
+611
+01:13:26,559 --> 01:13:34,479
+right so X becoming faint depends on Y becoming faint similarly like X becoming not constant
+
+612
+01:13:34,479 --> 01:13:39,759
+depends on Y becoming not constant like in this case happened right so X became not constant
+
+613
+01:13:39,759 --> 01:13:45,639
+because because I became not constant right so I just finish it another so this is the idea of
+
+614
+01:13:45,640 --> 01:13:58,039
+separability and this is the example that you talked about right multiple expression
+
+615
+01:13:58,039 --> 01:14:06,240
+and you you pointed out right so multiple expressions can compute the same value right
+
+616
+01:14:06,240 --> 01:14:13,520
+so what can what is happening along this program path in this program path I am getting a value
+
+617
+01:14:13,520 --> 01:14:24,320
+which is X is equal to 2 Y is equal to 3 and Z is equal to 5 what along this program path again
+
+618
+01:14:24,320 --> 01:14:33,920
+I am getting I am getting X equals 3 I am getting Y equals 2 and I am getting Z equals 5 so if I
+
+619
+01:14:33,920 --> 01:14:42,000
+had got the constant values here I should have got what X is not constant not constant once it
+
+620
+01:14:42,479 --> 01:14:51,680
+is 3 Y is not constant again 1 is 3 once is 2 but Z should be constant value 5 can you quickly
+
+621
+01:14:51,680 --> 01:15:00,800
+do the constant propagation algorithm on this and see what happens Z becomes not constant why
+
+622
+01:15:00,800 --> 01:15:06,560
+why did poor thing become not constant because what are we doing is we are computing the inset
+
+623
+01:15:06,560 --> 01:15:15,280
+here and we are saying both this X and Y X is not constant Y is not constant so because they are
+
+624
+01:15:15,280 --> 01:15:20,400
+not constant they are being used here so Z is also not constant so the value we compute is
+
+625
+01:15:20,400 --> 01:15:27,280
+Z is also not constant and we miss out of an opportunity of optimization here is that could
+
+626
+01:15:27,280 --> 01:15:36,200
+have been a constant 5 and I could have replaced this business here so this is one analysis where
+
+627
+01:15:36,199 --> 01:15:42,279
+my optimal solution so remember initially we talked about this actual solution what we want
+
+628
+01:15:42,279 --> 01:15:47,840
+to compute the solution we want to compute is to the program point I would try to take all paths
+
+629
+01:15:47,840 --> 01:15:54,880
+that reach that program point and then compute their meets and that was what we defined as the
+
+630
+01:15:54,880 --> 01:16:02,439
+MOP solution the meet of all path solution that is the best solution we should get right because
+
+631
+01:16:02,439 --> 01:16:07,439
+I am actually looking at every execution possible and then seeing what are the states along every
+
+632
+01:16:07,439 --> 01:16:16,479
+possible execution however whatever what we ended up computing using the framework the fixed point
+
+633
+01:16:16,479 --> 01:16:22,599
+framework was what is called the MFP the MFP solution or the maximum fixed point solution
+
+634
+01:16:22,599 --> 01:16:29,079
+maximum or minimum depending on whatever you like right so least fixed point or the maximum
+
+635
+01:16:29,079 --> 01:16:38,600
+greatest fixed point whatever you like so it is the so we are computing the MFP solution in this
+
+636
+01:16:38,600 --> 01:16:47,039
+case as it turns out the MOP solution and the MOP MFP solution do not coincide so if I take in the
+
+637
+01:16:47,039 --> 01:16:52,039
+MOP solution I would have computed everything till this point and I would have seen that this
+
+638
+01:16:52,039 --> 01:16:57,519
+value is 5 but if I do the MFP solution because I am first computing the ins and then propagating
+
+639
+01:16:57,520 --> 01:17:02,280
+it I lose that information and I end up getting not constant for something which had which would
+
+640
+01:17:02,280 --> 01:17:07,840
+have been more precise as 5 that is where the bad news ends so we essentially get a
+
+641
+01:17:07,840 --> 01:17:13,600
+approximation so the problem is that is it a problem like did we lose soundness because of this
+
+642
+01:17:13,600 --> 01:17:21,160
+no we could have done an optimization we did not do it fine not a good thing but we can live with
+
+643
+01:17:21,159 --> 01:17:28,239
+it right but it does not become unsafe right so essentially it still gives you an over
+
+644
+01:17:28,239 --> 01:17:37,239
+approximation so I define a new term called over approximation which means that I approximate
+
+645
+01:17:37,239 --> 01:17:43,239
+but I approximate more so essentially I can inhibit optimizations but I will not lose out
+
+646
+01:17:43,239 --> 01:17:49,039
+on soundness right so that is what is referred to as over approximation so we will end up doing
+
+647
+01:17:49,039 --> 01:17:56,800
+an over approximation but the algorithm is not precise it is not precise it is not exactly
+
+648
+01:17:56,800 --> 01:18:04,960
+computing what the MOP solution would have computed so our search for a unified framework
+
+649
+01:18:04,960 --> 01:18:11,680
+continues and we will see that I thought I will be able to cover more but this was okay there is
+
+650
+01:18:11,680 --> 01:18:17,000
+some bit of theoretical framework foundations which can actually say that why all this business
+
+651
+01:18:17,159 --> 01:18:23,279
+works I mean so essentially whatever I said the number of steps required for updates are this and
+
+652
+01:18:23,279 --> 01:18:29,399
+all you can actually put it in a very nice framework with a little bit of lattice theory
+
+653
+01:18:29,399 --> 01:18:37,520
+and little bit of expand theory but maybe there is already too much of theory so we will see I
+
+654
+01:18:37,520 --> 01:18:42,560
+see that I'll see the mood for the class tomorrow if we see that the class is in mood for that we
+
+655
+01:18:42,560 --> 01:18:49,880
+will do that otherwise we will do something else of what so there is something called lattice
+
+656
+01:18:49,880 --> 01:18:57,039
+theory so the data the idea is this the idea is there is these data flow facts is a so you know
+
+657
+01:18:57,039 --> 01:19:00,520
+what is the lattice how many people know what is the lattice some not many people raised their
+
+658
+01:19:00,520 --> 01:19:11,200
+hands yesterday so the so lattice is a set with an ordering relation right so you take a set and
+
+659
+01:19:11,199 --> 01:19:15,319
+you define an ordering relation which says that the points in this set can be ordered by something
+
+660
+01:19:15,319 --> 01:19:22,840
+is less than or greater than something right so this is referred to as any set with an
+
+661
+01:19:22,840 --> 01:19:29,880
+ordering relation is referred to as a poset or a partial order partially ordered set right so it
+
+662
+01:19:29,880 --> 01:19:38,880
+is a poset if for any two values in this domain so okay so there is also called something called
+
+663
+01:19:38,880 --> 01:19:46,000
+a total order so I say something is a total order if every two values in this set can be ordered by
+
+664
+01:19:46,000 --> 01:19:50,880
+that relation like for instance set of integers by the less than equal to operator is it a total
+
+665
+01:19:50,880 --> 01:19:56,640
+order yes because I pick any two numbers give me any two national numbers I can tell you what
+
+666
+01:19:56,640 --> 01:20:03,600
+which one is lesser than which one set of complex numbers under lexicographic ordering is it total
+
+667
+01:20:03,600 --> 01:20:10,000
+order under lexicographic ordering you know lexicographic ordering that you first compare
+
+668
+01:20:10,000 --> 01:20:17,120
+the first guy the real real parts if they're equal then compare the so that also forms a
+
+669
+01:20:17,120 --> 01:20:25,520
+total ordering but the complex numbers under under complex ordering which is says that like
+
+670
+01:20:25,520 --> 01:20:38,000
+I'll say that c1 is like i plus a plus ib is less than equal to x plus i i mean j
+
+671
+01:20:38,000 --> 01:20:47,920
+so let's say this is these are the DLM complex parts so now I would say that this holds only
+
+672
+01:20:47,920 --> 01:21:01,119
+if a is less than equal to x and b is b is less than equal to y if this happens only then I will
+
+673
+01:21:01,119 --> 01:21:09,520
+say that this is less than this but think about these numbers i plus a 1 plus 2i and 2 plus 1i
+
+674
+01:21:09,520 --> 01:21:19,680
+which one is lesser than which one can't say I this ordering does not give me a relation I
+
+675
+01:21:19,680 --> 01:21:28,920
+cannot put any of them before the so if there are such elements then I call it a partially
+
+676
+01:21:28,920 --> 01:21:34,720
+ordered set or a poset so there is an ordering but it's partially ordered like there are elements
+
+677
+01:21:34,720 --> 01:21:39,199
+which do not have an ordering between them so now the cool idea is that these data flow
+
+678
+01:21:39,199 --> 01:21:45,360
+facts can be put up as lattice elements by some ordering relation and this ordering is
+
+679
+01:21:45,360 --> 01:21:51,720
+basically on this approximation basically so which I don't want to get into that so essentially now
+
+680
+01:21:51,720 --> 01:21:59,640
+once you have that lattice you can actually talk about these these termination guarantees
+
+681
+01:21:59,640 --> 01:22:05,520
+and computing the correct things on that lattice structure and the type of the function like for
+
+682
+01:22:05,520 --> 01:22:11,880
+instance I said that even with infinite lattices sorry infinite sets I can have a terminating
+
+683
+01:22:11,880 --> 01:22:16,720
+execution of my analysis like constant propagation why because in that case the lattice that you get
+
+684
+01:22:16,720 --> 01:22:24,160
+has a finite height the height of the lattice is finite the number of elements can be infinite so
+
+685
+01:22:24,160 --> 01:22:29,160
+anyway so let's see if we have taste for it tomorrow we can do more but as far as a practitioner
+
+686
+01:22:29,159 --> 01:22:34,599
+is concerned we have sort of figured out how to do the analysis but if you do that you will
+
+687
+01:22:34,599 --> 01:22:39,639
+actually have the mathematical foundation as to why this analysis is framework really works right
+
+688
+01:22:39,639 --> 01:22:44,399
+so from a compiler's perspective maybe that is not so important but really understanding it it is
+
+689
+01:22:44,399 --> 01:22:49,079
+really important to I mean you really understand insights that why does this is a value mathematically
+
+690
+01:22:49,079 --> 01:22:54,840
+why does it really work and the good part is once you have put things in that framework the
+
+691
+01:22:54,840 --> 01:23:00,760
+proofs are done in that framework and they're done with after that I would not have to do the proof
+
+692
+01:23:00,760 --> 01:23:05,600
+for every analysis separately so it gives you a checklist that does this happen does this happen
+
+693
+01:23:05,600 --> 01:23:11,039
+does this happen does this happen yes the analysis is out and it terminate done you do not have to
+
+694
+01:23:11,039 --> 01:23:15,360
+do a proof for every analysis separately that is a that is what you get back from that.
+

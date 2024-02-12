@@ -1,0 +1,15 @@
+ **Exam Notes - Data Flow Analysis (Part II):**
+
+1. *Single Statement Basic Blocks*: Assume only single statement basic blocks for simplicity. Gen and kill sets can be calculated locally without requiring information from other basic blocks.
+	* Gen: New definitions generated in the basic block.
+	* Kill: Previous definitions killed in the basic block.
+2. *Global Solution Sets*: Compute global solution sets (in and out sets) using local sets.
+	* In: Set of reaching definitions at the beginning of a basic block.
+	* Out: Set of reaching definitions at the end of a basic block.
+3. *Solving Equations*: To solve the data flow analysis problem, we need to address three issues: existence, uniqueness, and computability of solutions.
+4. *Multiple Solutions*: Multiple solutions to the set of equations are possible due to loops creating circular dependencies.
+5. *Least Fixed Point Solution (LFP)*: Desired solution is the smallest set of definitions in terms of cardinality.
+6. *Safe vs. Precise Solutions*: Safe solutions avoid incorrect transformations, whereas precise solutions provide optimal results. Balancing safety and precision is crucial in data flow analysis.
+7. *Scalability*: Importance of efficiently handling large systems and codes in data flow analysis.
+
+These concepts lay the foundation for advanced data flow analysis techniques and demonstrate the challenges involved in accurately modeling and transforming programs. Understanding these principles contributes to effective compiler development and improved software performance.

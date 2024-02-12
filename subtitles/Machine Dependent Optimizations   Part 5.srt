@@ -1,0 +1,1072 @@
+1
+00:00:00,000 --> 00:00:11,540
+Get started. So, what we have seen so far is that we have seen code generation and instruction
+
+2
+00:00:11,540 --> 00:00:17,420
+selection as well. Now, the next thing that you are going to see is register allocation
+
+3
+00:00:17,420 --> 00:00:22,600
+right. This is an important problem in the compiler and we will see in great level of
+
+4
+00:00:22,600 --> 00:00:29,060
+detail how to do register allocation right. Subsequently, we will talk about instruction
+
+5
+00:00:29,059 --> 00:00:34,140
+scheduling although instruction scheduling pass might happen before the register allocation
+
+6
+00:00:34,140 --> 00:00:38,979
+in many of the compilers okay. So, this module is going to be on register
+
+7
+00:00:38,979 --> 00:00:44,340
+allocation and in register allocation after introducing the problem we will talk about
+
+8
+00:00:44,340 --> 00:00:50,000
+a very simple register allocator using usage code. In fact, this is a high level way of
+
+9
+00:00:50,000 --> 00:00:55,460
+explaining what is happening right and we will do something better than this, but quickly
+
+10
+00:00:55,460 --> 00:01:00,859
+see an example of how to do register allocation just using register count.
+
+11
+00:01:00,859 --> 00:01:06,460
+Subsequently, we will talk about register allocation using graph coloring. This is typically
+
+12
+00:01:06,460 --> 00:01:11,420
+how register allocation is done in a compiler. We will also talk about the problem of doing
+
+13
+00:01:11,420 --> 00:01:15,900
+register allocation within a basic block and when it is within a basic block the problem
+
+14
+00:01:15,900 --> 00:01:22,900
+becomes a simpler problem and can be solved okay in near linear time kind of a algorithm
+
+15
+00:01:23,020 --> 00:01:30,020
+and you can in fact do optimal register allocation using near linear time. That kind of inspires
+
+16
+00:01:30,020 --> 00:01:37,020
+another allocator which is called the linear scan register allocator which is not optimal,
+
+17
+00:01:37,500 --> 00:01:43,040
+but which is very efficient, very efficient in terms of the time it takes to generate
+
+18
+00:01:43,040 --> 00:01:48,420
+the register allocation okay. So, we will also talk about that and it seems to perform
+
+19
+00:01:48,420 --> 00:01:53,620
+close enough to the graph coloring allocator. Graph coloring allocator itself is a heuristic
+
+20
+00:01:53,620 --> 00:01:59,740
+approach so that is also not going to generate optimal code right. So, generating optimal
+
+21
+00:01:59,740 --> 00:02:05,420
+register allocation is again an NP hard problem. So, we will not try to solve it using I mean
+
+22
+00:02:05,420 --> 00:02:10,780
+we will not try to get the optimal solution, but we will try to get a solution which is
+
+23
+00:02:10,780 --> 00:02:17,780
+as good as possible that is really the up okay. So, this is roughly the organization for this
+
+24
+00:02:17,780 --> 00:02:21,659
+module okay. Now, what is the register allocation problem?
+
+25
+00:02:21,659 --> 00:02:27,420
+The register allocation problem essentially is to identify which variable should be allocated
+
+26
+00:02:27,420 --> 00:02:34,420
+in registers okay. We also know that variables which do not overlap with each other can possibly
+
+27
+00:02:35,460 --> 00:02:42,139
+share the same register, but we have to identify which variables can get these registers. It
+
+28
+00:02:42,179 --> 00:02:47,579
+is quite possible that there are more number of variables than the registers available
+
+29
+00:02:47,579 --> 00:02:52,859
+and therefore some may not necessarily stay in register. Particularly in a Sysc architecture
+
+30
+00:02:52,859 --> 00:02:59,859
+we know that you can use memory operands in your arithmetic and logic instructions. Therefore,
+
+31
+00:02:59,859 --> 00:03:06,859
+I mean if you cannot allocate registers for them you will continue to use them from memory.
+
+32
+00:03:06,860 --> 00:03:12,660
+Whereas in Sysc sorry in Rysc architectures all arithmetic and logic instructions have
+
+33
+00:03:12,660 --> 00:03:18,220
+to be in memory. So, what happens is that you will even for variables which you cannot
+
+34
+00:03:18,220 --> 00:03:25,140
+allocate memory eventually when you perform certain operations from registers have to
+
+35
+00:03:25,140 --> 00:03:30,260
+be used for that. So, they have a mechanism for generating code for those kinds of architecture.
+
+36
+00:03:30,260 --> 00:03:34,460
+We will talk about that. We may not really talk about that in level of great level of
+
+37
+00:03:34,460 --> 00:03:40,340
+detail, but we will see how to handle that. Maybe we will discuss that how to handle
+
+38
+00:03:40,340 --> 00:03:44,700
+that okay. Again when you talk about register allocator, register allocator can be done
+
+39
+00:03:44,700 --> 00:03:50,620
+as a global register allocator or as a local register allocator. When you talk about local
+
+40
+00:03:50,620 --> 00:03:55,460
+register allocator it is register allocation within a basic block. Whereas global register
+
+41
+00:03:55,460 --> 00:04:00,980
+allocation is beyond basic block or across basic block. Typically what is done is that
+
+42
+00:04:00,979 --> 00:04:06,939
+a global register allocation pass first happens and registers are allocated globally. Typically
+
+43
+00:04:06,939 --> 00:04:13,939
+at a function level is what register allocation happens right. Subsequently for certain optimizations
+
+44
+00:04:13,939 --> 00:04:17,579
+you would do a local register allocation on top of that.
+
+45
+00:04:17,579 --> 00:04:22,620
+So, this is essentially the register allocation problem, but it also has a sub problem which
+
+46
+00:04:22,620 --> 00:04:26,980
+is the register assignment problem. Having decided which variables would reside in a
+
+47
+00:04:26,980 --> 00:04:33,379
+register you will also have to decide on what registers. That is a subsequent problem,
+
+48
+00:04:33,379 --> 00:04:38,060
+but that in today's context many registers right if they are all homogeneous it means
+
+49
+00:04:38,060 --> 00:04:44,020
+that any register can hold any value right. Then this register assignment problem becomes
+
+50
+00:04:44,020 --> 00:04:48,660
+a somewhat a trivial problem, but there are certain architectures in which you will say
+
+51
+00:04:48,660 --> 00:04:54,980
+that this cannot be in that register or this has to be in odd even registers or this has
+
+52
+00:04:54,980 --> 00:05:02,100
+to be only in these registers etc. In which case subsequent to doing this register allocation
+
+53
+00:05:02,100 --> 00:05:08,180
+problem you also have to solve what is called a register assignment problem ok.
+
+54
+00:05:08,180 --> 00:05:14,259
+So for example is accumulator is another example. There is a special register called accumulator
+
+55
+00:05:14,259 --> 00:05:19,540
+and only certain things can be loaded in the accumulator right. So, if you have such situations
+
+56
+00:05:19,540 --> 00:05:23,939
+then you will also have to mark those things and then say that these registers cannot be
+
+57
+00:05:23,939 --> 00:05:29,819
+used for that purpose right. Together these two problems are always called referred to
+
+58
+00:05:29,819 --> 00:05:35,180
+as register allocation problem although to be precise register allocation only refers
+
+59
+00:05:35,180 --> 00:05:41,939
+to deciding which registers will be in which variables will be in register and which variables
+
+60
+00:05:41,939 --> 00:05:47,500
+will be in memory ok. That is really what the problem is ok.
+
+61
+00:05:47,500 --> 00:05:53,740
+Now every machine has a set of registers. The problem is that you are given an intermediate
+
+62
+00:05:53,740 --> 00:06:02,180
+program ok some piece of code ok which has its control flow right control flow graph
+
+63
+00:06:02,180 --> 00:06:07,860
+represented in the form of a control flow graph and the number of registers k that is
+
+64
+00:06:07,860 --> 00:06:16,900
+available in the machine. The idea is to find out can this code can this code right be I
+
+65
+00:06:16,900 --> 00:06:23,660
+mean can these registers let me put it this way can these registers be assigned to the
+
+66
+00:06:24,580 --> 00:06:31,020
+variables in the code such that no two conflicting variables are assigned the same register and
+
+67
+00:06:31,020 --> 00:06:37,580
+there is no extra spill ok there is no extra loads or stores for the spill. That is you
+
+68
+00:06:37,580 --> 00:06:43,500
+are going to have a code in which all these variables ok will be assigned the registers
+
+69
+00:06:43,500 --> 00:06:48,900
+such that two variables which are kind of conflicting with each other are not assigned
+
+70
+00:06:48,899 --> 00:06:54,620
+the same register. We will see what is conflicting in a moment ok.
+
+71
+00:06:54,620 --> 00:07:02,299
+This problem is NP hard ok and therefore trying to solve this optimally is going to be going
+
+72
+00:07:02,299 --> 00:07:07,539
+to take a very long time. So, you use heuristic approaches the simplest heuristic that we
+
+73
+00:07:07,539 --> 00:07:13,779
+use is what is called count based heuristic. You can also use the graph coloring approach
+
+74
+00:07:13,979 --> 00:07:18,899
+and then I will also briefly talk about the linear scan allocator. Remember all of these
+
+75
+00:07:18,899 --> 00:07:26,219
+are heuristic approaches right and they will end up generating codes which are not necessarily
+
+76
+00:07:26,219 --> 00:07:32,739
+optimal you can say near optimal or sub optimal code and this one is supposed to generate
+
+77
+00:07:32,739 --> 00:07:39,859
+code which is right closer to near optimal. This is supposed to generate code which is
+
+78
+00:07:39,860 --> 00:07:45,020
+actually poorer than this one, but in terms of the time it takes to solve the problem
+
+79
+00:07:45,020 --> 00:07:50,580
+it is faster. The time complexity of this is better than the time complexity of this
+
+80
+00:07:50,580 --> 00:07:56,819
+right and then of course this is a very very simple approach and it generates very inefficient
+
+81
+00:07:56,819 --> 00:08:01,540
+kind of an allocation. So, let us see all three of them in this lecture, but before
+
+82
+00:08:01,540 --> 00:08:06,819
+we go into that let us first talk about what are conflicting variables ok. Two variables
+
+83
+00:08:06,899 --> 00:08:13,019
+are said to be conflicting if they are live at the same time right and liveness is essentially
+
+84
+00:08:13,019 --> 00:08:20,339
+defined as a variable is said to be live if its value is needed in the future if it holds
+
+85
+00:08:20,339 --> 00:08:25,539
+a value and its value is needed in the future. And what does this really mean we will explain
+
+86
+00:08:25,539 --> 00:08:33,700
+this by the following thing you take any program point P right there is a point ok P i in the
+
+87
+00:08:33,700 --> 00:08:41,140
+program which is before this point right in which it is defined the variable is defined
+
+88
+00:08:41,140 --> 00:08:46,780
+that means that given a program point there is a point prior to that where this variable
+
+89
+00:08:46,780 --> 00:08:53,700
+has been defined and there is a point after that where the variable is used that means
+
+90
+00:08:53,700 --> 00:08:59,379
+that you are in between the definition and the use of a variable.
+
+91
+00:08:59,379 --> 00:09:05,019
+But of course you also want to say that in between the value is not redefined that means
+
+92
+00:09:05,019 --> 00:09:13,299
+that you have a definition then some use then again another definition again another use
+
+93
+00:09:13,299 --> 00:09:19,939
+then in between these use and the definition those points it is not live ok. Let me give
+
+94
+00:09:19,939 --> 00:09:28,340
+that example here so let us say the temporary is defined here ok it is used here and then
+
+95
+00:09:28,340 --> 00:09:36,540
+again subsequently defined here and used here. Now you can say this program point it is live
+
+96
+00:09:36,540 --> 00:09:44,220
+this program point it is live but this program point in between these two right there is
+
+97
+00:09:44,220 --> 00:09:50,460
+a definition before that there is an use after that however in between this point and this
+
+98
+00:09:50,460 --> 00:09:59,780
+use there is a redefinition correct right. So we do not call this as live ok this is
+
+99
+00:09:59,780 --> 00:10:12,300
+not whereas this is live and ok this is live right so that is really what we mean ok.
+
+100
+00:10:12,299 --> 00:10:22,219
+Let us take an example right look at this code right now for each variable we say that
+
+101
+00:10:22,219 --> 00:10:29,779
+the point in which it is defined till its last use is where it is live ok. So for example
+
+102
+00:10:29,779 --> 00:10:35,059
+the variable S 1 which is defined here is only used in the next instruction similarly
+
+103
+00:10:35,059 --> 00:10:41,219
+the variable S 2 which is defined is being used in the next two instructions right and
+
+104
+00:10:41,220 --> 00:10:46,300
+a variable which is S 3 which is defined over here is being used in the next instruction and
+
+105
+00:10:46,300 --> 00:10:52,980
+so on right. So the live range of each one of these variables is shown here and clearly
+
+106
+00:10:52,980 --> 00:10:59,340
+we can see that S 1 and S 2 conflict with each other right if they are given the same register
+
+107
+00:10:59,340 --> 00:11:04,860
+then obviously there is going to be a problem isn't it because they are live at this point
+
+108
+00:11:04,860 --> 00:11:13,340
+together and therefore they cannot be using the same register whereas S 1 and S 4 can share the
+
+109
+00:11:13,340 --> 00:11:19,139
+same register because they were never live together right at any of these program points
+
+110
+00:11:19,139 --> 00:11:27,340
+if you look at it either S 1 is live or S 4 is live but not together therefore S 1 and S 4 can
+
+111
+00:11:27,340 --> 00:11:35,100
+be assigned different registers right ok. Now the same thing will go a little bit more into the
+
+112
+00:11:35,100 --> 00:11:41,139
+details as I mentioned earlier right whenever we say a variable is said to be live if there is a
+
+113
+00:11:41,139 --> 00:11:48,899
+definition before that and there is an use after that including that point ok. So for example if
+
+114
+00:11:48,899 --> 00:11:55,900
+you look at C and then talk about variable S 2 then there is a definition before that and there
+
+115
+00:11:55,899 --> 00:12:02,500
+is an use after that and there is no redefinition from this point to the use point therefore this
+
+116
+00:12:02,500 --> 00:12:09,699
+is what is called the live range of this variable ok. Now we essentially define what is called an
+
+117
+00:12:09,699 --> 00:12:18,500
+interval ok so this interval between p i to p j is the live range of this variable right so S 2
+
+118
+00:12:18,500 --> 00:12:26,059
+is live between b to d for example from this point to this point. How do we compute the live
+
+119
+00:12:26,059 --> 00:12:33,860
+variables live range of a variable? We have been talked about the diffuse change in the data flow
+
+120
+00:12:33,860 --> 00:12:40,500
+analysis live variable analysis and diffuse change so using that we can calculate right
+
+121
+00:12:40,500 --> 00:12:47,580
+we can calculate the live range of each variable is that ok have you people been discussed I mean
+
+122
+00:12:47,580 --> 00:12:54,820
+has this been discussed as a part of the data flow analysis yeah yes and no liveness has been
+
+123
+00:12:54,820 --> 00:13:04,820
+discussed ok so d u change have not been discussed is it ok that is fine you can kind of read up that
+
+124
+00:13:04,820 --> 00:13:10,500
+quickly similar data flow I mean it basically uses live variable analysis to compute the d u
+
+125
+00:13:10,500 --> 00:13:19,500
+change the next circle I will read to that ok. Now the question is when is register allocation done
+
+126
+00:13:19,500 --> 00:13:24,860
+and on what code is register allocation done? Register allocation is typically done on the
+
+127
+00:13:24,860 --> 00:13:31,500
+lower level intermediate code either intermediate code or machine code typically on the machine
+
+128
+00:13:31,500 --> 00:13:38,179
+code more typically on the machine code ok that is where it is done it is done ok and
+
+129
+00:13:38,259 --> 00:13:44,139
+often times what happens is that code generation happens assuming infinite registers and what it
+
+130
+00:13:44,139 --> 00:13:50,739
+does is that it uses what are called temporary vary sorry temporary registers ok or what they
+
+131
+00:13:50,739 --> 00:13:55,099
+call it as the let us call it as temporary register I do not want to call it logical.
+
+132
+00:13:55,099 --> 00:14:00,500
+So, code generation happens with temporary registers which assumes infinite amount of
+
+133
+00:14:00,500 --> 00:14:05,299
+registers now what you do in the register allocation phase is that you find out which
+
+134
+00:14:05,299 --> 00:14:11,500
+one of them actually go to those registers and which one will be not registers or will be always
+
+135
+00:14:11,500 --> 00:14:17,740
+access from the memory that is needed to be done during the register allocation phase and this
+
+136
+00:14:17,740 --> 00:14:24,859
+is typically done after all the global optimizations are also done but it can be done either before or
+
+137
+00:14:24,859 --> 00:14:30,379
+after instruction scheduling and towards the end of this lecture and possibly in the next lecture
+
+138
+00:14:30,379 --> 00:14:36,740
+we will discuss what are the pros and cons of doing it before as well as after right both of
+
+139
+00:14:36,740 --> 00:14:42,620
+them has some positive and some negative aspects of doing things and there is interaction between
+
+140
+00:14:42,620 --> 00:14:48,259
+this instruction scheduling phase and the register allocation phase. So, one has to be one has to
+
+141
+00:14:48,259 --> 00:14:53,620
+understand that in order to position them appropriately. Software pipelining is another
+
+142
+00:14:53,620 --> 00:14:57,779
+instruction scheduling method when we talk about instruction scheduling we will also talk about
+
+143
+00:14:57,779 --> 00:15:04,659
+software pipelining. Now, this again I do not understand too much of this so I copied this
+
+144
+00:15:04,659 --> 00:15:12,539
+slide from this source right and this kind of shows in the LLVM where exactly is register
+
+145
+00:15:12,539 --> 00:15:19,379
+allocation being done right. So, you can see that you do all these code generation instruction
+
+146
+00:15:19,379 --> 00:15:25,500
+selection right instruction scheduling and further some SSA based optimization which
+
+147
+00:15:25,659 --> 00:15:32,820
+Malai talked about yesterday and after that you have an SSA form of instructions on that you do
+
+148
+00:15:32,820 --> 00:15:41,500
+register allocation this is how it happens in LLVM right whereas in GCC right it is little bit
+
+149
+00:15:41,500 --> 00:15:48,940
+different. So, after the code generation phase right there are certain optimizations that are
+
+150
+00:15:48,940 --> 00:15:57,220
+done and after that you do instruction scheduling and after that you do register allocation right.
+
+151
+00:15:57,220 --> 00:16:04,660
+So, that is really how this happens in register allocation but for our purpose what we will assume
+
+152
+00:16:04,660 --> 00:16:10,180
+is that we have some kind of a code where there are temporary registers the code already has some
+
+153
+00:16:10,180 --> 00:16:16,540
+temporary registers and we need to decide how many of them will get actually the register that is
+
+154
+00:16:16,539 --> 00:16:22,819
+really the problem that you are trying to look at okay. Now, first thing is that let us just simply
+
+155
+00:16:22,819 --> 00:16:28,980
+explain register allocation using this usage accounts and why that is important just to get
+
+156
+00:16:28,980 --> 00:16:35,139
+the intuition of that. We will try to do that using a simple example but before that let us
+
+157
+00:16:35,139 --> 00:16:40,019
+find out what is the objective of register allocation why do we need to do register allocation.
+
+158
+00:16:40,019 --> 00:17:01,019
+So, in the register allocation problem you are now trying to do register allocation for a specific
+
+159
+00:17:01,019 --> 00:17:20,339
+target architecture correct. It is dependent on the architecture on which you are going to. Okay,
+
+160
+00:17:20,339 --> 00:17:26,539
+right okay so I do not know whether I should have probably talked about this little bit but I did
+
+161
+00:17:27,019 --> 00:17:33,740
+not okay. So, you can do this is the different passes in GCC right. Now, as I mentioned here
+
+162
+00:17:33,740 --> 00:17:39,539
+these are the high level languages then you do your front end part of your compilation and then
+
+163
+00:17:39,539 --> 00:17:45,700
+you generate different kinds of RTLs right this is like intermediate representation right.
+
+164
+00:17:45,700 --> 00:17:55,579
+Then so you can think of this as some kind of an intermediate code alright and then this
+
+165
+00:17:55,579 --> 00:18:01,139
+intermediate code takes certain machine description this is basically description about the target
+
+166
+00:18:01,139 --> 00:18:08,139
+language this is what well I also talked about later earlier right. So, this specifies for x86
+
+167
+00:18:08,139 --> 00:18:13,699
+how many registers are there what kind of instruction set is there or whatever other
+
+168
+00:18:13,699 --> 00:18:19,579
+information that you want to mention along with their cost blah blah blah etc. Then using that
+
+169
+00:18:19,579 --> 00:18:25,379
+information reading that information when you do register allocation your register allocator
+
+170
+00:18:25,380 --> 00:18:30,700
+is going to use this information and then generate code for that. In fact, even before
+
+171
+00:18:30,700 --> 00:18:38,380
+you go to register allocation for generating machine code in fact GCC has a pass which is
+
+172
+00:18:38,380 --> 00:18:48,700
+called machine MD RTL which is actually machine specific RTL right. That pass also takes the
+
+173
+00:18:48,700 --> 00:18:54,140
+machine description in terms of generating code how do I generate code for let us say an x86
+
+174
+00:18:54,140 --> 00:19:00,940
+machine how do I generate code for a risk machine like let us say r 10000 or power 9 whatever it is
+
+175
+00:19:00,940 --> 00:19:05,820
+each one is going to be different. So, you need to take the machine description and the code
+
+176
+00:19:05,820 --> 00:19:10,740
+generator kind of understands that and then generates code based on that. Similarly, the
+
+177
+00:19:10,740 --> 00:19:15,500
+register allocator is also going to look at the machine description and then understand how many
+
+178
+00:19:15,500 --> 00:19:21,140
+registers are there are there any constraints on the register right. For example, when we talk about
+
+179
+00:19:21,300 --> 00:19:29,340
+risk 5 right you know that there are 32 registers each one of them is 32 bit and r 0 is hardwired
+
+180
+00:19:29,340 --> 00:19:36,620
+to 0. All of this information is available in the machine descriptor in some form which each one of
+
+181
+00:19:36,620 --> 00:19:42,300
+these phases like the code generation phase or the register allocation phase or the instruction
+
+182
+00:19:42,300 --> 00:19:48,220
+scheduling phase all of this remember this entire topic is machine dependent optimization.
+
+183
+00:19:48,900 --> 00:19:55,140
+So, everything we do is specific to the machine so that information about machine has to be read
+
+184
+00:19:55,140 --> 00:20:01,299
+from somewhere in the case of GCC it is read from a place which is called the machine description
+
+185
+00:20:01,299 --> 00:20:06,500
+file in different compilers could have been called by different names but there is a place
+
+186
+00:20:06,500 --> 00:20:11,620
+from where it has to read this from it is not that the compiler is intelligent enough to probe
+
+187
+00:20:11,620 --> 00:20:16,620
+the processor to find out how many registers are there you specify that in the machine description
+
+188
+00:20:16,619 --> 00:20:21,819
+file right does that answer your question okay thanks for bringing up the point I thought that
+
+189
+00:20:22,459 --> 00:20:28,299
+people already knew about it I did not go into the details but it helped us to clarify okay.
+
+190
+00:20:28,299 --> 00:20:35,019
+Any more questions on that right so the description of the machine is given to the compiler particularly
+
+191
+00:20:35,019 --> 00:20:40,419
+the backend of the compiler particularly to the machine dependent optimizations of the compiler
+
+192
+00:20:40,419 --> 00:20:46,539
+right and based on that it actually generates a code. So, the machine description for x86 is
+
+193
+00:20:46,539 --> 00:20:51,180
+going to be different from the machine description for risk 5 which is different from the machine
+
+194
+00:20:51,180 --> 00:20:58,819
+description for let us say power 9 or 10,000 or something right and the machine description
+
+195
+00:20:58,819 --> 00:21:06,099
+has to specify all the constraints right machine description is the place where you specify what
+
+196
+00:21:06,099 --> 00:21:12,500
+format of instructions is allowed what of addressing modes are allowed everything has to be specified
+
+197
+00:21:12,500 --> 00:21:18,859
+there only right without which the code generator has no clue of generating code right forget about
+
+198
+00:21:18,859 --> 00:21:26,900
+register allocator even code generator cannot do anything up to here the front end and generating
+
+199
+00:21:26,900 --> 00:21:33,819
+the intermediate code you do not need to know anything about the machine right whereas this
+
+200
+00:21:33,819 --> 00:21:38,819
+part there is a lot that you need to know about the machine in fact every one of the topics that
+
+201
+00:21:38,859 --> 00:21:45,179
+I am going to talk about right remember the title of my presentation is machine dependent
+
+202
+00:21:45,179 --> 00:21:50,740
+optimization so dependent machine dependent everything has to be dependent on that so we
+
+203
+00:21:50,740 --> 00:21:58,419
+need to take those information from the machine description alright okay.
+
+204
+00:21:58,419 --> 00:22:05,619
+So, let us move forward so let us quickly do this register allocation using usage accounts
+
+205
+00:22:05,619 --> 00:22:13,659
+before the break right so here the idea is to okay before I talk about this particular method
+
+206
+00:22:13,659 --> 00:22:18,579
+let us say what is the objective of doing register allocation why do we talk about it so much why
+
+207
+00:22:18,579 --> 00:22:23,619
+cannot I just if my architecture allows things to be in memory why cannot I just take everything
+
+208
+00:22:23,619 --> 00:22:32,379
+from memory right that way I can completely eliminate the register allocation exactly right
+
+209
+00:22:32,380 --> 00:22:38,500
+so the access time of memory is going to be much more compared to the access time of registers so
+
+210
+00:22:38,500 --> 00:22:45,060
+what should be the idea you should be able to put as many variables as possible in the registers
+
+211
+00:22:45,060 --> 00:22:52,540
+and which variable do you actually put it into the registers the ones which are being used more
+
+212
+00:22:52,540 --> 00:22:59,340
+often right and when you say the ones which are being used more often is it in the code the number
+
+213
+00:22:59,339 --> 00:23:10,179
+of times that they appear so for example here in this code S2 appears three times right of course
+
+214
+00:23:10,179 --> 00:23:15,259
+this is a basic block so really should not have mattered but let us look at it so do you count
+
+215
+00:23:15,259 --> 00:23:21,500
+this as three times or do you look at whether this basic block is enclosed in a loop right and
+
+216
+00:23:22,500 --> 00:23:29,019
+that loop might be executed hundred times as opposed to some other variables which are not
+
+217
+00:23:29,019 --> 00:23:36,660
+inside that basic block or whatever right okay so we will come back to this point as soon as
+
+218
+00:23:36,660 --> 00:23:43,059
+I give this example then you will realize this right so what we want to do is that we want to
+
+219
+00:23:43,059 --> 00:23:50,660
+use these registers for variables which are being used more often right that what is how do we define
+
+220
+00:23:50,660 --> 00:23:57,420
+how to get this count we will get it to that point little later okay of course we can use
+
+221
+00:23:57,420 --> 00:24:04,180
+the same register for multiple variables as long as they do not overlap let us take this example
+
+222
+00:24:04,180 --> 00:24:09,740
+right and for the purpose of discussion I have taken the high level code although I should have
+
+223
+00:24:09,740 --> 00:24:16,340
+taken the intermediate code or the machine code of this the machine code is difficult for us to
+
+224
+00:24:16,339 --> 00:24:21,579
+read and understand it also involves a lot of instruction so let us look at this particular
+
+225
+00:24:21,579 --> 00:24:28,099
+code right this is the control flow graph for this right and let us say that we want to do
+
+226
+00:24:28,099 --> 00:24:35,299
+register allocation for this entire function right all right now this is what I was asking
+
+227
+00:24:35,299 --> 00:24:44,539
+let us look at the variable sum right sum is defined in this position sum is used here sum
+
+228
+00:24:44,539 --> 00:24:52,779
+is also used in these locations right so if I look at sum the number of definitions right if
+
+229
+00:24:52,779 --> 00:25:00,740
+I look at this as one one more right but then you know that is not really true sum is being
+
+230
+00:25:00,740 --> 00:25:06,619
+used in this loop repeatedly right that means that whenever I take this definition this
+
+231
+00:25:06,619 --> 00:25:14,219
+definition is actually hundred times not just once right so this will be hundred times plus
+
+232
+00:25:14,219 --> 00:25:21,099
+once here and right a hundred times plus once there so it's basically 101 definitions how many
+
+233
+00:25:21,099 --> 00:25:32,739
+uses of sum one here right which corresponds to hundred uses plus one here plus one more here now
+
+234
+00:25:32,740 --> 00:25:39,900
+let's talk about this static versus dynamic counts right that's very important now if I look at the
+
+235
+00:25:39,900 --> 00:25:47,059
+variable sum how many times does it appear in this program forget about def and use we combine
+
+236
+00:25:47,059 --> 00:25:58,059
+them together how many times one two three four five six right this is a static count right this
+
+237
+00:25:58,059 --> 00:26:04,099
+is what we call as the static count right because that's a number of times it appears in the code
+
+238
+00:26:04,099 --> 00:26:09,819
+what is the dynamic count of the usage of sum right that's what we discussed earlier hundred
+
+239
+00:26:09,819 --> 00:26:19,579
+plus hundred two hundred two hundred and one two three four right all right so that is the dynamic
+
+240
+00:26:19,579 --> 00:26:27,299
+count since you are talking about cost saving in accessing the variable from register versus
+
+241
+00:26:27,299 --> 00:26:33,139
+cost saving in accessing the variable from memory should we worry about dynamic count or
+
+242
+00:26:33,139 --> 00:26:38,500
+should we worry about static count dynamic count no doubt about it right because this is when the
+
+243
+00:26:38,500 --> 00:26:45,180
+program is being executed correct the more often a particular loop is executed the more benefit you
+
+244
+00:26:45,180 --> 00:26:51,220
+are going to get by putting that register into that if I ask you the question right should C be
+
+245
+00:26:51,220 --> 00:26:56,500
+in a register or should sum be in a register answer is obvious right C is never used within
+
+246
+00:26:56,500 --> 00:27:03,339
+the loop so don't worry about giving it a register right so so that is why when we talk about this
+
+247
+00:27:03,339 --> 00:27:09,339
+usage we are always talking about the so-called dynamic count how many times it being accessed
+
+248
+00:27:09,339 --> 00:27:15,579
+in the program we may not have this count as hundred but we'll have this count as n or whatever
+
+249
+00:27:15,579 --> 00:27:20,619
+it is and we can actually deal with that that's actually good enough for us right and we know
+
+250
+00:27:20,619 --> 00:27:25,539
+that in some cases these loops are going to be executed more than ten times or more than hundred
+
+251
+00:27:25,539 --> 00:27:30,899
+times that's actually good enough approximation for us you don't have to necessarily know the
+
+252
+00:27:30,899 --> 00:27:39,019
+exact number okay so after having done this what we really find is that right both sum and i are
+
+253
+00:27:39,019 --> 00:27:46,700
+used more number of times than corresponding to C and square right therefore if you have only
+
+254
+00:27:46,700 --> 00:27:54,019
+two registers available to you then they should be allocated to sum and square sorry sum and i
+
+255
+00:27:54,900 --> 00:28:00,339
+particularly within this loop those two registers should be assigned to sum and i outside the loop
+
+256
+00:28:00,339 --> 00:28:06,139
+you may not necessarily worry too much but within the loop if you don't allocate registers for this
+
+257
+00:28:06,139 --> 00:28:12,460
+they are going to end up coming from memory and that's not a good thing for the program right so
+
+258
+00:28:12,460 --> 00:28:20,700
+we also know right that we can also reuse the same register right for another variable if their live
+
+259
+00:28:20,700 --> 00:28:29,860
+ranges do not overlap so we can see that square and i do not overlap because when square is defined
+
+260
+00:28:29,860 --> 00:28:37,940
+the last use of i is already over correct so if i can use the same register which was given to i
+
+261
+00:28:37,940 --> 00:28:46,220
+also to square right i could have i could also save that cost even though it's only appearing once
+
+262
+00:28:46,220 --> 00:28:54,980
+okay now what about C can i use either one of these register or could i have used this
+
+263
+00:28:54,980 --> 00:29:03,620
+register which was allocated to i to C no because C is defined here and the last use of C is over
+
+264
+00:29:03,620 --> 00:29:12,380
+here which overlaps with i's live range so i cannot be used right so what we can do in this example is
+
+265
+00:29:12,380 --> 00:29:20,980
+that if you have two registers assign one to sum and another to i and then later to square so that's
+
+266
+00:29:20,980 --> 00:29:27,220
+the kind of allocation so any usage based allocator is essentially going to do things at this level
+
+267
+00:29:27,220 --> 00:29:35,220
+right and this is not going to be very efficient we have better methods of doing this so we will
+
+268
+00:29:35,220 --> 00:29:38,740
+talk about the graph coloring based approach next.
+

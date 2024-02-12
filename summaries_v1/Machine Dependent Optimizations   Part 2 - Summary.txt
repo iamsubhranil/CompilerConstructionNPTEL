@@ -1,0 +1,14 @@
+ **Technical Terms:**
+
+1. Data Hazards: Occurs due to true dependencies, where a subsequent instruction relies on the result of a preceding instruction. Handled using instruction scheduling.
+2. Instruction Scheduling: A compiler technique used to minimize stalls caused by data hazards by reordering instructions so that dependent instructions are farther apart. Can be done at compile-time or run-time.
+3. Delay Slot: A phenomenon in CPU pipelines where the instruction following a branch instruction can be executed regardless of whether the branch is taken or not. Fillable with useful instructions to increase efficiency.
+4. Superscalar Processor: A CPU design capable of issuing and executing multiple instructions simultaneously, improving overall performance. Uses complex hardware to manage instruction dependencies and execute independent instructions concurrently.
+5. Very Long Instruction Word (VLIW) Processor: A CPU design that groups multiple instructions into a single "wide" instruction, requiring the compiler to ensure instruction independence. Simpler hardware compared to superscalar CPUs, but relies on accurate compiler analysis.
+6. Code Generation: A crucial compiler phase responsible for translating an intermediate representation (such as AST or three-address code) into target assembly code suitable for a specific machine architecture. Requires detailed knowledge of the target platform.
+7. Register Renaming: An optimization technique that dynamically maps program variables to physical registers, reducing false dependencies and enabling increased instruction-level parallelism.
+8. Directed Acyclic Graph (DAG): A data structure representing a set of nodes and edges with no cycles, commonly used to represent dependencies among instructions or operations. Suitable for code generation algorithms aiming to extract maximum parallelism.
+9. Optimal Code Generation: Generating the most efficient code possible for a given problem. Often challenging due to exponential time complexity; approximations and heuristics are frequently employed.
+10. Peephole Optimization: Machine-dependent optimization pass applied to short sections of assembly code (peepholes). Targets redundancies, mispredictions, or missed opportunities for improvement introduced during earlier passes of the compiler.
+
+These terms describe various aspects of handling data hazards, processor designs, code generation strategies, and optimizations involved in creating efficient machine code for diverse platforms. Understanding these terms contributes to developing robust and effective compilers tailored to specific targets.

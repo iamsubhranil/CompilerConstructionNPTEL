@@ -1,0 +1,1024 @@
+1
+00:00:00,000 --> 00:00:12,800
+Okay, so the last session I was sort of indecisive whether I should do it or not or how much
+
+2
+00:00:12,800 --> 00:00:20,600
+but I think it's a good idea to talk a bit about pointer analysis. The reason is that
+
+3
+00:00:20,600 --> 00:00:27,679
+Monday whenever you start looking at machine independent optimizations, he might want you
+
+4
+00:00:27,679 --> 00:00:34,880
+to know about pointer analysis. So at least a little bit idea of it is important. So now
+
+5
+00:00:34,880 --> 00:00:40,439
+pointer analysis exactly what is the data for problem? What are we trying to solve?
+
+6
+00:00:40,439 --> 00:00:52,579
+So we are trying to figure out that given a set of variables, rather I would say given a set of
+
+7
+00:00:52,579 --> 00:01:10,219
+pointer variables and a set of memory locations, we want to find out that what for a given variable
+
+8
+00:01:10,219 --> 00:01:15,539
+says a given variable B, what are the set of memory locations it may be able to access,
+
+9
+00:01:15,540 --> 00:01:32,260
+which it might be pointing to. This is points to. So for any given variable, I want to find out
+
+10
+00:01:32,260 --> 00:01:45,420
+that what does it point to? So that is the next question. So let us say that we have a set of
+
+11
+00:01:45,420 --> 00:01:58,019
+statements. I have x equals ampersand A, y equals ampersand B and say y equals ampersand C, x equals
+
+12
+00:01:58,019 --> 00:02:05,460
+y. So let's say how will we go about doing pointer analysis? So essentially for, so what is the,
+
+13
+00:02:05,460 --> 00:02:10,020
+what will it look like? What is the data for problem? What is the data flow set? What is
+
+14
+00:02:10,020 --> 00:02:16,939
+the solution set look like? So for every variable, I will have to say what is the points to set.
+
+15
+00:02:16,939 --> 00:02:22,700
+So there are how many variables? There are variables like there is x, y, these are the
+
+16
+00:02:22,700 --> 00:02:27,500
+two variables. For each of them, I would like to need, I need to say that x can point to what all
+
+17
+00:02:27,500 --> 00:02:33,020
+things and y can point to what all things. This is my solution. This is what my solution would
+
+18
+00:02:33,020 --> 00:02:43,219
+look like. So now to begin with, I will assume that the pointy sets are empty. They are not
+
+19
+00:02:43,219 --> 00:02:54,180
+pointing to anything. So let's say I start doing a flow sensitive analysis. I start doing a flow
+
+20
+00:02:54,180 --> 00:02:59,500
+sensitive analysis. So in a flow sensitive analysis, I will need to maintain the pointer
+
+21
+00:02:59,500 --> 00:03:04,379
+sets at each program point or at end of each basic block the way we were doing. So let's for
+
+22
+00:03:04,379 --> 00:03:08,979
+this particular set of instructions, how would you go about doing it? So after the first statement,
+
+23
+00:03:08,979 --> 00:03:18,539
+how will it change? So x will now start pointing to A and y will start pointing to still the set
+
+24
+00:03:18,539 --> 00:03:28,459
+is empty. At this point, x starts pointing to still A, y points to B. At this point,
+
+25
+00:03:28,459 --> 00:03:43,099
+x points to A and y points to C and at this point, both points to, yeah, so x also starts
+
+26
+00:03:43,099 --> 00:03:57,900
+pointing to C and y also keeps on pointing to C. So this is all pointer analysis is all about.
+
+27
+00:03:57,900 --> 00:04:04,859
+Now what about if we have, what are my meet and join operators? Like if I wanted to across two
+
+28
+00:04:04,860 --> 00:04:13,860
+basic blocks, if I want to say that what should be the pointer set here? Union, variable, per variable.
+
+29
+00:04:13,860 --> 00:04:22,980
+Per variable. For like x, you will unify the set of variables on x. For y, you will do it for y and
+
+30
+00:04:22,980 --> 00:04:34,460
+so on. And what are my, how will I compute my transfer function for each basic block?
+
+31
+00:04:34,460 --> 00:04:43,580
+So to come up with the transfer function, you have to come up with what are the important
+
+32
+00:04:43,580 --> 00:04:47,020
+statements I have to model. So what are the different important statements that are there
+
+33
+00:04:47,019 --> 00:04:56,060
+for pointer analysis? The first is the assignment of the referencing operator. So essentially y
+
+34
+00:04:56,060 --> 00:05:03,899
+equals ampersand A sort of operation. So here what will happen? So what is the transfer function
+
+35
+00:05:03,899 --> 00:05:16,459
+for such a statement? So kill whatever is the pointer set of y, throw it away and
+
+36
+00:05:16,699 --> 00:05:24,819
+add A as the singleton element in that set. The second important operation is star y equals A.
+
+37
+00:05:24,819 --> 00:05:42,379
+Point a dereferencing operator. Oh sorry, the other way round. So A y equals this. So that is not required.
+
+38
+00:05:42,379 --> 00:05:53,459
+So I can do, what about y equals, assignment statement, y equals x. Replace the set of,
+
+39
+00:05:53,459 --> 00:06:04,500
+whatever is the set of y, throw it and put the set of x here. And then you have, these are important,
+
+40
+00:06:04,500 --> 00:06:14,259
+but you can also have y equals star of x. Why is that? It's a pointer to pointer. So then what
+
+41
+00:06:14,259 --> 00:06:25,620
+will we do? So we will find out what is the set of location that x points to. Then figure out for
+
+42
+00:06:25,620 --> 00:06:32,259
+all of these locations, what is the location that those locations can point to. And the union of
+
+43
+00:06:32,259 --> 00:06:39,459
+that will finally get assigned as the points to set of y. And now the last thing is that if you
+
+44
+00:06:39,459 --> 00:06:47,259
+have the other type of operation, star of y is equal to x. It can still be a double pointer.
+
+45
+00:06:47,259 --> 00:07:10,860
+So then what will you do? Okay, so this is a little sensitive operation. How, what does it mean? So,
+
+46
+00:07:11,660 --> 00:07:20,379
+so whenever I say, whenever I tell you this points to set, A points to A or B, what exactly does it mean?
+
+47
+00:07:20,379 --> 00:07:38,139
+What is every element? Y is a variable. No, no, I'm saying what does this fact mean? What does A
+
+48
+00:07:38,139 --> 00:07:46,860
+points to A and B mean? A may be pointing to A or B. You do not know which one does it point to
+
+49
+00:07:46,860 --> 00:08:13,860
+at this point in time. Sorry, y points to. After n B. Yes, yes, yes, of course it will. So that is
+
+50
+00:08:13,860 --> 00:08:20,660
+what you have to modulate properly. So what does then star y of equals x should do? Yeah,
+
+51
+00:08:20,660 --> 00:08:30,819
+yeah. So types are matching. So don't worry about it. So then let's say y is pointing to,
+
+52
+00:08:30,819 --> 00:08:59,740
+I don't know, let's say u and v. No, v, okay, u and w. So then. Can I kill the set? Yes,
+
+53
+00:09:00,379 --> 00:09:06,779
+yes. So that is a very tricky thing, right? So had this been a simple set u, then I know that
+
+54
+00:09:06,779 --> 00:09:14,299
+y is surely pointing to u. That's an easy case. In that case, I can kill whatever was point,
+
+55
+00:09:14,299 --> 00:09:19,899
+whatever u was pointing to. And I can now say whatever x is pointing to, u also points to that.
+
+56
+00:09:20,940 --> 00:09:28,299
+But if I have a situation where y was pointing to two things or more, then I do not know at this
+
+57
+00:09:28,299 --> 00:09:37,099
+point what it might be pointing to. So I have to be safe. I cannot be unsafe. So if I throw away
+
+58
+00:09:37,099 --> 00:09:42,699
+the contents in u, maybe u was not even changed, maybe w was changed. I don't know because it's a
+
+59
+00:09:42,699 --> 00:09:48,859
+made point relation. It may be pointing to any of them. I don't know which one is currently
+
+60
+00:09:48,859 --> 00:09:56,299
+pointing to. So in that case, I cannot, so this is what is known as a strong update and a weak
+
+61
+00:09:56,299 --> 00:10:01,740
+update. So if you do a strong update, means you throw away whatever that variable is currently
+
+62
+00:10:01,740 --> 00:10:10,299
+having and put the new fact. Instead, you can do a weak update when you know that I do not know
+
+63
+00:10:11,099 --> 00:10:15,339
+which of them is the right guy. So let me just add it to both the data flow facts.
+
+64
+00:10:16,539 --> 00:10:24,620
+So in this particular case, if it is pointing to u and w, I will not throw away the facts of u and w.
+
+65
+00:10:24,620 --> 00:10:31,259
+I will simply add the points to set of x into the points to set of both u and w. I'll just union them.
+
+66
+00:10:35,980 --> 00:10:41,740
+This is a weak update. And strong update is whenever, if it had been a singleton set,
+
+67
+00:10:42,299 --> 00:10:49,980
+then I know that y is surely pointing to u. Then I can simply throw away that set and put the whole
+
+68
+00:10:49,980 --> 00:11:00,060
+set of x as the set of, so the set of u. So this is how I design my transfer function.
+
+69
+00:11:00,700 --> 00:11:06,060
+The meet operation you already know. So this is exactly what my points to analysis is.
+
+70
+00:11:08,139 --> 00:11:13,420
+So we have this points to set, where variables points to values, and this is the business. So
+
+71
+00:11:13,420 --> 00:11:17,340
+what is my, what does my lattice look like? What is the ordering relation on that?
+
+72
+00:11:20,460 --> 00:11:44,460
+So it is set, right? So it is a set of locations.
+
+73
+00:11:44,460 --> 00:11:49,259
+So the ordering relation can is generally.
+
+74
+00:11:55,259 --> 00:11:57,820
+So for one variable, what does the ordering relation look like?
+
+75
+00:12:02,620 --> 00:12:04,139
+MT and then it is a?
+
+76
+00:12:06,860 --> 00:12:11,019
+Right, right. But what is the ordering on? How do I do an ordering? What is the ordering relation
+
+77
+00:12:11,019 --> 00:12:22,139
+for this lattice? Yeah, subset equal to, right? So that is for every variable. And then the whole
+
+78
+00:12:22,139 --> 00:12:26,539
+lattice is going to be the product of that, the product lattice, just the way we did it for
+
+79
+00:12:26,539 --> 00:12:36,939
+constant propagation. And then the ordering is this huge humongous ordering among each of the
+
+80
+00:12:36,940 --> 00:12:41,100
+component lattices. And then you figure out if something is bigger than that or not. Exactly
+
+81
+00:12:41,100 --> 00:12:54,700
+the way we did for constant propagation. Right? Are you lost? Who is lost? Why ordering?
+
+82
+00:12:57,660 --> 00:13:03,660
+You tell me. So if you have a set which is pointing to only A and B, and I have a set
+
+83
+00:13:03,659 --> 00:13:09,419
+which is pointing to A, B and C, the same variable. So X pointing to this and X pointing to this,
+
+84
+00:13:09,419 --> 00:13:11,419
+which is more approximate, which is over approximate?
+
+85
+00:13:17,339 --> 00:13:21,899
+Later, later, later doesn't work guys. Please understand across program points,
+
+86
+00:13:21,899 --> 00:13:28,139
+it does not, there is no comparison. This everything is working at one program point.
+
+87
+00:13:29,100 --> 00:13:35,179
+Right? So I'm saying what, how do the updates move at the same program point? So every of
+
+88
+00:13:35,179 --> 00:13:39,179
+these lattices are actually think about them, they are duplicated at each program point,
+
+89
+00:13:39,179 --> 00:13:44,220
+and they're moving on their own independently. So across the program points, there is absolutely
+
+90
+00:13:44,220 --> 00:13:48,139
+no relation. I can put any statement in between and arbitrarily change the,
+
+91
+00:13:49,740 --> 00:13:53,419
+whatever happens at another program point. I can produce any state I can.
+
+92
+00:13:53,500 --> 00:13:58,699
+So all these beautiful mathematics that we saw today was all telling you things about the same
+
+93
+00:13:58,699 --> 00:14:03,740
+program point. Along the same program point, it should form that ascending chain and then
+
+94
+00:14:03,740 --> 00:14:11,500
+eventually stabilize and all this business. So across program points, things do not make
+
+95
+00:14:11,500 --> 00:14:16,299
+that mistake again. I mean, I know this is a very, I mean, it happens again and again and again to
+
+96
+00:14:16,299 --> 00:14:21,819
+people, but don't like, don't get into that trap. That will be very misleading.
+
+97
+00:14:29,259 --> 00:14:32,299
+So now the thing is that is it a separable analysis?
+
+98
+00:14:32,299 --> 00:14:48,059
+Yes. Yes. So this is also not a separable analysis, right? Because if I change the
+
+99
+00:14:48,059 --> 00:14:54,459
+points to set of one relation for this double, that pointer dereferences that may cause an update
+
+100
+00:14:54,459 --> 00:15:00,219
+to the another guy's points to relation. So this is also not a separable relation. Yeah?
+
+101
+00:15:02,699 --> 00:15:12,459
+So pointer increment does not change the point to set of anything. You just get to a new location,
+
+102
+00:15:12,459 --> 00:15:18,139
+right? So pointer increment means what? So you are, this was pointing to, so think about my
+
+103
+00:15:18,139 --> 00:15:27,740
+locations as L1, L2 and so on, right? So if I say pointer P is P plus 1, essentially now P is
+
+104
+00:15:27,740 --> 00:15:34,539
+pointing to the location L2. That is all that is. So earlier it was like, so the other problem is
+
+105
+00:15:34,539 --> 00:15:41,259
+that there are these, these increment statement happen on things like aggregate data structures
+
+106
+00:15:41,259 --> 00:15:46,860
+like arrays, right? So the problem is even modeling arrays is hard because whenever we
+
+107
+00:15:46,860 --> 00:15:51,500
+are modeling something, we would like a finite representation, but arrays can be of unbounded
+
+108
+00:15:51,500 --> 00:15:57,100
+sizes. You do not know what size the programmer want the array for, right? Like for instance,
+
+109
+00:15:57,100 --> 00:16:01,980
+let us say even allocate the array dynamically using a malloc statement. So at runtime, what is
+
+110
+00:16:01,980 --> 00:16:07,420
+the value of that, the size of the malloc? Nobody knows, right? So I will not be able to do a
+
+111
+00:16:07,420 --> 00:16:11,500
+analysis at compile time because I do not know how big the array is going to be at runtime.
+
+112
+00:16:12,379 --> 00:16:16,940
+So what people do is, like I was saying yesterday, instead of these multiple locations,
+
+113
+00:16:17,500 --> 00:16:27,019
+they assume that the whole array is just one location L1, right? And like if you say pointer
+
+114
+00:16:27,500 --> 00:16:41,980
+the array A goes to, like let us say P goes to A and A0 and later you say P goes to ampersand
+
+115
+00:16:41,980 --> 00:16:47,340
+A0, P goes to ampersand A1, what the compiler will simply do is because it is the same location,
+
+116
+00:16:47,340 --> 00:16:53,500
+here also it will say P goes to L1. Here also it will say that, okay, I still see the same array.
+
+117
+00:16:53,500 --> 00:16:56,700
+It is not a different array. So it will still keep it as P goes to L1.
+
+118
+00:16:58,379 --> 00:17:06,619
+So it completely disregards your array accesses for the different elements. It does not bother
+
+119
+00:17:06,619 --> 00:17:10,940
+because it does not know how many memory locations to model. So the one way is to like completely
+
+120
+00:17:11,740 --> 00:17:17,579
+squish the array into one location and then say I will only keep track of does it point to this
+
+121
+00:17:17,579 --> 00:17:21,980
+array or this other array. But I will not keep track of which index in the array it is currently
+
+122
+00:17:21,980 --> 00:17:26,539
+pointing to, right? Excellent question. So this is an important point, but yeah,
+
+123
+00:17:26,539 --> 00:17:31,740
+generally, right? So that is one way to handle arrays. Of course, there are other abstractions.
+
+124
+00:17:31,740 --> 00:17:35,819
+We will have come up with more sophisticated abstractions, but let us not get into this.
+
+125
+00:17:38,220 --> 00:17:42,860
+So again, like I said, people have this recency abstraction where what they do is they think that
+
+126
+00:17:42,860 --> 00:17:48,059
+my array is two parts. One part is the rest of the array is squished into one location
+
+127
+00:17:48,700 --> 00:17:54,859
+and the first element like A0 and the rest. And I will only keep track of these two, nothing else.
+
+128
+00:17:56,379 --> 00:18:02,619
+So because people think that the most recently accessed location you will going to access again
+
+129
+00:18:02,619 --> 00:18:07,740
+or something like that. So again, it depends on your domain, looks at depends on your problems.
+
+130
+00:18:09,019 --> 00:18:12,139
+So are we good with this transfer function for all these statements?
+
+131
+00:18:12,380 --> 00:18:15,980
+Any question with understanding point analysis? Probably this is the fastest point analysis,
+
+132
+00:18:16,860 --> 00:18:21,740
+but it is very similar to constant propagation. That is the, so everything remains very similar.
+
+133
+00:18:21,740 --> 00:18:27,420
+Any questions with this? Again, very quickly, so we have these points to sets. So for every
+
+134
+00:18:27,420 --> 00:18:32,300
+variable we need to figure out what are the locations, memory locations it can point to,
+
+135
+00:18:33,820 --> 00:18:38,220
+right? So the updates for these different statements are as follows. If you have one
+
+136
+00:18:38,299 --> 00:18:43,980
+goes to Y is equal to ampersand A, then you will kill the set Y. You will throw away whatever is
+
+137
+00:18:43,980 --> 00:18:51,740
+in Y and put A in that location. If Y equals X, then you'll throw away whatever is there in Y
+
+138
+00:18:51,740 --> 00:18:58,620
+and copy the whole set of Y into the points to set of X, points to set of Y. If you have Y equals
+
+139
+00:18:58,619 --> 00:19:04,379
+star of X, then what do you do? Then you will find out what are the locations that does that
+
+140
+00:19:04,379 --> 00:19:11,739
+X point to. So let's say X points to location L1 and L2 and L1, L2 themselves points to,
+
+141
+00:19:11,739 --> 00:19:17,259
+let's say AB and this points to C. Then what will you do?
+
+142
+00:19:17,259 --> 00:19:22,539
+Yeah, so I'll take the union over all the locations that these guys could point to. So this will become,
+
+143
+00:19:22,539 --> 00:19:31,819
+so X will start pointing to A, B, C, all them because it does not know where to go. And finally,
+
+144
+00:19:31,819 --> 00:19:36,700
+if you have the most tricky situation is if you have a set of X points to location L1,
+
+145
+00:19:36,700 --> 00:19:43,900
+L2, L3, L4, L5, L6, L7, L8, L9, L9, L9, L9, L9, L9, L9, L9, L9, L9, L9, L9, L9, L9, L9,
+
+146
+00:19:43,900 --> 00:19:50,220
+finally if you have the most tricky situation is if you have star of Y equals X, then what can happen?
+
+147
+00:19:54,700 --> 00:19:59,340
+Yes, so if it is a singleton set, then I can actually do a strong update
+
+148
+00:20:00,380 --> 00:20:08,140
+by replacing that particular location by the set contained in X. Or if it is not a singleton set,
+
+149
+00:20:08,140 --> 00:20:15,340
+then I do a weak update by adding that set to all the sets pointed to Y.
+
+150
+00:20:17,420 --> 00:20:28,140
+Clean? Awesome. Now, pointer analysis is one analysis which is also done in a flow insensitive
+
+151
+00:20:28,140 --> 00:20:35,660
+manner. So it is a good candidate for flow insensitive analysis also. Did I lose everything?
+
+152
+00:20:36,620 --> 00:20:44,700
+Okay, so one interesting data structure or interesting visualization people used to
+
+153
+00:20:44,700 --> 00:20:49,259
+track about point analysis is referred to as a points to graph.
+
+154
+00:20:58,460 --> 00:21:04,060
+So what is this graph? This graph is all the variables and the memory locations.
+
+155
+00:21:04,220 --> 00:21:17,579
+A, B, X, Y, so on. Let us say array something like that. And there is a directed edge from
+
+156
+00:21:17,579 --> 00:21:26,379
+one location to the other if A can point to that location. So here essentially what does this show?
+
+157
+00:21:27,020 --> 00:21:37,180
+So this captures the points to relation that A can point to X and Y, B can point to Y, and
+
+158
+00:21:37,180 --> 00:21:46,940
+X can point to the array. So this relation is captured by this points to graph.
+
+159
+00:21:47,420 --> 00:22:02,140
+Okay, so now there is a very interesting flow insensitive analysis called the steam.
+
+160
+00:22:10,700 --> 00:22:15,180
+I keep on forgetting where is the beacon.
+
+161
+00:22:17,660 --> 00:22:25,500
+So, so Stinger's analysis essentially these are flow insensitive analysis.
+
+162
+00:22:35,740 --> 00:22:42,220
+So what it means is it does not look at the order in which I traverse the statements.
+
+163
+00:22:42,220 --> 00:22:43,740
+The statements appear in the program.
+
+164
+00:22:47,180 --> 00:22:52,460
+It is something known as a equality based analysis and I will tell you why it is called so.
+
+165
+00:22:55,100 --> 00:23:01,579
+And this is probably the fastest point analysis available, but it is not very precise.
+
+166
+00:23:02,299 --> 00:23:06,700
+So it is really meant for really large pieces of code where you cannot afford to run a
+
+167
+00:23:07,579 --> 00:23:11,980
+like a very expensive analysis. But point analysis as you can understand is a precursor
+
+168
+00:23:11,980 --> 00:23:15,660
+to almost every analysis because if they are pointers everything can go haywire.
+
+169
+00:23:15,660 --> 00:23:21,420
+We do not know what they point to. So at least you need some point analysis to go any for any
+
+170
+00:23:21,420 --> 00:23:27,019
+analysis to run. So even for large code bases where you cannot afford to run a very expensive
+
+171
+00:23:27,019 --> 00:23:31,500
+point analysis you can still run steam guys analysis because it is extremely fast.
+
+172
+00:23:33,339 --> 00:23:39,420
+Okay, so let us think about how does steam guys analysis work. So let us say I have
+
+173
+00:23:39,580 --> 00:23:51,580
+A equals ampersand x, B equals ampersand y, B equals ampersand z, A equals b.
+
+174
+00:23:54,460 --> 00:24:00,060
+Let us say I have this piece of code. So the way steam guys analysis work it is very similar
+
+175
+00:24:00,060 --> 00:24:06,220
+to the updates that we have seen so far. But because it is a flow insensitive analysis
+
+176
+00:24:06,940 --> 00:24:10,940
+it cannot do strong updates because it does not know which order the statements appear.
+
+177
+00:24:11,500 --> 00:24:18,380
+So it can only do weak updates. That is one problem. The second problem with flow insensitive
+
+178
+00:24:18,380 --> 00:24:26,299
+analysis is that think about that you have taken the statements in this order. And after some time
+
+179
+00:24:27,420 --> 00:24:34,140
+there is a statement which assumes the previous statement like okay let us see how this works here.
+
+180
+00:24:36,220 --> 00:24:40,059
+So how should I put it?
+
+181
+00:24:46,299 --> 00:24:50,299
+So let us put some updates to these guys also. P equals
+
+182
+00:24:53,579 --> 00:24:54,700
+maybe ampersand a
+
+183
+00:24:57,500 --> 00:24:58,220
+right and
+
+184
+00:24:58,299 --> 00:24:58,940
+and
+
+185
+00:25:06,539 --> 00:25:14,380
+star P equals ampersand z. No ampersand z cannot happen. So type wise what can happen here?
+
+186
+00:25:15,660 --> 00:25:21,500
+Star P can be ampersand B let us say. No sorry only B.
+
+187
+00:25:22,140 --> 00:25:31,259
+So now essentially the problem is that when I let us say because I am doing a flow insensitive
+
+188
+00:25:31,259 --> 00:25:37,900
+analysis the order in which I am seeing these statements just does not matter. So it can happen
+
+189
+00:25:37,900 --> 00:25:42,859
+that I end up seeing this particular statement first. I start seeing star P equals B first.
+
+190
+00:25:44,380 --> 00:25:50,140
+So at this point I do not even know what does P point to. Later down the line I discover P
+
+191
+00:25:50,140 --> 00:25:55,740
+points to A. So now I have to figure out I have to go to the previous statement again
+
+192
+00:25:56,620 --> 00:26:01,660
+and I will have to update all the locations where P was pointing to by this new information
+
+193
+00:26:01,660 --> 00:26:06,300
+that I have got. What if later I also realize that P can point to C also?
+
+194
+00:26:07,900 --> 00:26:14,140
+So then again I will have to go to this state revisit this statement again and put this
+
+195
+00:26:14,140 --> 00:26:22,700
+particular information in C also. So you do not want a statement to be executed multiple times.
+
+196
+00:26:23,500 --> 00:26:28,940
+So you want to do an update in a manner that I traverse my statements once but the points
+
+197
+00:26:28,940 --> 00:26:35,259
+to relation I get eventually actually works for no matter which order I would have seen the statements.
+
+198
+00:26:38,220 --> 00:26:42,780
+So this analysis is able to do that. So the way this works is let us consider
+
+199
+00:26:42,779 --> 00:26:50,379
+for now this particular set of instructions, set of statements. So it looks at A and it says that
+
+200
+00:26:50,379 --> 00:27:03,099
+A points to X. Then it finds B and it says B can point to Y. Then later it finds out that B
+
+201
+00:27:03,659 --> 00:27:07,980
+points to B equals ampersand Z. So what should it do?
+
+202
+00:27:11,259 --> 00:27:18,379
+It should do a union of these things. Essentially what it will do is it will say that X and Z,
+
+203
+00:27:19,899 --> 00:27:25,980
+so B can point to either X or Z. So it will put them in the same class. It will say it points
+
+204
+00:27:25,980 --> 00:27:32,860
+to a bunch of things and X and Y are both possible. Then it encounters a statement
+
+205
+00:27:32,860 --> 00:27:44,380
+which is A equals B. So what should it do? A points to, so now you see there is a problem.
+
+206
+00:27:45,339 --> 00:27:52,380
+If I say A points to X, Y, Z then I would lose the information that then the order in which these
+
+207
+00:27:52,380 --> 00:27:58,700
+two happen matters. What if A equals B came first and A equals ampersand X came later?
+
+208
+00:27:59,580 --> 00:28:08,940
+Then it would have been A points to X. So I want to do an update where both of them,
+
+209
+00:28:11,340 --> 00:28:15,340
+so it does not matter which order the statements ran.
+
+210
+00:28:15,339 --> 00:28:26,220
+So how should it change? What should I do now? How should I, so this is my points to graph at
+
+211
+00:28:26,220 --> 00:28:38,220
+this point. So how should I change it? I will put A and B in the single class.
+
+212
+00:28:38,220 --> 00:28:48,380
+No, no, no. There we did not, I just, so this statement is if I could have done a strong update,
+
+213
+00:28:48,380 --> 00:28:55,100
+I would have liked to throw away the set of A and just put the set of B. Here I cannot do a strong update.
+
+214
+00:29:08,220 --> 00:29:15,180
+Right, but if you think about it, it is the other way around. The question is that,
+
+215
+00:29:17,019 --> 00:29:24,059
+so okay, so let us say B which can, so okay now, so one thing is that once I say A equals B because
+
+216
+00:29:24,059 --> 00:29:29,339
+I do not consider such order in which the statements happen, what can happen? Which of these
+
+217
+00:29:29,339 --> 00:29:39,099
+two sets is going to be larger? PTS of A or PTS of B? So now A can point to everything that B points
+
+218
+00:29:39,099 --> 00:29:45,019
+to because of this, but A can still point to more things, right? Like for instance,
+
+219
+00:29:45,019 --> 00:29:48,779
+A can point to X, but there is no way B can start pointing to X.
+
+220
+00:29:48,779 --> 00:30:02,859
+Set of states, what does it even mean? Because I need a points to set for A B variable.
+
+221
+00:30:02,859 --> 00:30:17,579
+No, so at the end of the day, I want a points to graph like this, which tells me,
+
+222
+00:30:17,579 --> 00:30:28,539
+so what should I do? How should I change my graph? So I have A points to X, B points to Y and Z. That
+
+223
+00:30:28,539 --> 00:30:44,139
+is the state current state now. And who will point to that? So A points to X, Y and Z and B
+
+224
+00:30:44,139 --> 00:30:53,019
+points to? Okay, so now here is a choice. So now the problem is that later, so if there was something
+
+225
+00:30:53,019 --> 00:31:00,660
+which was pointing to A, so I will have to go and update that also, right? Because let us say,
+
+226
+00:31:00,660 --> 00:31:07,180
+this guy says star of something. So anyway, so here you have to make a decision. So there
+
+227
+00:31:07,180 --> 00:31:11,259
+are two decisions, two possibilities. So Steingart's analysis is something called
+
+228
+00:31:11,259 --> 00:31:15,940
+equality based analysis, which does not distinguish the direction. It does not distinguish between
+
+229
+00:31:15,940 --> 00:31:22,740
+exactly the same as the set I think. So I said that points to A is points to B is a subset of
+
+230
+00:31:22,740 --> 00:31:28,259
+points to A. This is going to be the case, right? So A can point to, it is surely pointing to things
+
+231
+00:31:28,259 --> 00:31:37,059
+which can be in B, but A can point to more things, right? What Steingart's analysis does is,
+
+232
+00:31:37,059 --> 00:31:44,299
+it actually assumes an equality. It completely forgets about that. And then for this particular
+
+233
+00:31:44,500 --> 00:31:51,700
+thing, it will essentially unify these guys and it say that, okay, because this guy can point to
+
+234
+00:31:51,700 --> 00:31:56,259
+anything, because A can point to anything and these two guys are the same. So both A and B
+
+235
+00:31:56,259 --> 00:32:09,619
+can point to any of X, Y and Z. So there is another analysis known as Anderson's analysis.
+
+236
+00:32:14,579 --> 00:32:20,379
+Which essentially maintains this relation that points to of B is a subset of points to of A.
+
+237
+00:32:20,379 --> 00:32:38,500
+This is referred to as an inclusion based analysis, right? So what is the advantage
+
+238
+00:32:38,500 --> 00:32:44,779
+of Steingart's over keeping an inclusion based thing? Why should it help me to just merge these
+
+239
+00:32:44,779 --> 00:32:57,579
+two states? Yes, yes, exactly. So in inclusion based thing, you have to maintain a graph of
+
+240
+00:32:57,579 --> 00:33:03,140
+these inclusions, right? Which is, who is containing what? And if there is a new element
+
+241
+00:33:03,140 --> 00:33:08,099
+added, you have to revisit it and make sure that is covered again. So essentially it does
+
+242
+00:33:08,099 --> 00:33:12,859
+a transitive closure on the inclusion graph eventually. And that is why this algorithm
+
+243
+00:33:12,859 --> 00:33:19,099
+goes to cubic time. This is an O-N-cube algorithm. The Steingart's analysis, as you said, I do not
+
+244
+00:33:19,099 --> 00:33:24,259
+really have to bother about. So once I do this union, I know that I have covered all ways A and
+
+245
+00:33:24,259 --> 00:33:30,779
+B could have interacted. So this analysis turns out to be almost linear time. So it is a very fast
+
+246
+00:33:30,779 --> 00:33:46,740
+analysis, right? So I will not get into details of it, but I think this much should be enough to
+
+247
+00:33:46,740 --> 00:33:52,779
+get you going with points to analysis. If you want to implement points to analysis in LLVM,
+
+248
+00:33:52,779 --> 00:34:22,059
+how will you go about doing this? How will you go about building it in LLVM? So iterate
+
+249
+00:34:22,059 --> 00:34:42,179
+over all basic blocks. How will you maintain the points to relations? What is union? You
+
+250
+00:34:42,179 --> 00:34:46,980
+are going to disjoint set union, right? Okay. So that is a very good, actually that is the data
+
+251
+00:34:46,980 --> 00:34:53,099
+structure which is used in Steingart's. So that is why it is able to make it almost linear time.
+
+252
+00:34:53,099 --> 00:35:00,219
+So essentially now, essentially what you do is you maintain these sets and whenever this merging
+
+253
+00:35:00,219 --> 00:35:06,460
+happens, you use this union-fine data structure to do a quick merge of these different sets
+
+254
+00:35:06,460 --> 00:35:15,179
+and keep on assigning it to the respective, to both of them, right? So any questions on this?
+
+255
+00:35:15,179 --> 00:35:18,899
+We did a very quick thing. Some people have to leave at 5, so I wanted to cover it.
+
+256
+00:35:18,899 --> 00:35:24,379
+Okay. So we can close off this thing.
+

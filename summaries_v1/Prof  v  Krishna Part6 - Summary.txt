@@ -1,0 +1,16 @@
+ **Exam Notes - Technical Terms:**
+
+1. *Monotonicity*: A property where the value of a variable consistently moves in one direction, either increasing, decreasing, or staying the same.
+2. *Flow Set*: Represents the set of possible types that can flow into an expression.
+3. *Field Resolution*: Uses static types to access a field in Java, unlike method resolution which uses dynamic types.
+4. *Type Cast*: Used to convert an expression from one type to another, but does not change the underlying object.
+5. *Class Hierarchy Analysis (CHA)*: Quick but less precise method for determining which methods can be called by a given method call.
+6. *Control Flow Analysis (CFA)*: More precise, flow-insensitive, and context-insensitive method for computing flow sets compared to CHA.
+7. *Constraint Generation*: Creating constraints based on new allocations, assignments, and function calls.
+8. *Belongs To*, *Subset*, and *Conditional* constraints: Different types of constraints generated during analysis.
+9. *Propagate Function*: Helps push flow information through the graph.
+10. *Graph Representations*: Constraints can be represented as a graph, with nodes representing flow variables and edges indicating flow relations.
+11. *Termination*: Even though the number of constraints is finite, the algorithm may still add new constraints; however, the number of times a constraint is processed is bounded, ensuring termination.
+12. *Complexity*: The algorithm is an N^3 algorithm on paper, but in practice, it often runs much faster due to various factors.
+
+Understanding these concepts allows you to analyze and optimize Java programs effectively, leveraging flow analysis, constraint generation, and solving to derive valuable flow information. Termination, complexity, and practical considerations ensure the feasibility of implementing and deploying these techniques in real-world applications.

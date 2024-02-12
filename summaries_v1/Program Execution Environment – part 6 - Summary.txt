@@ -1,0 +1,21 @@
+ Exam Notes:
+
+1. Virtually Indexed Cache: If the cache is present before the MMU in the processor layout, it is usually virtually indexed. This allows for faster address translation.
+2. Kernel Space Mapping: Kernel space is mapped as part of the user process's address space to avoid a page table switch during system calls, preventing a TLB flush.
+3. Kernel Page Table Isolation (KPTI): A security measure taken to mitigate the Meltdown vulnerability, which allowed unauthorized access to kernel space. KPTI separates kernel space from user space, but introduces a performance penalty due to increased context switching and page table manipulation.
+4. Counter Example - Allocating Large Blocks: A program attempts to repeatedly allocate 768MB blocks using `malloc`. The success of this operation depends on the availability of contiguous virtual address space, which is influenced by the word length (32-bit vs. 64-bit) and physical memory size.
+5. Virtual Addresses: Pointer values returned by `malloc` are virtual addresses. These addresses need to be contiguous in memory to enable proper pointer arithmetic.
+6. Copy on Write (COW): An optimization strategy employed by modern operating systems to defer physical memory allocation until a writable copy is explicitly requested. COW reduces memory consumption and improves performance by minimizing unnecessary data duplication.
+7. Custom Memory Allocators: Implementing a custom memory allocator involves tracking free and allocated memory regions in addition to managing the underlying memory policies provided by the operating system. Improvements focus on optimizing block allocation and reducing fragmentation.
+8. Assignment - Observing Memory Layout: Write a program that displays the addresses of various elements, such as functions, data, stack, and heap memory, and compare the results with the expected memory layout. Use tools like `pgrep`, `pmap`, or `cat /proc/$pid/maps` to inspect the memory map of the process.
+
+Key Concepts:
+
+* Virtual Memory and Address Translation
+* Processor Cache Organization
+* Process Management and Context Switching
+* Virtual Address Spaces and Sharing
+* Memory Allocation Strategies and Policies
+* Security Measures and Vulnerabilities
+
+Understanding these concepts is essential for developing secure, efficient, and reliable software systems. Familiarity with low-level programming, operating systems principles, and system software design will facilitate mastery of these topics.

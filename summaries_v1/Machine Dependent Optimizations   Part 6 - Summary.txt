@@ -1,0 +1,32 @@
+ **Graph Coloring-Based Register Allocation**:
+
+- Goal: Assign registers to variables while avoiding conflicts (interference) between overlapping live ranges.
+- Interference Graph: Represents variables as nodes and conflicts as edges.
+- Graph Coloring: Find a valid coloring for the interference graph using minimal colors (chromatic number).
+
+**Chaitin's Algorithm**:
+
+- Simplification Step: Remove nodes with degrees less than 'K'.
+	+ Repeat until no more nodes can be removed.
+	+ Remaining nodes have degrees >= K, indicating potential non-colorability.
+- Spilling: Select a node for spilling to ensure colorability.
+	+ Prioritize nodes with lower profitability (cost / degree ratios).
+
+**Briggs' Improvement**:
+
+- Delay spilling decisions until the coloring phase.
+- Check adjacency colors during coloring to avoid unnecessary spilling.
+- Optimistic Spilling: Assume colorability during simplification and allow backtracking.
+
+**Extensions**:
+
+- Coalescing: Merge coalescible nodes (copy statements) to minimize interference.
+- Live Range Splitting: Decrease maximum register pressure by dividing long live ranges.
+
+**Local Register Allocation**:
+
+- Within a basic block, determine variable live ranges.
+- Construct an interval graph, which can be optimally colored in linear time.
+- Suitable for scenarios requiring rapid code generation (e.g., Just-In-Time Compilation).
+
+Confidence: 85%

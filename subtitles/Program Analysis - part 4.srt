@@ -1,0 +1,3048 @@
+1
+00:00:00,000 --> 00:00:12,160
+Yesterday we started with data flow analysis. So, today we will go ahead with that. So,
+
+2
+00:00:12,160 --> 00:00:16,440
+essentially the idea was that we essentially looked at 4 classic problems in data flow
+
+3
+00:00:16,440 --> 00:00:22,800
+analysis reaching definitions, available expressions, live variable analysis and very busy expressions
+
+4
+00:00:22,800 --> 00:00:32,359
+right. So, just very quickly recap what was reaching definition? What is the what do we
+
+5
+00:00:32,359 --> 00:00:37,520
+try to compute reaching definitions? Yeah, so for from the set of all definitions. So,
+
+6
+00:00:37,520 --> 00:00:45,040
+what are definitions? Assignments to variables are definitions. So, for every, so now we from
+
+7
+00:00:45,040 --> 00:00:51,240
+the program we have the set of all definitions and we are asking what are the set of definitions
+
+8
+00:00:51,240 --> 00:00:56,160
+which can reach a given location. So, what does it mean for a definition to reach a given location?
+
+9
+00:00:56,160 --> 00:01:02,040
+That there is a path that exists from that particular definition to this program point
+
+10
+00:01:02,040 --> 00:01:10,359
+and the definition is not killed during in that actually in at least one of these paths right.
+
+11
+00:01:10,359 --> 00:01:18,560
+So, the second problem was available expressions. What was available expressions? Right, so what
+
+12
+00:01:18,560 --> 00:01:25,799
+does it mean for an expression? It is computed along all paths reaching that particular program
+
+13
+00:01:25,799 --> 00:01:32,240
+point. Then we have live variable analysis right. So, what are the set of variables that are used
+
+14
+00:01:32,240 --> 00:01:40,159
+on at least one of the paths from the given program point to program exit right and finally,
+
+15
+00:01:40,159 --> 00:01:48,079
+we have very busy expressions which say what are the expressions? Yes, yes.
+
+16
+00:01:48,079 --> 00:01:52,239
+Next question which will be computed in every possible path from the given location to the
+
+17
+00:01:52,239 --> 00:02:02,879
+program exit. Excellent, so now, so we will keep on revising whatever we did yesterday and let us
+
+18
+00:02:02,879 --> 00:02:09,800
+hope that we do not have an issue. We have looked at the definition of region definitions. So,
+
+19
+00:02:09,800 --> 00:02:15,319
+essentially we had this idea of this idea of tokens flowing in the system right. So,
+
+20
+00:02:15,319 --> 00:02:20,400
+essentially we are thinking that every point there is a definition, there is a token that gets
+
+21
+00:02:20,400 --> 00:02:27,759
+generated and if every time I have multiple paths reaching a program point, I will collect the
+
+22
+00:02:27,759 --> 00:02:35,680
+tokens along all paths. If a program point bifurcates into two paths into there are two
+
+23
+00:02:35,680 --> 00:02:41,879
+edges outgoing edges, then I will copy the token and duplicate along both the paths and if there
+
+24
+00:02:41,879 --> 00:02:49,199
+is any definition which can kill a given token which is by redefining onto the same variable,
+
+25
+00:02:49,199 --> 00:02:55,240
+then the token will vanish right. So, now, the set of definitions reaching a program point
+
+26
+00:02:55,240 --> 00:03:04,000
+are basically the tokens flowing through that program point right. So, now, the question was
+
+27
+00:03:04,000 --> 00:03:14,479
+that which direction we flow the tokens. So, where do we start from? So, we flow them in the
+
+28
+00:03:14,479 --> 00:03:26,360
+forward direction right. So, this was forward. Then when do we say a definition reaches a use?
+
+29
+00:03:26,360 --> 00:03:30,680
+So, when the token reaches here for the respective thing, what happens if the variable is resigned,
+
+30
+00:03:30,680 --> 00:03:39,879
+we kill the variable. So, we discussed this and we will refer to RD of n as the set of reaching
+
+31
+00:03:39,879 --> 00:03:46,680
+definitions at the basic block n. So, now, let us start designing this analysis. So,
+
+32
+00:03:46,680 --> 00:03:52,520
+let us to begin with assume single statement basic blocks. So, now, remember from yesterday
+
+33
+00:03:52,520 --> 00:03:59,200
+what how did we say we will design this algorithm. We will essentially come up with two things. We
+
+34
+00:03:59,199 --> 00:04:14,039
+will define a set of what we call local sets. Local sets are set of definitions which are which
+
+35
+00:04:14,039 --> 00:04:19,959
+can be computed by looking only at a given basic block right. So, essentially to compute
+
+36
+00:04:19,959 --> 00:04:28,560
+gen of n or kill of n, I will not need to look at anything else, but only at n right.
+
+37
+00:04:28,560 --> 00:04:36,319
+So, what is gen of n? What are the new definitions which are generated at the basic block? Are you
+
+38
+00:04:36,319 --> 00:04:41,840
+convinced that I do not really need to look at any other basic block to compute gen of n right.
+
+39
+00:04:41,840 --> 00:04:46,160
+When I am looking at n, I just look at what are the definitions in that basic block and just
+
+40
+00:04:46,160 --> 00:04:54,840
+collect them. That is my set of that is gen. What is kill of n? All that gets reassigned right. So,
+
+41
+00:04:54,839 --> 00:05:00,959
+assume that I have already collected the set of the universal set of all the universal set of
+
+42
+00:05:00,959 --> 00:05:06,519
+definitions the set of all definitions in the program. After that to figure out which of these
+
+43
+00:05:06,519 --> 00:05:10,560
+definition gets killed by this basic block again does not require me to look at any other basic
+
+44
+00:05:10,560 --> 00:05:17,679
+right. Assuming understand the as you were pre-pass where I collect the set of all definitions right.
+
+45
+00:05:17,679 --> 00:05:23,439
+From that set whatever definitions get reassigned, I can simply put them in the kill set.
+
+46
+00:05:23,439 --> 00:05:31,759
+Right. So, these two sets I really do not need to look at anything else to compute the gen and
+
+47
+00:05:31,759 --> 00:05:39,160
+kill sets. So, this is what why they are called local sets and then using them we will compute
+
+48
+00:05:39,160 --> 00:05:46,759
+a set of global solution sets sets which will which will tell me what are the set of definitions
+
+49
+00:05:46,759 --> 00:05:53,680
+which are which appear which are reaching at the beginning of a basic block and at the end of a
+
+50
+00:05:53,680 --> 00:06:05,959
+basic block right. So, given a basic block I will compute two sets. So, one is in of B or in of n
+
+51
+00:06:05,959 --> 00:06:18,799
+right for the basic block n and out of n. So, in of n will tell me what are the set of definitions
+
+52
+00:06:18,799 --> 00:06:26,240
+which reach this basic block at this program point just before executing any instruction in
+
+53
+00:06:26,240 --> 00:06:32,560
+the basic block right. Out of n will tell me what are the set of reaching definitions at this program
+
+54
+00:06:32,560 --> 00:06:39,040
+point which is after executing all the instructions in this basic right. Now in this in this particular
+
+55
+00:06:39,040 --> 00:06:43,839
+case I have only if I assume only one basic one statement in the basic block then it is a matter
+
+56
+00:06:43,839 --> 00:06:48,399
+of just saying what happens after the before the statement and what happens after that statement.
+
+57
+00:06:48,399 --> 00:06:57,519
+And then I will then we will look at the initialization how to really initialize the sets to get it. So,
+
+58
+00:06:57,519 --> 00:07:02,040
+what is what is my global solution yesterday that is what we looked at right. The end of a
+
+59
+00:07:02,040 --> 00:07:06,920
+basic block for reaching definitions essentially will take the union over all the predecessors
+
+60
+00:07:06,920 --> 00:07:15,600
+and take a union over their outsets right. So, if you have a basic block I can compute the in at n
+
+61
+00:07:15,600 --> 00:07:21,080
+by figuring out which are the basic blocks which are reaching which are the reaching
+
+62
+00:07:21,080 --> 00:07:32,000
+definitions reaching here from the predecessor blocks and I take a union over their outs right.
+
+63
+00:07:32,000 --> 00:07:39,240
+And the out will tell me what happens after I execute this statement in this basic block. So,
+
+64
+00:07:39,240 --> 00:07:46,680
+I get this by subtracting my kill set whatever gets killed by the basic block and then adding
+
+65
+00:07:46,680 --> 00:07:51,680
+the gen. So, you guys should immediately stop me if something is not clear. So,
+
+66
+00:07:51,680 --> 00:07:55,199
+we are going to implement this so we should really be completely clear about what that is.
+
+67
+00:07:55,199 --> 00:08:05,120
+Right ok. So, let us do a small example. So, let us say I have this particular program I have
+
+68
+00:08:05,120 --> 00:08:17,079
+a equals b plus 2 I have a equals 5 I have b equals 9 and for this particular thing let us
+
+69
+00:08:17,079 --> 00:08:23,199
+say I want to compute my solution right. So, the first thing we will do is we will first
+
+70
+00:08:23,199 --> 00:08:28,319
+construct the universal set right. So, the universal set in this case of definitions is
+
+71
+00:08:28,319 --> 00:08:34,639
+I just give arbitrary names to them I call this one d 1 I call this 2 d 2 and I call this 3 d 3.
+
+72
+00:08:34,639 --> 00:08:46,200
+Right. So, my universal set of definitions is d 1 d 2 d 3. Right. So, now let us compute the
+
+73
+00:08:46,200 --> 00:08:54,280
+gen at this particular block. So, what is going to be my gen? My gen is going to be d 1. Right.
+
+74
+00:08:54,280 --> 00:09:01,680
+And my kill is going to be so from these definitions which is the definition does it kill? So,
+
+75
+00:09:01,680 --> 00:09:09,879
+this is an assignment to a this is an assignment to a and this is an assignment to b which one
+
+76
+00:09:09,879 --> 00:09:17,200
+does it kill? So, we can simply say d 1 and d 2 right both of them it kills. So, let us not even
+
+77
+00:09:17,200 --> 00:09:24,679
+bother about see the how the equation is kept. So, first I subtract kill and then I add gen. So,
+
+78
+00:09:24,679 --> 00:09:30,200
+even if d 1 gets removed I am going to add it back. So, does not matter right. So, I really do
+
+79
+00:09:30,200 --> 00:09:35,320
+not have to worry about that I should not kill my gen. So, I do not have to worry about that right
+
+80
+00:09:35,320 --> 00:09:39,240
+or you can write the equation differently and then you can also take care of that right. So,
+
+81
+00:09:39,240 --> 00:09:47,120
+it is up to you. So, now my kill set in this case becomes what it becomes d 1 and d 2 that is my
+
+82
+00:09:47,120 --> 00:09:54,120
+kill set. Right. So, similarly you can do the gen for this the gen for this is d 2 and the kill
+
+83
+00:09:54,120 --> 00:10:02,480
+for this is again d 1 d 2. See I do not even care when I am computing the gen and kill of this I
+
+84
+00:10:02,480 --> 00:10:07,639
+do not even care that d 2 cannot even reach here there is no path all these things I do not even
+
+85
+00:10:07,639 --> 00:10:11,559
+bother about I just say look at this basic block look at the definitions in this basic block and
+
+86
+00:10:11,559 --> 00:10:16,159
+tell me out of this set of all definitions which of them get generated which of them get killed I
+
+87
+00:10:16,159 --> 00:10:24,399
+do not even bother right. Similarly let us say gen of this gen of this is going to be d 3 and
+
+88
+00:10:24,399 --> 00:10:36,879
+kill of this is going to be d 3 those are my gen and kill sets. So, as you can see I did not even
+
+89
+00:10:36,879 --> 00:10:40,439
+bother looking at other basic blocks when I am computing the gen and kill at any basic block.
+
+90
+00:10:40,439 --> 00:10:57,159
+Make sense? Okay. So, now comes the question that now essentially the idea is very simple
+
+91
+00:10:57,159 --> 00:11:04,159
+that I have got these gen and kill sets at all these basic blocks now I will simply go and write
+
+92
+00:11:04,159 --> 00:11:09,199
+my set of equations I can simply now set write my set of equations I will write a set of equation
+
+93
+00:11:09,199 --> 00:11:17,839
+like in of b 1 b 1 let us say this basic block is b 1 this basic block is b 2 and this basic block
+
+94
+00:11:17,839 --> 00:11:25,919
+is b 3 and this is b 4. So, I will write that b 1 is equal to this is the entry basic block so the
+
+95
+00:11:26,399 --> 00:11:36,519
+definitions are the entry is going to be empty and out of b 1 is going to be what is going to be
+
+96
+00:11:36,519 --> 00:11:54,279
+gen of b 1 union in of b 1 minus kill of b 1 right. So, similarly I will write in of b 2
+
+97
+00:11:54,279 --> 00:12:05,079
+is something which is nothing but the b 2 union of all the predecessors. So, in this case there
+
+98
+00:12:05,080 --> 00:12:16,400
+is only one predecessor so this is nothing but out of b 1 right and out of b 2 is going to be
+
+99
+00:12:16,400 --> 00:12:29,640
+the same thing for b 2 similarly if I had to do it for b 4 sorry in of b 4 then it would have been
+
+100
+00:12:29,639 --> 00:12:47,240
+out of out of b 2 union out of b 3 right agreed. So, I will have this huge set of equations and
+
+101
+00:12:48,080 --> 00:13:00,600
+and we are hoping that these equations would eventually give me the. So, now if I solve this
+
+102
+00:13:00,600 --> 00:13:10,039
+set of equations I will end up getting my in and outsets right there can be complications things
+
+103
+00:13:10,039 --> 00:13:15,879
+are not so simple in life like for instance what if I have a loop going from here to here
+
+104
+00:13:15,879 --> 00:13:24,960
+right. So, there will there may be a cyclic thing so in that case my in of b 1 may not be so let us
+
+105
+00:13:24,960 --> 00:13:36,439
+say I have some other entry let us not bother. So, in in of b 1 can become out of b 4 right. So,
+
+106
+00:13:36,439 --> 00:13:45,360
+then what is going on is that you can see that b 4 out of b 4 is dependent somehow on b 1 because
+
+107
+00:13:45,360 --> 00:13:53,279
+b 2 is dependent on b 1 and b 3 is dependent on b 1 and b 4 is dependent on b 3 b 2 and b 3 and
+
+108
+00:13:53,279 --> 00:14:00,840
+now the problem is b 1 is again dependent on b 4. So, b 4 is dependent on b 1 and b 1 is dependent
+
+109
+00:14:00,840 --> 00:14:05,320
+on b 4 so there is a cyclic dependence. So, now these are set of equations you cannot simply
+
+110
+00:14:05,320 --> 00:14:10,759
+substitute you cannot solve by simple substitution otherwise how do you solve equations you just
+
+111
+00:14:10,759 --> 00:14:15,639
+substitute whatever you can substitute from later equations you put them up get a large
+
+112
+00:14:15,639 --> 00:14:20,720
+equation try to solve it that is one generic strategy right. But now these set of equations
+
+113
+00:14:20,720 --> 00:14:28,840
+you cannot do that because there is this cyclic dependence agreed. So, these are called what I
+
+114
+00:14:28,840 --> 00:14:36,000
+said 6 point equations and we will spend a lot of time today understanding and to see how to
+
+115
+00:14:36,000 --> 00:14:49,200
+really solve 6 point equations. So, right so now the question is that so we need some other strategy
+
+116
+00:14:49,200 --> 00:14:56,879
+to solve these equations but let us try to understand the solution space first right.
+
+117
+00:14:56,879 --> 00:15:08,279
+So, first of all the question is that for does these set of equations will this set of equations
+
+118
+00:15:08,279 --> 00:15:14,720
+have the have only one solution or can it have multiple solutions. So, we have to whenever we
+
+119
+00:15:14,720 --> 00:15:18,439
+have several equations we have to start asking these questions right and then if it allows
+
+120
+00:15:18,439 --> 00:15:24,480
+multiple solutions are all the solutions okay or which solution is the solution that I am
+
+121
+00:15:24,480 --> 00:15:30,879
+more interested right which solution would work for us. So, that is my next question the next
+
+122
+00:15:30,879 --> 00:15:36,680
+question is that is the solution unique or can there be multiple solutions what is your guess.
+
+123
+00:15:36,680 --> 00:15:44,800
+So, let us stare at these equations and try to think can there be just one solution or
+
+124
+00:15:44,800 --> 00:15:51,920
+can there be multiple solutions no no the outcome so sorry maybe I should have so the outcome. So,
+
+125
+00:15:52,759 --> 00:15:57,799
+how do you verify your solution on this okay we do not know how to compute a solution but can we
+
+126
+00:15:57,799 --> 00:16:03,839
+know do you know how to verify a solution how will we verify a solution. So, what is going to be a
+
+127
+00:16:03,839 --> 00:16:11,159
+solution for this let us ask that first what is my solution what we mean by this solution yes the
+
+128
+00:16:11,159 --> 00:16:24,639
+in out sets of all basic blocks right. So, in of b 1 out of b 1 in of b 2 out of b 2 right this
+
+129
+00:16:24,639 --> 00:16:37,360
+whole tuple is going to be my solution right how yeah. So, now the question is that how do I so now
+
+130
+00:16:37,360 --> 00:16:44,200
+will I have only one such solution or can I have multiple solutions. So, let us try to stare at
+
+131
+00:16:44,200 --> 00:16:49,960
+this equation and try to think okay. So, let us sorry it was about the question of verifying
+
+132
+00:16:49,960 --> 00:16:54,960
+the solution. So, can I verify the solution how will I verify a solution. So, let us say somebody
+
+133
+00:16:54,960 --> 00:16:59,080
+comes and tells you I think this is a solution for this how would you check he is lying or not.
+
+134
+00:16:59,080 --> 00:17:04,160
+We have see we have abstracted everything out now everything is a pure nice mathematical set
+
+135
+00:17:04,160 --> 00:17:08,720
+equations I really do not have to go back to my control flow graph anymore whatever I could have
+
+136
+00:17:08,720 --> 00:17:12,600
+done with my control flow graph I have already done now all you have to do is live with these
+
+137
+00:17:12,600 --> 00:17:17,000
+equations you have already extracted out the equations now the question is now you have a
+
+138
+00:17:17,000 --> 00:17:20,600
+set of equations now you are talking about the solutions for this equation which will give me
+
+139
+00:17:20,600 --> 00:17:25,759
+a solution to the control flow graph somehow yeah, but we have done this nice abstraction only.
+
+140
+00:17:25,759 --> 00:17:34,040
+Excellent so we have the general set so now yes I will just go and plug in those values
+
+141
+00:17:34,039 --> 00:17:38,799
+here if all the equations match up I will say that is the solution if they do not match up it
+
+142
+00:17:38,799 --> 00:17:44,159
+is not a solution as simple as that agreed right. So, we know how to verify a solution now the
+
+143
+00:17:44,159 --> 00:17:50,319
+question is how do you compute the solution right looks weird right. So, now so let us try to first
+
+144
+00:17:50,319 --> 00:17:57,799
+answer that what would this so will this solution be will there be only one solution or will there
+
+145
+00:17:57,799 --> 00:18:06,680
+be multiple solutions okay. So, I will give you a hint look at this particular graph and try to
+
+146
+00:18:06,680 --> 00:18:18,279
+answer that question. So, now what I am asking you to do is to play the debits and locate try to
+
+147
+00:18:18,279 --> 00:18:23,639
+try to break this thing try to say that okay this is not what I would have wanted but I can still
+
+148
+00:18:23,640 --> 00:18:29,640
+get the solution. So, you are trying to compute reaching definitions and there is a self loop
+
+149
+00:18:29,640 --> 00:18:44,440
+on this basic very simple case. So, okay so I will still make it easier let us say I already
+
+150
+00:18:44,440 --> 00:19:00,640
+have a known solution right which is let us say let us say call it n 1 0 okay. So, let us say this
+
+151
+00:19:00,640 --> 00:19:11,799
+is a set in 1 0 out 1 0 and into 0 these are the two things and this into 0 is okay does not matter
+
+152
+00:19:11,799 --> 00:19:18,919
+but now the question is that I want to figure out so this in is going to be this so let us have
+
+153
+00:19:18,919 --> 00:19:27,879
+a in 0 also something like that and I want to construct another solution which is in 1 in 1 1
+
+154
+00:19:27,879 --> 00:19:34,119
+in 1 into 1 and so on. Take this solution and somehow try to extend it into another solution
+
+155
+00:19:34,119 --> 00:19:42,039
+if you can. So, let us assume that I already know that these guys already form a solution.
+
+156
+00:19:42,039 --> 00:19:55,799
+This notation I do not like this notation okay let me just change this notation. So,
+
+157
+00:19:55,799 --> 00:20:13,000
+let us just put a solution let me say that in 1 in it is not 1 this is some set S 1 and out of
+
+158
+00:20:13,000 --> 00:20:21,319
+n is some set S 2 let us say this is my solution I know S 1 is solution to this it satisfies those
+
+159
+00:20:21,319 --> 00:20:30,519
+equations. Now I want to say can I can you somehow use S 1 and S 2 and extend it to another solution
+
+160
+00:20:30,519 --> 00:20:35,039
+which still works on this basic law do not think of the controller graph now just think about this
+
+161
+00:20:35,039 --> 00:20:49,759
+set of equations and remember the equations you have the equations here. No understand my
+
+162
+00:20:50,160 --> 00:20:56,160
+question is that you are already given a solution which is in of n is S 1 and out of n is S 2.
+
+163
+00:20:56,160 --> 00:21:04,960
+This solution is given to you already in 1 and out S 1 and S 2 may not be the same that you can agree
+
+164
+00:21:04,960 --> 00:21:31,000
+or they are the same. Excellent excellent very nice. So, what I can simply do is I can really
+
+165
+00:21:31,000 --> 00:21:40,920
+play this game I take S 1 this guy is S 1 and to this I add some definition d i which is let us
+
+166
+00:21:40,920 --> 00:21:48,599
+say not in this set right. So, what will happen to this this guy let us say is not does not get
+
+167
+00:21:48,599 --> 00:21:58,279
+killed by this right. So, this will also have d i because this guy has d i this will come and
+
+168
+00:21:58,279 --> 00:22:02,920
+merge with this. So, everything will stabilize. So, I got a new solution from this which is nothing
+
+169
+00:22:02,920 --> 00:22:15,680
+but S 1 plus d i and S 2 plus d i do you see this I can just put a new thing and because there is a
+
+170
+00:22:15,680 --> 00:22:20,599
+loop this guy will feed back and the whole thing will still stabilize they all the equations will
+
+171
+00:22:20,599 --> 00:22:32,159
+still match up. Once I can put another definition I can put the whole set here right the whole
+
+172
+00:22:32,159 --> 00:22:39,599
+universal set I can put here right. So, essentially there may not be just one or two there can be
+
+173
+00:22:39,599 --> 00:22:52,719
+multiple fixed point solutions to this set of equations anybody who does not see this right.
+
+174
+00:22:52,719 --> 00:22:58,799
+So, the question is that which of these solutions. So, now I can so these set of solutions if I try
+
+175
+00:22:58,799 --> 00:23:03,039
+to give it us to us some sort of solver it will give me a whole lot of solutions. So,
+
+176
+00:23:03,039 --> 00:23:08,679
+which solution is the solution I am really interested see how we are going from the
+
+177
+00:23:08,680 --> 00:23:16,120
+programming language problem to a mathematical formulation and then back to the language problem
+
+178
+00:23:16,120 --> 00:23:19,400
+right. So, we have abstracted into a set of equations now we see there can be multiple
+
+179
+00:23:19,400 --> 00:23:25,480
+solutions to the set of equations now we are asking which solution is the solution I was
+
+180
+00:23:25,480 --> 00:23:30,400
+looking to get when I was trying to solve the problem the original problem. So, which of these
+
+181
+00:23:30,400 --> 00:23:34,759
+sets would work for us which of these solutions would work for us which one we should get.
+
+182
+00:23:34,759 --> 00:23:47,319
+Exactly. So, I want this the solution which is the smallest set right. So, now we are like
+
+183
+00:23:47,319 --> 00:23:51,799
+piling problem on problem because first we do not even know how to get a solution second
+
+184
+00:23:51,799 --> 00:23:56,079
+problem is even if you get a solution any solution will not do we will actually need
+
+185
+00:23:56,079 --> 00:24:01,879
+a solution which gives you the minimum size of these sets right what we can let us refer
+
+186
+00:24:02,120 --> 00:24:10,120
+to that as the least fixed point solution right. So, I will call it the least fixed
+
+187
+00:24:10,120 --> 00:24:25,840
+point solution or LFP right. So, multiple problems first we do not even know the third
+
+188
+00:24:25,839 --> 00:24:35,319
+question is how do we even know a solution exists a set of equations may not have a solution right.
+
+189
+00:24:35,319 --> 00:24:41,119
+So, that is another problem. So, we have multiple problems to answer first is does a solution even
+
+190
+00:24:41,119 --> 00:24:54,519
+exist the second is even if it exists is it computable which means that can I take find
+
+191
+00:24:54,559 --> 00:25:00,639
+the algorithm to compute that solution and the third is even if it exists and I get a
+
+192
+00:25:00,639 --> 00:25:11,879
+algorithm to compute it can it give me the LFP or right. So, we have to answer all these questions.
+
+193
+00:25:11,880 --> 00:25:24,760
+So, today's class we will actually try to see how to get an answer to these problems this is
+
+194
+00:25:24,760 --> 00:25:28,680
+a point to ask questions anybody who has not understood what we are trying to do please ask
+
+195
+00:25:28,680 --> 00:25:33,680
+it now because otherwise the whole day will become very boring will not even have the motivation to
+
+196
+00:25:33,680 --> 00:25:40,000
+do it yeah in generally also there can be a whenever there is a loop which has this transitive
+
+197
+00:25:40,240 --> 00:25:45,000
+I mean which will create a cyclic dependency we can always do that. So, instead of this one
+
+198
+00:25:45,000 --> 00:25:48,920
+basic block had it being a sequence of basic blocks that also would have the same problem
+
+199
+00:25:48,920 --> 00:25:54,720
+right I can just simply extend that idea right even last set of basic blocks from the last guy
+
+200
+00:25:54,720 --> 00:25:59,799
+from where I have the back edge I add a new definition and that will go and like pause
+
+201
+00:25:59,799 --> 00:26:07,200
+everything within the loop. So, if you do not have a loop then we are good because we do not
+
+202
+00:26:07,200 --> 00:26:12,120
+have a cyclic dependency as soon as you have a loop you have a problem and programs will have
+
+203
+00:26:12,120 --> 00:26:16,920
+loops yes we are increasing the size of the set that is true but think about this innocent
+
+204
+00:26:16,920 --> 00:26:22,160
+question right you take this set of equations and give it to a solver right which will solve
+
+205
+00:26:22,160 --> 00:26:28,400
+this six point equations and give you give it a solution to you that particular guy does not
+
+206
+00:26:28,400 --> 00:26:34,080
+know what solution is the one you want right for it does not know the original problem it does not
+
+207
+00:26:34,079 --> 00:26:37,919
+know we are trying to compute which definitions it just looks at this set of equations and then
+
+208
+00:26:37,919 --> 00:26:42,839
+say there is some equations over set. So, can I solve it and give you a solution but not all
+
+209
+00:26:42,839 --> 00:26:46,960
+solutions from that guy are admissible I cannot just take any solution and that will not be the
+
+210
+00:26:46,960 --> 00:26:52,399
+answer that I am looking to get ok should we summarize it one more time or is it ok.
+
+211
+00:26:52,399 --> 00:26:59,839
+So, so ok so the problem is again what would we do we did essentially we start oh this all goes
+
+212
+00:26:59,839 --> 00:27:12,000
+oh thank god it stays ok. So, the idea was this idea was that we took our control flow graph from
+
+213
+00:27:12,000 --> 00:27:17,439
+our control flow graph we figured out that we decided that analysis that we will do we will
+
+214
+00:27:17,439 --> 00:27:24,799
+break it up into two phases we will do a local analysis to figure out some summaries about each
+
+215
+00:27:24,799 --> 00:27:29,599
+basic block something which will tell me what happens at each basic block and these are will
+
+216
+00:27:29,599 --> 00:27:35,240
+be do using this gen and kill sets. So, we will compute the set of gen sets we will compute the
+
+217
+00:27:35,240 --> 00:27:40,359
+gen set which will tell me what happens at node n what are what are generated at node n and the
+
+218
+00:27:40,359 --> 00:27:46,440
+kill set will tell me what gets killed at node n using this local sets I can start writing equations
+
+219
+00:27:46,440 --> 00:27:53,839
+which will summarize the computation over the whole graph right. So, first we started doing it
+
+220
+00:27:53,839 --> 00:27:58,240
+at one basic block and then we want to extend create equations which will work for the whole
+
+221
+00:27:58,240 --> 00:28:03,559
+graph the whole control flow graph. So, to construct the global solutions we use these
+
+222
+00:28:03,559 --> 00:28:08,959
+equations we use the transfer function which says that given what happens what is the set at the
+
+223
+00:28:08,959 --> 00:28:13,279
+beginning of the basic block what is going to be the set at the end of the basic block.
+
+224
+00:28:13,279 --> 00:28:28,519
+So, this is referred to as the transfer function agreed and second thing we will do we will use
+
+225
+00:28:28,519 --> 00:28:36,200
+this inset sorry we will use this meet operator. So, we basically say that how do I know what
+
+226
+00:28:36,200 --> 00:28:40,200
+happens at the beginning of a basic block right. So, we need to figure out what happens at the
+
+227
+00:28:40,200 --> 00:28:43,160
+beginning of the basic block what happens at the end of the basic block what happens at the beginning
+
+228
+00:28:43,160 --> 00:28:49,039
+of the basic block things get accumulated all the sets outsets from the predecessors get
+
+229
+00:28:49,039 --> 00:28:53,120
+accumulated what happens at the end of the basic block I apply my transfer function to figure out
+
+230
+00:28:53,120 --> 00:29:00,559
+how does my inset change into my outset all that is clear. Now one once we have this set of equations
+
+231
+00:29:00,559 --> 00:29:08,559
+the rest of the work is very mechanical I just go and apply this equations to every single basic
+
+232
+00:29:08,559 --> 00:29:15,639
+block in the system. So, then I get this large set of equations that I which tell what happens
+
+233
+00:29:15,639 --> 00:29:20,679
+at every particular basic block I can simply expand it out nothing very serious going on I
+
+234
+00:29:20,679 --> 00:29:26,119
+just plug in the right gen and kill sets for each of each of these cases right.
+
+235
+00:29:26,119 --> 00:29:33,279
+Now I have what we have been able to do is we have been able to forget our control flow
+
+236
+00:29:33,279 --> 00:29:38,359
+graph we forget what we forget what was the problem we were solving we were solving some
+
+237
+00:29:38,359 --> 00:29:42,439
+reaching definition problem I do not care anymore we were solving something on a graph I do not
+
+238
+00:29:42,439 --> 00:29:50,199
+care anymore I now I can just live with this set of equations if I can design a solver which can
+
+239
+00:29:50,199 --> 00:29:55,959
+take these equations and give me a solution to these equations I am done I will get in and
+
+240
+00:29:55,959 --> 00:29:59,919
+outsets which I can simply go and see oh that is what happens in the beginning of this oh this is
+
+241
+00:29:59,920 --> 00:30:05,320
+what happens at the end of this that is it are we good till now agreed ok.
+
+242
+00:30:05,320 --> 00:30:13,240
+Now let us forget the actual problem the reaching definition problem and just stare at this system
+
+243
+00:30:13,240 --> 00:30:20,279
+equations first thing I notice is that this system of equations is cannot be solved easily
+
+244
+00:30:20,279 --> 00:30:29,680
+by substitutions why because I can see dependence is going on here right I can see that BB1 depends
+
+245
+00:30:29,680 --> 00:30:43,440
+on B4 and I see B4 depends on B2 B3 which in turn depend on B1 right so any change I make to any
+
+246
+00:30:43,440 --> 00:30:47,920
+of these sets will get propagated to the other one which will create a problem and again which
+
+247
+00:30:47,920 --> 00:30:56,320
+will propagate the change to the whole thing again. So I need a different strategy to solve
+
+248
+00:30:56,480 --> 00:31:02,279
+these equations I cannot solve these equations simply by substitution that we should be convinced
+
+249
+00:31:02,279 --> 00:31:10,200
+on right before that we have to so now that is one problem second is that first we have to looking
+
+250
+00:31:10,200 --> 00:31:14,599
+at these equations first we have to figure out that do this is a set of equations even have a
+
+251
+00:31:14,599 --> 00:31:20,480
+solution does a solution even exist in this case right if its solution does not exist there is not
+
+252
+00:31:20,480 --> 00:31:28,599
+no point even thinking about an algorithm right. So first question is does a solution exist second
+
+253
+00:31:28,599 --> 00:31:33,759
+problem is that if there exists a solution do we have can we come up with an efficient
+
+254
+00:31:33,759 --> 00:31:38,640
+algorithm to solve these equations that is an important question in computer science if you
+
+255
+00:31:38,640 --> 00:31:47,279
+can do something can you do it right so that is the second problem the third problem is that do
+
+256
+00:31:47,279 --> 00:31:52,480
+the system equations have multiple solutions so first we are talking about no solutions and now
+
+257
+00:31:52,480 --> 00:31:58,799
+we are talking about multiple solutions right so now the question is that do the system equations
+
+258
+00:31:58,799 --> 00:32:05,599
+have multiple solutions if the system of equations have a multiple solution then which is the solution
+
+259
+00:32:05,599 --> 00:32:12,920
+we are looking to get right so we saw that if I pick one solution to this equations I can very
+
+260
+00:32:12,920 --> 00:32:19,720
+simply keep on adding definitions to get larger sets which are still solutions which are also
+
+261
+00:32:19,720 --> 00:32:26,440
+solutions so this set of equations do have multiple solutions if they have multiple solutions then
+
+262
+00:32:26,440 --> 00:32:31,720
+the question is that which is the solution that works for us not every solution works for us right
+
+263
+00:32:31,720 --> 00:32:36,519
+so which solution works for us the smallest solution works for us right the solution which
+
+264
+00:32:37,000 --> 00:32:45,039
+the sizes of the sets are the smallest okay think about it so what do we want to do with reaching
+
+265
+00:32:45,039 --> 00:32:50,759
+definitions what can we do with reaching definitions okay that is a very good question so let us let
+
+266
+00:32:50,759 --> 00:32:58,279
+us think about it so why would be interested in the smallest set so whenever you are faced
+
+267
+00:32:58,279 --> 00:33:03,440
+with this problem that what are I mean why this solution is good for me why not something else
+
+268
+00:33:03,440 --> 00:33:07,799
+you should think about the application of this particular analysis so where can I use reaching
+
+269
+00:33:07,799 --> 00:33:12,480
+definitions can you think can you give me some idea of some very simple idea of what can be
+
+270
+00:33:12,480 --> 00:33:17,440
+some optimization some transformation I can do with reaching definitions so if I know that a
+
+271
+00:33:17,440 --> 00:33:29,320
+particular set like I have like x equals y plus z right and let us say I know that y has only one
+
+272
+00:33:29,319 --> 00:33:42,559
+reaching definition right so it means that there is some y equals something something this guy is
+
+273
+00:33:42,559 --> 00:33:48,960
+coming from can I do an optimization can I not let us say this guy reads from some function call
+
+274
+00:33:48,960 --> 00:33:59,519
+can I not simply put the function call here could I have done it if there were multiple
+
+275
+00:33:59,519 --> 00:34:06,360
+reaching definitions right so if there was a y equals foo and y equals bar then which one do
+
+276
+00:34:06,360 --> 00:34:11,800
+we substitute I do not know which one I can substitute then I cannot do anything but I can
+
+277
+00:34:11,800 --> 00:34:18,519
+do this optimization if I know that y is equal y has only one reaching definition better still
+
+278
+00:34:18,519 --> 00:34:26,719
+for instance think about the case where instead of y equals foo I had just y equals 2 right if
+
+279
+00:34:26,719 --> 00:34:36,039
+y is just equals 2 I can simply substitute 2 here and this other thing is already 2 so 2 plus 2
+
+280
+00:34:36,039 --> 00:34:43,679
+becomes 4 I can do it at compile time compile time I can just forget there was a y completely
+
+281
+00:34:43,679 --> 00:34:50,279
+forget there was a y I can simply substitute 2 I can compute 4 at compile time not at runtime
+
+282
+00:34:50,279 --> 00:34:54,559
+right something I would have done when running the program I can do at time and compiling the
+
+283
+00:34:54,559 --> 00:35:00,799
+program so I get 4 better still it can create a transitive effect let us say y was the reaching
+
+284
+00:35:00,799 --> 00:35:06,159
+definition of somebody else the single reaching definition of somebody else for that guy I can
+
+285
+00:35:06,159 --> 00:35:11,679
+again substitute instead of x sorry x was the reason I can substitute instead of x I can
+
+286
+00:35:11,679 --> 00:35:18,599
+substitute 4 that guy maybe we are added with something else right so you can keep on doing
+
+287
+00:35:18,599 --> 00:35:26,559
+this and lot of code that would have otherwise got computed at runtime will now get computed
+
+288
+00:35:26,559 --> 00:35:32,139
+at compile time so let us talk about the case where y is equal to 2 so I am saying let us say
+
+289
+00:35:32,139 --> 00:35:44,219
+I know so I have x equals y plus 2 right now if I know that this guy is not there this is the
+
+290
+00:35:44,219 --> 00:35:53,179
+only reaching definition of y that is the only reaching definition of y there is no other reaching
+
+291
+00:35:53,179 --> 00:36:00,379
+definition of y at this program point then I can simply I know that it is going to read y from here
+
+292
+00:36:00,380 --> 00:36:07,180
+from nowhere else right so I can I not simply take this 2 and replace instead of y put a 2 here
+
+293
+00:36:07,180 --> 00:36:17,980
+right so what have you saved do you think we have saved a lot yeah we have stored saved the
+
+294
+00:36:17,980 --> 00:36:24,660
+memory load a memory load is a very expensive operation half of the compiler optimization half
+
+295
+00:36:24,660 --> 00:36:29,740
+of the architecture optimizations are actually there to reduce loads caches are there to reduce
+
+296
+00:36:29,739 --> 00:36:39,500
+loads now at least reduce the effect of loads the run the latency of loads no no we are just
+
+297
+00:36:39,500 --> 00:36:45,579
+substituting the value itself we are not even do we do we not even have y here we will just say
+
+298
+00:36:45,579 --> 00:36:53,299
+it is 2 this this this y is always going to be 2 no matter what right so we forget y completely
+
+299
+00:36:53,300 --> 00:37:00,140
+and then I say 2 plus 2 is nothing but 4 I write the whole thing as 4 I just say this is nothing
+
+300
+00:37:00,140 --> 00:37:14,300
+but x equals 4 right and this can create other effects I can later down the line if x equals 4
+
+301
+00:37:14,300 --> 00:37:18,300
+is the reaching definition of the only reaching definition of somebody else I can do it further
+
+302
+00:37:18,300 --> 00:37:25,140
+right so yesterday you were asking me that what why are these optimizations useful this is one
+
+303
+00:37:25,140 --> 00:37:29,980
+place where optimizations are useful right see how many loads we can remove like this and load
+
+304
+00:37:29,980 --> 00:37:36,019
+removing loads is a very very important optimization because memory access memory is very very slow your
+
+305
+00:37:36,019 --> 00:37:43,620
+processor is very very fast so if you can save accesses trips to memory you will save a lot right
+
+306
+00:37:43,619 --> 00:37:47,139
+so this is a very relevant optimization this is known as constant propagation
+
+307
+00:37:53,859 --> 00:37:59,259
+so we just figure out constants and we propagate them also the program so this is a very weak
+
+308
+00:37:59,259 --> 00:38:04,859
+algorithm for constant propagation we will see a better algorithm but but this is also a form
+
+309
+00:38:04,859 --> 00:38:10,819
+of constant propagation this is not that powerful but still it is good this thing yeah sure this one
+
+310
+00:38:10,820 --> 00:38:19,019
+right now just assume this is what it is yeah but it's a union over this guy also right union over
+
+311
+00:38:19,019 --> 00:38:23,420
+this edge also no matter what comes from the other guys this guy is already there this guy
+
+312
+00:38:23,420 --> 00:38:29,420
+is going to get union with so if I add a new DI to this particular edge it is always going
+
+313
+00:38:29,420 --> 00:38:34,300
+to be satisfied things so it does not really matter what comes from the other side other guys
+
+314
+00:38:34,300 --> 00:38:39,780
+no we will see that we will see how to compute it we are not even there yet no we will see a
+
+315
+00:38:39,780 --> 00:38:44,780
+proper discipline we are coming up with a solution to fit for equations right we now will we will
+
+316
+00:38:44,780 --> 00:38:48,900
+actually spend a lot of time looking at theory to say how can these equations be really be solved
+
+317
+00:38:48,900 --> 00:38:55,420
+so let's not have like we will actually mathematically see they can be solved or not right so there is
+
+318
+00:38:55,420 --> 00:38:59,820
+quite a bit of purity this so let's take the other questions yeah so think about the case
+
+319
+00:38:59,820 --> 00:39:06,460
+think about somebody think about the solver as a black box right so you give it a you give it a set
+
+320
+00:39:06,460 --> 00:39:12,619
+of equations it gives you a solution back how do you know what solution it has given you it is not
+
+321
+00:39:12,619 --> 00:39:16,139
+it is going to get you the best solution and then I did something and give you that it is not that
+
+322
+00:39:16,139 --> 00:39:21,139
+right it will simply search the just think about one really stupid way of getting the solution I
+
+323
+00:39:21,139 --> 00:39:30,780
+simply guess solutions and verify it guess and verify it guess and check right I can just randomly
+
+324
+00:39:30,780 --> 00:39:36,380
+select sets put them in and verify it is the right the solution or not that particular algorithm
+
+325
+00:39:36,380 --> 00:39:45,100
+can actually give me any solution right so I do not know what the solver is doing right we just
+
+326
+00:39:45,100 --> 00:39:51,180
+it you give it a problem it gives you a solution which solution gives you you do not know so we
+
+327
+00:39:51,180 --> 00:39:57,740
+will actually actually like yesterday we replace the label by a string label exactly the similar
+
+328
+00:39:57,739 --> 00:40:05,539
+way in the the program text using LLVM APIs we will replace that instance of y by actually
+
+329
+00:40:05,539 --> 00:40:12,059
+two we will calculate it at compile time replace it by the new constant and then again get new
+
+330
+00:40:12,059 --> 00:40:18,019
+solutions yes that is optimization that is exactly the optimized code you will get yeah I come to it
+
+331
+00:40:18,019 --> 00:40:22,819
+so right now we are assuming single statement basic blocks we will consider multiple statement
+
+332
+00:40:22,820 --> 00:40:27,980
+basic block just after this now let us come back to this particular application right on this
+
+333
+00:40:27,980 --> 00:40:33,420
+application can you now tell me that what solution would work you guys said the smallest solution
+
+334
+00:40:33,420 --> 00:40:38,059
+can you now think about why will a larger solution not work no that is the other way around here the
+
+335
+00:40:38,059 --> 00:40:42,620
+I am missing order definition but I am saying here you are computing a definition which is a
+
+336
+00:40:42,620 --> 00:40:46,940
+set of definitions which is larger than that that is what you do here right you took the initial
+
+337
+00:40:46,940 --> 00:40:55,380
+S1 and you extend it by a new arbitrary definition di so your solutions become larger so generally
+
+338
+00:40:55,380 --> 00:41:00,900
+that will not happen the reason is that every use will surely have at least one definition
+
+339
+00:41:00,900 --> 00:41:06,740
+right otherwise it is garbage value right otherwise nobody nobody has assigned anything
+
+340
+00:41:06,740 --> 00:41:11,179
+to it and we are using that value so that is garbage and if I put substitute one garbage value
+
+341
+00:41:11,179 --> 00:41:16,780
+by another garbage value really does not matter right so that is not so much of an issue but the
+
+342
+00:41:16,780 --> 00:41:24,300
+bigger issue is I think you are on the right track but think about the case yeah nine nine
+
+343
+00:41:24,300 --> 00:41:30,660
+much simpler than that no but universal set is bounded the universal set is a set of all
+
+344
+00:41:30,660 --> 00:41:34,660
+definitions the program the program is bounded size right you know this is all the program is
+
+345
+00:41:34,660 --> 00:41:40,660
+I cannot invent new definitions there so we could do this definition only if the size of the set was
+
+346
+00:41:40,660 --> 00:41:46,220
+one if it was singleton set I cannot do it if the size of the set was two now the size of this
+
+347
+00:41:46,219 --> 00:41:52,779
+guy reports the size of the set is two I cannot do that optimization and that new guy di is probably
+
+348
+00:41:52,779 --> 00:41:58,939
+a pseudo definition it was not a definition which is actually reaching it right so I am missing out
+
+349
+00:41:58,939 --> 00:42:04,619
+on the opportunity of doing an optimization agree make sense so that is why I would like the smallest
+
+350
+00:42:04,619 --> 00:42:10,099
+set so that I can do these optimizations I do not miss out on optimizations okay think about the same
+
+351
+00:42:10,099 --> 00:42:14,739
+case let us say I had y equal to 2 here and y equals 5 here these are the two reaching definitions
+
+352
+00:42:14,739 --> 00:42:22,299
+coming here then which one do you pick I cannot decide so we cannot do an optimization right make
+
+353
+00:42:22,299 --> 00:42:28,199
+sense so we now understand why we would like the smallest set to be there so I do not extend my
+
+354
+00:42:28,199 --> 00:42:32,819
+universal set a universal set is the same because there is no point in it that is garbage right
+
+355
+00:42:32,819 --> 00:42:38,799
+anything out of the universal it is garbage to the existing set the existing set of definition so in and out are sets are
+
+356
+00:42:38,799 --> 00:42:44,619
+definitions right so to this set of definition to the outset I just added a new definition because
+
+357
+00:42:44,619 --> 00:42:48,019
+of which the insert will also have the definition because it is a union over the predecessors and
+
+358
+00:42:48,019 --> 00:42:55,659
+one of the pieces itself out of itself right so so that definition would just stick around any
+
+359
+00:42:55,659 --> 00:43:00,940
+definition I plug it in it will stick around and that will be a valid solution so I picked the
+
+360
+00:43:00,940 --> 00:43:07,219
+definition carefully I picked the one which does not get yes so I am saying there are such
+
+361
+00:43:07,219 --> 00:43:12,059
+solutions possible I am not saying all definition can be added and all of them will give you a
+
+362
+00:43:12,059 --> 00:43:16,059
+solution all I am saying is there are multiple solutions possible there need not be a single
+
+363
+00:43:16,059 --> 00:43:22,299
+solution not all solutions are like not all possible vectors are possible solutions but
+
+364
+00:43:22,299 --> 00:43:28,380
+the set of possible solutions is not single term it may not be unique so it is a very common game
+
+365
+00:43:28,380 --> 00:43:33,299
+in like mathematics right so you want to show a multiple solution you would actually take one
+
+366
+00:43:33,299 --> 00:43:38,059
+solution and say can I do something and get another solution from this right so I give you
+
+367
+00:43:38,059 --> 00:43:43,059
+a way of doing that right so the next question is I think it is your whatever you started with is
+
+368
+00:43:43,059 --> 00:43:52,139
+the question of safety now think about the case what if what would have happened if one of the
+
+369
+00:43:52,139 --> 00:44:00,460
+solutions in this set was smaller than what it what it should have been if I miss out on a
+
+370
+00:44:00,460 --> 00:44:06,099
+definition a definition is actually reaching definition but that does not get captured not
+
+371
+00:44:06,099 --> 00:44:10,219
+it will not happen with these set of equations it will not even stabilize there so that will
+
+372
+00:44:10,219 --> 00:44:14,420
+not be a valid solution but I am saying let us say somebody I do not use this thing I just guess
+
+373
+00:44:14,420 --> 00:44:21,219
+something and I say oh work with this right so what what so I should not call it a definition
+
+374
+00:44:21,219 --> 00:44:27,699
+but but let us see I say an assignment to these sets this in and outsets right to this in and
+
+375
+00:44:27,699 --> 00:44:36,419
+outsets if I put an arbitrary set of sets assign an arbitrary set of set of definitions such that
+
+376
+00:44:36,419 --> 00:44:43,299
+there is some definitions meeting me missing from the actual set of definition that be there what
+
+377
+00:44:43,299 --> 00:44:50,139
+would have happened wrong transformations that is dangerous that is sure dangerous right it is okay
+
+378
+00:44:50,139 --> 00:44:55,299
+I can wait for another hour for my program to complete execution I live with it but I cannot
+
+379
+00:44:55,300 --> 00:45:01,460
+say that okay I will give your execution in five minutes 50% answer wrong answer I cannot
+
+380
+00:45:01,460 --> 00:45:08,539
+live with that right so so your compiler cannot give you wrong answers and they do give you wrong
+
+381
+00:45:08,539 --> 00:45:13,420
+answers that is different matter altogether but and we saw it yesterday right we saw it yesterday
+
+382
+00:45:13,420 --> 00:45:18,019
+there were different behavior of different compilers on the same program right so all at
+
+383
+00:45:18,019 --> 00:45:28,739
+least one of them is surely wrong so but whatever so now the question is that okay so now the
+
+384
+00:45:28,739 --> 00:45:37,940
+question is that so this this is what is referred to as safety right so I would say a solution is
+
+385
+00:45:37,940 --> 00:45:49,940
+safe if it at least contains all the definitions it needs to have otherwise the solution is not
+
+386
+00:45:49,940 --> 00:45:58,740
+a safe solution so you will see that these set of equations no matter what solution they give you
+
+387
+00:45:58,740 --> 00:46:05,380
+that surely give you a safe solution they will not miss out on a definition right that is not
+
+388
+00:46:05,380 --> 00:46:10,700
+going to happen right so it may be that we may not get the best solution but it will not do a
+
+389
+00:46:10,700 --> 00:46:16,700
+wrong optimization so there are in program analysis people talk about these two important
+
+390
+00:46:16,700 --> 00:46:27,340
+things one is safety people also refer to as soundness and it also talk about something
+
+391
+00:46:27,340 --> 00:46:39,460
+called precision and they also refer to as completeness so safety or soundness means
+
+392
+00:46:39,460 --> 00:46:46,539
+that I should not compute a solution which can lead to a wrong result for my client whoever is
+
+393
+00:46:46,539 --> 00:46:55,180
+using this analysis right and precision tells me or accuracy tells me how close am I to the
+
+394
+00:46:55,179 --> 00:47:00,500
+actual solution so I have the optimal right solution sitting somewhere how close am I to
+
+395
+00:47:00,500 --> 00:47:09,259
+the right solution am I there or am I off that right so if I really have a precise solution I
+
+396
+00:47:09,259 --> 00:47:15,179
+will be able to do all the optimizations I would have liked to do if I have a safe solution I will
+
+397
+00:47:15,179 --> 00:47:21,699
+never transform my code in a wrong manner right so these are extremely important just keep it in
+
+398
+00:47:21,699 --> 00:47:42,939
+your mind whenever you are doing anything with program analysis all good okay so right so it
+
+399
+00:47:42,940 --> 00:47:51,659
+was in the slide itself so you have precision we have safety and the next thing as like which
+
+400
+00:47:51,659 --> 00:47:58,019
+is important for engineers is scalability that how much can you scale it what is the efficiency
+
+401
+00:47:58,019 --> 00:48:06,500
+of this algorithm what are the largest like how large is the piece of code I can handle right so
+
+402
+00:48:06,500 --> 00:48:11,099
+this is from it so these are important from the of course from the application and the
+
+403
+00:48:11,099 --> 00:48:17,699
+theoretical perspective this is again important from the system building perspective so we have
+
+404
+00:48:17,699 --> 00:48:21,619
+talked about it so which set will work for us best the smallest or the largest the second
+
+405
+00:48:21,619 --> 00:48:29,179
+question is does such the smallest solution exist or rather even solution exists and right
+
+406
+00:48:29,179 --> 00:48:36,019
+so one intuition you can carry forward is that the best solution so now if you just somehow somebody
+
+407
+00:48:36,019 --> 00:48:42,300
+gives you all possible solutions magically right the way to get the best solution would
+
+408
+00:48:42,300 --> 00:48:48,699
+be to take the intersection of all this that is surely going to be the best solution right so
+
+409
+00:48:48,699 --> 00:48:56,900
+just keep that intuition in mind but let us not try to devise a strategy to do this business so
+
+410
+00:48:56,900 --> 00:49:02,940
+this is algorithm that you were trying to propose right so this is algorithm is that you see your
+
+411
+00:49:02,940 --> 00:49:12,980
+solution sets by sure sure solutions like solutions which are surely correct surely safe right no not
+
+412
+00:49:12,980 --> 00:49:20,300
+really so sure set I meant here was the what the set that you know is correct from the onset like
+
+413
+00:49:20,300 --> 00:49:25,420
+for instance for reaching definitions I know that at the beginning of the program my inset
+
+414
+00:49:25,420 --> 00:49:31,380
+at the entry point of the program is going to be large that I know right I know that for a
+
+415
+00:49:31,380 --> 00:49:37,220
+liveness analysis at the end of the after the program terminates my live sets are going to
+
+416
+00:49:37,220 --> 00:49:44,900
+be empty that I know right so these are things I already know so I can just simply plug in those
+
+417
+00:49:44,900 --> 00:49:54,860
+values second is I initialize my sets by some values now that is a next question okay so let's
+
+418
+00:49:54,860 --> 00:50:00,420
+answer that also so we have reaching definition sets so okay let me just complete algorithm so
+
+419
+00:50:00,420 --> 00:50:06,059
+then what we do is we we initialize these sets all of the in and out so let's go back to the
+
+420
+00:50:06,059 --> 00:50:17,659
+equation sets yeah so these are the set of equations right so what we simply do is we
+
+421
+00:50:17,659 --> 00:50:22,180
+we know the gen and kill sets anyway so the in and out sets I don't know but I know the
+
+422
+00:50:22,180 --> 00:50:28,700
+inset at the beginning of the entry block for every other block what we simply do what we
+
+423
+00:50:29,099 --> 00:50:35,819
+do is we plug in the we initialize it with some set either the empty set or the universal set it
+
+424
+00:50:35,819 --> 00:50:44,939
+will be one of those two things right and then you will run this fixed point iteration right so
+
+425
+00:50:44,939 --> 00:50:48,899
+every time you run the fixed point iteration the solutions would change because the for instance
+
+426
+00:50:48,899 --> 00:50:53,939
+the in is empty if we force the out to become empty not empty sorry the out to become something
+
+427
+00:50:53,940 --> 00:50:59,860
+right whatever the out becomes that will force its children to become something right so that
+
+428
+00:50:59,860 --> 00:51:07,019
+will change something in the in the structure of these sets you feed that again keep on doing it
+
+429
+00:51:07,019 --> 00:51:13,780
+till at a point there is no change to the set of solutions and that is exactly my test that all my
+
+430
+00:51:13,780 --> 00:51:19,300
+solutions will be satisfied then I've got my solution that is this strategy we will follow so
+
+431
+00:51:19,300 --> 00:51:23,940
+the last question we have to answer is that what should we initialize our sets with should
+
+432
+00:51:23,940 --> 00:51:29,500
+it be an empty set or should it be a universal set for each definitions just think about it and tell
+
+433
+00:51:49,300 --> 00:52:10,700
+me okay I got one vote for empty set two votes for empty nobody says universal this is the game
+
+434
+00:52:10,699 --> 00:52:38,139
+man it's okay why is it empty set why not universal set excellent I think all of you
+
+435
+00:52:38,139 --> 00:52:43,619
+got answers right so essentially if I substitute it with the universal set what will happen is
+
+436
+00:52:43,619 --> 00:52:50,460
+that all these d i's that I did not want they'll just stick around I'll never be able to remove
+
+437
+00:52:50,460 --> 00:52:56,299
+them so one thing is sure that this set of equations no matter what always gives me a
+
+438
+00:52:56,299 --> 00:53:02,619
+solution which is the correct solution right but I would like the best solution right so if I
+
+439
+00:53:02,619 --> 00:53:08,099
+already give it a solution which is a bad solution the system would be stabilized the system will
+
+440
+00:53:08,099 --> 00:53:13,579
+not even move so I should put it in an uncomfortable position where it does system solution is not
+
+441
+00:53:13,579 --> 00:53:18,380
+correct it's not even a correct solution so then it will do something and build up a set and
+
+442
+00:53:18,380 --> 00:53:24,579
+eventually the solution is going to be a solution which is going to be a safe solution right so
+
+443
+00:53:24,579 --> 00:53:30,299
+that is why I do not want to initialize with the universal set because as you said like in the
+
+444
+00:53:30,299 --> 00:53:36,339
+universal set whichever definitions would satisfy such condition they will simply stick around and
+
+445
+00:53:36,820 --> 00:53:42,220
+I'll still get a solution but I'll get a bad solution I'll not get the smallest in that
+
+446
+00:53:42,220 --> 00:53:54,220
+environment right yeah because see that that is the guide idea right so when we apply these
+
+447
+00:53:54,220 --> 00:54:01,420
+equations when we apply these equations actually if you think about it I do not because I have
+
+448
+00:54:01,420 --> 00:54:07,579
+got rid of the control flow graph now these are just set of equations for me the there is no
+
+449
+00:54:07,579 --> 00:54:12,740
+ordering there there are just a set of equations it's a set of equation not a sequence of equations
+
+450
+00:54:12,740 --> 00:54:20,139
+so now the way I do my updates that does not matter I can do this updates in any way and to
+
+451
+00:54:20,139 --> 00:54:25,059
+do that my right hand side should also already have some assignments otherwise I will not be
+
+452
+00:54:25,059 --> 00:54:32,579
+able to compute the left hand side so I'll just fix my short set which is my beginning of my basic
+
+453
+00:54:32,579 --> 00:54:42,779
+block to the correct solution and everything else while I initialize to empty right so now I am free
+
+454
+00:54:42,779 --> 00:54:48,380
+to choose any equation I will just update it and I'll let go of that I'll pick anything updated
+
+455
+00:54:48,380 --> 00:54:56,820
+because I have already have things initialized I do not have to bother outsets depend on insets
+
+456
+00:54:56,820 --> 00:55:05,780
+and insets also depend on outsets because of this guy right so the beginning the in depends on the
+
+457
+00:55:05,780 --> 00:55:15,740
+outs of the free dc sets and at the end out depends on the in of the current how
+
+458
+00:55:19,340 --> 00:55:27,980
+no it is you're just putting it as empty for the time yeah yeah huh so in this case when you put
+
+459
+00:55:27,980 --> 00:55:31,820
+the in the left hand side will be a different it will be empty and the right hand side will
+
+460
+00:55:31,820 --> 00:55:40,460
+be get computed and that is what is doing this this thing right this chaotic thing right so
+
+461
+00:55:40,460 --> 00:55:45,500
+so whenever like here you will say you are whenever you are computing this in guy you
+
+462
+00:55:45,539 --> 00:55:50,940
+will assume your out which is nothing but into to be empty but you will get a new value for in
+
+463
+00:55:50,940 --> 00:55:59,579
+very good question let's see why should it stabilize okay so so this is referred to a
+
+464
+00:55:59,579 --> 00:56:04,940
+six point computation I mean just again don't bother now let's try to sketch the whole algorithm
+
+465
+00:56:04,940 --> 00:56:13,059
+exactly what are we trying to do so to begin with we start with doing initialization I forget to
+
+466
+00:56:13,059 --> 00:56:25,659
+and that works because it is empty so yeah so so this is my initialization so I initialize all
+
+467
+00:56:25,659 --> 00:56:33,980
+my insets to empty outsets I put them to gen I mean I'll see I hoping to save an iteration
+
+468
+00:56:33,980 --> 00:56:39,299
+that's all like maybe one more iteration it would have stabilized one iteration earlier it will stabilize
+
+469
+00:56:39,300 --> 00:56:44,060
+again so that's not the marriage don't work I could have just done it empty also would not
+
+470
+00:56:44,060 --> 00:56:50,140
+have changed anything okay so next what should I do how should I set it up so this is my
+
+471
+00:56:50,140 --> 00:56:59,539
+initialization after this how should I set it up for the entry block is not the universal set
+
+472
+00:56:59,539 --> 00:57:03,700
+the entry block is also the empty set right reaching definitions is empty at the beginning
+
+473
+00:57:03,699 --> 00:57:10,699
+so this takes care of this but you are right when I should have us in other cases in any other
+
+474
+00:57:10,699 --> 00:57:14,500
+cases it could be the initialization set and the actual value may be different so then I will have
+
+475
+00:57:14,500 --> 00:57:23,139
+to set it agree separately but in this case it works so I don't have to bother so then what do
+
+476
+00:57:23,139 --> 00:57:31,259
+I need to do so I need to so let's say now I'll use this flag to say that have I reached a solution
+
+477
+00:57:31,580 --> 00:57:38,820
+so I will simply set this flag to whenever I have reached a solution what is a solution a solution
+
+478
+00:57:38,820 --> 00:57:44,620
+is basically remember what is the solution the solution is the in and out of all basic blocks
+
+479
+00:57:44,620 --> 00:57:54,780
+not one basic block right so I have to check if none of these guys change then I will say that
+
+480
+00:57:55,019 --> 00:58:03,540
+okay I have got a solution you understand that right so the solution is not the in or out of
+
+481
+00:58:03,540 --> 00:58:08,380
+one basic block it's the in and out of the all the basic blocks right so you have to run through
+
+482
+00:58:08,380 --> 00:58:12,500
+the whole basic all the basic blocks so your check for termination is what run through all
+
+483
+00:58:12,500 --> 00:58:19,580
+the basic blocks ensure there is no change in any of them right so that is my flag then what do I do
+
+484
+00:58:19,579 --> 00:58:29,460
+yes we'll apply the equations so basically we'll keep on doing it till the flag stabilizes we'll
+
+485
+00:58:29,460 --> 00:58:35,059
+start with taking flag as false I don't know why I did that but you get no no I wanted to enter
+
+486
+00:58:35,059 --> 00:58:46,460
+the value so okay so now so this is where the actual business is happening so for all my basic
+
+487
+00:58:46,460 --> 00:58:55,139
+blocks in my set of basic blocks n I simply compute a new value of in depending on the
+
+488
+00:58:55,139 --> 00:59:01,579
+outs that I get see here the I've not used the older in right that is was one conclusion
+
+489
+00:59:01,579 --> 00:59:08,340
+somebody had and then I then I check if this new in that I got is it different than the earlier
+
+490
+00:59:08,340 --> 00:59:15,059
+in or not right if it is different than the earlier in then I have to continue my flag cannot
+
+491
+00:59:15,059 --> 00:59:23,420
+become true sorry the flag flag will remain false I mean it will not which which side did I see yeah
+
+492
+00:59:23,420 --> 00:59:34,139
+okay you got it right so okay so then so if new in is not equal to in then I set my flag to true
+
+493
+00:59:34,139 --> 00:59:39,980
+that means I I have still not done yet I again need to recompute my solutions and I update my
+
+494
+00:59:39,980 --> 00:59:47,639
+equations right I update my in B to be the new in and correspondingly update my out to the new
+
+495
+00:59:47,639 --> 01:00:00,260
+value that is all that there is very simple very clean very neat right so stare at this for a
+
+496
+01:00:00,260 --> 01:00:09,860
+moment make sure you understand it so notice that this is the part which is actually talking
+
+497
+01:00:09,860 --> 01:00:18,620
+about one solution right this is the part because solution is remember the solution was all the
+
+498
+01:00:18,620 --> 01:00:24,620
+ins and outs right so this is the part which is actually talking about one solution and if
+
+499
+01:00:24,620 --> 01:00:29,060
+the solution changes we go back in the loop so this loop is only just checking one solution this
+
+500
+01:00:29,059 --> 01:00:44,940
+is check solution okay so so equations of the form like okay we will come to fixed point theory
+
+501
+01:00:44,940 --> 01:00:49,340
+we will talk so these are these equation these sort of equations where things can depend on
+
+502
+01:00:49,340 --> 01:00:55,179
+itself so these equations are called fixed point equations and a solution such that f of x equals
+
+503
+01:00:55,179 --> 01:01:01,139
+x is referred to as a solution to these equations which is essentially what it means is so it's
+
+504
+01:01:01,139 --> 01:01:07,259
+sort of it has reached a saddle point it does not change from there that's what it's called a fixed
+
+505
+01:01:07,259 --> 01:01:13,419
+point it just gets fixed there not unique it's just that the solution doesn't move from there so
+
+506
+01:01:13,419 --> 01:01:18,899
+essentially what it means means is that see fx equals x it means that if I take x and I apply
+
+507
+01:01:19,380 --> 01:01:25,900
+again I get the same x back so if a solution x0 satisfies this particular condition then I would
+
+508
+01:01:25,900 --> 01:01:34,300
+say that x0 is a fixed point solution of x of the function f so fixed point theory is a is a theory
+
+509
+01:01:34,300 --> 01:01:48,380
+itself it's a lot so it's essentially studies such functions well no it says that the definition is
+
+510
+01:01:48,380 --> 01:01:56,980
+that of a solution x0 is referred to as the fixed point solution of a function f if applying
+
+511
+01:01:56,980 --> 01:02:03,900
+x0 to f gives you x0 back that's that's a definition and we are interested in this case
+
+512
+01:02:03,900 --> 01:02:13,099
+we are interested fine fine solutions and this f in this case is the vector of all all your meet
+
+513
+01:02:13,099 --> 01:02:19,659
+and join equations so it's not one equation it's the the whole vector is one question
+
+514
+01:02:19,659 --> 01:02:41,019
+I am not bothered to ask it okay are we are we good so yeah so I think we are doing a very
+
+515
+01:02:41,019 --> 01:02:46,099
+good job of like discussing and so you guys should also do that maybe just make sure that
+
+516
+01:02:46,099 --> 01:02:56,259
+everybody understands and then we will get to the class so do we understand this algorithm
+
+517
+01:02:56,259 --> 01:03:01,460
+completely any doubt anywhere even a little doubt because we will go back and implement
+
+518
+01:03:01,460 --> 01:03:11,900
+this is an LLVM and we will see something happening we are assuming yeah for time being
+
+519
+01:03:11,900 --> 01:03:15,500
+we are assuming only one instruction so only thing I have not told you is I have not told
+
+520
+01:03:15,500 --> 01:03:19,900
+you how to compute the gen and kill sets for multiple statement that is the only thing remaining
+
+521
+01:03:19,900 --> 01:03:27,019
+to be told if that is told everything else works okay if you just assume that somebody gives you
+
+522
+01:03:27,019 --> 01:03:32,380
+a general tool set even for a multi statement basic block everything else works right we do
+
+523
+01:03:32,380 --> 01:03:38,780
+not know how to compute the general tool sets for a multi statement basic block right now this
+
+524
+01:03:38,780 --> 01:03:55,300
+works for you all good okay can I move okay now is the big question very good
+
+525
+01:03:55,300 --> 01:04:09,260
+okay so okay I hope others have not heard it so okay look at this data at the solution
+
+526
+01:04:09,260 --> 01:04:17,620
+and look at this algorithm and tell me that why should this halt why should I ever like
+
+527
+01:04:17,620 --> 01:04:23,460
+there was this question right this system equations why should it ever converge right
+
+528
+01:04:23,659 --> 01:04:47,019
+so stare at this and tell me why should it
+
+529
+01:04:47,019 --> 01:04:52,820
+so you should tell me that what happens in every iteration what happens to this solution
+
+530
+01:04:53,340 --> 01:05:03,300
+that I get what happens to that solution in every iteration excellent excellent either the set
+
+531
+01:05:03,300 --> 01:05:10,380
+sets remain the same or they increase in size they can never ever decrease in size that you
+
+532
+01:05:10,380 --> 01:05:16,460
+are sure why is that because I am taking union of for ins I am taking the union of outs you
+
+533
+01:05:16,460 --> 01:05:22,460
+can only increase things cannot decrease things right and the gen sets are the same the gen and
+
+534
+01:05:22,460 --> 01:05:27,179
+kill are the same when I computing the outs right so in the previous iteration if that will not
+
+535
+01:05:27,179 --> 01:05:31,900
+remove something in the next iteration also they cannot remove the sink the same thing right it
+
+536
+01:05:31,900 --> 01:05:35,420
+cannot happen that even does not remove the first iteration but even got in the second iteration
+
+537
+01:05:35,420 --> 01:05:40,500
+that cannot happen right it is the same function the gen and the kill is the same are the same
+
+538
+01:05:40,500 --> 01:05:47,860
+for every basic block right so can you are you convinced that the in and the outsets can only
+
+539
+01:05:47,860 --> 01:05:54,460
+increase in size they cannot decrease in size okay good so they can only increase in size what
+
+540
+01:05:54,460 --> 01:06:00,539
+is the largest size that they can grow to the number of definitions the universal set so there
+
+541
+01:06:00,539 --> 01:06:08,340
+is a there is there is upper bound and there is upper one to this also so so so it is bounded by
+
+542
+01:06:08,340 --> 01:06:15,980
+the totals the universal set of definitions right so eventually if it keeps on increasing at most in
+
+543
+01:06:15,980 --> 01:06:20,619
+the worst case it can go and hit the ceiling if there is a ceiling right the ceiling is a set of
+
+544
+01:06:20,619 --> 01:06:25,219
+all definitions right so it cannot grow beyond that so this guy someday or the other has to halt
+
+545
+01:06:25,219 --> 01:06:38,659
+right so this algorithm will surely terminate are we good with the proof do you understand
+
+546
+01:06:38,659 --> 01:06:44,219
+the proof okay now can you isolate the things in the proof what are the two things I used to do
+
+547
+01:06:44,219 --> 01:06:49,339
+the proof what are the two properties of these functions or this type of analysis that I used
+
+548
+01:06:49,339 --> 01:06:57,539
+in the proof there are two very important things I used and we will see that in when we really
+
+549
+01:06:57,539 --> 01:07:02,779
+formalize it properly what are the two important things I we discussed you used the can you isolate
+
+550
+01:07:02,779 --> 01:07:07,819
+those I am saying two so you cannot tell me so first is we looked at the nature of the function
+
+551
+01:07:07,819 --> 01:07:13,379
+right these are the in and out functions I did not want to tell it but I think I should tell the
+
+552
+01:07:13,820 --> 01:07:23,500
+what is the function here so essentially so we are talking about the fixed point computation
+
+553
+01:07:23,500 --> 01:07:34,900
+right so let us let me just define what we mean by a fixed point solution so if for a function
+
+554
+01:07:35,139 --> 01:07:52,740
+I say that is a fixed point solution if f of gives me back right just take it as a definition
+
+555
+01:07:52,740 --> 01:08:02,260
+this is a definition so I say that is a fixed point solution of if I apply again and give me
+
+556
+01:08:02,260 --> 01:08:11,260
+on applying f to x0 again gives me x0 again gives me x0 back then I say that x0 is a fixed
+
+557
+01:08:11,260 --> 01:08:16,820
+point solution does it does it make sense so here if you think about it I we are actually
+
+558
+01:08:16,820 --> 01:08:25,980
+computing a fixed point solution the solution it looks like this there is a in one in b1 sitting
+
+559
+01:08:25,979 --> 01:08:36,819
+here out b1 sitting here in b2 sitting here out b2 sitting here so this is my these are my
+
+560
+01:08:36,819 --> 01:08:46,259
+solutions right what is my function what is my function f no no no mathematically what is my
+
+561
+01:08:46,259 --> 01:08:54,339
+function now so again look at it so this is what my x0 looks like so my f should be able to take
+
+562
+01:08:54,340 --> 01:09:00,699
+this x0 and give me an updated value so what does my f look like what is my f what is my function f
+
+563
+01:09:00,699 --> 01:09:12,380
+so if you think about this algorithm what is this algorithm it says that while so I initialize x0
+
+564
+01:09:12,380 --> 01:09:19,579
+to some in some initialization we will theoretically say what that is one moment and while not stabilized
+
+565
+01:09:19,579 --> 01:09:35,460
+I say x is equal to f of x0 f of x sorry so I they put x to some initialization I do some
+
+566
+01:09:35,460 --> 01:09:45,659
+initialization of x and then y while this does not hold not stabilized means while x is not equal
+
+567
+01:09:45,659 --> 01:09:56,659
+to f of x I say I apply f to it again and do and put it back in x essentially this is what we are
+
+568
+01:09:56,659 --> 01:10:07,340
+doing nothing more than this you should be able to see this that is all we are doing nothing nothing
+
+569
+01:10:07,340 --> 01:10:15,539
+more serious to them now tell me what is my so this is the computation of f this is the update
+
+570
+01:10:15,539 --> 01:10:33,739
+of f so can you tell me what is this f no no no so you understand my x0 is a vector of these
+
+571
+01:10:33,739 --> 01:10:38,939
+guys right so my f should also take a vector of these guys and give out a vector of these guys
+
+572
+01:10:45,539 --> 01:10:55,460
+so what does my f look like I will keep on repeating it so why what is my f
+
+573
+01:10:55,460 --> 01:11:07,340
+so what should I what if my x0 looks like this my f should be able to take this vector and
+
+574
+01:11:07,340 --> 01:11:16,300
+spit out a similar vector the updated vector for each value of the vector
+
+575
+01:11:16,300 --> 01:11:29,500
+mathematically tell me what is f you guys are trying to sneak out I will not let you
+
+576
+01:11:29,500 --> 01:11:49,380
+no no f is a function now so to say what is that ah somebody said something set of all
+
+577
+01:11:49,380 --> 01:11:59,980
+outs no but f is a function f is a function look at this look at this thing I wrote compare with
+
+578
+01:11:59,980 --> 01:12:12,380
+whatever you see on the screen on left hand side this this is this is all that we are doing this
+
+579
+01:12:12,380 --> 01:12:15,980
+three lines of code is all we are doing we wrote ten lines that is a different matter so you have
+
+580
+01:12:15,979 --> 01:12:17,579
+to somehow summarize those ten lines into this
+
+581
+01:12:17,579 --> 01:12:46,539
+okay so f is basically that like if I want to compute enough b
+
+582
+01:12:46,539 --> 01:12:55,500
+enough b1 what is enough b1 it is empty set what is out of b1 out of b1 is enough
+
+583
+01:12:55,500 --> 01:13:15,100
+ha jen of b1 jen of b1 then union enough b1 enough b1 minus kill of b1 comma so my function
+
+584
+01:13:15,100 --> 01:13:23,100
+is basically a vector over all these mutant update functions and I apply this function f
+
+585
+01:13:23,100 --> 01:13:29,700
+by doing a component by component application of these functions do you see what is happening
+
+586
+01:13:29,700 --> 01:13:37,579
+this is the simplest form I could think of so essentially think of this function f itself being
+
+587
+01:13:37,579 --> 01:13:44,579
+a vector of functions right every element of that vector of functions every element is a
+
+588
+01:13:44,579 --> 01:13:53,220
+function and that function applies updates the respective element in the solution right can you
+
+589
+01:13:53,220 --> 01:13:58,220
+see this so this empty is a constant function this is also a function which takes anything
+
+590
+01:13:58,220 --> 01:14:04,859
+and gives you an empty function right so it will take this and give you an empty function again
+
+591
+01:14:04,859 --> 01:14:11,059
+this guy will take this and give you an updated solution for this this guy will take this and
+
+592
+01:14:11,060 --> 01:14:16,100
+give you updated solution for this so it is a function of vector it is a vector of functions
+
+593
+01:14:16,100 --> 01:14:22,340
+which is applied on the vector of solutions or the solution vector gives you an output
+
+594
+01:14:22,340 --> 01:14:34,100
+solution vector does it make sense to communicate it now it is not obligated right make sense look
+
+595
+01:14:34,100 --> 01:14:38,980
+at this particular loop that is exactly what this guy is doing it is just running over my vector
+
+596
+01:14:38,979 --> 01:14:44,339
+of functions and updating each respective element in the solution and giving you this
+
+597
+01:14:44,339 --> 01:14:49,419
+particular update exactly this particular update is what this guy's doing nothing more
+
+598
+01:14:49,420 --> 01:15:16,340
+right yeah 9 light wheel is wrong you are right so this I did in my taxi so the shaking
+
+599
+01:15:16,340 --> 01:15:29,500
+too much yeah so this should be this should be in B minus kill of B union j.
+
+600
+01:15:29,500 --> 01:15:48,979
+Thank you done got it so essentially we have figured out we are doing a so essentially we
+
+601
+01:15:48,979 --> 01:15:52,859
+are not doing something very serious we are doing something very simple it just the function is
+
+602
+01:15:52,859 --> 01:15:58,899
+complicated that is all it is right so now we are we know that we are able to compute the
+
+603
+01:15:58,899 --> 01:16:06,899
+fixed point solution and we know that the solution halts do we know that we get the
+
+604
+01:16:06,899 --> 01:16:31,219
+smallest solution can you argue that yeah but half you get them what is the argument why can
+
+605
+01:16:31,220 --> 01:16:45,220
+not a arbitrary definition speak in okay so one way to do these proofs how can you do actually
+
+606
+01:16:45,220 --> 01:16:56,659
+mathematically do this proof how can you really write a proper nice proof okay how will you do
+
+607
+01:17:26,659 --> 01:17:34,859
+maybe what you are saying is right but you have to formalize it better so what is the type of
+
+608
+01:17:34,859 --> 01:17:44,340
+what is the proof strategy that you use no you cannot do so there is no direct this thing so
+
+609
+01:17:44,340 --> 01:17:50,619
+what sort of reasoning to use what are the proof techniques to know of induction contradiction
+
+610
+01:17:50,619 --> 01:18:03,180
+and so what is the sort of proof will work here so there is a loop here so whenever you
+
+611
+01:18:03,180 --> 01:18:11,659
+have a loop then what is works well induction works well right so what you know at the beginning
+
+612
+01:18:11,659 --> 01:18:19,380
+of before you enter the while loop is that is smaller solution smaller than the original
+
+613
+01:18:19,380 --> 01:18:25,100
+solution right we it does not contain an extra definition it does not contain an extra definition
+
+614
+01:18:25,100 --> 01:18:31,779
+that we know why because we have initially empty and generally there right that we know so my
+
+615
+01:18:31,779 --> 01:18:40,020
+base case holds right so my theorem that in trying to prove is that I do not have an extra
+
+616
+01:18:40,020 --> 01:18:45,859
+definition in any of my sets in the beginning the base case is that I have not entered the loop I
+
+617
+01:18:45,899 --> 01:18:53,179
+have taken zero iterations and my solution is solution holds yeah the lemma holds the theorem
+
+618
+01:18:53,179 --> 01:18:58,819
+holds once good that holds because I have not everything is empty so I don't care now you have
+
+619
+01:18:58,819 --> 01:19:06,299
+to say that how do you apply induction so you use an induction hypothesis so what is the induction
+
+620
+01:19:06,300 --> 01:19:20,659
+hypothesis right so you use an induction hypothesis which says that for any iterations for any
+
+621
+01:19:20,659 --> 01:19:26,659
+any iterations of the loop I do not have an extra definition yet that is the assumption and then
+
+622
+01:19:26,659 --> 01:19:32,420
+I do the inductive step the inductive step says that given that after any iterations I did not
+
+623
+01:19:32,420 --> 01:19:38,180
+have not introduced a new definition after an additional step I will still not introduce a new
+
+624
+01:19:38,180 --> 01:19:46,659
+definition right so can you try that on this very interesting area it's it's a theoretical area and
+
+625
+01:19:46,659 --> 01:19:53,020
+it's a like practical area right if you just do theory it's not interesting if you just do like
+
+626
+01:19:53,020 --> 01:19:57,020
+applications or build implementations it's not interesting you have to do both you have to do
+
+627
+01:19:57,020 --> 01:20:01,779
+proofs and you have to also build things right so we will be to improve now and afternoon we will
+
+628
+01:20:01,779 --> 01:20:06,979
+build things yeah so the proof you will do at home you try to but you have to understand
+
+629
+01:20:06,979 --> 01:20:13,179
+the structure of the proof right this is exactly what you have to do okay so we know that the last
+
+630
+01:20:13,179 --> 01:20:17,019
+thing is that what is the complexity of this algorithm maybe maybe maybe what we should do
+
+631
+01:20:17,019 --> 01:20:23,659
+is that let's try to think about the complexity of this particular step rather this particular
+
+632
+01:20:23,659 --> 01:20:30,979
+step right so these are two important steps that are happening in between right so
+
+633
+01:20:31,419 --> 01:20:39,219
+so this particular step is actually for all basic blocks it is doing some unions and some
+
+634
+01:20:39,219 --> 01:20:46,819
+in some updates and so on so before coming to this let's think about the data structures
+
+635
+01:20:46,819 --> 01:20:51,899
+because then the analysis becomes maybe we can do something more tighter so what what do you can
+
+636
+01:20:51,899 --> 01:20:56,319
+you think how can we represent these guys how can we represent these sets so that I can do
+
+637
+01:20:56,319 --> 01:21:02,000
+this updates fast right I have this union sitting here and we have a differencing operator sitting
+
+638
+01:21:02,000 --> 01:21:07,960
+remember what you need to do these are just set manipulations in and outs are sets okay I see what
+
+639
+01:21:07,960 --> 01:21:14,479
+you're saying so you're saying B out of B is a hash map yeah okay agreed but I'm saying what is
+
+640
+01:21:14,479 --> 01:21:21,519
+going to be my what is the how will represent a set itself every of these all these guys are sets
+
+641
+01:21:21,520 --> 01:21:27,400
+right so enough be okay I see what you're saying you're saying in is nothing but a set from basic
+
+642
+01:21:27,400 --> 01:21:34,600
+blocks to something to a set given the basic block I would like the set the set of definition
+
+643
+01:21:34,600 --> 01:21:44,720
+that it has right so I'm asking what how will you represent this set of definitions list of things
+
+644
+01:21:45,199 --> 01:21:51,440
+list is not a like linked list and a what what can you use what should you use so this is what
+
+645
+01:21:51,440 --> 01:21:59,520
+is called a bit set it's a very common data structure in almost all compiler frameworks
+
+646
+01:21:59,520 --> 01:22:03,920
+right so essentially for a set I need to just say that it is a member of that set or is it
+
+647
+01:22:03,920 --> 01:22:11,560
+not a member of that set right so I will allocate a vector of bits of the size of my universal set
+
+648
+01:22:11,560 --> 01:22:18,800
+right for every element for every set I will put the respective bit bit on if it is a member
+
+649
+01:22:18,800 --> 01:22:24,400
+otherwise off it is not a member right so you understand what you think right so the d1 d2
+
+650
+01:22:24,400 --> 01:22:35,240
+d3 d4 I will just order them in some way and I'll create a vector of bits b1 b2 b3 b4 and I will
+
+651
+01:22:35,240 --> 01:22:40,760
+set it to 1 if I want d2 to be in the set and set it to 0 if I don't want it to be in the set
+
+652
+01:22:40,760 --> 01:22:46,360
+so now I can have these bit strings or bit vectors which will tell me what are the elements
+
+653
+01:22:46,360 --> 01:22:50,960
+in that set of course I can only do it for a bounded side size set I cannot do it for an
+
+654
+01:22:50,960 --> 01:22:58,440
+unbounded sense if the universal set is bounded right so now assuming that I use bit sets how do
+
+655
+01:22:58,440 --> 01:23:08,520
+I get how do I do union over bit sets will be a or an or operation is a union over bit sets
+
+656
+01:23:08,520 --> 01:23:17,720
+extremely fast bit operations are really fast right and what will be intersection and differencing
+
+657
+01:23:17,720 --> 01:23:24,920
+you can figure out you can write that also as intersection and negation and things like that
+
+658
+01:23:24,920 --> 01:23:33,760
+right so you can actually do these operations really fast using when you have bit sets so now
+
+659
+01:23:33,760 --> 01:23:38,680
+let's assume that my sets are represented as represented as bit sets now can you look at the
+
+660
+01:23:38,680 --> 01:23:42,880
+algorithm and tell me the total cost of this so you can assume that I can do this bit set
+
+661
+01:23:42,880 --> 01:23:51,199
+of operations in constant time so I am NOT so essentially what I have thrown away is the size
+
+662
+01:23:51,199 --> 01:23:57,199
+of my universal set I don't care how many definitions were there right they are represented
+
+663
+01:23:57,199 --> 01:24:02,640
+by bit set and I can do bit set operations in a in constant time now what is the complexity
+
+664
+01:24:02,640 --> 01:24:07,680
+of this so the definition loop you don't have to bother about so the set of definition would
+
+665
+01:24:07,680 --> 01:24:11,480
+come in when you want to do these business right when you have to do a union or minus
+
+666
+01:24:11,480 --> 01:24:17,280
+that is where the size of the the size of the set matters but I am saying because we are presenting
+
+667
+01:24:17,280 --> 01:24:21,360
+them as bit sets we can do that in constant time so you don't really need to worry about
+
+668
+01:24:21,359 --> 01:24:37,759
+the number of definitions you got what I am saying number of blocks yes so this iteration
+
+669
+01:24:37,760 --> 01:24:53,159
+move this is this inner thing happens for for the number of blocks and the outer thing so that
+
+670
+01:24:53,159 --> 01:24:59,000
+is one estimate at most the number of definitions because I can okay that's why you were saying
+
+671
+01:24:59,000 --> 01:25:05,280
+definition I see so because every time assuming that I climb by only putting one definition and
+
+672
+01:25:06,000 --> 01:25:11,559
+then it is number of basic blocks into number of definitions but that's a bad estimate can we do
+
+673
+01:25:11,559 --> 01:25:27,880
+better number of edges inside the value so but but but that can create a long chain right you
+
+674
+01:25:27,880 --> 01:25:38,319
+can have a long chain of dependencies which again goes back to a loop yes that is simple
+
+675
+01:25:38,319 --> 01:25:42,800
+right computation inside is the number of basic blocks because all these are constant
+
+676
+01:25:42,800 --> 01:25:51,440
+so these are so okay one thing we assume is that my graphs are like control flow graphs are generally
+
+677
+01:25:51,440 --> 01:25:57,159
+small graphs right so the in degree and out degrees are not high right so because like what
+
+678
+01:25:57,159 --> 01:26:02,840
+do we say if condition branches into two switch cases are not so much but even we do not have
+
+679
+01:26:02,840 --> 01:26:08,599
+large switch cases a lot of times so we can assume that we can assume these relax these things and
+
+680
+01:26:08,599 --> 01:26:13,639
+we can assume that these are constant time so even I'll assume this can be done in constant
+
+681
+01:26:13,639 --> 01:26:17,760
+time let us assume this can be done in constant so this can be done in constant time this can
+
+682
+01:26:17,760 --> 01:26:23,439
+be done in constant let's not even bother about those things so this now goes for the number of
+
+683
+01:26:23,439 --> 01:26:28,799
+iterations right so now the question is how many times outer loop goes that is my main question
+
+684
+01:26:28,799 --> 01:26:34,719
+actually so one estimate for the outer loop was that number of definitions because I can say every
+
+685
+01:26:34,719 --> 01:26:41,639
+time I like maybe I'm really bad and I had I have to at most add one definition rather at least add
+
+686
+01:26:41,639 --> 01:26:47,599
+one definition right but then think about it you have to add at least one definition your solution
+
+687
+01:26:47,600 --> 01:26:54,440
+set is not one set it's a set of sets or a vector of sets it may happen that you add a definition to
+
+688
+01:26:54,440 --> 01:26:59,440
+one of these sets which gets propagated to each of these sets and then this guy puts another
+
+689
+01:26:59,440 --> 01:27:04,560
+definition to the first set again it propagates so the question is how many times my basic blocks
+
+690
+01:27:04,560 --> 01:27:14,800
+have to get updated that is what I am asking so that is like you will tell me tomorrow what what
+
+691
+01:27:14,800 --> 01:27:22,960
+goes on with this okay third question is like if you have to implement this algorithm so here I
+
+692
+01:27:22,960 --> 01:27:27,960
+do not mention order on these basic blocks I'm not saying I just say pick one basic block and
+
+693
+01:27:27,960 --> 01:27:32,079
+update it pick one basic block and update that's all I worry about right I'm just worried about
+
+694
+01:27:32,079 --> 01:27:36,720
+that every iteration of the while loop I update all my basic blocks that is all I care about I
+
+695
+01:27:36,720 --> 01:27:41,199
+have not given an iteration order on the basic blocks what do you think will be the right
+
+696
+01:27:41,199 --> 01:27:45,840
+iteration order what will be what do you think will be a good iteration order period before
+
+697
+01:27:45,840 --> 01:27:54,559
+child is not a graph traversal you have to tell me bfs bfs so essentially maybe but that is what
+
+698
+01:27:54,559 --> 01:28:03,159
+you wanted to say so say essentially what you do so what is the idea essentially you would like
+
+699
+01:28:03,159 --> 01:28:08,720
+to do some sort of a so there is a cycle so you cannot essentially get a topological order but
+
+700
+01:28:08,720 --> 01:28:16,840
+if I use my dominator information can I do something or what if I look at the cycle free
+
+701
+01:28:16,840 --> 01:28:25,560
+graph if I just remove the cycles and topological sort on the on the cycle free graph that looks
+
+702
+01:28:25,560 --> 01:28:31,119
+to be a good order because exactly what you are saying that I would have computed the the
+
+703
+01:28:31,119 --> 01:28:36,600
+predecessors before I look at their children so I would have not so the and what would have
+
+704
+01:28:36,600 --> 01:28:44,640
+the worst order the reverse of this right I keep on I have the like the states have not get updated
+
+705
+01:28:44,640 --> 01:28:49,840
+and I am computing it already and at the end I go and update the guy and this guy is the start
+
+706
+01:28:49,840 --> 01:28:55,240
+the whole cycle right so that's the worst the worst case that is for a forward analysis for
+
+707
+01:28:55,240 --> 01:28:59,880
+reaching definitions had it been a backward analysis then I would have done the other
+
+708
+01:28:59,880 --> 01:29:08,760
+other direction right so these are interesting ways of like these are the so it does not change
+
+709
+01:29:08,760 --> 01:29:14,480
+your worst case complexity but it will change your runtime when you are implementing so I think we
+
+710
+01:29:14,480 --> 01:29:20,359
+have answered it so this is how you set the definitions and bit sets no what will change
+
+711
+01:29:20,359 --> 01:29:27,880
+the worst case complexity will remain the same the runtime will change your implementation will
+
+712
+01:29:27,880 --> 01:29:33,239
+be a better implementation so if you do forward analysis you should do topological order why
+
+713
+01:29:33,239 --> 01:29:38,199
+because you should have computed whatever you are dependent on so in the forward iteration
+
+714
+01:29:38,199 --> 01:29:43,600
+your in is dependent on the union of the outs of the predecessors so first compute the predecessors
+
+715
+01:29:43,600 --> 01:29:49,720
+and then only compute your the correct node if it's a backward analysis then you have to do the
+
+716
+01:29:49,720 --> 01:29:56,600
+other way your successor should get computed before you compute the present so now what if
+
+717
+01:29:56,600 --> 01:30:02,200
+we have multiple statement basic blocks right so that's the only thing remaining to be covered
+
+718
+01:30:02,200 --> 01:30:08,280
+so I did not tell you how to compute the gen and kill sets if I had multiple statement basic blocks
+
+719
+01:30:08,280 --> 01:30:13,440
+first question is why would I have a multiple statement basic blocks why why should I even
+
+720
+01:30:13,440 --> 01:30:18,020
+bother having multiple statements why can't I live with single statement basic blocks nothing
+
+721
+01:30:18,020 --> 01:30:24,079
+nothing I mean I don't lose anything right still do fixed point iteration all these business so
+
+722
+01:30:24,079 --> 01:30:33,600
+no but why do I have to have basic blocks which have multiple statements I can have basic block
+
+723
+01:30:33,600 --> 01:30:37,039
+which have single statements what is the requirement of something being a basic block it has a single
+
+724
+01:30:37,039 --> 01:30:45,600
+entry and a single exit that's all so every statement by itself is a basic block what
+
+725
+01:30:45,600 --> 01:30:51,439
+what complexity reduces how I have to do updates on all of them anyway I'm doing a fixed point
+
+726
+01:30:51,439 --> 01:30:57,439
+computation what does it impact size of the solution it impacts the size of the solution
+
+727
+01:30:57,439 --> 01:31:04,919
+right so I'll have to do my function vector will be larger so my inner loop in the while loop will
+
+728
+01:31:04,919 --> 01:31:12,559
+be larger because I'll have to run through a larger set of larger vector function vector right
+
+729
+01:31:12,559 --> 01:31:17,879
+instead what we do is we try to summarize the information for every basic block separately and
+
+730
+01:31:17,880 --> 01:31:23,199
+try to do this so my number of equations increase so I do not have to so I can live
+
+731
+01:31:23,199 --> 01:31:28,079
+with a smaller set of equations if I combine multiple statements together into a basic block
+
+732
+01:31:28,079 --> 01:31:36,319
+so there looks to be a interesting reason to do this now the question is that if I have multiple
+
+733
+01:31:36,319 --> 01:31:43,880
+statement basic blocks the only question is how do I what is going to be my gen set and what is
+
+734
+01:31:43,880 --> 01:31:52,319
+going to be my kill set let me give you a problem let me give you a example like a basic block on
+
+735
+01:31:52,319 --> 01:32:02,600
+which you can think about a equals 5 b equals 29 a equals 26 let's say this basic yeah that is
+
+736
+01:32:02,600 --> 01:32:05,840
+all you need everything else you already have the equations you already have just apply them
+
+737
+01:32:05,840 --> 01:32:09,520
+everything else just works only thing we don't know is for multiple statement basic block what
+
+738
+01:32:09,520 --> 01:32:13,119
+is going to be my gen what is going to be my kill for a single statement basic block we know
+
+739
+01:32:13,119 --> 01:32:21,000
+it I hope gen is the guy which is sitting there right and kill is all the definitions
+
+740
+01:32:21,000 --> 01:32:31,880
+that particular assignment is killing right now how do I get the what do I do for the
+
+741
+01:32:31,880 --> 01:32:35,439
+multiple statement basic block so for instance for this basic block let's say this is d1 d2 d3
+
+742
+01:32:35,439 --> 01:32:48,799
+what are going to be my gen and kill sets are you sure is gen going to be d1 and d3
+
+743
+01:32:48,799 --> 01:32:57,439
+sorry sorry sorry sorry d2 and d3 why not d1 right right right and my so this is my gen and
+
+744
+01:32:58,319 --> 01:33:08,599
+what is my kill kill is going to be well I have to really consider other universal these things
+
+745
+01:33:08,599 --> 01:33:25,599
+corresponding to what why do so how do you initialize it whatever your list is both empty
+
+746
+01:33:25,600 --> 01:33:29,880
+so one for gen one for kill let's talk the general worth of us these are separate anyway
+
+747
+01:33:29,880 --> 01:33:39,640
+d1 have you got it so I we simply do a scan through the through the linear the this thing
+
+748
+01:33:39,640 --> 01:33:45,560
+the basic block we start with for gen I start with an empty set start with an empty set I just
+
+749
+01:33:45,560 --> 01:33:52,480
+say that I get the first statement I put that definition in the set I get the next statement
+
+750
+01:33:52,479 --> 01:33:59,079
+I put that definition in the set and I may remove things if it kills anything already present in
+
+751
+01:33:59,079 --> 01:34:04,599
+gen because by the by the time I reach the end of the basic block the new definition will not
+
+752
+01:34:04,599 --> 01:34:10,599
+be exposed like for instance a right whenever I'm hitting this last a equals 26 I need to push out
+
+753
+01:34:10,599 --> 01:34:15,959
+the earlier definition d1 right so the gen set here it will become start with empty at this
+
+754
+01:34:15,960 --> 01:34:24,560
+location it will have d1 at this location it will have d1 and d2 at this location it will push it
+
+755
+01:34:24,560 --> 01:34:34,039
+will have d1 d2 d3 and it will push out d1 right because now d1 cannot be generated because somebody
+
+756
+01:34:34,039 --> 01:34:41,720
+in the basic block itself has killed it right so this is my gen algorithm what is my kill algorithm
+
+757
+01:34:41,720 --> 01:34:48,640
+kill I can just take a union of everything and whichever these variable skills because I kill
+
+758
+01:34:48,640 --> 01:34:53,360
+and anyway I generate later after that so I don't have to watch no so there are no no so
+
+759
+01:34:53,360 --> 01:34:57,880
+you are you for the kill set you will start with you have to talk about what are definition
+
+760
+01:34:57,880 --> 01:35:02,119
+in the universal set get killed kill is much simpler right you know that there are updates
+
+761
+01:35:02,119 --> 01:35:09,520
+to a and b in this basic block so in the universal set whichever definitions are defining a or b all
+
+762
+01:35:09,520 --> 01:35:15,120
+of them get killed so now we all know data flow analysis of at least reaching definitions very well
+

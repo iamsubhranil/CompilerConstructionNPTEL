@@ -1,0 +1,3180 @@
+1
+00:00:00,000 --> 00:00:12,620
+So, let us now see the details of how exactly we do the schedule, right. So, to model the
+
+2
+00:00:12,620 --> 00:00:18,019
+resource constraints in the software pipeline schedule, similar to the resource allocation
+
+3
+00:00:18,019 --> 00:00:23,859
+table that we talked in the case of instruction scheduling, we have a reservation table which
+
+4
+00:00:23,859 --> 00:00:31,379
+is called the modulo reservation table, right. And this reservation table has exactly, it
+
+5
+00:00:31,379 --> 00:00:39,939
+has as many columns as the number of resources, but what would be the number of rows? The
+
+6
+00:00:39,939 --> 00:00:46,260
+number of rows should be equal to the initiation interval, right, because you are only talking
+
+7
+00:00:46,259 --> 00:00:55,539
+about a schedule of length ii, right. So, this modulo reservation table is of ii columns
+
+8
+00:00:55,539 --> 00:01:02,299
+and f rows, where f is the number of resources that you have, right. And it essentially talks
+
+9
+00:01:02,299 --> 00:01:07,659
+about whether a particular resource is being used in that particular step in the modulo
+
+10
+00:01:08,500 --> 00:01:16,420
+modulo schedule. So, for example, for our example ii was 2, so we have basically 2 rows
+
+11
+00:01:16,420 --> 00:01:23,459
+and we had 4 functional units, right. So, now when you do the scheduling, if an operation
+
+12
+00:01:23,459 --> 00:01:31,579
+is scheduled at time step t, then t mod ii is a time step in which it is needed in the
+
+13
+00:01:31,579 --> 00:01:37,299
+resource modulo reservation table, that is how you mark that thing, okay.
+
+14
+00:01:37,299 --> 00:01:43,780
+So, when you do the modulo scheduling or software pipelining, you have to ensure that it satisfies
+
+15
+00:01:43,780 --> 00:01:48,579
+the resource constraints, it also satisfies the dependence constraints, both of which
+
+16
+00:01:48,579 --> 00:01:54,659
+we have to make sure it does. So, resource constraint is ensured by using the modulo
+
+17
+00:01:54,659 --> 00:02:00,780
+reservation table. Let us see how that works. So, each entry in the table records a sequence
+
+18
+00:02:00,780 --> 00:02:07,659
+of reservations, right. And you say if again we will take the example and then write it
+
+19
+00:02:07,659 --> 00:02:15,219
+down that might be easier. So, for example, let us say the load instruction, right, was
+
+20
+00:02:15,219 --> 00:02:22,379
+scheduled at time step 0, right. Then we will say that in the modulo reservation table load
+
+21
+00:02:22,379 --> 00:02:28,659
+is scheduled at time step 0, right. Let us say if the store was scheduled at time step
+
+22
+00:02:28,699 --> 00:02:39,699
+5, right, store is also a load store operation, time step 5 is 5 mod 2 which is 1, right.
+
+23
+00:02:40,219 --> 00:02:47,219
+And let us say the floating point add was scheduled at time step 2, then over there,
+
+24
+00:02:48,060 --> 00:02:53,939
+right. Like this you put these operations in the modulo reservation table, right. Let
+
+25
+00:02:54,020 --> 00:02:59,020
+us say the subtract was scheduled at time step 4, then you put it over here, right,
+
+26
+00:02:59,020 --> 00:03:06,020
+the integer subtract. Now, what about the integer add, right, in our let us say if you
+
+27
+00:03:06,020 --> 00:03:13,020
+want to schedule the integer add in time step 2, 4 or 6, is it possible? No, because the
+
+28
+00:03:13,419 --> 00:03:20,219
+subtract is already there. So, you can only try in the other time step, right. If it can,
+
+29
+00:03:20,219 --> 00:03:24,780
+so for example, if you are trying time step 4, it is not possible because subtract is
+
+30
+00:03:24,780 --> 00:03:29,780
+already there. Then you will try time step 5 and then see whether it can be scheduled.
+
+31
+00:03:29,780 --> 00:03:35,780
+If it can be scheduled, you put it there. If not, you go to the next time step, but
+
+32
+00:03:35,780 --> 00:03:42,780
+that next time step is again time step 0. So, there is no point trying to do from t
+
+33
+00:03:42,780 --> 00:03:49,780
+to, so you only need to do from t to t plus i i minus 1, no point going beyond t plus
+
+34
+00:03:49,780 --> 00:03:54,580
+i, right, because it is a modulo reservation table. So, this is essentially what we need
+
+35
+00:03:54,580 --> 00:03:58,780
+to understand in terms of resource constraint, correct, okay.
+
+36
+00:03:58,780 --> 00:04:05,300
+So, again the heuristic approach uses the earliest start time and the latest start time,
+
+37
+00:04:05,300 --> 00:04:11,620
+right, and try to use that as some kind of a priority. Try to schedule nodes which have
+
+38
+00:04:11,620 --> 00:04:17,300
+less slack first and then nodes which have more slack later, okay. And as I mentioned
+
+39
+00:04:17,300 --> 00:04:21,740
+earlier to schedule an operation, you have to see whether the resource is available.
+
+40
+00:04:21,740 --> 00:04:27,660
+You use the modulo reservation table and then you check a time step t minus i i, sorry t
+
+41
+00:04:27,660 --> 00:04:34,259
+mod i i, not t minus i i, okay. This is again a bin packing problem because you have i i
+
+42
+00:04:34,259 --> 00:04:39,540
+cross f slots and you want to pack all your operations in that such that they satisfy
+
+43
+00:04:39,540 --> 00:04:45,259
+the dependency constraints and it is NP complete, okay.
+
+44
+00:04:45,740 --> 00:04:51,659
+So, here is roughly how the iterative modulo scheduler works. Let us try to look at it.
+
+45
+00:04:51,659 --> 00:04:57,459
+So, you start from i i is equal to minimum i i and if you are not able to get a schedule
+
+46
+00:04:57,459 --> 00:05:03,300
+in this i i, you will increase your i i by 1 and keep trying and you will keep trying
+
+47
+00:05:03,300 --> 00:05:07,740
+until some maximum amount of things that is possible. After that you are going to say
+
+48
+00:05:07,740 --> 00:05:13,039
+maybe it is not worth trying to do the software pipelining for this and then come out. So,
+
+49
+00:05:13,040 --> 00:05:18,720
+you select an operation with a higher priority and then for that operation between its as
+
+50
+00:05:18,720 --> 00:05:26,080
+soon as possible time to as late as possible time, you try to schedule it, correct.
+
+51
+00:05:26,080 --> 00:05:29,720
+And in the time step in which you are trying to schedule, you want to essentially make
+
+52
+00:05:29,720 --> 00:05:35,080
+sure that there is no resource conflict in the modulo reservation table. If there is
+
+53
+00:05:35,080 --> 00:05:39,600
+no resource conflict in the modulo reservation table, then you try to add this operation
+
+54
+00:05:39,600 --> 00:05:45,840
+to the schedule by marking those resources in the modulo reservation table, right. If
+
+55
+00:05:45,840 --> 00:05:52,160
+your t is greater than your ALAP time, that means that you have only fixed this much from
+
+56
+00:05:52,160 --> 00:05:56,280
+the start time, earlier start time to later start time, but if you have exceeded, then
+
+57
+00:05:56,280 --> 00:06:02,720
+maybe something has bad has happened and you can try to fix this by doing some backtracking.
+
+58
+00:06:02,720 --> 00:06:09,120
+So, what you are going to do is that I was unable to schedule it between my earliest
+
+59
+00:06:09,120 --> 00:06:14,360
+start time to the latest start time. That is why my t is greater than latest start
+
+60
+00:06:14,360 --> 00:06:19,319
+time. Then what I am going to do is that I will force it in the latest start time and
+
+61
+00:06:19,319 --> 00:06:24,199
+in order for me to force it in the latest start time, I may have to eject an already
+
+62
+00:06:24,199 --> 00:06:29,560
+scheduled operation from the schedule, right. So, in the modulo reservation table if you
+
+63
+00:06:29,560 --> 00:06:34,079
+go back, right. So, for example, let us say I was trying to do a schedule, but let us
+
+64
+00:06:34,639 --> 00:06:39,159
+say there was already an operation in that slot, maybe this floating point add. Then
+
+65
+00:06:39,159 --> 00:06:43,800
+what I need to do is that I have to eject, right and then introduce the new operation
+
+66
+00:06:43,800 --> 00:06:48,120
+here and then try to see if add can be scheduled in a different cycle.
+
+67
+00:06:48,120 --> 00:06:54,319
+So, this is essentially the backtracking that we talk about, right. Eject conflicting operations
+
+68
+00:06:54,319 --> 00:07:01,279
+from the MRT and then you compute the ASR PLAP time of the remaining operations and
+
+69
+00:07:01,399 --> 00:07:06,079
+you kind of repeat this process, right. So, for every operation you have what is called
+
+70
+00:07:06,079 --> 00:07:10,959
+the earliest start time and latest start time starting from the earliest start time, you
+
+71
+00:07:10,959 --> 00:07:17,039
+try to schedule it at a particular time slot where there is no resource conflict, right.
+
+72
+00:07:17,039 --> 00:07:23,199
+If you cannot find such a thing, then you try to force it at its last latest starting
+
+73
+00:07:23,199 --> 00:07:28,159
+time and that would mean that some operations would get ejected. That is ok. We will try
+
+74
+00:07:28,160 --> 00:07:32,480
+to schedule them again. Then you compute the earliest start time and latest start time
+
+75
+00:07:32,480 --> 00:07:37,960
+of all operations, redo your priority and you keep iterating this. But it may so happen
+
+76
+00:07:37,960 --> 00:07:43,040
+that one operation will eject the other, that operation will again eject back this one.
+
+77
+00:07:43,040 --> 00:07:47,200
+If it happens for multiple times, then that is where your budget will exceed and once
+
+78
+00:07:47,200 --> 00:07:52,040
+your budget exceeds, you come out of that you increase your I I and you try for the
+
+79
+00:07:52,040 --> 00:07:56,560
+next I I, ok. So, this is how the software pipelining algorithm
+
+80
+00:07:56,600 --> 00:08:03,600
+works. So, again for our example, right, let us see what happens. We found that our minimum
+
+81
+00:08:04,240 --> 00:08:10,959
+I I is 2. So, let us start off with I I is equal to 2, right and let us try each one
+
+82
+00:08:10,959 --> 00:08:16,199
+of these operations. So, first let us take the load operation and try to see whether
+
+83
+00:08:16,199 --> 00:08:21,600
+we can schedule it at time step 0, right. It is possible to schedule because no resources
+
+84
+00:08:21,680 --> 00:08:26,760
+being used at this point. Then let us take the add operation. The add operation will
+
+85
+00:08:26,760 --> 00:08:31,280
+have an earliest start time which is 2 cycles after the load operation. Therefore, it will
+
+86
+00:08:31,280 --> 00:08:38,120
+only be t equal to 2. Now, again if you try t equal to 2 at that particular slot, there
+
+87
+00:08:38,120 --> 00:08:44,120
+is a resource which is freely available. So, add can also be started at t equal to 2. Then
+
+88
+00:08:44,120 --> 00:08:49,960
+the next is store. Store can only start at t sorry, store can only start at t equal to
+
+89
+00:08:49,960 --> 00:08:56,680
+5, right and 5 is essentially time step 1 in the modulo reservation table. So, you can
+
+90
+00:08:56,680 --> 00:09:01,080
+put it there. Now, what about the integer add and the integer
+
+91
+00:09:01,080 --> 00:09:06,879
+subtract that times are given here and you can try to see that they are also not conflicting.
+
+92
+00:09:06,879 --> 00:09:11,920
+Then lastly you have the branch instruction that is also not conflicting. You can put
+
+93
+00:09:11,920 --> 00:09:18,920
+it in that, right. So, this is how you try to do software pipeline schedule, ok.
+
+94
+00:09:19,159 --> 00:09:26,000
+So, what we can do is I have another 3 or 4 slides which is about register requirements
+
+95
+00:09:26,000 --> 00:09:32,199
+in modulo scheduling, ok in software pipeline schedule. Maybe I will just skip this thing
+
+96
+00:09:32,199 --> 00:09:38,120
+because it will be going into a lot of details, ok or maybe just I will tell you what the
+
+97
+00:09:38,120 --> 00:09:41,679
+problem is and then we will come back and look at it, ok.
+
+98
+00:09:41,679 --> 00:09:46,559
+So, let us now look at having scheduled these instructions like this in the software pipeline
+
+99
+00:09:46,639 --> 00:09:52,279
+schedule. Let us see what is really happening with regard to the registers, right. Now,
+
+100
+00:09:52,279 --> 00:09:57,639
+think of this as iteration i, i plus 1 and i plus 2, but a software pipeline schedule
+
+101
+00:09:57,639 --> 00:10:03,719
+only has one of them, right. For our purpose we have actually written down successive iterations,
+
+102
+00:10:03,719 --> 00:10:07,519
+but the schedule itself has only one iteration in the code.
+
+103
+00:10:07,519 --> 00:10:13,479
+Now, the load instruction is going to produce a value which is going to be consumed by the
+
+104
+00:10:13,560 --> 00:10:19,560
+floating point add instruction, but in our schedule, right if you look at it, right,
+
+105
+00:10:19,560 --> 00:10:26,560
+ith iteration of the load, i minus 1th iteration of the add and i minus second iteration of
+
+106
+00:10:27,039 --> 00:10:34,039
+the store are together in a loop, correct. So, when I unroll this 3 or 4 times then essentially
+
+107
+00:10:34,120 --> 00:10:40,200
+this is what I get. This load corresponds to the ith iteration, this add corresponds
+
+108
+00:10:40,200 --> 00:10:47,200
+to the ith iteration and this store corresponds to the ith iteration. I have marked them as
+
+109
+00:10:47,280 --> 00:10:54,280
+load 1, add 1 and store 1, right. Similarly, yeah, this corresponds to the i plus 1th iteration,
+
+110
+00:10:55,000 --> 00:10:59,640
+this corresponds to the i plus 1th iteration. Now, let us look at the register requirements
+
+111
+00:10:59,640 --> 00:11:06,640
+and their live ranges, right. So, load produces a value which is being consumed by the add,
+
+112
+00:11:07,639 --> 00:11:14,639
+right. Whereas, add produces a value which is being consumed by the store, right. Now,
+
+113
+00:11:17,039 --> 00:11:24,039
+this is for the add instruction. The add instruction produces a value which is being used by the
+
+114
+00:11:25,000 --> 00:11:30,620
+store instruction as the index, right, pointer. Therefore, its live range starts from here
+
+115
+00:11:30,620 --> 00:11:36,039
+and goes all the way up to here. Now, this is for the subtract instruction. The subtract
+
+116
+00:11:36,039 --> 00:11:43,039
+instruction produces a value, right, which is going to be used by the branch instruction,
+
+117
+00:11:43,039 --> 00:11:46,919
+ok, the same thing being repeated in the next one.
+
+118
+00:11:46,919 --> 00:11:53,919
+Now, what are we seeing, right? Let us look at specifically the register used by add 1,
+
+119
+00:11:54,399 --> 00:12:01,399
+right. The register, let us say if f naught is the destination register for add 1, correct.
+
+120
+00:12:01,399 --> 00:12:08,399
+Now, when is that being used? It is being used after three cycles in here, but before
+
+121
+00:12:11,240 --> 00:12:18,240
+that I have one more add instruction which is trying to rewrite into this. In fact, this
+
+122
+00:12:19,600 --> 00:12:24,559
+f naught register and this f naught register or this live range and this live range, they
+
+123
+00:12:24,599 --> 00:12:30,359
+are conflicting, but we have the same register being used for that, right.
+
+124
+00:12:30,359 --> 00:12:37,359
+So, my add instruction here, right, what are the register values for this? May be f naught
+
+125
+00:12:38,399 --> 00:12:45,399
+f 2 f 4, correct. Remember that in the code there is only one version of the code, one
+
+126
+00:12:47,039 --> 00:12:53,239
+iteration of the code. So, it uses the value f naught f 2 f 4. So, when I come back in
+
+127
+00:12:53,240 --> 00:12:59,639
+the next iteration, I am trying to redefine that value, but this redefinition is happening
+
+128
+00:12:59,639 --> 00:13:06,639
+before its use has happened. That means that before the store takes the value, I would
+
+129
+00:13:07,440 --> 00:13:12,440
+have overwritten it. In some sense, it is like a war dependency, right. This is the
+
+130
+00:13:12,440 --> 00:13:19,120
+read that should have happened and this write should only happen after that, but we have
+
+131
+00:13:19,120 --> 00:13:24,960
+scheduled it so that now it is going to happen before. In other words, a single register
+
+132
+00:13:24,960 --> 00:13:31,960
+is not enough for add. You need to know how two registers because it has two live ranges,
+
+133
+00:13:33,000 --> 00:13:40,000
+this and this and they are overlapping, correct. So, you need more than one register for f
+
+134
+00:13:41,039 --> 00:13:45,200
+naught itself. Similarly, if you look at the green one, you
+
+135
+00:13:45,200 --> 00:13:51,120
+have three, right. There will be one more green here, right. So, there will be three
+
+136
+00:13:51,120 --> 00:13:57,600
+that will be overlapping with each other, correct. So, this problem is essentially the
+
+137
+00:13:57,600 --> 00:14:04,600
+register allocation problem in software pipelining, okay. Now, if you are looking at the rolled
+
+138
+00:14:04,800 --> 00:14:09,120
+version, the compact version that is what is going to really be in the loop, this is
+
+139
+00:14:09,120 --> 00:14:15,279
+what it is. As you can see that the floating point operation is going to use a register
+
+140
+00:14:15,279 --> 00:14:20,679
+which is going to overlap with itself. The subtract is going to use a register which
+
+141
+00:14:20,679 --> 00:14:26,440
+is going to overlap with itself. This means that this has to be allocated two registers
+
+142
+00:14:26,440 --> 00:14:33,440
+and this has to be allocated three registers, right. So, again there are hardware support
+
+143
+00:14:33,480 --> 00:14:38,460
+to do some of these things and in the absence of a software hardware support, you can also
+
+144
+00:14:38,620 --> 00:14:45,139
+do it in software by unrolling the loop and doing necessary renaming of variables, okay.
+
+145
+00:14:45,139 --> 00:14:50,820
+So, I think with that I will stop our discussion on register requirement for modular scheduling
+
+146
+00:14:50,820 --> 00:14:55,139
+or software pipelining because otherwise it gets too complicated. But if you have any
+
+147
+00:14:55,139 --> 00:15:01,060
+quick questions, maybe we can take it at this point in time. Any questions on software pipelining
+
+148
+00:15:01,060 --> 00:15:05,379
+or otherwise we are done with this, okay. This actually shows you the details of how
+
+149
+00:15:05,460 --> 00:15:09,139
+to do the renaming and things like that. I will give you the slides. You can go through
+
+150
+00:15:09,139 --> 00:15:13,259
+them, right. You do not want to go. This is again a taxonomy of all software pipeline
+
+151
+00:15:13,259 --> 00:15:14,259
+schedule.
+
+152
+00:15:14,259 --> 00:15:15,259
+.
+
+153
+00:15:15,259 --> 00:15:16,259
+More registers?
+
+154
+00:15:16,259 --> 00:15:17,259
+More registers.
+
+155
+00:15:17,259 --> 00:15:18,259
+Okay.
+
+156
+00:15:18,259 --> 00:15:19,259
+Then?
+
+157
+00:15:19,259 --> 00:15:31,580
+Again you are thinking in terms of adding the
+
+158
+00:15:32,580 --> 00:15:41,060
+spill instructions and stores, spill loads and stores, but those spill loads and stores
+
+159
+00:15:41,060 --> 00:15:47,340
+also need to be scheduled in this corner.
+
+160
+00:15:47,340 --> 00:15:48,340
+.
+
+161
+00:15:48,340 --> 00:15:59,340
+Can all of them registers are dependent? Sorry.
+
+162
+00:15:59,340 --> 00:16:00,340
+.
+
+163
+00:16:00,340 --> 00:16:01,340
+Okay.
+
+164
+00:16:01,340 --> 00:16:02,340
+.
+
+165
+00:16:02,340 --> 00:16:03,340
+Okay.
+
+166
+00:16:03,340 --> 00:16:04,340
+.
+
+167
+00:16:04,340 --> 00:16:22,820
+So, essentially from whatever you are saying what I understand is that see there is a situation
+
+168
+00:16:23,820 --> 00:16:24,820
+.
+
+169
+00:16:24,820 --> 00:16:25,820
+.
+
+170
+00:16:25,820 --> 00:16:26,820
+.
+
+171
+00:16:26,820 --> 00:16:27,820
+.
+
+172
+00:16:27,820 --> 00:16:28,820
+.
+
+173
+00:16:28,820 --> 00:16:29,820
+.
+
+174
+00:16:29,820 --> 00:16:30,820
+.
+
+175
+00:16:30,820 --> 00:16:31,820
+.
+
+176
+00:16:31,820 --> 00:16:32,820
+.
+
+177
+00:16:32,820 --> 00:16:33,820
+.
+
+178
+00:16:33,820 --> 00:16:34,820
+.
+
+179
+00:16:34,820 --> 00:16:35,820
+.
+
+180
+00:16:35,820 --> 00:16:36,820
+.
+
+181
+00:16:36,820 --> 00:16:37,820
+.
+
+182
+00:16:37,820 --> 00:16:38,820
+.
+
+183
+00:16:38,820 --> 00:16:39,820
+.
+
+184
+00:16:39,820 --> 00:16:40,820
+.
+
+185
+00:16:40,820 --> 00:16:41,820
+.
+
+186
+00:16:41,820 --> 00:16:42,820
+.
+
+187
+00:16:42,820 --> 00:16:43,820
+.
+
+188
+00:16:43,820 --> 00:16:44,820
+.
+
+189
+00:16:44,820 --> 00:16:45,820
+.
+
+190
+00:16:45,820 --> 00:16:46,820
+.
+
+191
+00:16:46,820 --> 00:16:47,820
+.
+
+192
+00:16:47,820 --> 00:16:48,820
+.
+
+193
+00:16:48,820 --> 00:16:49,820
+.
+
+194
+00:16:49,820 --> 00:16:50,820
+.
+
+195
+00:16:50,820 --> 00:16:51,820
+.
+
+196
+00:16:51,820 --> 00:16:52,820
+.
+
+197
+00:16:52,820 --> 00:16:53,820
+.
+
+198
+00:16:53,820 --> 00:16:54,820
+.
+
+199
+00:16:54,820 --> 00:16:55,820
+.
+
+200
+00:16:55,820 --> 00:16:56,820
+.
+
+201
+00:16:56,820 --> 00:16:57,820
+.
+
+202
+00:16:57,820 --> 00:17:05,820
+Making it hard for me.
+
+203
+00:17:05,820 --> 00:17:10,820
+.
+
+204
+00:17:10,820 --> 00:17:11,820
+.
+
+205
+00:17:11,820 --> 00:17:16,220
+This is what you got the register classes, is it?
+
+206
+00:17:16,220 --> 00:17:17,220
+.
+
+207
+00:17:17,220 --> 00:17:18,220
+Okay.
+
+208
+00:17:18,220 --> 00:17:36,220
+Sorry, let us just try to write it down. S 1 is equal to.
+
+209
+00:17:36,220 --> 00:17:39,819
+S 1 by S 2. Ok and you have only one register.
+
+210
+00:17:39,819 --> 00:17:51,299
+I mean if you have to use both of them from register and you have only one register, obviously
+
+211
+00:17:51,299 --> 00:17:58,859
+the implementation is impossible. Should not arise. If it arises you cannot generate code,
+
+212
+00:17:58,859 --> 00:18:05,899
+right. See essentially what you are saying is that you only have op register register
+
+213
+00:18:06,100 --> 00:18:12,780
+of a situation, right. And you say that I have only one register, then code generation
+
+214
+00:18:12,780 --> 00:18:27,340
+itself is not possible, correct. I do not know whether it is a corner case or this is
+
+215
+00:18:27,340 --> 00:18:35,700
+an impossible situation, ok. So, see your question is well understood that when I have
+
+216
+00:18:35,700 --> 00:18:40,100
+multiple live ranges which are overlapping and then I have a situation I do not have
+
+217
+00:18:40,100 --> 00:18:46,340
+enough registers. Then one of those live ranges have to be spilt, right. So, maybe this live
+
+218
+00:18:46,340 --> 00:18:50,420
+range is spilt between this point to this point, so that you will only have exactly
+
+219
+00:18:50,420 --> 00:18:56,059
+three live ranges which are overlapping, right. And in any instruction you are going to have
+
+220
+00:18:56,059 --> 00:19:01,340
+at most two operations. So, before that operation you can always spill all other things and
+
+221
+00:19:01,339 --> 00:19:05,299
+you need to have at least that many number of registers to do things.
+
+222
+00:19:05,299 --> 00:19:12,099
+Because it is very in the life you can have tried with the spilt with the number of registers.
+
+223
+00:19:12,099 --> 00:19:19,659
+Ok then what happened? So, it is kind of like number of registers out of the range.
+
+224
+00:19:19,659 --> 00:19:23,539
+Absolutely, right. So, code generation cannot proceed.
+
+225
+00:19:23,539 --> 00:19:26,619
+Further. Yeah further. So, the minimum is probably
+
+226
+00:19:26,619 --> 00:19:41,259
+to and then beyond that it cannot do it, ok. Alright, so any other questions?
+
+227
+00:19:41,259 --> 00:19:49,019
+For the register allocation, ok. So, you want to have what are called rotating registers,
+
+228
+00:19:50,019 --> 00:19:57,940
+So, little bit complicated this is similar to what they have as register windows in spark
+
+229
+00:19:57,940 --> 00:20:01,779
+architecture. So, I have to go into a lot of details that is why I want to skip this
+
+230
+00:20:01,779 --> 00:20:07,059
+thing. Offline we can talk about it during lunch or something, right. So, again I have
+
+231
+00:20:07,059 --> 00:20:11,660
+the details in the slide and maybe it will definitely have the keyword and if you do
+
+232
+00:20:11,660 --> 00:20:15,819
+Google search you can get all the details that you want. Otherwise feel free to contact
+
+233
+00:20:15,819 --> 00:20:26,220
+me, right, ok. Alright, ok. Now, we talked about code generation, we
+
+234
+00:20:26,220 --> 00:20:31,059
+talked about instruction scheduling, we talked about software pipelining, we talked about
+
+235
+00:20:31,059 --> 00:20:37,019
+register allocation. The last component that we wanted to cover is something which is relating
+
+236
+00:20:37,019 --> 00:20:43,740
+to again certain machine dependent optimizations which pertains to memory hierarchy and which
+
+237
+00:20:43,740 --> 00:20:50,420
+pertains to parallelism, ok. Again I have quite a few slides for the next session. I
+
+238
+00:20:50,420 --> 00:20:55,140
+will not do all of them, but I will do a quickly some part of that and then show you what can
+
+239
+00:20:55,140 --> 00:21:00,200
+be done. Now, let us just try to get through this memory hierarchy little quickly because
+
+240
+00:21:00,200 --> 00:21:04,980
+all of you would have done a course in computer organization. So, let me try to get this thing.
+
+241
+00:21:04,980 --> 00:21:11,380
+So, whenever we talked about pipeline instruction execution, we assumed that processor can do
+
+242
+00:21:11,580 --> 00:21:16,860
+instruction fetch in a cycle or can do load or restore in a single cycle and this is because
+
+243
+00:21:16,860 --> 00:21:23,860
+we have always assumed that there are caches in our architecture, right. And this cache
+
+244
+00:21:23,860 --> 00:21:28,860
+essentially is a part of the memory hierarchy that we talk about and all of you understand
+
+245
+00:21:28,860 --> 00:21:32,700
+this memory hierarchy. So, there is no need for me to go. Particularly what we want to
+
+246
+00:21:32,700 --> 00:21:39,700
+talk about is that we have there is multiple levels of caches L1, L2, L3 and beyond that
+
+247
+00:21:39,700 --> 00:21:45,900
+there is memory, right. If all of you know how caches work, then I can quickly skip
+
+248
+00:21:45,900 --> 00:21:51,900
+some of this discussion and then go to the next one. But just to be very brief on this,
+
+249
+00:21:51,900 --> 00:21:56,259
+what we see here is typically we have the processors. The processor gives an address
+
+250
+00:21:56,259 --> 00:22:02,100
+which is typically looked at in the L1 cache. L1 cache is typically a split cache for instruction
+
+251
+00:22:02,100 --> 00:22:07,500
+and data. If the data is available, then it is given to the processor and typically that
+
+252
+00:22:07,500 --> 00:22:13,619
+takes about 1 to 2 cycles. If the thing is not available in L1 cache, then you have to
+
+253
+00:22:13,619 --> 00:22:18,700
+go to L2 cache and if you have multiple levels of hierarchy, if it is not in L2, you will
+
+254
+00:22:18,700 --> 00:22:25,700
+go to L3 and so on, right. So, again you all know about temporal locality and spatial locality,
+
+255
+00:22:25,700 --> 00:22:32,700
+right. Do we need to explain that? Temporal locality, spatial locality, no need, right.
+
+256
+00:22:33,700 --> 00:22:40,700
+Okay. So, let us look at this particular equation which is of interest to us, right. So, whenever
+
+257
+00:22:40,700 --> 00:22:47,059
+I talk about a memory access, right, I talk about an average memory access time and if
+
+258
+00:22:47,059 --> 00:22:52,700
+I have one or more levels of caches, then my average memory access time is essentially
+
+259
+00:22:52,700 --> 00:22:59,700
+determined by the hit time of the first level cache, if the data is available in the first
+
+260
+00:22:59,700 --> 00:23:04,779
+level cache and if it is not, then I have to fetch it from the subsequent level. So,
+
+261
+00:23:04,779 --> 00:23:11,779
+there is a miss penalty, the data is not available, there is a miss penalty and there is a miss
+
+262
+00:23:11,819 --> 00:23:18,819
+rate. So, how often I miss and every time I miss, I have to have a miss penalty. Then
+
+263
+00:23:18,940 --> 00:23:24,500
+this miss penalty itself will depend on whether I have the next level of cache or not and
+
+264
+00:23:24,500 --> 00:23:29,140
+again that equation would be something very similar to this equation, whatever that can
+
+265
+00:23:29,140 --> 00:23:34,700
+be fetched from L 2, it is a hit time of L 2 plus miss rate at L 2 multiplied by miss
+
+266
+00:23:34,700 --> 00:23:40,380
+penalty of L 2. So, it keeps going like this, right. Our idea with the caches is that you
+
+267
+00:23:40,380 --> 00:23:47,380
+want to essentially make sure that the average memory access time is reduced. So, for this,
+
+268
+00:23:49,740 --> 00:23:56,740
+the important parameters are hit rate, miss penalty and miss rate, okay. If you are an
+
+269
+00:23:57,620 --> 00:24:02,180
+architecture student, then you will worry about all three of them and you try to see
+
+270
+00:24:02,180 --> 00:24:07,940
+how you can minimize them. But for the compiler course, what we need to worry about is that
+
+271
+00:24:07,940 --> 00:24:13,420
+since we do not have hardware in our control, I cannot change the hit time or the miss penalty,
+
+272
+00:24:13,420 --> 00:24:20,000
+right. I can only influence the miss rate. So, let us see how the compiler can influence
+
+273
+00:24:20,000 --> 00:24:25,140
+the miss rate. For that purpose, we will try to understand how the caches work and what
+
+274
+00:24:25,140 --> 00:24:30,540
+can be done. Again, just very quickly hit is when you find the data in the cache. For
+
+275
+00:24:30,540 --> 00:24:35,340
+our purpose of discussion, we will limit ourselves to one level of cache and then talk about
+
+276
+00:24:35,340 --> 00:24:40,259
+it, right. Hit is when you find the data in the cache, miss is when you do not find the
+
+277
+00:24:40,259 --> 00:24:46,980
+data in the cache. Hit ratio is the number of hits divided by the number of accesses.
+
+278
+00:24:46,980 --> 00:24:52,660
+Miss ratio is the number of miss divided by the number of accesses. Hit time, of course,
+
+279
+00:24:52,660 --> 00:24:57,700
+we do not, I mean it is the time to access from L1 cache. Miss penalty is the time you
+
+280
+00:24:57,700 --> 00:25:04,700
+take to get it from the, from outside of the cache, okay. Now, we also know about different
+
+281
+00:25:04,700 --> 00:25:08,779
+cache organizations, do not we? What are the three different cache organizations that you
+
+282
+00:25:08,779 --> 00:25:17,779
+are familiar with? Direct mapping, associative, set associative. So, these are the three different
+
+283
+00:25:17,779 --> 00:25:22,019
+cache organizations that you are familiar with. So, they are essentially determined
+
+284
+00:25:22,019 --> 00:25:27,019
+by these three, four questions. Where is a block placed and that is depending on whether
+
+285
+00:25:27,019 --> 00:25:32,619
+it is direct mapped, set associative or fully associative, where it is being placed and
+
+286
+00:25:32,619 --> 00:25:38,940
+then once you know what is the organization, you know how to find the tag and valid, see
+
+287
+00:25:38,940 --> 00:25:45,779
+the tag and the set index bits and the offset bits. And for our discussion, we will not
+
+288
+00:25:46,539 --> 00:25:51,539
+too much worry about the replacement policy or what happens in the right, okay.
+
+289
+00:25:51,539 --> 00:25:57,299
+So, first let us quickly talk about direct mapped cache. In the case of a direct mapped
+
+290
+00:25:57,299 --> 00:26:04,299
+cache, each memory block is being mapped to a unique place in the cache, right. And that
+
+291
+00:26:04,980 --> 00:26:09,899
+unique place is typically identified by a hash function and this hash function is typically
+
+292
+00:26:09,900 --> 00:26:15,259
+a mod function that we use. So, if I have for example, let us say 16 blocks in the
+
+293
+00:26:15,259 --> 00:26:21,460
+memory and 8 blocks in the cache, then of course, block 0 and block 8 will be mapped
+
+294
+00:26:21,460 --> 00:26:28,460
+to cache block 0. Block 1 and block 9 will be mapped to cache block 1 and so on, correct.
+
+295
+00:26:29,019 --> 00:26:36,019
+So, that is really what happens. So, this again you must be familiar with. Let me just
+
+296
+00:26:36,420 --> 00:26:42,619
+get all of these things. So, in a direct mapped cache, if I assume that each block consists
+
+297
+00:26:42,619 --> 00:26:49,619
+of 32 bits, 32 bytes, then my offset is 5 bits. And if again I have done this for a
+
+298
+00:26:51,420 --> 00:26:58,420
+specific case assuming that I have a cache block of size 16 kilobytes with 32 byte blocks,
+
+299
+00:26:59,220 --> 00:27:06,220
+then I have 512 blocks. So, the index will be 9 bits. The remaining are tag bits. All
+
+300
+00:27:06,660 --> 00:27:11,140
+of you are familiar with this, right. You no need to go through this in any more detail,
+
+301
+00:27:11,140 --> 00:27:18,140
+correct. Okay, good. So, then what we do is that you essentially take the address, use
+
+302
+00:27:18,420 --> 00:27:24,660
+the index bits, index into the cache, right and then do a tag match. If the tag match
+
+303
+00:27:24,660 --> 00:27:31,660
+is true, then you have found the data. If not, you have a miss, correct. So, here is
+
+304
+00:27:32,019 --> 00:27:37,259
+what you have shown at the hit, miss is not shown, right. This is what happens in a direct
+
+305
+00:27:37,259 --> 00:27:43,060
+mapped cache. Now, in a set associative cache, okay, each
+
+306
+00:27:43,060 --> 00:27:48,300
+block has multiple places to which it can go to, right. And the number of places it
+
+307
+00:27:48,300 --> 00:27:54,100
+can go to is essentially the associativity. That means that the cache is divided into
+
+308
+00:27:54,099 --> 00:27:59,819
+a number of blocks and then it is also those blocks are also grouped in terms of number
+
+309
+00:27:59,819 --> 00:28:06,819
+of sets. Each set has let us say 2 or 4 or 8 blocks associated with that. If it is a
+
+310
+00:28:06,819 --> 00:28:12,259
+two way, four way or a eight way set associative, then every memory block is uniquely mapped
+
+311
+00:28:12,259 --> 00:28:18,219
+to one set, but within that set it can go to any one of those blocks. That is really
+
+312
+00:28:18,219 --> 00:28:23,359
+the idea. So, again let us see what it is. Here the same 8 blocks are now divided into
+
+313
+00:28:23,359 --> 00:28:30,359
+four sets and every memory block is uniquely mapped to one of these sets, but then within
+
+314
+00:28:30,519 --> 00:28:34,799
+the set it can be either one of those blocks, right.
+
+315
+00:28:34,799 --> 00:28:41,799
+So, this is what happens, right. Block 0, block 4, block 8, etcetera are mapped to set
+
+316
+00:28:42,000 --> 00:28:49,000
+0, right. Similarly, block 3, block 7, block 11, etcetera are mapped to set 3, right. So,
+
+317
+00:28:49,000 --> 00:28:54,920
+in this set associative cache it is possible to have for example block 3 and block 11 together
+
+318
+00:28:54,920 --> 00:29:01,200
+in set 3. Whereas in the case of a direct mapped class 3 and 11 cannot be together in
+
+319
+00:29:01,200 --> 00:29:08,200
+the cache, okay. Alright. So, this is similar thing. If you have a set associative cache
+
+320
+00:29:09,599 --> 00:29:16,599
+rate of size again 16 kilobytes, then what you do is that you take the number of cache
+
+321
+00:29:17,399 --> 00:29:22,719
+blocks which is 512, you divide it by 4 if it is a 4-way set associative, then you say
+
+322
+00:29:22,719 --> 00:29:27,199
+how 128 sets. That means that you need to have 7 bits as index.
+
+323
+00:29:27,199 --> 00:29:31,919
+Now, how do you find the blocks in the cache? For a 2-way set associative cache the diagram
+
+324
+00:29:31,919 --> 00:29:38,039
+shows you use the index bits, you index into the cache. There will be two locations that
+
+325
+00:29:38,039 --> 00:29:42,480
+you have because corresponding to the set for a 2-way set associative cache you have
+
+326
+00:29:42,480 --> 00:29:47,720
+two locations you search both these tags, right. One of them is a hit, then you have
+
+327
+00:29:47,720 --> 00:29:54,240
+a hit. If both of them are misses then it is a miss, okay. So, that is how you access
+
+328
+00:29:54,240 --> 00:30:00,880
+the data in a set associative cache, okay. Now, let us try to understand how the caches
+
+329
+00:30:00,880 --> 00:30:07,880
+work from a programmer's perspective, right. We will use a direct mapped cache which is
+
+330
+00:30:07,960 --> 00:30:12,640
+16 kilobytes with 32 byte cache block size, okay.
+
+331
+00:30:12,640 --> 00:30:18,720
+Do you all know, I think this is going to the example, okay. Now, before we go into
+
+332
+00:30:18,720 --> 00:30:24,320
+that do you all know the three different types of cache misses? So, the cache misses are
+
+333
+00:30:24,320 --> 00:30:31,320
+classified into three types, right. One called the cold misses, right, cold or compulsory
+
+334
+00:30:31,319 --> 00:30:38,319
+misses. Another one called conflict misses and the third one called capacity misses.
+
+335
+00:30:46,119 --> 00:30:53,119
+Have you come across these things? No? Okay. Do we need them? Let us find out, okay. Let
+
+336
+00:30:55,519 --> 00:31:00,319
+me very briefly tell you what these three different types of misses are, right. When
+
+337
+00:31:00,319 --> 00:31:06,119
+you try to bring the block for the first time into the cache that miss has to anyway
+
+338
+00:31:06,119 --> 00:31:10,519
+happen, right, because there is no way by which the cache by default will have that
+
+339
+00:31:10,519 --> 00:31:17,519
+block. So, the first miss that happens is what we call as the cold miss, right. Then
+
+340
+00:31:18,720 --> 00:31:24,599
+the misses that happen because your cache cannot have all the capacity to hold all the
+
+341
+00:31:24,599 --> 00:31:29,279
+addresses, cache does not have the capacity to hold all the addresses. Those types of
+
+342
+00:31:29,279 --> 00:31:36,279
+misses are called the capacity misses, right and remaining misses are what are called conflict
+
+343
+00:31:36,799 --> 00:31:41,359
+misses, okay. So, in other way of explaining is that with
+
+344
+00:31:41,359 --> 00:31:48,359
+regard to the capacity misses supposing let us say you have a 32 kilobyte cache, right
+
+345
+00:31:48,359 --> 00:31:55,359
+with block size as 32, right. Then this will have 1k blocks in this, correct. Now, that
+
+346
+00:31:55,359 --> 00:32:02,359
+1k blocks can hold only at most 1k of locations, right. If you access, if you are going to
+
+347
+00:32:04,119 --> 00:32:11,119
+access data which is beyond 1k blocks, then irrespective of what you do, it is going to
+
+348
+00:32:11,819 --> 00:32:18,559
+give a miss up to 1k only what is what you can hold and beyond that, right, anything
+
+349
+00:32:18,559 --> 00:32:22,559
+that you try to access even though you may want it to be in the cache, it is not going
+
+350
+00:32:22,559 --> 00:32:24,879
+to be there. For example, I will actually give you some
+
+351
+00:32:24,879 --> 00:32:29,879
+examples of this in the next slide where you will actually try to understand that, right.
+
+352
+00:32:29,879 --> 00:32:35,879
+So, because of my limited capacity any miss that happens is essentially a capacity miss.
+
+353
+00:32:35,879 --> 00:32:40,879
+A conflict miss on the other hand happens in the following way. See, you remember you
+
+354
+00:32:40,879 --> 00:32:47,879
+saw the example of block 3 and block 11 getting mapped to the same set, right, set 3 in our
+
+355
+00:32:48,880 --> 00:32:55,880
+set associative cache, correct. What if I also want to access block 7? That will also
+
+356
+00:32:57,720 --> 00:33:04,720
+get mapped to the same set, correct. Now, if I have a program which tries to alternatively
+
+357
+00:33:04,720 --> 00:33:11,720
+access 3, 7 and 11 repeatedly, then what happens? One of them is going to evict the other, right
+
+358
+00:33:11,920 --> 00:33:18,200
+and you are going to have a miss. That kind of a miss is what is called a conflict miss.
+
+359
+00:33:18,200 --> 00:33:24,200
+See, I have 1024 blocks. If you have allowed each one of these blocks to go somewhere in
+
+360
+00:33:24,200 --> 00:33:30,519
+the cache, I could have had all three of them together, correct. If I had a fully associative
+
+361
+00:33:30,519 --> 00:33:36,519
+cache of 1024 blocks, these three accesses would not have caused a miss whereas, because
+
+362
+00:33:36,519 --> 00:33:41,200
+I have a two-way set associative cache, I have a miss. Do not worry even if I have a
+
+363
+00:33:41,200 --> 00:33:48,200
+four-way set associative cache, I could have had all three of them together, right. So,
+
+364
+00:33:48,200 --> 00:33:54,720
+the misses which happen because my associativity is limited are called conflict misses, right.
+
+365
+00:33:54,720 --> 00:34:00,480
+So, these are the three different types of misses. We will not too much worry about classifying
+
+366
+00:34:00,480 --> 00:34:06,880
+them, but somewhere I might mention, okay. Now, let us move forward. Let us take a real
+
+367
+00:34:06,880 --> 00:34:13,680
+example and then see what happens. Supposing, let us say I want to access an array of 2k
+
+368
+00:34:13,680 --> 00:34:20,119
+elements and this is an array of double. Each element is 8 bytes long, okay. And for the
+
+369
+00:34:20,119 --> 00:34:25,240
+purpose of this example, we will only assume that the array is in my data cache. No other
+
+370
+00:34:25,240 --> 00:34:31,000
+variable is in my data cache, right, right. And this is the code that is going to be executed.
+
+371
+00:34:31,000 --> 00:34:36,599
+Again, I do not really see the reason for understanding the code, but let us see what
+
+372
+00:34:36,599 --> 00:34:43,119
+happens here. So, as I mentioned earlier, we are only going to say that the array A
+
+373
+00:34:43,119 --> 00:34:50,000
+and its elements are what is going to be stored in our cache, right. And so, the way in which
+
+374
+00:34:50,000 --> 00:34:56,159
+the elements are going to be accessed in the loop is that you will first load array A 0,
+
+375
+00:34:56,159 --> 00:35:02,880
+then A 1, A 2, A 3, A 4 and so on. Now, can you tell me that when I do write this program
+
+376
+00:35:03,200 --> 00:35:09,280
+and then when I run it on a machine which has 16 kilobytes of cache, right and assuming
+
+377
+00:35:09,280 --> 00:35:15,920
+that only array A is going to be in my cache, how many hits and how many misses will I have,
+
+378
+00:35:15,920 --> 00:35:21,880
+right. That should be analyzable, okay. At least approximately we should be able to get
+
+379
+00:35:21,880 --> 00:35:28,480
+a picture of this, right. So, I will make it things simpler for you.
+
+380
+00:35:28,480 --> 00:35:35,079
+I will also tell you if I know what is the base address of this, right, then I can divide
+
+381
+00:35:35,079 --> 00:35:43,639
+this in terms of I think these ones and zeros have kind of gone here, right. So, okay. So,
+
+382
+00:35:43,639 --> 00:35:53,360
+this is my offset bits. These are my set index bits, okay. These are my set index bits, okay.
+
+383
+00:35:53,840 --> 00:36:00,200
+So, let us first look at, okay. Now, as I mentioned earlier, let us assume that my
+
+384
+00:36:00,200 --> 00:36:07,800
+cache block size is 32 bytes, right. That means that these 5 bits are going to be my index bits,
+
+385
+00:36:07,800 --> 00:36:16,800
+right and let us say how many bits, okay. So, I have 9 bits as my set index bits. So,
+
+386
+00:36:16,800 --> 00:36:23,480
+that means that this has 512 sets, right and if it is a 16 kilobyte cache, then it is basically
+
+387
+00:36:23,480 --> 00:36:28,960
+a direct mapped cache. So, we are talking about a direct mapped cache of 16 kilobytes, right.
+
+388
+00:36:28,960 --> 00:36:41,720
+So, these are the 9 bits. If the address is this, then the first block A0, right, will be in cache
+
+389
+00:36:41,719 --> 00:36:50,480
+block 256. That is really what it says. If you look at this value 100000, right, that is essentially
+
+390
+00:36:50,480 --> 00:37:01,079
+cache block 256, okay. Now, in each element, sorry, each block of the cache contains 32 bytes. How
+
+391
+00:37:01,079 --> 00:37:09,199
+many elements are these? Each element is 8 bytes long, right. That means 4 elements will be in 1
+
+392
+00:37:09,199 --> 00:37:18,799
+cache block. So, let us look at this diagram, right. If A0 is in cache block 256, then obviously
+
+393
+00:37:18,799 --> 00:37:26,039
+A1 will also be there, A2 will also be there, A3 will also be there. What about A4? That will be mapped
+
+394
+00:37:26,039 --> 00:37:37,039
+to cache block 257, right. A8 will be 258 and so on, okay, right. Now, suddenly in between I have,
+
+395
+00:37:37,039 --> 00:37:47,239
+okay. So, remember this has 512 blocks, right. Now, when I access A0, since I am accessing it
+
+396
+00:37:47,239 --> 00:37:53,639
+for the first time, right, the data is not going to be available. So, it is going to be a miss.
+
+397
+00:37:53,639 --> 00:38:02,799
+Whereas, when I access A1, A2 and A3 subsequently, right, because A0 was brought in, this entire block
+
+398
+00:38:02,799 --> 00:38:09,799
+was brought in, all of them are going to be hits. Similarly, when I access A4, it is being brought
+
+399
+00:38:09,799 --> 00:38:15,920
+in for the first time. Therefore, it is a miss and all subsequent accesses will be hits. So,
+
+400
+00:38:15,920 --> 00:38:21,960
+you can see that the first miss that happens is what we call as the cold miss or the cold
+
+401
+00:38:21,960 --> 00:38:30,320
+compulsory miss, right. All other things are hit, right. Now, if I start from 256 and if there are
+
+402
+00:38:30,320 --> 00:38:41,199
+512 blocks, I should have gone up to 511, correct. But then I end up with 255. Why? After 511,
+
+403
+00:38:41,199 --> 00:38:48,480
+where would the next block be? 0, correct. See, remember this is a cache, this is an array of size
+
+404
+00:38:48,480 --> 00:38:57,760
+2K elements, right, 2K elements each of 8 bytes, correct. So, 1K elements would be how many bytes?
+
+405
+00:38:57,760 --> 00:39:06,400
+8K bytes, right. So, 8K bytes is starting from 256 all the way up to 512 and the next 8K elements
+
+406
+00:39:06,400 --> 00:39:14,920
+will be from 0 to 255. So, that is really what is happening here, ok. So, somewhere in between when
+
+407
+00:39:14,920 --> 00:39:24,240
+you talk about A of 1025 that will be or A of 1024 that will be in cache block 0, A of 1028 will
+
+408
+00:39:24,240 --> 00:39:31,159
+be in cache block 1 and so on and A of 244 is in cache block 255, ok. In this particular case,
+
+409
+00:39:31,159 --> 00:39:39,079
+the array size is same as your cache block size, correct. So, if you want to access the entire array,
+
+410
+00:39:39,239 --> 00:39:45,440
+you can actually fit it in your cache and as you access all the elements, the entire array is being
+
+411
+00:39:45,440 --> 00:39:51,719
+brought into your cache, ok. So, in this particular case, what is going to happen? Your first access
+
+412
+00:39:51,719 --> 00:39:59,519
+is a miss and subsequent accesses would be shits. So, for every four accesses, you have one miss.
+
+413
+00:39:59,519 --> 00:40:06,319
+Now, supposing let us say you try to access this array repeatedly 10 times, then what would happen
+
+414
+00:40:06,320 --> 00:40:14,200
+the subsequent accesses? All will be hits because after the first access, this value is going to
+
+415
+00:40:14,200 --> 00:40:20,320
+be there, this cold miss will disappear and all the data elements are available, right. So,
+
+416
+00:40:20,320 --> 00:40:30,840
+if you try to do this access 10 times, then you have exactly 2048 divided by 4 which is 512 misses
+
+417
+00:40:30,840 --> 00:40:40,920
+and then 2048 divided by multiplied by 10 that many accesses. So, 512 divided by 2480, 20,480,
+
+418
+00:40:40,920 --> 00:40:49,120
+that is your miss ratio so to say, correct, ok. Good, again this is going into all of these details.
+
+419
+00:40:49,120 --> 00:40:54,760
+So, you can just look at it say that for every four accesses, there is one miss. So, that means
+
+420
+00:40:55,000 --> 00:41:03,320
+there is a 25 percent miss and 75 percent hit, ok. And essentially whatever that we are getting is
+
+421
+00:41:03,320 --> 00:41:08,840
+because of spatial locality, data is available. If you iterate it 10 times, then you also get
+
+422
+00:41:08,840 --> 00:41:17,280
+benefit because of temporal locality, ok. Now, instead of 10, 2048, if let us say if you have
+
+423
+00:41:17,280 --> 00:41:27,080
+4096 elements, then what happens, right. Then also if you go through this array once, ok. So,
+
+424
+00:41:27,080 --> 00:41:36,560
+that just yeah. So, this is example one with this much, ok. Now, the first time that you go through,
+
+425
+00:41:36,560 --> 00:41:42,320
+you have all compulsory misses, but if you go through it 10 times, then what happens is that
+
+426
+00:41:42,559 --> 00:41:48,039
+you remember that you can only hold 2048 elements in your cache because it is a 16 kilobyte cache.
+
+427
+00:41:48,039 --> 00:41:54,559
+If you have 4K elements in your cache, then after you go to the 2049th element, it will actually
+
+428
+00:41:54,559 --> 00:42:00,400
+rewrite the existing elements. Then if you try to iterate, then the second time when you come,
+
+429
+00:42:00,400 --> 00:42:06,039
+you again you are not going to see your elements in the cache. So, those misses that happen are
+
+430
+00:42:06,039 --> 00:42:11,280
+what are going to be called as capacity misses, ok. That is really what this is explaining.
+
+431
+00:42:11,280 --> 00:42:19,560
+Let us look at another example where you have two arrays, each one of them is 2048, right. So,
+
+432
+00:42:19,560 --> 00:42:24,240
+in this particular case, the order in which you are going to do the accesses is that you
+
+433
+00:42:24,240 --> 00:42:32,320
+are going to access A of 0 followed by B of 0, A of 1 followed by B of 1 and so on, right.
+
+434
+00:42:32,320 --> 00:42:38,880
+Now, I will skip the details of, ok. I will actually do this part, but then skip the other
+
+435
+00:42:38,880 --> 00:42:44,720
+details. Supposing let us say array A is in this location and array B is in this location,
+
+436
+00:42:44,720 --> 00:42:55,000
+right, exactly offset by 2K into 8, ok. Now, you can see that the first address is this and the
+
+437
+00:42:55,000 --> 00:43:06,400
+second address is that, right. Now, what do you see? That both A and B or A of 0 and B of 0 are
+
+438
+00:43:06,400 --> 00:43:13,480
+mapped to the same cache block, right. When both A of 0 and B of 0 are mapped to the same
+
+439
+00:43:13,480 --> 00:43:17,960
+cache block, let us see now what happens when I try to do the sequence of accesses.
+
+440
+00:43:17,960 --> 00:43:23,880
+When I try to do the sequence of accesses, A of 0 will give me first a miss, cold miss,
+
+441
+00:43:23,880 --> 00:43:32,480
+that is ok. B of 0 will give me a cold miss, that is also ok. Then what about A of 1? So,
+
+442
+00:43:33,440 --> 00:43:42,000
+this is 256. Both A of 0 and B of 0 are mapped to the same cache block, 256, correct. Now,
+
+443
+00:43:42,000 --> 00:43:50,760
+we have accessed A of 0 which was a miss. So, A 0, A 1, A 2, A 3 were brought to cache block 0,
+
+444
+00:43:50,760 --> 00:44:00,840
+correct. After that we access B of 0. That means that B 0, B 1, B 2, B 3 were brought into the
+
+445
+00:44:00,840 --> 00:44:07,920
+cache block. But where in the cache block? Same cache block 0, which means your A was replaced,
+
+446
+00:44:07,920 --> 00:44:16,800
+right. Then when you try to access again A of 1, that data will not be there. You will have a miss.
+
+447
+00:44:16,800 --> 00:44:24,160
+This miss is a conflict, right, because this data was replaced because of something else was mapping
+
+448
+00:44:24,159 --> 00:44:31,519
+to the same cache location, right. So, if you look at this accesses, then you can see that after
+
+449
+00:44:31,519 --> 00:44:38,920
+the first two misses of A of 0 and B of 0, A of 1, B of 1, A of 2, B of 2, blah, blah, blah, blah,
+
+450
+00:44:38,920 --> 00:44:48,519
+blah, blah, everything is a miss, right. So, in this case having the cache is no good, right.
+
+451
+00:44:48,519 --> 00:44:59,840
+You have a hit ratio of 0. What can you do to improve this situation? Separate cache for A and B.
+
+452
+00:44:59,840 --> 00:45:08,440
+Who said that? Okay. Yeah, unfortunately we cannot change the processor, right or we cannot
+
+453
+00:45:08,440 --> 00:45:17,880
+change what is inside the processor. This is a very, very simple problem. Let us assume that
+
+454
+00:45:17,880 --> 00:45:23,519
+we are going to do this loop only once and I at least want to get that 75 percent, right,
+
+455
+00:45:23,519 --> 00:45:34,720
+which is for every four accesses, one miss kind of a thing. Is that something that we can do other
+
+456
+00:45:34,720 --> 00:45:43,400
+than changing the processor or the cache? Let us say that we are not hardware engineers, right.
+
+457
+00:45:43,400 --> 00:45:48,880
+We are all elsewhere. We have given a processor and we want to improve the situation because,
+
+458
+00:45:48,880 --> 00:45:56,519
+again remember we are talking about this from the compiler perspective. Why were the misses
+
+459
+00:45:56,519 --> 00:46:07,000
+happening? Sorry? Change sequence of, okay. How will you change it?
+
+460
+00:46:13,800 --> 00:46:22,639
+Okay. Okay, that is one possible way of doing it. Very clever because you have done instruction
+
+461
+00:46:22,639 --> 00:46:29,280
+scheduling. You can do that. But something else, more from a cache optimization point.
+
+462
+00:46:29,280 --> 00:46:39,000
+Yes, definitely a clever answer. Why were the misses happening? Because of the conflict,
+
+463
+00:46:39,760 --> 00:46:52,559
+yeah, go ahead. You are trying to say something. If I do something so that A of 0 and B of 0 go
+
+464
+00:46:52,559 --> 00:47:01,119
+to different cache locations and there is no problem at all, right. Instead of having 2048
+
+465
+00:47:01,119 --> 00:47:08,960
+elements, if I had 2052 elements, correct, they will be offset at least by one block.
+
+466
+00:47:08,960 --> 00:47:16,279
+That is actually all that I need. Very simple, right. Instead of buying a new processor or a
+
+467
+00:47:16,279 --> 00:47:24,079
+new computer, you just use four extra bytes or four extra elements, problem is solved, correct.
+
+468
+00:47:24,079 --> 00:47:30,639
+All that we wanted is that we do not want these two things to be getting mapped to the same cache
+
+469
+00:47:30,639 --> 00:47:36,279
+location. So, this solution is often called padding. You just pad this element so that,
+
+470
+00:47:36,279 --> 00:47:41,960
+you know, two of them do not necessarily map to the same thing. Compiler by default will do
+
+471
+00:47:41,960 --> 00:47:46,480
+that today. If you want, you can check in your compiler whether it is happening or not happening,
+
+472
+00:47:46,480 --> 00:47:53,239
+right. That means you run a program with 2048 elements and then run another program with,
+
+473
+00:47:53,239 --> 00:47:58,559
+let us say, more number of elements, 2052 or whatever elements and then see whether
+
+474
+00:47:58,559 --> 00:48:05,400
+their execution time significantly differ. They may not. So, all that we need to do is that the
+
+475
+00:48:05,400 --> 00:48:11,519
+compiler should assign addresses such that they do not map to the same location. And if it does,
+
+476
+00:48:11,519 --> 00:48:18,199
+all that you need to do is to pad the first array with four extra elements. The moment you pad the
+
+477
+00:48:18,199 --> 00:48:22,119
+first array with four extra elements, yeah, I will just take the question after I finish this sentence.
+
+478
+00:48:22,119 --> 00:48:28,079
+So, the moment you pad the first array with four extra elements, right, the second array
+
+479
+00:48:28,079 --> 00:48:35,440
+getting shifted at least by one cache block and therefore, both a0 and b0 will be in different
+
+480
+00:48:35,440 --> 00:48:41,440
+locations and therefore, all of these accesses will result in the one miss followed by three
+
+481
+00:48:41,440 --> 00:48:46,279
+hits. That pattern will continue. That is again only for this example. I am sure that you are
+
+482
+00:48:46,279 --> 00:48:48,279
+going to have an example which is different. Go ahead.
+
+483
+00:48:48,280 --> 00:49:08,519
+Right. Right. So, that is entirely a different problem, not a cache problem per se. Even there,
+
+484
+00:49:08,519 --> 00:49:13,200
+if you have these two arrays which are getting mapped to the same location, you will have the
+
+485
+00:49:13,199 --> 00:49:20,159
+cache misses, okay. And again, if you have the cache misses, you bring those b, right,
+
+486
+00:49:20,159 --> 00:49:25,119
+and then you load it. You load it, but you load it with a cost, right. We will talk about
+
+487
+00:49:25,119 --> 00:49:32,319
+these vector processors right after this, right after this, okay. Again, this is a separate
+
+488
+00:49:32,319 --> 00:49:36,319
+optimization that you have to do. That is a separate optimization. These are orthogonal,
+
+489
+00:49:36,320 --> 00:49:44,160
+correct. So, is this solution fine? The simple padding, okay, either add four elements to a or
+
+490
+00:49:44,160 --> 00:49:51,559
+you have a small array of 16 bytes, whatever it is, sorry, 32 bytes so that the one gets shifted.
+
+491
+00:49:51,559 --> 00:49:57,120
+Anything which is more than 32 is all that you need to do, okay. So, essentially, you have to
+
+492
+00:49:57,120 --> 00:50:02,080
+make sure that the base address of b is such that it is not that. You may not directly see these
+
+493
+00:50:02,079 --> 00:50:09,239
+addresses, but you can actually do this padding to make it change, okay. Now, the moment you do
+
+494
+00:50:09,239 --> 00:50:15,239
+this, this is what you are going to get, okay. You are going to get back your 75 percent heat
+
+495
+00:50:15,239 --> 00:50:20,480
+ratio. You could have also done another thing, right. If you are going to have this kind of a
+
+496
+00:50:20,480 --> 00:50:27,799
+thing where you have a and b, instead of having them as two arrays, you can have it as an array
+
+497
+00:50:27,800 --> 00:50:34,400
+of structures, right, where the structure has two elements a, b, right. So, this is what is called
+
+498
+00:50:34,400 --> 00:50:41,320
+structure of arrays versus array of structures, right. So, this is an array of structure idea.
+
+499
+00:50:41,320 --> 00:50:47,560
+So, when you do this, what happens is that each element of the structure has a and b,
+
+500
+00:50:47,560 --> 00:50:55,320
+right, and they will be adjacent elements. So, one cache line will have two structures,
+
+501
+00:50:55,320 --> 00:51:02,200
+four elements, which is two structures, right. Structure 0, a. Structure 0, b. Structure 1,
+
+502
+00:51:02,200 --> 00:51:08,600
+a. Structure 1, b. Next cache line will have structure 2 and structure 3. The next cache
+
+503
+00:51:08,600 --> 00:51:14,440
+line will have structure 4 and so on and so forth, right. When you reorder your data structure,
+
+504
+00:51:14,440 --> 00:51:19,600
+that also helps. So, if you are going to use two arrays which are kind of going to be used
+
+505
+00:51:19,600 --> 00:51:25,280
+together and if they have sizes which are kind of likely to conflict, then you may want to think
+
+506
+00:51:25,280 --> 00:51:31,280
+in terms of array of structures rather than structure of arrays, right. That is another way
+
+507
+00:51:31,280 --> 00:51:36,200
+by which the same problem can be handled, okay. Let us talk about the third important thing which
+
+508
+00:51:36,200 --> 00:51:41,519
+is about dealing with more than one dimension of the array, multiple dimensions of the array,
+
+509
+00:51:41,519 --> 00:51:50,000
+right. Let us now look at this code. I have a nested loop, right, for j, for i and then I have
+
+510
+00:51:50,000 --> 00:51:56,880
+some accesses, right. Now, let us look at the reference sequence. You are basically accessing
+
+511
+00:51:56,880 --> 00:52:05,480
+a 0 0, a 0, right. Yeah, you are accessing a and b alternatively. So, a 0 0, b 0 0 and then you
+
+512
+00:52:05,480 --> 00:52:16,079
+are storing b 0 0, then a 1 0, b 1 0, b 1 0 and so on, correct. Now, assuming that, let us assume
+
+513
+00:52:16,079 --> 00:52:22,639
+that a and b are not conflicting to the same location. Would you get locality here? Would
+
+514
+00:52:22,639 --> 00:52:28,480
+you get the spatial locality that you are seeing earlier? That is an yes or a no? No,
+
+515
+00:52:28,480 --> 00:52:33,440
+because sometimes, you know, some regions yes is this and some regions no is this. So, I do not know.
+
+516
+00:52:33,440 --> 00:52:41,599
+So, would you get spatial locality? Assuming that, let us assume that a of 0 0 maps to cache block
+
+517
+00:52:41,599 --> 00:52:48,079
+0 and b of 0 0 maps to cache block 256. So, let us say we have put them far apart, right.
+
+518
+00:52:48,079 --> 00:52:56,719
+Let us worry about that. Why would they not give me a spatial locality? a of 0 0 and then a of 1 0,
+
+519
+00:52:56,719 --> 00:53:07,960
+right. So, this depends on what is the order in which the elements are stored. Are we talking
+
+520
+00:53:07,960 --> 00:53:14,000
+about a row major order or a column major order? If it is a C program, it is a row major order.
+
+521
+00:53:14,000 --> 00:53:22,480
+In a row major order, spatial locality is going to be seen from a of 0 0, a of 0 1, a of 0 2 and so on.
+
+522
+00:53:22,480 --> 00:53:31,000
+So, if you access the elements like this, you are going to access a 0 and then a 1 0, which is far
+
+523
+00:53:31,400 --> 00:53:38,320
+away from that and then a 2 0, which is far away from that, okay. I do not exploit spatial locality
+
+524
+00:53:38,320 --> 00:53:44,280
+in that way, but then after I come back, I am going to eventually access a 0 1. Will I at least
+
+525
+00:53:44,280 --> 00:53:50,320
+get the locality then? No, because by that time I would have replaced this with something else,
+
+526
+00:53:50,320 --> 00:53:56,639
+correct. So, that is really what is going to happen. So, let us look at these things here.
+
+527
+00:53:56,639 --> 00:54:03,559
+So, we talked about this row major ordering, which all of you know, right, as opposed to the
+
+528
+00:54:03,559 --> 00:54:10,159
+column major order. So, this is row major order, right, a 0 0, a 0 1, a 0 2 are successive elements,
+
+529
+00:54:10,159 --> 00:54:16,440
+whereas in column major ordering, these will be the successive elements. So, if your storage is
+
+530
+00:54:16,440 --> 00:54:22,920
+in row major order, then you must necessarily do row major ordering to get spatial locality,
+
+531
+00:54:22,920 --> 00:54:28,159
+right. The array is small, then it is okay. Even then you may get the spatial locality,
+
+532
+00:54:28,159 --> 00:54:33,720
+because the entire array stays in your cache. But let us assume that it is a 2k by 2k array,
+
+533
+00:54:33,720 --> 00:54:40,840
+that is like 4m, way, way bigger than any L1 cache or L2 cache, right. So, something is going to
+
+534
+00:54:40,840 --> 00:54:45,720
+replace. By the time you come back and want to look at it, it is not going to be there in the cache,
+
+535
+00:54:45,719 --> 00:54:53,199
+right. So, that is really what is happening here. I have assumed it to be 1024 cross 1024,
+
+536
+00:54:53,199 --> 00:55:00,959
+that is like 8 megabytes, right. 8 megabytes is far too bigger than your L1 or L2 caches, right.
+
+537
+00:55:00,959 --> 00:55:08,039
+So, you and then you have two such arrays, that means 16 megabytes. Definitely it cannot hold in
+
+538
+00:55:08,039 --> 00:55:12,519
+your cache. So, you are going to have capacity misses. So, by the time you come back and access
+
+539
+00:55:12,519 --> 00:55:18,039
+A01, because of capacity misses, those lines would have been thrown. You can actually work out the
+
+540
+00:55:18,039 --> 00:55:26,960
+details and find out, right, okay. So, in this particular case, because you do a load of B00
+
+541
+00:55:26,960 --> 00:55:32,480
+and then a store, one of them is going to be a hit, the other one, sorry, one of them is going to
+
+542
+00:55:32,480 --> 00:55:38,400
+be a miss, the other one which you access immediately would be a hit. So, of these three accesses,
+
+543
+00:55:38,599 --> 00:55:44,519
+there will be two misses and one hit. That is why you are getting 33 percent. If the store has not
+
+544
+00:55:44,519 --> 00:55:55,039
+been there, you would have got 100 percent misses, okay. So, you remember the earlier program was
+
+545
+00:55:55,039 --> 00:56:04,760
+something like this, right. For j is equal to 0 to 1024 and then i is equal to 0 to 1024 and you
+
+546
+00:56:04,760 --> 00:56:11,120
+are accessing A of ij. That is what was the problem. If I have switched these two loops,
+
+547
+00:56:11,120 --> 00:56:19,920
+then what would have happened? My accesses would have been to A00, A01, A02 and so on. And in that
+
+548
+00:56:19,920 --> 00:56:27,920
+case, I would have had my 75 percent or more kind of a hit ratio. So, again it is the responsibility
+
+549
+00:56:27,920 --> 00:56:35,119
+of the compiler to understand what is the right storage order. And if the loop is not in the
+
+550
+00:56:35,119 --> 00:56:41,400
+storage order, is it possible to interchange the loop so that you can do the benefits of,
+
+551
+00:56:41,400 --> 00:56:47,320
+you can get the benefits of spatial locality. It may not always be possible to do the interchange.
+
+552
+00:56:47,320 --> 00:56:53,720
+May be unrolling. May be unrolling. Will unrolling help in this case?
+
+553
+00:56:53,719 --> 00:57:01,599
+Yes. Unrolling will not help. Unrolling still essentially takes the same order.
+
+554
+00:57:01,599 --> 00:57:09,279
+Unless you unroll it in a different way, okay, which essentially boils down to doing the
+
+555
+00:57:09,279 --> 00:57:14,439
+interchange, correct. If you want to get spatial locality here, you have to do the interchange,
+
+556
+00:57:14,440 --> 00:57:24,039
+right. Are you all with me? Okay. So, let us keep this. Finish this. So, if I interchange the loops
+
+557
+00:57:24,039 --> 00:57:31,159
+and then write it in this order, A of i is equal to 0 to 1024 and j is equal to 0 to 1024, then my
+
+558
+00:57:31,159 --> 00:57:36,840
+access order is same as my storage order. And therefore, I am going to get the spatial locality,
+
+559
+00:57:36,840 --> 00:57:46,280
+okay. Now, okay. Let us just move on to data parallelism. Yeah.
+
+560
+00:57:46,280 --> 00:57:56,080
+This is 2D array.
+
+561
+00:57:56,080 --> 00:58:13,560
+Not coherence wise, coherence is not the point at all. Leave that aside, yeah.
+
+562
+00:58:13,559 --> 00:58:26,079
+Why? Why? In any case, it is actually stored as a one-dimensional thing in memory, correct, right.
+
+563
+00:58:26,079 --> 00:58:36,519
+Is it how it is going to do?
+
+564
+00:58:36,519 --> 00:58:47,159
+If you have declared this as a two-dimensional array and if you give A of i j, it will actually
+
+565
+00:58:47,159 --> 00:58:53,519
+compute i times the number of elements in that multiplied by this plus j times the number of
+
+566
+00:58:53,519 --> 00:59:00,280
+this. Get that as an expression and then index it outside of the A of something. That is how
+
+567
+00:59:00,280 --> 00:59:05,759
+it is supposed to generate code for that, right. It is not like I am going to find out where
+
+568
+00:59:05,760 --> 00:59:12,640
+A of i 0 would be or what is the address of A of i 0 and then to that I am going to add something.
+
+569
+00:59:12,640 --> 00:59:17,760
+Whichever way you do, I think it is only the index address calculation, right.
+
+570
+00:59:17,760 --> 00:59:23,560
+Dynamic memory allocation.
+
+571
+00:59:23,560 --> 00:59:27,640
+Dynamic memory allocation. So, if you are declaring it as a two-dimensional
+
+572
+00:59:27,640 --> 00:59:35,240
+array and then allocating all the space upfront, it is the same, right. If you are doing dynamic
+
+573
+00:59:35,239 --> 00:59:39,359
+allocation, then the problem is different, right. You are essentially allocating an array
+
+574
+00:59:39,359 --> 00:59:44,079
+of one dimension and for each one of them you are allocating an another array, obviously.
+
+575
+00:59:44,079 --> 00:59:50,599
+So, in that case, using the one-dimensional array as a two-dimensional array.
+
+576
+00:59:50,599 --> 00:59:54,199
+Yeah, you are essentially saying that I do not do dynamic allocation or even if I do
+
+577
+00:59:54,199 --> 01:00:00,679
+dynamic allocation, I do all of them together in one shot, right. See, again think of it
+
+578
+01:00:00,679 --> 01:00:06,519
+in the following way. If I have an array which is 1024 cross 1024, why would I want
+
+579
+01:00:06,519 --> 01:00:13,799
+to do dynamic allocation, right? You would not, right. There are, you know, programs
+
+580
+01:00:13,799 --> 01:00:18,039
+and there are variables where you want to declare certain things as, I mean declare
+
+581
+01:00:18,039 --> 01:00:21,919
+something statically and there are certain places where you definitely have to go for
+
+582
+01:00:21,919 --> 01:00:24,960
+a dynamic thing. When you do a dynamic thing, I am assuming
+
+583
+01:00:25,960 --> 01:00:32,280
+do a 1024 cross 1024. It is 1024 and then for each one of them will have different,
+
+584
+01:00:32,280 --> 01:00:37,519
+for example, when I talk about an adjacency list representation, right. There are the
+
+585
+01:00:37,519 --> 01:00:40,519
+cases where you actually do dynamic memory allocation.
+
+586
+01:00:40,519 --> 01:00:49,519
+Why is it that for dynamic allocation to the array, it is so much different than on statically
+
+587
+01:00:49,519 --> 01:00:52,599
+allocated? Okay. Because this different elements of the
+
+588
+01:00:52,599 --> 01:00:59,599
+rows are going to be allocated, I mean, it is going to be allocated by the malloc separately,
+
+589
+01:00:59,599 --> 01:01:06,440
+right. And there are certain analysis that you can do with a statically allocated array.
+
+590
+01:01:06,440 --> 01:01:12,679
+In a dynamically allocated array, you cannot even do many of those analysis, right. So,
+
+591
+01:01:12,679 --> 01:01:21,159
+I would not say why or which one would perform better. It is kind of hard to predict, okay.
+
+592
+01:01:21,159 --> 01:01:25,199
+By saying that I will declare it as a one dimensional array, you are saying that I am
+
+593
+01:01:25,199 --> 01:01:29,440
+going to allocate all of them together in which case it pretty much becomes same as
+
+594
+01:01:29,440 --> 01:01:35,079
+static allocation except that it is done dynamically at runtime. It is a contiguous piece of that
+
+595
+01:01:35,079 --> 01:01:39,359
+many elements whereas this also was a contiguous piece. This was in data segment whereas that
+
+596
+01:01:39,359 --> 01:01:44,239
+will be in heap segment. Other than that, there is no real difference, okay. There may
+
+597
+01:01:44,239 --> 01:01:50,799
+not be, okay. Any other questions?
+
+598
+01:01:50,800 --> 01:01:57,519
+All I wanted to point out here is that do not, I mean, when you have these programs,
+
+599
+01:01:57,519 --> 01:02:02,400
+you should be able to find out which of these accesses are likely to give you more hits
+
+600
+01:02:02,400 --> 01:02:06,080
+and which of these accesses are likely to give less hits. That we should be able to
+
+601
+01:02:06,080 --> 01:02:10,480
+figure out and we cannot say that we would not be able to figure this out because after
+
+602
+01:02:10,480 --> 01:02:15,080
+all we understand caches, we understand how program works and we should be able to figure
+
+603
+01:02:15,080 --> 01:02:19,240
+this out, right. Any other questions?
+
+604
+01:02:19,679 --> 01:02:23,959
+So what happens in a matrix multiplication? That is the eventual question we want to get
+
+605
+01:02:23,959 --> 01:02:29,639
+into, right. All of you remember the matrix multiplication program, right. The program
+
+606
+01:02:29,639 --> 01:02:41,839
+says A of ij is equal to A of ij plus B of ik multiplied by C of kj. So, B array is going
+
+607
+01:02:41,840 --> 01:02:50,480
+to be accessed row wise. C array is going to be accessed column wise, right. So, in
+
+608
+01:02:50,480 --> 01:02:57,280
+one of them you will get benefits of spatial locality. In the other, you will not. And
+
+609
+01:02:57,280 --> 01:03:03,000
+if these arrays are too big, in neither of them you will get temporal locality, correct.
+
+610
+01:03:03,000 --> 01:03:07,600
+So, is that something that we can do to improve that?
+
+611
+01:03:08,360 --> 01:03:17,799
+Yeah, but then when you do the transport you are anyway incurring the cost, right. True,
+
+612
+01:03:17,799 --> 01:03:22,519
+I mean if you transport then you can use that, but then when you do the transport you are
+
+613
+01:03:22,519 --> 01:03:29,360
+going to access C in the column wise way or you are going to write it into the transpose
+
+614
+01:03:29,360 --> 01:03:34,839
+array in the column wise way. You are going to get hit somewhere. You can postpone the
+
+615
+01:03:34,840 --> 01:03:41,280
+problem, but you cannot solve the problem, is not it? But there is an advantage. If you
+
+616
+01:03:41,280 --> 01:03:45,079
+are going to repeatedly use that you will get the benefit of that, true.
+
+617
+01:03:45,079 --> 01:03:51,480
+Okay, so we are going to talk about that little later, right, if time permits. Now everything
+
+618
+01:03:51,480 --> 01:03:56,280
+is if time permits because we have only one more session. So, let us see what happens.
+
+619
+01:03:56,280 --> 01:04:04,640
+Okay, let me quickly talk about this parallelization and SIMD machines or SIMD operations. So,
+
+620
+01:04:04,639 --> 01:04:09,480
+one class of parallel machines are called SIMD machines which stands for single instruction
+
+621
+01:04:09,480 --> 01:04:14,799
+multiple data and in these machines essentially you execute a single operation or a single
+
+622
+01:04:14,799 --> 01:04:20,359
+instruction, but that single instruction operates on multiple data elements. That is why it
+
+623
+01:04:20,359 --> 01:04:24,719
+is called single instruction multiple data elements. Typically when you have a vector
+
+624
+01:04:24,719 --> 01:04:30,980
+and you are trying to do A of i plus B of i across all elements of i then that is like
+
+625
+01:04:31,019 --> 01:04:35,139
+a vector operation or that is like a SIMD operation, right.
+
+626
+01:04:35,139 --> 01:04:40,659
+Today you can see SIMD machines in many forms. Earlier days there used to be vector processors
+
+627
+01:04:40,659 --> 01:04:46,619
+which used to exploit SIMD. There also used to be array processors which used to exploit
+
+628
+01:04:46,619 --> 01:04:54,820
+SIMD, but these were like the 60s and the 70s and the 80s, but today's processors have
+
+629
+01:04:54,900 --> 01:05:00,660
+instructions like the MMX instructions or the AVX instructions. These are what we call
+
+630
+01:05:00,660 --> 01:05:07,660
+as the wide word instruction, right. So, for example I have a 512 bit register and I have
+
+631
+01:05:08,140 --> 01:05:15,140
+a functional unit which can actually do operations on 512 bits. That means that I can take 1632
+
+632
+01:05:15,140 --> 01:05:22,140
+bits and perform operations on all of these 16 operands. That is really what it is, right.
+
+633
+01:05:22,379 --> 01:05:29,379
+So this is also a form of SIMD machine, right. So it could be 512 bits or 256 bits or 64
+
+634
+01:05:30,940 --> 01:05:37,940
+bits and depending on that it is called either MMX or SSE or AVX and so on. Again AVX 256
+
+635
+01:05:37,940 --> 01:05:44,379
+is there, AVX 512 is there and so on. So there is also one other class of machines which
+
+636
+01:05:44,379 --> 01:05:51,379
+could potentially fit into this SIMD machines. What is that, right? GPUs.
+
+637
+01:05:52,139 --> 01:05:59,139
+Right, because they have what are called SIMD cores in them and those SIMD cores try to
+
+638
+01:05:59,739 --> 01:06:06,379
+execute instructions in parallel, same instructions on multiple data, right. It is actually I
+
+639
+01:06:06,379 --> 01:06:11,739
+mean people classify this as SIMD, single instructions multiple threads, but it actually
+
+640
+01:06:11,739 --> 01:06:17,940
+operates on multiple data values, right. That is also a SIMD machine, right. If you have
+
+641
+01:06:17,940 --> 01:06:22,659
+not heard about graphics processing unit, go to NVIDIA, right, for a visit and they
+
+642
+01:06:22,659 --> 01:06:24,860
+will tell you what it is.
+
+643
+01:06:24,860 --> 01:06:31,860
+Okay, so let us focus on this SSE and AVX instructions, okay. This shows in the timeline
+
+644
+01:06:34,539 --> 01:06:40,619
+how these things have evolved, right. I think way back in the 97 we had this MMX instructions
+
+645
+01:06:40,619 --> 01:06:46,980
+which used to operate on 64 or 128 bits. Now today we talk about similar operations which
+
+646
+01:06:46,980 --> 01:06:53,420
+are happening on 512 bits. So let us see what this is. I have the example in the next slide.
+
+647
+01:06:53,420 --> 01:07:00,420
+So this is really what happens, okay. Let us assume I have a register which is 128 bits
+
+648
+01:07:01,460 --> 01:07:07,980
+long, correct. So I have a set of registers which are 128 bits long and let us say, okay,
+
+649
+01:07:07,980 --> 01:07:13,400
+my operations have kind of shifted, okay. And I have four functional units which can
+
+650
+01:07:13,480 --> 01:07:18,880
+perform operations. And what I can do is that I can take some parts of X naught and the
+
+651
+01:07:18,880 --> 01:07:24,880
+corresponding part of Y naught and I can perform the operation to produce Z naught. Similarly,
+
+652
+01:07:24,880 --> 01:07:31,280
+X 1, Y 1, Z 1, X 2, Y 2, Z 2 and so on. This is essentially what happens and this operation
+
+653
+01:07:31,280 --> 01:07:37,800
+can be add, subtract, multiply or logical operations whatever it is, right.
+
+654
+01:07:37,800 --> 01:07:43,519
+So by giving one instruction I am performing operations instead of performing it on 32
+
+655
+01:07:43,519 --> 01:07:49,560
+bits, I am performing it on 128 bits. Therefore that single operation essentially results
+
+656
+01:07:49,560 --> 01:07:55,560
+in four parallel operations at the same time. This is essentially what we call as SIMD execution
+
+657
+01:07:55,560 --> 01:08:01,920
+or SSC or AVX or whatever you want to call it, okay. Modern processors including the
+
+658
+01:08:01,960 --> 01:08:08,960
+processors that you have in your laptop and desktop today support some form of AVX instruction.
+
+659
+01:08:09,079 --> 01:08:13,320
+So today afternoon in the lab session you will try to find out whether your compiler
+
+660
+01:08:13,320 --> 01:08:19,039
+can generate code so that it can make use of those processors capability, right. That
+
+661
+01:08:19,039 --> 01:08:23,440
+is something that you will see. Again the reason that we are trying to study is that
+
+662
+01:08:23,440 --> 01:08:28,440
+what should I do as a compiler writer in order for me to generate code for these parallel
+
+663
+01:08:28,439 --> 01:08:32,679
+machines, right. That is really what we are trying to look at. But first thing is that
+
+664
+01:08:32,679 --> 01:08:36,799
+we need to understand what these things are, right, okay.
+
+665
+01:08:36,799 --> 01:08:42,719
+So for example Intel, okay Intel of more recent kind let us say if you are looking at Skylake
+
+666
+01:08:42,719 --> 01:08:49,719
+kind of a processor would have a 512 bit register which means that on that you can do 16 single
+
+667
+01:08:51,159 --> 01:08:58,159
+precision floating point operations or 8 double precision floating point operations or 32
+
+668
+01:08:58,439 --> 01:09:03,599
+16 bit operations and so on and so forth, right. Where are those 16 bits and 8 bits
+
+669
+01:09:03,599 --> 01:09:09,399
+are relevant? All of you should know the keyword, buzzword.
+
+670
+01:09:09,399 --> 01:09:14,439
+Machine learning, deep learning, right. They all work with low precision things so that
+
+671
+01:09:14,439 --> 01:09:21,439
+you can actually do using these 512 bits, right. What 64 parallel operations, 8 bit
+
+672
+01:09:22,239 --> 01:09:29,239
+operations, correct. So all of that is possible. It also has 256 and 128 bit registers and these
+
+673
+01:09:31,599 --> 01:09:38,599
+are called by different names, okay. So there you go, right. If you have a 256 bit register
+
+674
+01:09:39,919 --> 01:09:46,479
+on that you can do 8 single precision floating point operations or 4 double precision operations
+
+675
+01:09:46,479 --> 01:09:53,479
+or 32 8 bit operation, right. These are typically used in machine learning kind of applications,
+
+676
+01:09:54,239 --> 01:10:01,239
+right. So if you have read about GPUs and GPUs capable of having a very high AI flops,
+
+677
+01:10:02,319 --> 01:10:08,159
+AI floating point operation this is really what they are talking about, okay.
+
+678
+01:10:08,159 --> 01:10:13,819
+Now this is all fine. Architecture provides you all these features, right. Programmer
+
+679
+01:10:13,819 --> 01:10:19,659
+do not write code like this. You still have to take the code for i is equal to 1 to 10,
+
+680
+01:10:19,659 --> 01:10:25,019
+a of i is equal to b of i plus c of i. How do I generate code for that, right. That is
+
+681
+01:10:25,019 --> 01:10:32,019
+the problem that we are trying to talk about, okay. So compilers have automatic vectorizations
+
+682
+01:10:33,059 --> 01:10:37,099
+which is what we all enjoy like we say okay I do not have to do any work. I just press
+
+683
+01:10:37,140 --> 01:10:44,140
+the button if it can do it is good. It typically works on simple programs, okay and to certain
+
+684
+01:10:45,660 --> 01:10:51,460
+extent it helps you. So you can see where it works and where it does not or you can
+
+685
+01:10:51,460 --> 01:10:57,020
+do thread. So okay so let me give you the example of automatic vectorization before
+
+686
+01:10:57,020 --> 01:11:00,220
+I go to different other methods of doing this.
+
+687
+01:11:00,220 --> 01:11:07,220
+So again here I have three arrays x, y and z each 256 elements and we are basically trying
+
+688
+01:11:07,820 --> 01:11:14,060
+to perform write some kind of element wise product operations on this, right. y of i
+
+689
+01:11:14,060 --> 01:11:20,420
+is equal to well I should have said z of i but does not matter, okay. So you look at
+
+690
+01:11:20,420 --> 01:11:26,420
+the code over here very complicated. I do not even understand what this is, okay. There
+
+691
+01:11:26,739 --> 01:11:33,739
+are two move instructions which basically move array y and array z into these two registers,
+
+692
+01:11:34,619 --> 01:11:41,619
+okay. And these move instructions would move a set of 16 or 32 words together depending
+
+693
+01:11:42,579 --> 01:11:49,579
+on the size, okay. x is actually 512 bits so it will actually move 16, 32 bit values
+
+694
+01:11:49,579 --> 01:11:56,579
+into that, right. Then you do a multiply. So the v essentially says it is a vector operation.
+
+695
+01:11:57,579 --> 01:12:03,619
+So it will actually do a parallel multiply of this xmm on register with xmm to register.
+
+696
+01:12:03,619 --> 01:12:10,380
+So you will see something like this happening, right, okay. First you move the operand from
+
+697
+01:12:10,380 --> 01:12:17,380
+the memory into these registers and then you perform this parallel multiplication, correct.
+
+698
+01:12:17,380 --> 01:12:22,340
+And then you store these values back into the other array, right. That is again the
+
+699
+01:12:22,340 --> 01:12:27,980
+move operation. So as I mentioned this should have been z not y, okay. So you are essentially
+
+700
+01:12:27,980 --> 01:12:34,980
+moving this xmm 0 back into the z array. So these four operations, each one of these four
+
+701
+01:12:36,220 --> 01:12:43,220
+operations essentially perform equivalent of 16, 32 bit operation, right. And they all
+
+702
+01:12:43,860 --> 01:12:48,699
+can be performed in the same amount of time whether you perform one operation or 16 operation.
+
+703
+01:12:48,699 --> 01:12:54,760
+The time taken is same because they are all going to be done in parallel, right, okay.
+
+704
+01:12:54,760 --> 01:12:59,180
+So this is how the code is going to look like. So afternoon when you compile your code for
+
+705
+01:12:59,180 --> 01:13:05,420
+vectorization do expect to see some really messy code like this, okay.
+
+706
+01:13:05,420 --> 01:13:12,420
+Now you asked a question about vectorization and cache. Is that question still there or
+
+707
+01:13:12,420 --> 01:13:18,619
+not? It is gone, correct. So why do not I ask you the question? Supposing let us say
+
+708
+01:13:18,619 --> 01:13:25,619
+I have a two dimensional array xij, right and I want to multiply x of i0 with y of i0
+
+709
+01:13:31,980 --> 01:13:38,980
+for different values of i. Then what happens? Assume row major ordering, right. Again we
+
+710
+01:13:39,979 --> 01:13:46,979
+are doing the same thing. If it had been like x of, I mean if I am doing x of i0, i1, i2,
+
+711
+01:13:48,219 --> 01:13:54,179
+i3 with y of i0, i1, i2, i3 you could have easily brought them, correct. Spatial locality
+
+712
+01:13:54,179 --> 01:13:59,179
+would have been there, you would have brought it to these 512 bit registers and you could
+
+713
+01:13:59,179 --> 01:14:04,179
+have performed the operation, everything is fine. That case was no problem. But let us
+
+714
+01:14:04,180 --> 01:14:11,180
+say I want to multiply x00, x10, x20, x40 with y10, y20, y30 and y40. Now these move
+
+715
+01:14:16,539 --> 01:14:23,220
+operations which are actually able to move things together, right is going to struggle
+
+716
+01:14:23,220 --> 01:14:29,860
+because these are in different locations in the memory and therefore in different locations
+
+717
+01:14:29,859 --> 01:14:36,859
+in the cache, right. So, if this move takes let us say t cycles,
+
+718
+01:14:37,939 --> 01:14:44,939
+that move if it is done inefficiently will take n times t, n times t, t times 4 not t
+
+719
+01:14:45,939 --> 01:14:52,819
+plus 4, t times 4 or t times 16 amount of time. But then there are some intelligent
+
+720
+01:14:52,819 --> 01:14:59,460
+operations like gather, right which will actually take values from different locations and somehow
+
+721
+01:14:59,460 --> 01:15:05,819
+try to push these things in a way which is faster but definitely not in t, okay. So,
+
+722
+01:15:05,819 --> 01:15:11,020
+you use gather operations to move those operations into a vector register. Then of course you
+
+723
+01:15:11,020 --> 01:15:18,020
+can perform these operations we multiply d together and then you put a scatter operation
+
+724
+01:15:18,300 --> 01:15:22,939
+which will actually put it in different places in the memory, possible to do that, okay.
+
+725
+01:15:22,939 --> 01:15:29,939
+There is a cost additional cost but it is better than doing it as a scalar, right possible,
+
+726
+01:15:30,859 --> 01:15:37,019
+okay. So, there are lots of things that are happening and what we now need to do is that
+
+727
+01:15:37,019 --> 01:15:42,979
+since architecture is doing all these things as compiler writer we should be able to generate
+
+728
+01:15:42,979 --> 01:15:46,659
+code appropriately. For example, if my architecture supports scatter
+
+729
+01:15:46,659 --> 01:15:51,139
+gather and I have a program which is like this I should rather use the scatter gather
+
+730
+01:15:51,140 --> 01:15:58,140
+instructions to do that efficiently, right. Again more challenges for the compiler writer,
+
+731
+01:15:59,740 --> 01:16:05,619
+okay. So, how do we exploit vectorization from our processors? Either you could use
+
+732
+01:16:05,619 --> 01:16:11,460
+automatic vectorization so GCC or something will have, right the appropriate flag which
+
+733
+01:16:11,460 --> 01:16:18,460
+helps you to do this, okay. But it may work for some simple cases like this but not necessarily
+
+734
+01:16:19,460 --> 01:16:26,460
+for all possible cases, right. You can also do one thing you can also indicate which arrays
+
+735
+01:16:26,899 --> 01:16:32,060
+or vectors where you are likely to perform vector operations and declare them as vector
+
+736
+01:16:32,060 --> 01:16:38,060
+arrays, vector data types and the compiler will take that hint and then try to vectorize
+
+737
+01:16:38,060 --> 01:16:42,060
+it. That is another approach. Again I am not going to go into all the details of how to
+
+738
+01:16:42,060 --> 01:16:46,779
+do that etcetera because that is really not the purpose.
+
+739
+01:16:46,779 --> 01:16:52,460
+You can also write vector intrinsic functions which actually does all of these things, okay.
+
+740
+01:16:52,460 --> 01:16:57,779
+Here I write the bad code in this form and then I give this to the compiler. The compiler
+
+741
+01:16:57,779 --> 01:17:04,420
+uses this to generate vector code. So, you can do one of these three things, okay. But
+
+742
+01:17:04,420 --> 01:17:09,619
+now we will ask the following question. How do I know that this array this loop can be
+
+743
+01:17:09,619 --> 01:17:16,619
+vectorized, right? How do we know that this loop can be vectorized?
+
+744
+01:17:16,779 --> 01:17:23,779
+We have to do certain analysis to figure out that this can be vectorized, right? And
+
+745
+01:17:24,340 --> 01:17:29,819
+that is when you can actually generate code like this. In fact if GCC or LLVM is generating
+
+746
+01:17:29,819 --> 01:17:36,099
+code like this they must be doing that analysis because all I wrote was this. Then it figured
+
+747
+01:17:36,099 --> 01:17:41,899
+out that this can be vectorized and I have to generate code like this, right. So, that
+
+748
+01:17:41,899 --> 01:17:47,619
+compiler was smart enough to do that by doing certain analysis. What are those analysis,
+
+749
+01:17:47,619 --> 01:17:54,619
+right? Again we talked about cache locality and other things and said that okay because
+
+750
+01:17:54,979 --> 01:18:01,139
+you wrote the loop as for j for i it was giving those locality. You have to interchange the
+
+751
+01:18:01,139 --> 01:18:07,579
+loops. How do we figure that out, right? And how do we analyze that and how do we say when
+
+752
+01:18:07,579 --> 01:18:12,500
+we can actually interchange loops? Can we interchange in all occasions? No, you may
+
+753
+01:18:12,500 --> 01:18:17,779
+violate some dependency. So, how do we do those analysis, right? We will try to see
+
+754
+01:18:17,779 --> 01:18:22,979
+some of these things very briefly, right, in the afternoon class, okay. That I am going
+
+755
+01:18:22,979 --> 01:18:27,180
+to do it slightly at a high level. So, I will not go into all the details, but at least
+
+756
+01:18:27,180 --> 01:18:30,819
+try to tell you what is in there and what we need to do.
+
+757
+01:18:30,819 --> 01:18:35,500
+So, I want you to before we conclude this session I want you to take back this following
+
+758
+01:18:35,699 --> 01:18:41,460
+things. Although in the last two days we talked about a lot of mundane things like code generation,
+
+759
+01:18:41,460 --> 01:18:46,699
+register allocation, instruction scheduling, all of this look like some nitty-gritty details,
+
+760
+01:18:46,699 --> 01:18:52,819
+right, may be trying to say one cycle here, one cycle there kind of a thing. It is not
+
+761
+01:18:52,819 --> 01:18:58,899
+about that. It is about the new features which are coming in the processors, the new things
+
+762
+01:18:58,899 --> 01:19:04,340
+that are coming in the processor and being able to generate code automatically for that.
+
+763
+01:19:04,340 --> 01:19:11,340
+That is why compiler design is exciting, right. Today you have GPUs. How do I generate code
+
+764
+01:19:12,500 --> 01:19:19,100
+for GPUs? Can I take your C program and then automatically generate a CUDA code which will
+
+765
+01:19:19,100 --> 01:19:25,420
+do certain things, right? Or if I have a CUDA code can I analyze it and make it better for
+
+766
+01:19:25,420 --> 01:19:32,420
+the GPUs, right? Or if I have a C code can I exploit the AVX capabilities in the CPUs
+
+767
+01:19:34,340 --> 01:19:40,539
+of the processor? Or if my processor has four cores, eight cores, all your processors has
+
+768
+01:19:40,539 --> 01:19:47,539
+four cores and eight cores. How many of your programs are exploiting that? May be nothing,
+
+769
+01:19:47,539 --> 01:19:52,699
+right, because you did not put the proper compiler switch or may be the proper compiler
+
+770
+01:19:52,699 --> 01:19:57,420
+switch is not yet available to automatically parallelize some of them. Can you write one
+
+771
+01:19:57,420 --> 01:20:04,260
+of that, right? So, there are lots of interesting opportunities in compiler design, right, that
+
+772
+01:20:04,260 --> 01:20:10,260
+you can actually do to exploit that. So, do not think of compiler design as oh that lexical
+
+773
+01:20:10,260 --> 01:20:16,659
+analysis parsing blah blah and you know. I mean today nobody really talks about many
+
+774
+01:20:16,659 --> 01:20:21,460
+of these things. It is important for us to understand to know how they are done, but
+
+775
+01:20:21,460 --> 01:20:27,579
+there are lots and lots of interesting challenges and opportunities in compilers, okay. Many
+
+776
+01:20:27,859 --> 01:20:34,859
+problems that you can work on, right and everyday processors are coming up with more and more
+
+777
+01:20:35,460 --> 01:20:40,539
+capability. First of all, I mean let me before I go into that, first of all let me ask you
+
+778
+01:20:40,539 --> 01:20:45,899
+the following question. Why do we even need compilers? Why cannot we just write programs
+
+779
+01:20:45,899 --> 01:20:52,899
+in assembly language? To write large programs is difficult. Even to write an assembly language
+
+780
+01:20:52,899 --> 01:20:59,899
+program, what do you need to know? You need to know about the architecture, machine architecture
+
+781
+01:21:03,500 --> 01:21:08,420
+and other things, correct and then the moment you write an assembly program for one machine,
+
+782
+01:21:08,420 --> 01:21:13,420
+if you want to take it to some other machine, you will have to redo the whole work, right.
+
+783
+01:21:13,420 --> 01:21:18,619
+So, essentially the reason that we have a compiler is that you want to abstract some
+
+784
+01:21:18,619 --> 01:21:23,619
+of those details, correct. So, that the programmer need not have to worry about it. He can still
+
+785
+01:21:23,619 --> 01:21:28,619
+think of A as an array, B as an array doing some addition, for loop, blah, blah, blah,
+
+786
+01:21:28,619 --> 01:21:33,859
+correct. So, everything else is taken care of by the compiler. Similarly, whenever there
+
+787
+01:21:33,859 --> 01:21:38,579
+is a new feature that is coming in the architecture, do you want the programmer to know about it
+
+788
+01:21:38,579 --> 01:21:43,460
+and exploit it? Do you want the programmer to write code like this or do you want the
+
+789
+01:21:44,020 --> 01:21:49,140
+compiler to generate code like this? That is the question, right. So, here there is
+
+790
+01:21:49,140 --> 01:21:54,220
+with explicit arithmetic instructions or data types, here with this with intrinsics where
+
+791
+01:21:54,220 --> 01:21:59,699
+he has to generate a lot more code by knowing things. So, what do we want them to see? What
+
+792
+01:21:59,699 --> 01:22:04,699
+as compiler writers can we enable them to do, right? That is really the question, right.
+
+793
+01:22:04,699 --> 01:22:10,420
+So, again there are lots of interesting problems and challenges that could be solved by writing
+
+794
+01:22:10,420 --> 01:22:17,420
+better compilers. So, keep that in mind when you come back for the afternoon session, that
+
+795
+01:22:17,420 --> 01:22:18,300
+we will stop.
+

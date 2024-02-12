@@ -1,0 +1,5172 @@
+1
+00:00:00,000 --> 00:00:08,240
+Hi everyone, my name is Girish Bhaarambhe.
+
+2
+00:00:08,240 --> 00:00:14,839
+I actually work in NVIDIA and I am responsible for the PTX compiler group within NVIDIA.
+
+3
+00:00:14,839 --> 00:00:20,559
+So my work essentially involves working with the language design and some of the later
+
+4
+00:00:20,559 --> 00:00:25,420
+aspects of the compilation like linker and loader related things.
+
+5
+00:00:25,420 --> 00:00:31,140
+So this module is essentially going to talk about the things which happen after compilation.
+
+6
+00:00:31,140 --> 00:00:36,100
+So far in first two weeks you have learned mostly what will happen during compilation
+
+7
+00:00:36,100 --> 00:00:39,380
+right including optimizations and code generation.
+
+8
+00:00:39,380 --> 00:00:44,540
+So this module kind of focuses on the other things which need to be there for program
+
+9
+00:00:44,540 --> 00:00:46,540
+to work correctly.
+
+10
+00:00:46,539 --> 00:01:04,620
+Now just to kind of give some examples of why this is interesting.
+
+11
+00:01:04,620 --> 00:01:20,659
+Can everyone read the code?
+
+12
+00:01:20,659 --> 00:01:23,659
+So can you tell me what will be the output of this code?
+
+13
+00:01:23,659 --> 00:01:24,659
+What?
+
+14
+00:01:24,659 --> 00:01:25,659
+Error.
+
+15
+00:01:25,659 --> 00:01:28,700
+So how many of you think it is error?
+
+16
+00:01:28,700 --> 00:01:31,460
+Why do you think it is an error?
+
+17
+00:01:31,460 --> 00:01:32,460
+Correct.
+
+18
+00:01:32,459 --> 00:01:35,659
+So the symbol gbl is being defined twice.
+
+19
+00:01:35,659 --> 00:01:37,299
+So it should result in error.
+
+20
+00:01:37,299 --> 00:01:39,679
+Now let us see this code in action.
+
+21
+00:01:39,679 --> 00:01:42,899
+So I do gcc sample dot c.
+
+22
+00:01:42,899 --> 00:01:48,739
+There is no error and it actually works.
+
+23
+00:01:48,739 --> 00:01:51,619
+Any idea why?
+
+24
+00:01:51,619 --> 00:02:00,019
+It is the simplest thing for compiler to realize that gbl is a symbol which is defined twice.
+
+25
+00:02:00,179 --> 00:02:05,060
+Let us try something different.
+
+26
+00:02:05,060 --> 00:02:15,859
+So I am defining a function called start in which I will do say printf hello.
+
+27
+00:02:15,859 --> 00:02:20,039
+And let me call start.
+
+28
+00:02:20,039 --> 00:02:23,939
+What will be output of this code?
+
+29
+00:02:23,939 --> 00:02:28,979
+Hello.
+
+30
+00:02:28,979 --> 00:02:39,459
+How many of you think hello?
+
+31
+00:02:39,459 --> 00:02:44,179
+Some error, multiple definition of start.
+
+32
+00:02:44,179 --> 00:02:51,739
+So whatever error we were expecting in the prior code we are getting in this code.
+
+33
+00:02:51,739 --> 00:02:54,780
+Let us try something more interesting.
+
+34
+00:02:54,780 --> 00:03:05,020
+So let us say I define an array whose size is say 3 gb.
+
+35
+00:03:05,020 --> 00:03:22,539
+How much is 3 gb?
+
+36
+00:03:22,539 --> 00:03:48,979
+3 gb.
+
+37
+00:03:48,979 --> 00:03:58,339
+Any idea what will be output of this?
+
+38
+00:03:58,339 --> 00:04:03,539
+So someone is thinking it is related to how much memory compiler can allocate.
+
+39
+00:04:03,539 --> 00:04:09,019
+Any other things?
+
+40
+00:04:09,019 --> 00:04:12,579
+Let us try this.
+
+41
+00:04:12,579 --> 00:04:15,379
+So it worked as expected.
+
+42
+00:04:15,379 --> 00:04:22,180
+Let us try to increase size a bit.
+
+43
+00:04:22,180 --> 00:04:23,180
+Still worked.
+
+44
+00:04:23,180 --> 00:04:30,100
+Let us try to increase bit more.
+
+45
+00:04:30,100 --> 00:04:34,819
+Still worked.
+
+46
+00:04:34,819 --> 00:04:59,500
+Some reason this is still worked.
+
+47
+00:04:59,500 --> 00:05:02,699
+So do we really have this much memory?
+
+48
+00:05:02,699 --> 00:05:07,180
+Now something is, but this is size of array too large.
+
+49
+00:05:07,180 --> 00:05:10,539
+So at some point it said I cannot allocate.
+
+50
+00:05:10,539 --> 00:05:16,620
+But do we really have this much memory just prior to that point?
+
+51
+00:05:16,620 --> 00:05:22,379
+So essentially this module is going to talk about these kind of things.
+
+52
+00:05:22,379 --> 00:05:25,980
+Whatever happened behind the CS.
+
+53
+00:05:25,980 --> 00:05:28,339
+So far like this was surprising.
+
+54
+00:05:28,339 --> 00:05:34,139
+My compiler did not error out on a symbol which was defined one after other.
+
+55
+00:05:34,139 --> 00:05:37,379
+What is the reason why it did not do that?
+
+56
+00:05:37,379 --> 00:05:39,579
+Why was start a problem?
+
+57
+00:05:39,579 --> 00:05:44,500
+I defined a function called underscore start and it was a problem.
+
+58
+00:05:44,500 --> 00:05:50,500
+So outcome of this module is to teach you things which go under the hood.
+
+59
+00:05:50,500 --> 00:05:55,620
+Whatever is not observable to you when you write program, but is actually happening within
+
+60
+00:05:55,620 --> 00:05:57,739
+the system.
+
+61
+00:05:58,699 --> 00:06:05,740
+Not just what happens, but why it is that way and how it is implemented.
+
+62
+00:06:05,740 --> 00:06:10,939
+And that essentially will enable you to understand how the programs are actually being executed
+
+63
+00:06:10,939 --> 00:06:14,100
+by the processor.
+
+64
+00:06:14,100 --> 00:06:19,420
+Any idea why you should learn these topics?
+
+65
+00:06:19,420 --> 00:06:24,579
+How many of you think it is interesting to learn about these topics?
+
+66
+00:06:24,579 --> 00:06:26,740
+Almost everyone.
+
+67
+00:06:26,740 --> 00:06:32,019
+So the reason you should learn these topics is because it makes you a better programmer.
+
+68
+00:06:32,019 --> 00:06:37,900
+A better programmer is always cognizant about the fact that whatever things are happening
+
+69
+00:06:37,900 --> 00:06:39,379
+in the system.
+
+70
+00:06:39,379 --> 00:06:44,379
+Because that allows you to design your programs in much more intelligent way and to be able
+
+71
+00:06:44,379 --> 00:06:46,540
+to exploit things in better way.
+
+72
+00:06:46,540 --> 00:06:50,819
+For example, you have learned matrix multiply.
+
+73
+00:06:50,819 --> 00:06:56,660
+And you probably saw an example where simply swapping the order of loop gave lot of performance.
+
+74
+00:06:57,620 --> 00:06:59,060
+Why did that happen?
+
+75
+00:06:59,060 --> 00:07:03,100
+Because you know in the system in which you are running your program there is a cache
+
+76
+00:07:03,100 --> 00:07:04,100
+sitting there.
+
+77
+00:07:04,100 --> 00:07:10,700
+And how to program things so that you efficiently utilize the cache.
+
+78
+00:07:10,700 --> 00:07:18,060
+So knowing these things will help you become better at in general programming.
+
+79
+00:07:18,060 --> 00:07:20,460
+It will make you really good at debugging.
+
+80
+00:07:20,460 --> 00:07:25,980
+Because whenever you are faced with a nasty bug and you don't know why this is happening,
+
+81
+00:07:26,020 --> 00:07:31,379
+like this in GBL, GBL thing, there is no sane way of thinking of why this happened.
+
+82
+00:07:31,379 --> 00:07:36,180
+But if you know what goes on under the hood, then it is much easier for you to reason about
+
+83
+00:07:36,180 --> 00:07:37,780
+those things.
+
+84
+00:07:37,780 --> 00:07:41,220
+And then it enables you to build more systems.
+
+85
+00:07:41,220 --> 00:07:44,620
+Whatever we are going to learn is going to talk about how a system is built and what
+
+86
+00:07:44,620 --> 00:07:47,780
+all constitutes a system.
+
+87
+00:07:47,780 --> 00:07:52,140
+Now when you are actually working in some environment, it's not that you will be able
+
+88
+00:07:52,139 --> 00:07:56,300
+to utilize the ideas which you learn here as it is.
+
+89
+00:07:56,300 --> 00:08:00,740
+But you will at least have foundation to think about where to start from.
+
+90
+00:08:00,740 --> 00:08:04,579
+And new systems can be built using that.
+
+91
+00:08:04,579 --> 00:08:10,099
+Now one disclaimer which I want to put here is most of the topics which are being discussed
+
+92
+00:08:10,099 --> 00:08:12,979
+would be very specific to an implementation.
+
+93
+00:08:12,979 --> 00:08:14,579
+It's not a theory.
+
+94
+00:08:14,579 --> 00:08:19,379
+Unlike the first two weeks what you have learned, it was a theoretical foundation and it kind
+
+95
+00:08:19,459 --> 00:08:23,180
+of hold across the various things.
+
+96
+00:08:23,180 --> 00:08:27,060
+This topic is very much implementation specific.
+
+97
+00:08:27,060 --> 00:08:32,500
+There are reasons why things are done this way for a particular implementation which
+
+98
+00:08:32,500 --> 00:08:35,740
+may or may not hold in other systems.
+
+99
+00:08:35,740 --> 00:08:40,740
+Most of the content here is specific to Linux and x86.
+
+100
+00:08:40,740 --> 00:08:43,960
+Windows actually might behave very differently.
+
+101
+00:08:43,960 --> 00:08:47,779
+So don't take this as a universal truth.
+
+102
+00:08:47,779 --> 00:08:49,980
+But it is one of the implementations.
+
+103
+00:08:49,980 --> 00:08:56,179
+And wherever possible I will try to point out that in other systems this differs.
+
+104
+00:08:56,179 --> 00:09:01,339
+But most of the material is kind of Linux and Intel specific.
+
+105
+00:09:01,339 --> 00:09:05,779
+Any questions before we kind of start?
+
+106
+00:09:05,779 --> 00:09:07,299
+So this is the outline.
+
+107
+00:09:07,299 --> 00:09:11,839
+Actually I have just too many things packed in these two days.
+
+108
+00:09:11,839 --> 00:09:17,059
+So we will start with life of a program which essentially talks about how the program actually
+
+109
+00:09:17,059 --> 00:09:19,519
+compiles to executable.
+
+110
+00:09:19,519 --> 00:09:24,319
+Then we will go into details on how functions are actually implemented.
+
+111
+00:09:24,319 --> 00:09:29,719
+Then we will go into details of object files which are produced by the compiler and assemblers.
+
+112
+00:09:29,719 --> 00:09:31,479
+Then we will look into the assembler.
+
+113
+00:09:31,479 --> 00:09:36,799
+We will look into linkers in very much detail on how linkers actually work.
+
+114
+00:09:36,799 --> 00:09:41,779
+And some of the execution aspects are covered in the later half of the session where we
+
+115
+00:09:41,779 --> 00:09:46,759
+will go into details of processes, virtual memory, how dynamic linking works.
+
+116
+00:09:46,799 --> 00:09:52,019
+And then depending on how time permits we will go into details of various language features
+
+117
+00:09:52,019 --> 00:09:55,819
+and how they are actually implemented in the compiler.
+
+118
+00:09:55,819 --> 00:09:58,740
+So let's start with life of program.
+
+119
+00:09:58,740 --> 00:10:06,120
+So what you write is some high level source code, CC++, Java, whatever.
+
+120
+00:10:06,120 --> 00:10:10,819
+It gets translated into an assembly program by the compiler.
+
+121
+00:10:10,819 --> 00:10:15,159
+And assembler will translate it into actual binary encoding.
+
+122
+00:10:15,159 --> 00:10:19,899
+And this binary encoding is what actually the hardware understands.
+
+123
+00:10:19,899 --> 00:10:21,980
+And you will run that program.
+
+124
+00:10:21,980 --> 00:10:27,659
+Now if you zoom into these steps, what is actually happening is, so let's say you have
+
+125
+00:10:27,659 --> 00:10:31,539
+program 1.c and program 2.c.
+
+126
+00:10:31,539 --> 00:10:38,019
+You can compile it into an executable saying prog 1.c, prog 2.c and run that program.
+
+127
+00:10:38,019 --> 00:10:43,360
+What is actually happening behind the scenes is you write your program in the text format
+
+128
+00:10:43,379 --> 00:10:46,960
+as in something in ASCII form.
+
+129
+00:10:46,960 --> 00:10:50,379
+You pre-process it.
+
+130
+00:10:50,379 --> 00:10:55,379
+Pre-processor is essentially trying to handle all the things like hash include, hash if
+
+131
+00:10:55,379 --> 00:10:57,800
+defs, hash defines and so on.
+
+132
+00:10:57,800 --> 00:11:01,379
+And pre-processor is actually a language agnostic step.
+
+133
+00:11:01,379 --> 00:11:03,639
+It has nothing to do with language as such.
+
+134
+00:11:03,639 --> 00:11:07,500
+So pre-processor does not understand your program semantically.
+
+135
+00:11:07,500 --> 00:11:10,940
+It's just a blind string replacement.
+
+136
+00:11:10,960 --> 00:11:14,880
+And it will convert it into a pre-processed source.
+
+137
+00:11:14,880 --> 00:11:19,280
+Then you will get to the compiler, which will actually do all the things which you have
+
+138
+00:11:19,280 --> 00:11:24,800
+learned in last two weeks to convert it into an assembly program.
+
+139
+00:11:24,800 --> 00:11:29,840
+Assembler's job is essentially to create object file or object program, which is essentially
+
+140
+00:11:29,840 --> 00:11:32,780
+a binary version of the program.
+
+141
+00:11:32,780 --> 00:11:39,320
+And then you get the executable file by feeding that object file into the linker.
+
+142
+00:11:40,060 --> 00:11:43,220
+This executable you will actually run.
+
+143
+00:11:43,220 --> 00:11:49,940
+This entire step before the loader is typically called as compiler driver.
+
+144
+00:11:49,940 --> 00:11:56,540
+So when you say GCC, ABC.C, what is actually GCC is not really a compiler.
+
+145
+00:11:56,540 --> 00:11:59,420
+GCC is a compiler driver.
+
+146
+00:11:59,420 --> 00:12:07,220
+So GCC is internally invoking all these tools to achieve these steps.
+
+147
+00:12:07,220 --> 00:12:12,960
+Now if we actually look into this, so let's get to a simple step.
+
+148
+00:12:12,960 --> 00:12:23,040
+So let's say I have hash defined max 100.
+
+149
+00:12:23,040 --> 00:12:25,840
+Now let's try to pre-process this code.
+
+150
+00:12:25,840 --> 00:12:31,200
+So I can do GCC dash E sample dot C.
+
+151
+00:12:31,200 --> 00:12:38,860
+And what you see here is actually all of these lines which you are seeing are actually contents
+
+152
+00:12:38,860 --> 00:12:44,320
+of STDIO.H.
+
+153
+00:12:44,320 --> 00:12:46,280
+So it's quite big.
+
+154
+00:12:46,280 --> 00:12:47,759
+Let's step to the end.
+
+155
+00:12:47,759 --> 00:12:53,160
+And you will see the max which was used is actually being replaced with the value of
+
+156
+00:12:53,160 --> 00:12:54,800
+this.
+
+157
+00:12:54,800 --> 00:13:00,560
+So this is the input which will actually be fed to the compiler.
+
+158
+00:13:00,559 --> 00:13:05,239
+The next step which we saw was essentially the compiler which will actually produce the
+
+159
+00:13:05,239 --> 00:13:06,619
+assembly file.
+
+160
+00:13:06,619 --> 00:13:21,959
+So if we do that, so this is the actual assembly program which was produced by the compiler.
+
+161
+00:13:21,959 --> 00:13:28,719
+Just to begin with you can see there is something called as main which was written in the program.
+
+162
+00:13:28,720 --> 00:13:36,279
+There are some calls to functions which we had called like printf.
+
+163
+00:13:36,279 --> 00:13:44,700
+There is a variable called array and it is taking 400 bytes because it was an integer
+
+164
+00:13:44,700 --> 00:13:48,060
+and we had said array of 100.
+
+165
+00:13:48,060 --> 00:13:52,840
+So you could see that somehow the program whatever we had written in C is also representable
+
+166
+00:13:53,840 --> 00:13:59,920
+just that the instructions which are being used are assembly instructions.
+
+167
+00:13:59,920 --> 00:14:05,920
+And then you can actually compile this to a sample dot O.
+
+168
+00:14:05,920 --> 00:14:11,519
+We will see what goes into the object file in much more detail.
+
+169
+00:14:11,519 --> 00:14:20,240
+And if you simply do this, then it is actually producing the A dot out which is the executable.
+
+170
+00:14:20,240 --> 00:14:25,799
+And A dot out you can actually run and what will happen is loader in the operating system
+
+171
+00:14:25,799 --> 00:14:30,480
+will come into picture and load that program into the memory.
+
+172
+00:14:30,480 --> 00:14:36,879
+Now to zoom into details of each and every component, as I mentioned, preprocessor essentially
+
+173
+00:14:36,879 --> 00:14:41,960
+takes the high level language source and converts it into the preprocessed source.
+
+174
+00:14:41,960 --> 00:14:48,320
+And it is responsible for processing all the hash includes and those things.
+
+175
+00:14:48,400 --> 00:14:54,760
+So linker is actually translating your high level language source into assembly program.
+
+176
+00:14:54,760 --> 00:14:58,480
+And by now you have learned that this is a beast of the task.
+
+177
+00:14:58,480 --> 00:15:00,160
+It is not a simple task.
+
+178
+00:15:00,160 --> 00:15:07,800
+It is not merely one to one translation, but it also involves lot of analysis and optimizations.
+
+179
+00:15:07,800 --> 00:15:13,120
+Compared to linker compiler, assembler is much more of a translator.
+
+180
+00:15:13,120 --> 00:15:18,639
+So assembler does not actually do optimizations or analysis.
+
+181
+00:15:18,639 --> 00:15:24,679
+And assembler is not just meant for translating the instructions into the binary encoding,
+
+182
+00:15:24,679 --> 00:15:32,440
+but also handles things which we saw here like what is this dot string, what is this
+
+183
+00:15:32,440 --> 00:15:34,399
+dot text.
+
+184
+00:15:34,399 --> 00:15:40,440
+So most of the assembler supports some directives for you to write different parts of the programs
+
+185
+00:15:40,600 --> 00:15:44,040
+And assembler is obviously responsible for handling them.
+
+186
+00:15:44,040 --> 00:15:49,480
+And assembler will create the object files which have the information for linker.
+
+187
+00:15:49,480 --> 00:15:55,360
+Now linker is essentially responsible for taking bunch of object files and linking them
+
+188
+00:15:55,360 --> 00:15:56,840
+together.
+
+189
+00:15:56,840 --> 00:16:00,360
+Linking would essentially involve resolving references.
+
+190
+00:16:00,360 --> 00:16:05,040
+So for example, when you write program, when we wrote this program, we didn't know what
+
+191
+00:16:05,040 --> 00:16:06,040
+is printf.
+
+192
+00:16:06,759 --> 00:16:11,839
+So linker's job is to figure out where the printf is and kind of pull that in and so
+
+193
+00:16:11,839 --> 00:16:12,839
+on.
+
+194
+00:16:12,839 --> 00:16:18,240
+So linker is responsible for figuring out where is something used and where is something
+
+195
+00:16:18,240 --> 00:16:23,399
+defined and connect those two things together.
+
+196
+00:16:23,399 --> 00:16:32,759
+Any idea why we need a linker?
+
+197
+00:16:32,759 --> 00:16:36,799
+So why do you want to write code in multiple source files?
+
+198
+00:16:36,799 --> 00:16:37,799
+Yes.
+
+199
+00:16:37,799 --> 00:16:38,799
+Correct.
+
+200
+00:16:38,799 --> 00:16:56,000
+So that is actually one of the key ideas of why you want to write code in multiple source
+
+201
+00:16:56,000 --> 00:16:57,000
+files.
+
+202
+00:16:57,080 --> 00:17:04,559
+So essentially, let's say you have a very big code, let's say 1 MB worth of C code.
+
+203
+00:17:04,559 --> 00:17:06,880
+And let's say you change one line in it.
+
+204
+00:17:06,880 --> 00:17:12,000
+What will happen is entire compiler needs to process the entire code again and again
+
+205
+00:17:12,000 --> 00:17:15,660
+for every small incremental change you are doing in the code.
+
+206
+00:17:15,660 --> 00:17:20,720
+And that's not developer friendly because imagine every time you are compiling a program,
+
+207
+00:17:20,720 --> 00:17:26,279
+your compiler takes five minutes to compile it because it has to compile large chunk of
+
+208
+00:17:26,440 --> 00:17:29,559
+code, then that's not acceptable.
+
+209
+00:17:29,559 --> 00:17:30,720
+So that is one reason.
+
+210
+00:17:30,720 --> 00:17:33,079
+Any other reasons?
+
+211
+00:17:33,079 --> 00:17:38,000
+So for example, why can't I create a source file, a separate source file and give it to
+
+212
+00:17:38,000 --> 00:17:44,519
+my friend and say use this and he can just hash include it.
+
+213
+00:17:44,519 --> 00:17:48,960
+So I don't write the entire source in one file, I hash include it.
+
+214
+00:17:48,960 --> 00:17:55,920
+The separate compilation problem still remains, but it at least solves my distribution problem
+
+215
+00:17:55,920 --> 00:18:01,360
+because so one of the things which Aman was saying is essentially you don't want to write
+
+216
+00:18:01,360 --> 00:18:06,480
+large programs because it kind of reduces the modularity because it kind of becomes
+
+217
+00:18:06,480 --> 00:18:08,200
+a problem.
+
+218
+00:18:08,200 --> 00:18:14,920
+So you want to write it as collection of source files and it allows you to do code reuse because
+
+219
+00:18:14,920 --> 00:18:19,400
+once I have written some code, I can reuse it at multiple places.
+
+220
+00:18:19,400 --> 00:18:25,440
+For example, let's say you have implemented some set of functions for linked list.
+
+221
+00:18:25,440 --> 00:18:28,920
+So linked list, insert, delete, whatever.
+
+222
+00:18:28,920 --> 00:18:34,000
+And you want to keep reusing it across your multiple projects, then I can simply have
+
+223
+00:18:34,000 --> 00:18:44,000
+linked list source code somehow included in my client code and use it.
+
+224
+00:18:44,000 --> 00:18:48,960
+So essentially it allows you to create library of common utilities.
+
+225
+00:18:49,600 --> 00:18:55,720
+One of the interesting aspect is allows you to distribute pre-compiled code.
+
+226
+00:18:55,720 --> 00:18:59,640
+So for example, let's say you have implemented linked list and you want to share it with
+
+227
+00:18:59,640 --> 00:19:05,400
+your friend, but you don't want to share in a form of source code because you don't
+
+228
+00:19:05,400 --> 00:19:09,960
+want your friend to look at how you have implemented linked list.
+
+229
+00:19:09,960 --> 00:19:15,319
+You are okay him using the linked list, but not how it is implemented.
+
+230
+00:19:15,319 --> 00:19:23,000
+So pre-compiled code, if you give to your friend, he can only see assembly.
+
+231
+00:19:23,000 --> 00:19:27,399
+From that he can still reverse engineer it, but less likely.
+
+232
+00:19:27,399 --> 00:19:33,000
+Source code is much more verbose to understand compared to assembly.
+
+233
+00:19:33,000 --> 00:19:40,200
+And then the separate compilation is the main reason where you don't want to keep recompiling
+
+234
+00:19:40,200 --> 00:19:43,119
+entire parts of your code.
+
+235
+00:19:43,119 --> 00:19:50,000
+But are there any advantages of keeping source code in one file?
+
+236
+00:19:50,000 --> 00:19:54,719
+Are there any reasons why I want to keep source in one file?
+
+237
+00:19:54,719 --> 00:19:57,079
+Correct.
+
+238
+00:19:57,079 --> 00:19:59,539
+So optimizations, how does compiler work?
+
+239
+00:19:59,539 --> 00:20:04,839
+So for compiler to optimize anything, it needs to have visibility.
+
+240
+00:20:04,839 --> 00:20:12,519
+So when main calls foo, if compiler has no idea what foo is, compiler will have to make
+
+241
+00:20:12,639 --> 00:20:16,599
+conservative assumptions that foo can do anything.
+
+242
+00:20:16,599 --> 00:20:21,879
+So for example, if you have a global variable, it may have to assume that foo may modify
+
+243
+00:20:21,879 --> 00:20:22,879
+that variable.
+
+244
+00:20:22,879 --> 00:20:28,920
+So I can't reuse the value or foo may do something which I don't know about.
+
+245
+00:20:28,920 --> 00:20:33,160
+So it reduces visibility of the compiler.
+
+246
+00:20:33,160 --> 00:20:38,599
+So there are cases where you may still want to keep things in single source.
+
+247
+00:20:38,599 --> 00:20:42,719
+But obviously then you lose the benefit of separate compilation.
+
+248
+00:20:42,719 --> 00:20:48,000
+So it will be a tradeoff between how much optimizations you want compiler to do on your
+
+249
+00:20:48,000 --> 00:20:55,879
+code versus how much modularity and separate compilation benefits you want.
+
+250
+00:20:55,879 --> 00:21:00,399
+Now there are link time optimizations also.
+
+251
+00:21:00,399 --> 00:21:04,699
+So linker can also do optimizations because at link time you will have everything coming
+
+252
+00:21:04,699 --> 00:21:06,659
+together.
+
+253
+00:21:06,660 --> 00:21:13,860
+But the thing is linker is always a bottleneck in the overall compilation process because
+
+254
+00:21:13,860 --> 00:21:18,540
+it has to process thousands of objects feeding in.
+
+255
+00:21:18,540 --> 00:21:22,980
+And if you start putting a lot of complex things into linker, your overall link time
+
+256
+00:21:22,980 --> 00:21:24,820
+is going to increase.
+
+257
+00:21:24,820 --> 00:21:30,860
+Plus typically linkers are designed to have very minimal information.
+
+258
+00:21:31,859 --> 00:21:38,379
+Let's say you had to do optimizations at link time and the code is already scheduled
+
+259
+00:21:38,379 --> 00:21:40,379
+and register allocated.
+
+260
+00:21:40,379 --> 00:21:45,019
+Then can linker really undo all the decisions which compiler took?
+
+261
+00:21:45,019 --> 00:21:47,559
+It's very hard for linker to undo the...
+
+262
+00:21:47,559 --> 00:21:51,740
+So for example, compiler made some conservative decisions.
+
+263
+00:21:51,740 --> 00:21:53,219
+Linker has to undo them.
+
+264
+00:21:53,219 --> 00:21:58,599
+But to undo them, it has to change the code which was generated by compiler.
+
+265
+00:21:58,599 --> 00:22:00,219
+And it has to change everything.
+
+266
+00:22:00,219 --> 00:22:05,240
+As soon as it touches something, it kind of will need to touch most of the parts.
+
+267
+00:22:05,240 --> 00:22:10,119
+So it becomes a practical problem that linkers cannot do all kinds of optimizations which
+
+268
+00:22:10,119 --> 00:22:11,679
+a compiler can do.
+
+269
+00:22:11,679 --> 00:22:16,319
+There are few things which it can do which we will see later.
+
+270
+00:22:16,319 --> 00:22:22,439
+But primarily, remember this, by breaking things up, you are reducing visibility.
+
+271
+00:22:22,440 --> 00:22:29,240
+And every component which we are going to study in the whole thing will have some visibility
+
+272
+00:22:29,240 --> 00:22:32,480
+and some things which it has to assume.
+
+273
+00:22:32,480 --> 00:22:40,000
+And for things which are unknown to that component, it is going to reduce the chances of possibly
+
+274
+00:22:40,000 --> 00:22:43,000
+interesting things happening in that component.
+
+275
+00:23:14,000 --> 00:23:19,440
+So essentially the object file which is generated inherently is going to be platform and architecture
+
+276
+00:23:19,440 --> 00:23:21,039
+specific.
+
+277
+00:23:21,039 --> 00:23:24,160
+And I cannot ship that...
+
+278
+00:23:24,160 --> 00:23:26,920
+So for example, let's say you have compiled something for Linux.
+
+279
+00:23:26,920 --> 00:23:32,039
+I cannot use that on Windows as it is unless I am doing some sort of virtualization kind
+
+280
+00:23:32,039 --> 00:23:34,720
+of thing.
+
+281
+00:23:34,720 --> 00:23:37,900
+And then I have my source and I need to distribute it.
+
+282
+00:23:37,900 --> 00:23:43,860
+You need to distribute different versions of your code, of your object files which are
+
+283
+00:23:43,860 --> 00:23:45,540
+specific to platforms.
+
+284
+00:23:45,540 --> 00:23:52,460
+That's why every library or every ISV or every provider of source code, for example, when
+
+285
+00:23:52,460 --> 00:23:58,519
+you download any software, you get option of which platform you are working on.
+
+286
+00:23:58,519 --> 00:24:03,220
+And that is the reason because the code is going to be different.
+
+287
+00:24:03,220 --> 00:24:06,060
+Does that answer your question or you had something different?
+
+288
+00:24:06,299 --> 00:24:09,179
+Okay.
+
+289
+00:24:09,179 --> 00:24:10,700
+Now coming to Loader.
+
+290
+00:24:10,700 --> 00:24:14,179
+So Loader is essentially part of the operating system.
+
+291
+00:24:14,179 --> 00:24:18,339
+And Loader is going to take your executable file and whatever command line arguments which
+
+292
+00:24:18,339 --> 00:24:22,500
+you have given to run your program and is actually going to load it in the memory and
+
+293
+00:24:22,500 --> 00:24:24,099
+execute it.
+
+294
+00:24:24,099 --> 00:24:28,899
+So Loader's job is essentially to read the program from the disk where it is stored.
+
+295
+00:24:28,899 --> 00:24:34,940
+So wherever you have a.out stored, it will read content of that, load it in the memory
+
+296
+00:24:35,140 --> 00:24:39,059
+and start running the first instruction of the program.
+
+297
+00:24:39,059 --> 00:24:42,180
+Now what is the first instruction in the program?
+
+298
+00:24:42,180 --> 00:24:43,180
+Is it main?
+
+299
+00:24:43,180 --> 00:24:44,180
+Correct.
+
+300
+00:24:44,180 --> 00:24:47,420
+It's underscore start.
+
+301
+00:24:47,420 --> 00:24:52,700
+And that's why we got that error earlier that there is something called underscore start
+
+302
+00:24:52,700 --> 00:24:54,980
+already defined.
+
+303
+00:24:54,980 --> 00:24:58,380
+And we'll see details of that later.
+
+304
+00:24:58,380 --> 00:25:01,059
+So what is need for a Loader?
+
+305
+00:25:01,059 --> 00:25:02,059
+Yes.
+
+306
+00:25:02,299 --> 00:25:03,299
+Okay.
+
+307
+00:25:03,299 --> 00:25:20,299
+Any other answers?
+
+308
+00:25:20,299 --> 00:25:24,819
+Okay.
+
+309
+00:25:24,819 --> 00:25:31,179
+So essentially if you had a system where only your program was running, nothing else, then
+
+310
+00:25:31,180 --> 00:25:36,539
+technically there is no need for a Loader because your program has entire access to
+
+311
+00:25:36,539 --> 00:25:38,900
+all the physical resources in the system.
+
+312
+00:25:38,900 --> 00:25:42,220
+But we don't live in that world.
+
+313
+00:25:42,220 --> 00:25:46,700
+We have processors with support multitasking.
+
+314
+00:25:46,700 --> 00:25:51,259
+And every time you are running something, there are already running programs behind
+
+315
+00:25:51,259 --> 00:25:52,660
+the scenes.
+
+316
+00:25:52,660 --> 00:25:58,180
+So someone has to manage what is being run, where and who is allocated what memory and
+
+317
+00:25:58,180 --> 00:25:59,700
+so on.
+
+318
+00:25:59,700 --> 00:26:05,180
+So that's why you need a Loader because you have multitasking systems.
+
+319
+00:26:05,180 --> 00:26:10,059
+So you have physical memory, you need to somehow distribute it across the programs which are
+
+320
+00:26:10,059 --> 00:26:11,779
+already running.
+
+321
+00:26:11,779 --> 00:26:17,340
+And you need a program which can look at the current state of the physical memory and ensure
+
+322
+00:26:17,340 --> 00:26:20,100
+that correct things are loaded.
+
+323
+00:26:20,100 --> 00:26:24,539
+That's why you need a program which will actually look at the current state of the machine and
+
+324
+00:26:24,539 --> 00:26:26,779
+do something appropriate.
+
+325
+00:26:27,099 --> 00:26:31,059
+And every time a program is run, the situation might be different, right?
+
+326
+00:26:31,059 --> 00:26:33,059
+Because the system load might be different.
+
+327
+00:26:33,059 --> 00:26:39,139
+So Loader cannot, I mean a program cannot be, cannot have all the information pre-baked
+
+328
+00:26:39,139 --> 00:26:48,379
+in because it is going to be dependent on the time at which it is being run.
+
+329
+00:26:48,379 --> 00:26:53,660
+And addresses will actually be unknown because we don't have the full view of what is happening
+
+330
+00:26:53,660 --> 00:26:55,859
+in the memory.
+
+331
+00:26:55,859 --> 00:27:00,359
+So if you look at it, this is kind of summary of what all is happening.
+
+332
+00:27:00,359 --> 00:27:04,299
+So we had source code, right, which got to the compiler.
+
+333
+00:27:04,299 --> 00:27:10,219
+You possibly had multiple source codes which produced relocatable object files which were
+
+334
+00:27:10,219 --> 00:27:17,299
+fed to the linker along with some static libraries probably to form an executable.
+
+335
+00:27:17,299 --> 00:27:22,939
+And executable was given to Loader and Loader had something called dynamic libraries which
+
+336
+00:27:22,939 --> 00:27:24,899
+was actually executed.
+
+337
+00:27:24,940 --> 00:27:29,580
+We will see details of the later phases here.
+
+338
+00:27:29,580 --> 00:27:32,300
+Relocatable object files, linkers, static libraries.
+
+339
+00:27:32,300 --> 00:27:38,019
+So beyond compiler, whatever you see is what is being covered in this model.
+
+340
+00:27:38,019 --> 00:27:43,540
+And typically whatever is happening on the upper side of the screen is at compilation
+
+341
+00:27:43,540 --> 00:27:51,500
+time and whatever is happening below is actually when you run the program.
+
+342
+00:27:51,500 --> 00:27:54,019
+Any questions so far?
+
+343
+00:27:54,139 --> 00:27:55,139
+Yes.
+
+344
+00:27:55,139 --> 00:28:00,500
+What are the different directions?
+
+345
+00:28:00,500 --> 00:28:03,379
+What are?
+
+346
+00:28:03,379 --> 00:28:09,660
+So essentially we will get to some parts of it but just to answer your questions quickly.
+
+347
+00:28:09,660 --> 00:28:15,500
+So essentially if you look at your program, your program largely consists of the instructions
+
+348
+00:28:15,500 --> 00:28:19,299
+which are going to run and some data for the instructions, right.
+
+349
+00:28:19,579 --> 00:28:25,059
+You might have global variables, you might have static variables and so on.
+
+350
+00:28:25,059 --> 00:28:31,059
+So there are some directives which are essentially used for representing data in your program
+
+351
+00:28:31,059 --> 00:28:36,259
+and there are some directives which are used to represent instructions in your program.
+
+352
+00:28:36,259 --> 00:28:38,539
+Typically the instructions are called dot text.
+
+353
+00:28:38,539 --> 00:28:44,139
+So anything with dot text is going to be set of instructions.
+
+354
+00:28:44,140 --> 00:28:50,180
+And anything with, actually this was a slightly bad example, I should probably.
+
+355
+00:28:50,180 --> 00:28:52,180
+So one second.
+
+356
+00:29:14,180 --> 00:29:43,860
+So typically then there is data for you to declare.
+
+357
+00:29:44,579 --> 00:29:50,299
+Then there are these kind of things, type and other things which we will get to a little
+
+358
+00:29:50,299 --> 00:29:56,299
+later in the session on what they are trying to represent.
+
+359
+00:29:56,299 --> 00:29:58,299
+Any other questions?
+
+360
+00:29:58,299 --> 00:30:08,099
+We will get to that.
+
+361
+00:30:08,099 --> 00:30:13,299
+So before we kind of start, I will just give brief intro of x86 assembly so that you are
+
+362
+00:30:13,299 --> 00:30:17,500
+aware of the sample codes which we are going to look at.
+
+363
+00:30:17,500 --> 00:30:22,180
+So x86 has actually bunch of registers.
+
+364
+00:30:22,180 --> 00:30:31,500
+So EAX, EBX, ECX, EDX, ESI, EDI, these are 32 bit registers and these are actually general
+
+365
+00:30:31,500 --> 00:30:32,599
+purpose.
+
+366
+00:30:32,599 --> 00:30:37,700
+So by general purpose I mean you can use them for your general register allocation and so
+
+367
+00:30:37,700 --> 00:30:38,859
+on.
+
+368
+00:30:38,859 --> 00:30:46,219
+So holding variables in the program or doing anything with respect to spills, other things
+
+369
+00:30:46,219 --> 00:30:50,799
+which you might have learned, these are the registers which are actually being used.
+
+370
+00:30:50,799 --> 00:30:57,500
+And these are 32 bits and there are lower bit variants of this.
+
+371
+00:30:57,500 --> 00:31:03,379
+So whenever I refer to AL register in my program, I am referring to the lower 8 bits.
+
+372
+00:31:04,380 --> 00:31:10,220
+So whenever I refer to AH, I am referring to the upper 8 bits in the lower 16 bits and
+
+373
+00:31:10,220 --> 00:31:14,580
+AX is essentially the upper 16 bits.
+
+374
+00:31:14,580 --> 00:31:17,900
+So this forms EAX registers.
+
+375
+00:31:17,900 --> 00:31:22,820
+And then there are two special registers ESP and EBP which we are going to learn a bit
+
+376
+00:31:22,820 --> 00:31:25,500
+more later in the session.
+
+377
+00:31:25,500 --> 00:31:30,740
+And x86 actually has two syntaxes.
+
+378
+00:31:30,740 --> 00:31:37,200
+So x86 textual program can appear in two syntax formats.
+
+379
+00:31:37,200 --> 00:31:41,420
+One is called as Intel form and one is called AT&T form.
+
+380
+00:31:41,420 --> 00:31:46,740
+So in Intel form, the differences are mostly syntactical.
+
+381
+00:31:46,740 --> 00:31:51,180
+There is no difference in the set of instructions and so on.
+
+382
+00:31:51,180 --> 00:31:56,819
+So the operand order is actually on the Intel syntax, the destination appears on the left
+
+383
+00:31:56,819 --> 00:32:00,220
+side before the source.
+
+384
+00:32:00,220 --> 00:32:07,539
+So this instruction is actually saying move value 5 into register EAX.
+
+385
+00:32:07,539 --> 00:32:10,660
+In AT&T syntax, it's kind of reverse.
+
+386
+00:32:10,660 --> 00:32:13,819
+Sources appear before the destination.
+
+387
+00:32:13,819 --> 00:32:17,700
+So 5 is being moved into EAX.
+
+388
+00:32:17,700 --> 00:32:25,220
+Now the registers in Intel syntax are referred directly EAX, EBX and so on.
+
+389
+00:32:25,220 --> 00:32:29,860
+In AT&T syntax, they start with percent.
+
+390
+00:32:29,859 --> 00:32:35,419
+But the instructions need to have the mnemonic which represents the size.
+
+391
+00:32:35,419 --> 00:32:43,859
+For example, here we had to say move l to say it is a word movement or move b to indicate
+
+392
+00:32:43,859 --> 00:32:46,500
+it's a byte movement and so on.
+
+393
+00:32:46,500 --> 00:32:50,419
+In Intel syntax, there is no such suffix.
+
+394
+00:32:50,419 --> 00:32:54,500
+And immediate need to have dollar as the prefix.
+
+395
+00:32:54,500 --> 00:32:58,359
+And essentially the addressing modes look something like this.
+
+396
+00:32:58,359 --> 00:33:03,519
+You don't need to kind of know all of these details, but when you read the sample code,
+
+397
+00:33:03,519 --> 00:33:06,119
+this might act as a reference.
+
+398
+00:33:06,119 --> 00:33:11,639
+And most of the assemblers support Intel syntax, but the glue assembler which is on the Linux
+
+399
+00:33:11,639 --> 00:33:15,039
+actually by default supports AT&T syntax.
+
+400
+00:33:15,039 --> 00:33:18,479
+There is a way to make it support Intel syntax also.
+
+401
+00:33:18,479 --> 00:33:25,079
+But most of the examples in this slide set are going to use AT&T syntax.
+
+402
+00:33:25,079 --> 00:33:29,879
+For example, this is actually AT&T syntax.
+
+403
+00:33:29,879 --> 00:33:35,759
+So you can see that percent is being used before the register names.
+
+404
+00:33:35,759 --> 00:33:42,079
+There are suffixes which are being used to indicate size.
+
+405
+00:33:42,079 --> 00:33:44,519
+And source appears before destination.
+
+406
+00:33:44,519 --> 00:33:50,720
+So this instruction is actually saying move content of EAX into ESI, not the other way
+
+407
+00:33:50,720 --> 00:33:51,720
+around.
+
+408
+00:33:52,400 --> 00:33:55,640
+Now this is how your sample assembly program will look.
+
+409
+00:33:55,640 --> 00:33:58,680
+You might have some data.
+
+410
+00:33:58,680 --> 00:34:03,940
+And this dot byte is saying how much size it is occupying.
+
+411
+00:34:03,940 --> 00:34:07,600
+So var is a 64 byte data.
+
+412
+00:34:07,600 --> 00:34:11,360
+So it's an array probably of 64 bytes.
+
+413
+00:34:11,360 --> 00:34:15,659
+X is a word, array of words.
+
+414
+00:34:15,659 --> 00:34:19,539
+So it has three elements, one, two, and three.
+
+415
+00:34:19,539 --> 00:34:24,139
+And then I have text program, which is essentially the set of instructions.
+
+416
+00:34:24,139 --> 00:34:29,860
+And this is saying move the value of EBX is actually a pointer.
+
+417
+00:34:29,860 --> 00:34:34,659
+So whatever it is pointing to, move that value into EAX.
+
+418
+00:34:34,659 --> 00:34:39,380
+This is saying move two into that pointer value and jump.
+
+419
+00:34:39,380 --> 00:34:43,059
+Are we OK with this?
+
+420
+00:34:43,059 --> 00:34:49,099
+So you need this much understanding to understand the rest of the slides.
+
+421
+00:34:49,759 --> 00:34:56,460
+The next part of this session is going to focus on how actually function calls are implemented.
+
+422
+00:34:56,460 --> 00:35:02,440
+So essentially, programming languages support creating abstraction of functions.
+
+423
+00:35:02,440 --> 00:35:08,239
+So you can think of function as block of code, which is typically intended to do one or related
+
+424
+00:35:08,239 --> 00:35:09,239
+task.
+
+425
+00:35:09,239 --> 00:35:13,139
+You write functions because you want reusability in your code.
+
+426
+00:35:13,139 --> 00:35:18,219
+So for example, if you have done linked list insert once, you can put it in a function
+
+427
+00:35:18,299 --> 00:35:23,659
+and call it multiple times and don't have to redo the same code again and again.
+
+428
+00:35:23,659 --> 00:35:26,980
+So they provide you to write modular programs.
+
+429
+00:35:26,980 --> 00:35:32,139
+And typically, every function will have a name from which you will identify that function.
+
+430
+00:35:32,139 --> 00:35:38,939
+It will have parameters which are used by function to actually do the computation.
+
+431
+00:35:38,939 --> 00:35:46,419
+So for example, if I want to compute power of two raised to five, so two and five can
+
+432
+00:35:46,500 --> 00:35:50,380
+be parameters which dictate what should be the function's output.
+
+433
+00:35:50,380 --> 00:35:55,139
+And just like they have input parameters, there are written values.
+
+434
+00:35:55,139 --> 00:36:00,460
+So typically, a computed value from a function can be written and function will have body,
+
+435
+00:36:00,460 --> 00:36:05,539
+which essentially is set of instructions, which will actually do the computation.
+
+436
+00:36:05,539 --> 00:36:12,659
+And function can have local variables to actually allocate memory and do some stuff with it.
+
+437
+00:36:12,659 --> 00:36:16,539
+Now every function typically has a single entry point.
+
+438
+00:36:16,539 --> 00:36:22,099
+So whenever you call a function, you always start at start of the function.
+
+439
+00:36:22,099 --> 00:36:28,019
+And the caller function, the function which is calling is called caller, that will typically
+
+440
+00:36:28,019 --> 00:36:31,899
+be suspended when the callee is being executed.
+
+441
+00:36:31,899 --> 00:36:36,779
+So whenever you call a function, the function which has called the other function will be
+
+442
+00:36:36,779 --> 00:36:41,739
+suspended and the callee function will start executing.
+
+443
+00:36:41,739 --> 00:36:47,259
+And once the callee function is done, it will return the control back to the caller and
+
+444
+00:36:47,259 --> 00:36:50,099
+then caller will continue.
+
+445
+00:36:50,099 --> 00:36:55,139
+So essentially, so let's say I had main, I call foo.
+
+446
+00:36:55,139 --> 00:36:57,500
+So main is now suspended.
+
+447
+00:36:57,500 --> 00:36:59,659
+Main is not actually executing.
+
+448
+00:36:59,659 --> 00:37:01,339
+Foo will start executing.
+
+449
+00:37:01,339 --> 00:37:05,259
+Then foo might execute some instructions and then call a function bar.
+
+450
+00:37:05,259 --> 00:37:07,219
+Then it might call foo bar.
+
+451
+00:37:07,219 --> 00:37:11,679
+Then foo bar returns to the caller function.
+
+452
+00:37:11,679 --> 00:37:16,139
+So a function will always return to its caller function.
+
+453
+00:37:16,139 --> 00:37:20,219
+And then bar will return to its caller function, ultimately to main.
+
+454
+00:37:20,219 --> 00:37:25,659
+And then main is again free to do another set of function calls.
+
+455
+00:37:25,659 --> 00:37:30,639
+This is how standard functions work in languages like C.
+
+456
+00:37:30,639 --> 00:37:34,739
+Now there are alternative execution semantics also.
+
+457
+00:37:34,739 --> 00:37:37,119
+What we have seen is the standard function.
+
+458
+00:37:37,119 --> 00:37:39,000
+But there is something called as co-routines.
+
+459
+00:37:39,000 --> 00:37:41,679
+How many of you have heard of co-routines?
+
+460
+00:37:41,679 --> 00:37:46,880
+Two people.
+
+461
+00:37:46,880 --> 00:37:55,440
+So co-routines are essentially, you can think of them like some sort of resume and return
+
+462
+00:37:55,440 --> 00:37:57,079
+kind of a control flow.
+
+463
+00:37:57,079 --> 00:38:05,320
+So when you call a co-routine, you initially start at the start of the function.
+
+464
+00:38:05,320 --> 00:38:08,639
+And you can return to the caller function.
+
+465
+00:38:08,759 --> 00:38:12,480
+When you are called again, you don't again start from the start.
+
+466
+00:38:12,480 --> 00:38:17,559
+But you start from the point where you were suspended earlier.
+
+467
+00:38:17,559 --> 00:38:21,599
+So it's more like a resume and suspend semantic.
+
+468
+00:38:21,599 --> 00:38:24,639
+So the caller function will call it.
+
+469
+00:38:24,639 --> 00:38:27,239
+Then co-routine will start executing.
+
+470
+00:38:27,239 --> 00:38:31,599
+Then it will suspend for some time, return back the control to the caller.
+
+471
+00:38:31,599 --> 00:38:36,559
+And caller can again resume it from the point where it started.
+
+472
+00:38:36,559 --> 00:38:39,480
+Just like C, don't support co-routines.
+
+473
+00:38:39,480 --> 00:38:43,199
+Newer standards in C++ have added support for it.
+
+474
+00:38:43,199 --> 00:38:47,000
+But there is also something called as asynchronous execution.
+
+475
+00:38:47,000 --> 00:38:52,960
+Where what I said earlier is whenever caller function calls the callee function, caller
+
+476
+00:38:52,960 --> 00:38:55,039
+function is suspended.
+
+477
+00:38:55,039 --> 00:38:59,039
+But in asynchronous executions, that may not happen.
+
+478
+00:38:59,039 --> 00:39:04,480
+That means whenever caller function calls the callee function, both caller and callee
+
+479
+00:39:04,480 --> 00:39:10,360
+are still active and executing concurrently.
+
+480
+00:39:10,360 --> 00:39:15,440
+And then there is something in functional languages called as higher order functions,
+
+481
+00:39:15,440 --> 00:39:18,519
+where you can return functions as values and so on.
+
+482
+00:39:18,519 --> 00:39:23,039
+This will actually be covered in much more detail later this week when there is a module
+
+483
+00:39:23,039 --> 00:39:25,679
+on functional programming.
+
+484
+00:39:25,679 --> 00:39:31,440
+So all these semantics which I just mentioned are out of scope for this module.
+
+485
+00:39:31,440 --> 00:39:33,880
+So we are not going to talk about how co-routines work.
+
+486
+00:39:33,880 --> 00:39:36,840
+We are not going to talk about how concurrency works.
+
+487
+00:39:36,840 --> 00:39:41,480
+And some higher order functions will actually be covered in this next session.
+
+488
+00:39:41,480 --> 00:39:48,440
+So we will stick to the details of how traditional function calls are implemented.
+
+489
+00:39:48,440 --> 00:39:53,019
+So what is needed to implement a function call?
+
+490
+00:39:53,019 --> 00:39:59,480
+So here I have a sample code which is saying that main is calling a function foo.
+
+491
+00:40:00,000 --> 00:40:09,719
+Main passes a parameter p which is accepted as m and then foo can have local variables
+
+492
+00:40:09,719 --> 00:40:14,719
+and return a value which can then be used by main.
+
+493
+00:40:14,719 --> 00:40:21,360
+So what all things you think are involved in a function call?
+
+494
+00:40:21,360 --> 00:40:23,360
+What all is needed?
+
+495
+00:40:23,360 --> 00:40:24,360
+Yes?
+
+496
+00:40:24,360 --> 00:40:25,360
+Sorry.
+
+497
+00:40:25,360 --> 00:40:26,360
+Return address is 1.
+
+498
+00:40:26,360 --> 00:40:27,360
+Correct.
+
+499
+00:40:27,360 --> 00:40:34,360
+There is some need to be able to pass parameters.
+
+500
+00:40:34,360 --> 00:40:35,360
+Yes?
+
+501
+00:40:35,360 --> 00:40:36,360
+Correct.
+
+502
+00:40:36,360 --> 00:40:46,960
+So you need some way to say what was the state of the caller.
+
+503
+00:40:46,960 --> 00:40:49,000
+Any other things?
+
+504
+00:40:49,000 --> 00:40:53,780
+Return value.
+
+505
+00:40:53,780 --> 00:40:58,740
+So essentially we need some way to transfer the control from caller to callee and this
+
+506
+00:40:58,740 --> 00:41:03,700
+will involve return address because you somehow need to get back to the caller.
+
+507
+00:41:03,700 --> 00:41:08,519
+You need some way to pass the parameters and get the return value.
+
+508
+00:41:08,519 --> 00:41:14,800
+You need some way for the callee function to create its own local variables.
+
+509
+00:41:14,800 --> 00:41:19,600
+And you need some way to do register usage which is essentially the context what you
+
+510
+00:41:19,600 --> 00:41:21,580
+are talking about.
+
+511
+00:41:21,579 --> 00:41:27,400
+So we will go into details of each of these steps and how they are implemented.
+
+512
+00:41:27,400 --> 00:41:35,639
+So the transferring control mechanism essentially requires when the caller is executed, when
+
+513
+00:41:35,639 --> 00:41:40,759
+the caller function calls a function, somehow the transfer needs to happen from caller to
+
+514
+00:41:40,759 --> 00:41:47,119
+callee and once the call is done, somehow we need to get back.
+
+515
+00:41:47,119 --> 00:41:53,299
+So most of the processors have instructions like branch and jump where they say that once
+
+516
+00:41:53,299 --> 00:41:58,400
+the branch is done, it will start executing from that program counter.
+
+517
+00:41:58,400 --> 00:42:02,900
+So we can very easily implement function call using that.
+
+518
+00:42:02,900 --> 00:42:07,980
+So x86 has an instruction called jump which we can use.
+
+519
+00:42:07,980 --> 00:42:17,019
+So essentially in main I am calling a function foo and I can simply do jump to foo.
+
+520
+00:42:17,019 --> 00:42:18,360
+That is sufficient.
+
+521
+00:42:18,360 --> 00:42:24,840
+I can simply say jump to foo and that will jump to foo and start executing that.
+
+522
+00:42:24,840 --> 00:42:29,639
+But how do we get back to the caller?
+
+523
+00:42:29,639 --> 00:42:34,259
+So how does callee know where we need to return to?
+
+524
+00:42:34,259 --> 00:42:40,880
+Any idea?
+
+525
+00:42:40,880 --> 00:42:46,780
+So it needs to return to the next instruction following the call.
+
+526
+00:42:46,780 --> 00:42:53,860
+So we can save that address somehow where we need to return to and use that saved address
+
+527
+00:42:53,860 --> 00:42:54,860
+to jump back.
+
+528
+00:42:54,860 --> 00:42:59,900
+So we know that when the function call happened, we need to come back to the next instruction
+
+529
+00:42:59,900 --> 00:43:03,240
+following call instruction.
+
+530
+00:43:03,240 --> 00:43:09,300
+So we save that address and we do all the function which is being called and come back
+
+531
+00:43:09,300 --> 00:43:12,680
+to the address which was saved.
+
+532
+00:43:12,680 --> 00:43:16,100
+Which address really we already answered?
+
+533
+00:43:16,099 --> 00:43:18,719
+And where to save it?
+
+534
+00:43:18,719 --> 00:43:19,719
+You are jumping ahead.
+
+535
+00:43:19,719 --> 00:43:26,599
+We will get there step by step and I will show you why stack makes most sense.
+
+536
+00:43:26,599 --> 00:43:32,199
+So why can't we simply do, why do we even need to save the address?
+
+537
+00:43:32,199 --> 00:43:34,079
+Why can't we simply jump back to the address?
+
+538
+00:43:34,079 --> 00:43:41,400
+So for example, I know that JMP is at location this.
+
+539
+00:43:41,480 --> 00:43:47,440
+In foo, I can simply say jump to this location which is the instruction following it.
+
+540
+00:43:47,440 --> 00:43:49,720
+I can do that.
+
+541
+00:43:49,720 --> 00:43:55,740
+Here I said jump to foo and in foo I said jump to this address.
+
+542
+00:43:55,740 --> 00:44:00,180
+Will this work?
+
+543
+00:44:00,180 --> 00:44:05,220
+Why it will not make any sense?
+
+544
+00:44:05,219 --> 00:44:13,000
+So one of the issues with this is essentially it will always return to the same address.
+
+545
+00:44:13,000 --> 00:44:20,959
+So you cannot call this function multiple times because remember the semantics were
+
+546
+00:44:20,959 --> 00:44:26,500
+from the point where it is called, you need to return to the instruction following it.
+
+547
+00:44:26,500 --> 00:44:31,079
+If I do it this way, I will always jump back to the address.
+
+548
+00:44:31,079 --> 00:44:38,840
+So if this function was called only once, if foo was called only once, this is actually
+
+549
+00:44:38,840 --> 00:44:41,099
+something which will work.
+
+550
+00:44:41,099 --> 00:44:43,139
+So it is not a problem.
+
+551
+00:44:43,139 --> 00:44:46,159
+It just that it is not general purpose.
+
+552
+00:44:46,159 --> 00:44:53,380
+So if compiler could prove that this function is called only once, compiler is fairly, compiler
+
+553
+00:44:53,380 --> 00:44:59,319
+is legal to do this optimization where it can simply say that jump back to this address
+
+554
+00:44:59,319 --> 00:45:00,519
+and you are done.
+
+555
+00:45:00,519 --> 00:45:03,159
+You do not need anything else.
+
+556
+00:45:03,159 --> 00:45:05,920
+And that is where visibility comes into picture.
+
+557
+00:45:05,920 --> 00:45:10,519
+So for example, if foo was defined in other file, will compiler ever know whether it is
+
+558
+00:45:10,519 --> 00:45:13,159
+called only once or multiple times?
+
+559
+00:45:13,159 --> 00:45:14,159
+No.
+
+560
+00:45:14,159 --> 00:45:19,280
+So by putting things together, you increase the visibility of compiler, but you obviously
+
+561
+00:45:19,280 --> 00:45:21,039
+have other disadvantages.
+
+562
+00:45:21,039 --> 00:45:23,800
+So you will have to trade off.
+
+563
+00:45:23,800 --> 00:45:26,280
+What is the other disadvantage of this?
+
+564
+00:45:26,280 --> 00:45:31,780
+So that is one disadvantage that we cannot call this function from different locations.
+
+565
+00:45:31,780 --> 00:45:35,680
+Any other issues with this?
+
+566
+00:45:35,680 --> 00:45:39,840
+Sorry, someone said something.
+
+567
+00:45:39,840 --> 00:45:41,880
+Recursion, correct.
+
+568
+00:45:41,880 --> 00:45:45,100
+So this will actually also not work in recursion.
+
+569
+00:45:45,100 --> 00:45:47,200
+Why will it not work in recursion?
+
+570
+00:45:47,199 --> 00:45:53,359
+Correct.
+
+571
+00:45:53,359 --> 00:46:00,159
+In fact, recursion has at least two call points, one from the main from where it is called
+
+572
+00:46:00,159 --> 00:46:04,079
+and one probably within the function where it is doing a recursive call.
+
+573
+00:46:04,079 --> 00:46:09,279
+So it kind of falls into the same thing that a recursive function will be called multiple
+
+574
+00:46:09,279 --> 00:46:15,639
+times, once from the original caller and once probably from within the function.
+
+575
+00:46:15,639 --> 00:46:18,659
+So it has to return to two different points.
+
+576
+00:46:18,659 --> 00:46:20,960
+So that does not work.
+
+577
+00:46:20,960 --> 00:46:24,879
+Now let us say I store it in a global variable.
+
+578
+00:46:24,879 --> 00:46:33,119
+So I create a global variable and before I do a call, I save the address of next instruction
+
+579
+00:46:33,119 --> 00:46:36,279
+into the global variable.
+
+580
+00:46:36,279 --> 00:46:41,619
+And in this function, I return to the content of that global variable.
+
+581
+00:46:41,619 --> 00:46:46,619
+So if there were multiple calls, just before the call, I will update the value of global
+
+582
+00:46:46,619 --> 00:46:49,619
+variable and save it.
+
+583
+00:46:49,619 --> 00:46:52,619
+Will this work?
+
+584
+00:46:52,619 --> 00:46:55,619
+Why?
+
+585
+00:46:55,619 --> 00:47:06,380
+Lot of variables is one problem.
+
+586
+00:47:07,380 --> 00:47:14,420
+So how many variables you need?
+
+587
+00:47:14,420 --> 00:47:20,380
+Will you need one per call or one per function?
+
+588
+00:47:20,380 --> 00:47:30,300
+Why do you need one per call?
+
+589
+00:47:30,300 --> 00:47:34,380
+What do you mean by calls are nested in this case?
+
+590
+00:47:34,380 --> 00:47:35,380
+Correct.
+
+591
+00:47:35,380 --> 00:47:54,380
+But that will still come down to one per function.
+
+592
+00:47:54,380 --> 00:47:59,380
+Correct.
+
+593
+00:47:59,380 --> 00:48:02,059
+So recursion cannot be done.
+
+594
+00:48:02,059 --> 00:48:08,980
+But if recursion is not a feature in the language, then I can actually get away with one per
+
+595
+00:48:08,980 --> 00:48:11,900
+function, not one per call.
+
+596
+00:48:11,900 --> 00:48:17,140
+So for every function, I will have a return at a global variable which holds the return
+
+597
+00:48:17,140 --> 00:48:18,619
+address of that.
+
+598
+00:48:18,619 --> 00:48:22,380
+Wherever I am calling that function, I will save.
+
+599
+00:48:22,380 --> 00:48:30,820
+So when I am calling function foo, I know I need to update variable called rate addr
+
+600
+00:48:30,820 --> 00:48:32,220
+underscore foo.
+
+601
+00:48:32,220 --> 00:48:37,099
+Whenever I am calling function bar, I will do rate addr underscore bar.
+
+602
+00:48:37,099 --> 00:48:42,900
+Whenever I am calling function xyz, I know I will use a variable called rate addr underscore
+
+603
+00:48:42,900 --> 00:48:43,900
+xyz.
+
+604
+00:48:43,900 --> 00:48:45,660
+Recursion doesn't work.
+
+605
+00:48:45,660 --> 00:48:47,420
+Any other issues with this scheme?
+
+606
+00:48:47,420 --> 00:48:50,940
+Every time do you know which function you are calling?
+
+607
+00:48:50,940 --> 00:48:53,659
+Correct.
+
+608
+00:48:53,659 --> 00:48:57,900
+So when you have function pointer, does everyone understand function pointer?
+
+609
+00:48:57,900 --> 00:49:01,500
+So pointer to function, right?
+
+610
+00:49:01,500 --> 00:49:05,019
+And it can be changed to different pointers.
+
+611
+00:49:05,019 --> 00:49:12,420
+So if this call was actually a function pointer call, then I don't even know which function
+
+612
+00:49:12,420 --> 00:49:13,619
+I am going to call.
+
+613
+00:49:13,619 --> 00:49:16,820
+So which global variable will I use?
+
+614
+00:49:16,820 --> 00:49:23,420
+I don't know whether it will be rate addr foo or rate addr bar or rate addr xyz.
+
+615
+00:49:23,420 --> 00:49:25,580
+So two issues with this scheme.
+
+616
+00:49:25,580 --> 00:49:27,019
+Recursion doesn't work.
+
+617
+00:49:27,019 --> 00:49:28,300
+Function pointers don't work.
+
+618
+00:49:28,300 --> 00:49:35,580
+If those two are not the features in your language, you can still use it.
+
+619
+00:49:35,580 --> 00:49:37,820
+Let's use a register.
+
+620
+00:49:37,820 --> 00:49:39,660
+We have registers.
+
+621
+00:49:39,660 --> 00:49:46,380
+So let's say just like global variable, why can't I store it in register?
+
+622
+00:49:46,380 --> 00:49:51,820
+So let's say I say eax is my register where I am going to store it.
+
+623
+00:49:51,820 --> 00:49:56,260
+So just before the function call, I am going to store it in eax.
+
+624
+00:49:56,260 --> 00:50:01,740
+Then do the call and then use the content of eax to come back.
+
+625
+00:50:01,740 --> 00:50:02,740
+What are issues with this scheme?
+
+626
+00:50:02,739 --> 00:50:17,779
+Okay.
+
+627
+00:50:17,779 --> 00:50:19,939
+That's actually a good point and we'll come to that.
+
+628
+00:50:19,939 --> 00:50:25,259
+So one problem which one person is saying is that there are limited number of registers.
+
+629
+00:50:25,259 --> 00:50:29,059
+We saw in the previous slide there were six general purpose registers.
+
+630
+00:50:29,059 --> 00:50:31,579
+So we have only six registers.
+
+631
+00:50:31,579 --> 00:50:38,059
+And the other issue is that the function itself may want to use eax for normal use, then I
+
+632
+00:50:38,059 --> 00:50:40,460
+might end up overwriting it.
+
+633
+00:50:40,460 --> 00:50:44,179
+Any other issues with this?
+
+634
+00:50:44,179 --> 00:50:47,820
+Can I implement recursion using this?
+
+635
+00:50:47,820 --> 00:50:51,460
+No.
+
+636
+00:50:51,460 --> 00:50:53,380
+By default we cannot use.
+
+637
+00:50:53,380 --> 00:51:01,980
+So I'll somehow need a way to save the value of eax, then I could do that.
+
+638
+00:51:01,980 --> 00:51:08,780
+And if you call some other function bar, then I need to have either a different register
+
+639
+00:51:08,780 --> 00:51:11,860
+or do something with it.
+
+640
+00:51:11,860 --> 00:51:13,220
+So this does not work.
+
+641
+00:51:13,220 --> 00:51:18,220
+Plus the other problem which kind of the other person was coming to that architectures typically
+
+642
+00:51:18,220 --> 00:51:20,460
+have very few registers.
+
+643
+00:51:20,460 --> 00:51:24,659
+And I may not want to waste my register for a return address.
+
+644
+00:51:24,659 --> 00:51:28,980
+Because you must have already learned that register allocation is hard.
+
+645
+00:51:28,980 --> 00:51:32,699
+And if you have fewer registers, it becomes further hard.
+
+646
+00:51:32,699 --> 00:51:37,340
+And registers are key for performance.
+
+647
+00:51:37,340 --> 00:51:43,579
+But if your architecture has a lot of registers, this may or may not be a concern.
+
+648
+00:51:43,579 --> 00:51:47,900
+So there are some processors which may have large number of registers, in which case it
+
+649
+00:51:47,900 --> 00:51:48,900
+might be okay.
+
+650
+00:51:49,460 --> 00:51:54,420
+So far we have seen that somehow caller and callee need to agree on where the return address
+
+651
+00:51:54,420 --> 00:51:56,380
+is.
+
+652
+00:51:56,380 --> 00:52:00,900
+And return address is specific for every invocation.
+
+653
+00:52:00,900 --> 00:52:05,180
+It's not once per function, it's once per call.
+
+654
+00:52:05,180 --> 00:52:09,960
+And it needs to be that's why instantiated every time a function is called.
+
+655
+00:52:09,960 --> 00:52:14,260
+And so far the schemes which we saw had some limitations.
+
+656
+00:52:14,260 --> 00:52:18,940
+Now coming to the answer which was already given, stack.
+
+657
+00:52:18,940 --> 00:52:25,420
+So essentially the intuition of stack really comes because you have programming languages
+
+658
+00:52:25,420 --> 00:52:28,360
+which have recursive functions.
+
+659
+00:52:28,360 --> 00:52:33,180
+If you didn't have recursive functions, some of the schemes which you already saw earlier
+
+660
+00:52:33,180 --> 00:52:36,700
+like global variable would have actually worked.
+
+661
+00:52:36,700 --> 00:52:42,640
+But since languages support recursion, inherently the notion of stack comes into the picture.
+
+662
+00:52:42,639 --> 00:52:48,199
+So stack is a region of memory that will work in last in first out manner.
+
+663
+00:52:48,199 --> 00:52:53,440
+I hope everyone understands what is a stack data structure and so on.
+
+664
+00:52:53,440 --> 00:52:58,879
+And most of the processors which are modern do have native support for stack.
+
+665
+00:52:58,879 --> 00:53:04,679
+By native support I mean they inherently implement stack in the hardware.
+
+666
+00:53:04,679 --> 00:53:09,900
+So x86 actually has a stack which grows down.
+
+667
+00:53:09,900 --> 00:53:15,700
+So it starts at some higher address and as you keep adding stuff into the stack, it will
+
+668
+00:53:15,700 --> 00:53:18,180
+keep going down.
+
+669
+00:53:18,180 --> 00:53:22,860
+Stack will always grow down in x86 style architecture.
+
+670
+00:53:22,860 --> 00:53:29,660
+And x86, remember we saw something called as ESP register, which I said is not a general
+
+671
+00:53:29,660 --> 00:53:31,260
+purpose register.
+
+672
+00:53:31,260 --> 00:53:36,900
+So ESP is actually a pointer which is pointing to top of the stack.
+
+673
+00:53:36,900 --> 00:53:40,079
+So ESP is always pointing to top of the stack.
+
+674
+00:53:40,079 --> 00:53:46,780
+Then x86 hardware supports instructions to push new stuff onto the stack.
+
+675
+00:53:46,780 --> 00:53:52,340
+So there is an instruction called push L. Remember L is a suffix to indicate 32 bit
+
+676
+00:53:52,340 --> 00:53:53,340
+data.
+
+677
+00:53:53,340 --> 00:54:01,700
+So push L is pushing 32 bits into the stack and it will increment the stack pointer automatically.
+
+678
+00:54:02,419 --> 00:54:08,779
+So what push L instruction is doing is essentially it is subtracting the stack pointer by 4 and
+
+679
+00:54:08,779 --> 00:54:14,539
+copying the data which is given into the stack location.
+
+680
+00:54:14,539 --> 00:54:21,159
+Pop does the reverse of it where it will update the stack pointer to actually go back.
+
+681
+00:54:21,159 --> 00:54:27,899
+So push is going to decrement the stack pointer and pop is going to increment the stack pointer.
+
+682
+00:54:27,899 --> 00:54:30,039
+Everyone understands?
+
+683
+00:54:30,039 --> 00:54:37,320
+So this is x86 64 architecture which is the 64 bit variant of the x86.
+
+684
+00:54:37,320 --> 00:54:41,920
+Whatever most of the laptops which you will have will be 64 bit.
+
+685
+00:54:41,920 --> 00:54:51,039
+So x86 64 actually needs a stack pointer which is 64 bit because the addresses are all 64
+
+686
+00:54:51,039 --> 00:54:52,279
+bit.
+
+687
+00:54:52,279 --> 00:54:58,880
+So it has a register called RSP which is a 64 bit register and it will decrement the
+
+688
+00:54:58,880 --> 00:55:05,320
+push instruction will decrement stack pointer by 8 and pop will increment the pointer by
+
+689
+00:55:05,320 --> 00:55:07,559
+8.
+
+690
+00:55:07,559 --> 00:55:08,880
+Does that make sense?
+
+691
+00:55:08,880 --> 00:55:21,519
+So x86 architecture had 32 bit stack pointer, x86 64 had 64 bit stack pointer and x86 also
+
+692
+00:55:21,519 --> 00:55:23,200
+supports two instructions.
+
+693
+00:55:23,200 --> 00:55:28,740
+Instead of using jump, we were manually trying to jump to some location.
+
+694
+00:55:28,739 --> 00:55:36,299
+There is a support for call instruction and call is essentially going to call the function
+
+695
+00:55:36,299 --> 00:55:39,019
+but it is not simply that.
+
+696
+00:55:39,019 --> 00:55:44,919
+It is implicitly going to push address of the next instruction on to the stack.
+
+697
+00:55:44,919 --> 00:55:48,059
+So call instruction is actually doing two things.
+
+698
+00:55:48,059 --> 00:55:54,919
+It is pushing address of the new next instruction on the stack and then it is jumping.
+
+699
+00:55:54,920 --> 00:55:57,760
+So it is similar to update stack jump.
+
+700
+00:55:57,760 --> 00:56:01,460
+Written instruction is actually going to do the reverse.
+
+701
+00:56:01,460 --> 00:56:08,760
+It is first going to pop whatever is top of the stack and then going to jump back.
+
+702
+00:56:08,760 --> 00:56:10,900
+Does that make sense?
+
+703
+00:56:10,900 --> 00:56:14,940
+So essentially just to demonstrate, so let us say I had this code.
+
+704
+00:56:14,940 --> 00:56:21,820
+So I have a call instruction which is calling some address and the next address is this.
+
+705
+00:56:21,820 --> 00:56:29,200
+Then my current instruction pointer is pointing to the call instruction and stack state is
+
+706
+00:56:29,200 --> 00:56:32,940
+something like this where it is pointing to some data into the stack.
+
+707
+00:56:32,940 --> 00:56:38,900
+What will happen is whenever I do a call, the address of the next instruction is going
+
+708
+00:56:38,900 --> 00:56:40,920
+to get pushed on to the stack.
+
+709
+00:56:40,920 --> 00:56:49,340
+The stack pointer is going to be updated to point to that and my stack pointer is decremented
+
+710
+00:56:49,519 --> 00:56:54,880
+because stack is going down and my instruction pointer is updated to the actual function
+
+711
+00:56:54,880 --> 00:56:56,539
+call which is being done.
+
+712
+00:56:56,539 --> 00:57:02,019
+So instruction will start executing from that function.
+
+713
+00:57:02,019 --> 00:57:05,140
+Return is going to do the opposite.
+
+714
+00:57:05,140 --> 00:57:12,980
+So when I was going to do return, my stack pointer was pointing to the return address
+
+715
+00:57:12,980 --> 00:57:17,059
+and my instruction pointer was pointing to the return instruction.
+
+716
+00:57:17,059 --> 00:57:20,860
+The return instruction is going to update the stack pointer by 4.
+
+717
+00:57:20,860 --> 00:57:27,099
+So it is going to actually increment it and popping the data which was on the stack and
+
+718
+00:57:27,099 --> 00:57:29,320
+jump to that address.
+
+719
+00:57:29,320 --> 00:57:36,360
+So just to summarize, call instruction will push things on to the stack and start executing
+
+720
+00:57:36,360 --> 00:57:38,039
+the function.
+
+721
+00:57:38,039 --> 00:57:44,219
+Rate instruction is going to pop the return address from the stack and going to start
+
+722
+00:57:44,219 --> 00:57:46,219
+executing.
+
+723
+00:57:46,379 --> 00:57:49,379
+Kids, what does this code do?
+
+724
+00:57:53,379 --> 00:57:56,379
+It will give the address of LBL.
+
+725
+00:57:56,379 --> 00:57:59,379
+It will give address of LBL.
+
+726
+00:57:59,379 --> 00:58:04,379
+Any other answers?
+
+727
+00:58:04,539 --> 00:58:15,539
+So remember, try to do.
+
+728
+00:58:15,539 --> 00:58:20,539
+Call instruction, what is it going to do with stack and then what the next instruction will
+
+729
+00:58:20,539 --> 00:58:23,539
+do?
+
+730
+00:58:23,539 --> 00:58:30,539
+Can you explain how?
+
+731
+00:58:34,539 --> 00:58:41,539
+Correct.
+
+732
+00:58:55,700 --> 00:58:57,940
+Does everyone understand what happened?
+
+733
+00:58:58,500 --> 00:59:04,740
+So call instruction, before doing the call, is going to push the address of the next instruction.
+
+734
+00:59:04,740 --> 00:59:08,780
+The next instruction itself is whatever is being pointed by LBL.
+
+735
+00:59:08,780 --> 00:59:14,300
+So the address of LBL is what is pushed on to the stack.
+
+736
+00:59:14,300 --> 00:59:19,579
+And call is going to start again executing from that instruction itself.
+
+737
+00:59:19,579 --> 00:59:24,980
+And then you hit this instruction pop and pop is going to pop whatever is top of the
+
+738
+00:59:24,980 --> 00:59:26,599
+stack.
+
+739
+00:59:26,599 --> 00:59:29,960
+So it will actually pop the address of LBL.
+
+740
+00:59:29,960 --> 00:59:34,960
+So it is essentially getting address of the current instruction itself.
+
+741
+00:59:34,960 --> 00:59:41,960
+Are there any issues since there is no return?
+
+742
+00:59:41,960 --> 00:59:48,960
+Yeah, so return is not a must instruction for every call.
+
+743
+00:59:49,480 --> 00:59:55,400
+As long as you keep your stack in the correct form, it does not matter whether you had a
+
+744
+00:59:55,400 --> 01:00:01,039
+ret instruction or you did not have a ret instruction.
+
+745
+01:00:01,039 --> 01:00:03,860
+Can someone tell me why we do this?
+
+746
+01:00:03,860 --> 01:00:10,860
+Is there any use of this code you can think of?
+
+747
+01:00:12,240 --> 01:00:19,240
+To get address of the current instruction, is there any use of that functionality?
+
+748
+01:00:19,239 --> 01:00:26,239
+Why do you want address of current instruction?
+
+749
+01:00:27,879 --> 01:00:34,879
+What can you do with it?
+
+750
+01:00:45,239 --> 01:00:48,799
+Does everyone understand what he said?
+
+751
+01:00:48,800 --> 01:00:55,800
+So there is something called a set jump and long jump in C. So you can think of it like
+
+752
+01:00:57,080 --> 01:01:03,000
+similar to exception handling in C++ where instead of returning to caller, immediate
+
+753
+01:01:03,000 --> 01:01:06,880
+caller, you may return to arbitrary points.
+
+754
+01:01:06,880 --> 01:01:12,519
+So let us say you have main was calling foo, foo was calling bar, bar was calling foo bar.
+
+755
+01:01:12,519 --> 01:01:18,039
+You can actually jump back directly from foo bar to main without having to go through this
+
+756
+01:01:18,039 --> 01:01:19,199
+chain.
+
+757
+01:01:19,199 --> 01:01:22,759
+But that is again out of scope for this module just for the record.
+
+758
+01:01:22,759 --> 01:01:28,400
+I am not going to talk about how set jumps and long jumps are implemented.
+
+759
+01:01:28,400 --> 01:01:32,400
+Any other use you can think of?
+
+760
+01:01:32,400 --> 01:01:36,920
+It does not seem like something very common.
+
+761
+01:01:36,920 --> 01:01:41,599
+But we will see tomorrow where to use this.
+
+762
+01:01:41,599 --> 01:01:47,920
+So remember this that way to get address of the current instruction is by doing this where
+
+763
+01:01:47,920 --> 01:01:52,599
+you call the next instruction and you pop from the stack.
+
+764
+01:01:52,599 --> 01:01:57,280
+And we will see tomorrow where we actually can use this trick to implement something.
+
+765
+01:01:57,280 --> 01:02:03,159
+Now so far what we have seen is how the control transfer happened.
+
+766
+01:02:03,159 --> 01:02:05,039
+Any doubts in that?
+
+767
+01:02:05,039 --> 01:02:08,039
+How call and return happened?
+
+768
+01:02:08,039 --> 01:02:09,039
+Yes.
+
+769
+01:02:09,039 --> 01:02:16,039
+What is the function to call?
+
+770
+01:02:16,039 --> 01:02:17,239
+Correct.
+
+771
+01:02:17,239 --> 01:02:24,079
+So that goes into, so proper use requires just before the write instruction to have
+
+772
+01:02:24,079 --> 01:02:26,000
+written address on the stack.
+
+773
+01:02:26,000 --> 01:02:33,519
+If you do not do this, then you have arbitrary code and then anything can happen.
+
+774
+01:02:33,519 --> 01:02:41,719
+So if you do not, that is why compiler generated code typically will not have such things.
+
+775
+01:02:41,719 --> 01:02:45,800
+And whenever you are writing, that is why you need to be aware of these kinds of things.
+
+776
+01:02:45,800 --> 01:02:51,960
+So if you are aware of these semantics, then you can generate code that way.
+
+777
+01:02:51,960 --> 01:02:57,120
+What will happen is if you have arbitrary thing on the stack, it will simply happily
+
+778
+01:02:57,120 --> 01:03:01,800
+use that address and start executing that.
+
+779
+01:03:01,800 --> 01:03:05,120
+No.
+
+780
+01:03:05,120 --> 01:03:10,600
+Can you write analysis which will detect if stack is in the correct state?
+
+781
+01:03:10,599 --> 01:03:14,339
+So let us say you are seeing the assembly code.
+
+782
+01:03:14,339 --> 01:03:23,079
+How will you analyze that stack is in the correct shape just before the return?
+
+783
+01:03:23,079 --> 01:03:24,799
+Do you always know?
+
+784
+01:03:24,799 --> 01:03:28,960
+What if there is a loop with n and I am doing something?
+
+785
+01:03:28,960 --> 01:03:34,880
+I mean you could do something statically, but may not be possible always.
+
+786
+01:03:34,880 --> 01:03:39,239
+But in simplistic case, yes, you could say that there are three pushes here and three
+
+787
+01:03:39,239 --> 01:03:40,239
+pops here.
+
+788
+01:03:40,239 --> 01:03:43,239
+So I must be in good shape.
+
+789
+01:03:43,239 --> 01:03:44,239
+Correct.
+
+790
+01:03:44,239 --> 01:03:45,239
+Yes.
+
+791
+01:03:45,239 --> 01:03:52,119
+So now let us look at the local variables.
+
+792
+01:03:52,119 --> 01:03:58,159
+So a function can essentially define local variables which it can use for its operation.
+
+793
+01:03:58,159 --> 01:04:03,479
+And there are two types of local variables, CC++ supports.
+
+794
+01:04:03,479 --> 01:04:07,139
+One is variables which have auto storage or default storage.
+
+795
+01:04:07,139 --> 01:04:12,779
+So whenever you write something like int var, it is something with the auto storage
+
+796
+01:04:12,779 --> 01:04:16,500
+and you can also write something as static.
+
+797
+01:04:16,500 --> 01:04:18,900
+What is the difference between the two?
+
+798
+01:04:18,900 --> 01:04:19,900
+Yes.
+
+799
+01:04:19,900 --> 01:04:20,900
+Correct.
+
+800
+01:04:20,900 --> 01:04:29,460
+So essentially, the scope of the variables is only within the function.
+
+801
+01:04:29,460 --> 01:04:34,099
+That means I cannot access CNT outside this function.
+
+802
+01:04:34,099 --> 01:04:38,319
+Same way I cannot access var outside this function.
+
+803
+01:04:38,319 --> 01:04:41,299
+But the lifetime is actually different.
+
+804
+01:04:41,299 --> 01:04:48,179
+So var and arr are actually have lifetime only of the function.
+
+805
+01:04:48,179 --> 01:04:52,059
+So whenever the function is called, they are created and whenever the function returns,
+
+806
+01:04:52,059 --> 01:04:53,799
+they are destroyed.
+
+807
+01:04:53,799 --> 01:04:58,219
+Static variables on the other hand are created for the entire life of the program.
+
+808
+01:04:59,219 --> 01:05:04,500
+their values even if you call the same function multiple times.
+
+809
+01:05:04,500 --> 01:05:09,699
+And when do you think are auto variables allocated?
+
+810
+01:05:09,699 --> 01:05:13,179
+So every time you call a function, you need to allocate them.
+
+811
+01:05:13,179 --> 01:05:18,379
+So every time a function is called, they are allocated, initialized and deallocated every
+
+812
+01:05:18,379 --> 01:05:20,819
+time the function returns.
+
+813
+01:05:20,819 --> 01:05:27,659
+Static variables we will see later on how they are allocated and what happens to them.
+
+814
+01:05:27,659 --> 01:05:32,019
+So where should we store auto variables?
+
+815
+01:05:32,019 --> 01:05:33,980
+Still go step by step.
+
+816
+01:05:33,980 --> 01:05:37,460
+Can we store them in registers?
+
+817
+01:05:37,460 --> 01:05:38,460
+Why not?
+
+818
+01:05:38,460 --> 01:05:39,460
+Correct.
+
+819
+01:05:39,460 --> 01:05:45,539
+So the first problem is limited registers.
+
+820
+01:05:45,539 --> 01:05:48,539
+But are there any other cases?
+
+821
+01:05:48,539 --> 01:06:04,940
+Okay, so we will come to that.
+
+822
+01:06:04,940 --> 01:06:09,860
+So let us say I have a function, let us say which it does not call any other function.
+
+823
+01:06:09,860 --> 01:06:12,860
+Let us hypothetically assume.
+
+824
+01:06:12,860 --> 01:06:13,860
+Yes.
+
+825
+01:06:13,860 --> 01:06:22,019
+So that is one problem you already discussed that you have more number of variables than
+
+826
+01:06:22,019 --> 01:06:27,180
+you have registers.
+
+827
+01:06:27,180 --> 01:06:31,300
+So let us say I have array of four elements.
+
+828
+01:06:31,300 --> 01:06:35,260
+Can I store it in four registers?
+
+829
+01:06:35,260 --> 01:06:39,460
+So let us say number of registers is not an issue.
+
+830
+01:06:39,460 --> 01:06:40,460
+For now.
+
+831
+01:06:41,019 --> 01:06:42,539
+That is always a practical problem.
+
+832
+01:06:42,539 --> 01:06:48,579
+But for now, let us assume you have either two very few local variables or you have many
+
+833
+01:06:48,579 --> 01:06:49,579
+registers.
+
+834
+01:06:49,579 --> 01:06:51,300
+In that case, what are the problems?
+
+835
+01:06:51,300 --> 01:06:52,920
+Can you still have?
+
+836
+01:06:52,920 --> 01:06:56,780
+So let us say you had five variables and five registers available.
+
+837
+01:06:56,780 --> 01:07:02,980
+Can I always store my variables into registers?
+
+838
+01:07:02,980 --> 01:07:07,340
+So that is also not an issue.
+
+839
+01:07:07,340 --> 01:07:11,660
+Correct.
+
+840
+01:07:11,660 --> 01:07:28,860
+So essentially, you might have ISA constraints, where a particular register may need to be
+
+841
+01:07:28,860 --> 01:07:35,180
+free for some reason, because the instruction implicitly modifies it and so on.
+
+842
+01:07:35,180 --> 01:07:36,539
+Leave that aside.
+
+843
+01:07:36,539 --> 01:07:40,380
+So let us leave aside all the register related issues.
+
+844
+01:07:40,380 --> 01:07:42,460
+You have sufficient registers.
+
+845
+01:07:42,460 --> 01:07:50,179
+You have registers which you can truly use for your purpose and there is no other issue.
+
+846
+01:07:50,179 --> 01:07:58,619
+So why do you think that matters?
+
+847
+01:08:07,340 --> 01:08:11,820
+So one issue which she is saying is data types might create a problem.
+
+848
+01:08:11,820 --> 01:08:16,300
+But so to answer to that, what might happen is you might waste space.
+
+849
+01:08:16,300 --> 01:08:21,500
+For example, you might say that even character I am storing in a 32 bit register.
+
+850
+01:08:21,500 --> 01:08:29,739
+So it is a waste of space in the register, but that is not the most interesting problem.
+
+851
+01:08:29,739 --> 01:08:30,739
+Let us say array.
+
+852
+01:08:30,739 --> 01:08:33,180
+So let us say I have declared an array.
+
+853
+01:08:33,659 --> 01:08:37,260
+Array of four and I have four registers available.
+
+854
+01:08:37,260 --> 01:08:39,260
+Can I store array in?
+
+855
+01:08:39,260 --> 01:08:41,260
+How?
+
+856
+01:08:55,260 --> 01:09:02,300
+So when I do EA, somehow when I do address of EAX plus one, do I get EBX?
+
+857
+01:09:03,180 --> 01:09:07,180
+Okay.
+
+858
+01:09:21,180 --> 01:09:22,220
+Correct.
+
+859
+01:09:22,220 --> 01:09:25,180
+So that is getting to core of the issue.
+
+860
+01:09:25,180 --> 01:09:28,220
+So essentially think of it this way.
+
+861
+01:09:28,220 --> 01:09:32,380
+So let us say I had declared a, can I use whiteboard?
+
+862
+01:09:32,380 --> 01:09:33,579
+I will switch to terminal.
+
+863
+01:09:33,579 --> 01:09:36,220
+I think that might be easy.
+
+864
+01:09:36,220 --> 01:09:41,420
+So let us say I have this function foo, to which I get an index.
+
+865
+01:09:41,420 --> 01:09:50,300
+And I declare int error of four.
+
+866
+01:09:50,300 --> 01:09:59,819
+And I do printf percent d error of i.
+
+867
+01:09:59,819 --> 01:10:01,260
+How will this code work?
+
+868
+01:10:01,260 --> 01:10:12,619
+So let us say I have put this in EAX, EBX, ECX, EDX.
+
+869
+01:10:12,619 --> 01:10:14,619
+How will that work?
+
+870
+01:10:14,619 --> 01:10:19,500
+Correct.
+
+871
+01:10:19,500 --> 01:10:23,100
+So one bad way is to do this.
+
+872
+01:10:23,900 --> 01:10:38,940
+So it kind of undoes whatever optimizations you have learned and says generate bad code.
+
+873
+01:10:38,940 --> 01:10:40,940
+So bad option.
+
+874
+01:10:40,940 --> 01:10:46,940
+The fundamental reason for this is what she was trying to say.
+
+875
+01:10:46,939 --> 01:10:54,219
+That there is some indexing which is happening in my code, but the registers which I have
+
+876
+01:10:54,219 --> 01:10:55,819
+are not indexable.
+
+877
+01:10:55,819 --> 01:10:57,099
+So I cannot do.
+
+878
+01:10:57,099 --> 01:11:06,059
+So if I had something like this, base register plus i gives me base reg of i.
+
+879
+01:11:06,059 --> 01:11:10,699
+If something like this was there, then I could actually do it.
+
+880
+01:11:10,699 --> 01:11:12,019
+Okay.
+
+881
+01:11:12,020 --> 01:11:18,820
+So if my hardware had something like this, where if I do r0 plus 1, I get r1.
+
+882
+01:11:18,820 --> 01:11:22,820
+r1 plus 2, I get r4 and so on.
+
+883
+01:11:22,820 --> 01:11:24,820
+Then I will actually be able to do it.
+
+884
+01:11:24,820 --> 01:11:29,020
+Otherwise the only option is to do this bad thing.
+
+885
+01:11:29,020 --> 01:11:32,100
+Any other reasons which will force you to not use a register.
+
+886
+01:11:32,100 --> 01:11:37,780
+So we saw one case where indexing is causing a problem.
+
+887
+01:11:37,779 --> 01:11:41,779
+Any other issues why you cannot use registers?
+
+888
+01:11:41,779 --> 01:11:48,460
+Correct.
+
+889
+01:11:48,460 --> 01:11:52,619
+But that is something register allocation should have already done.
+
+890
+01:11:52,619 --> 01:11:58,779
+So whenever you had a variable v, it was let's say allocated by register allocator to eax,
+
+891
+01:11:58,779 --> 01:12:02,500
+then register allocator is keeping the map of some sort.
+
+892
+01:12:02,500 --> 01:12:07,020
+That wherever var is used, use eax.
+
+893
+01:12:07,020 --> 01:12:09,020
+Correct.
+
+894
+01:12:09,020 --> 01:12:15,220
+So, yeah.
+
+895
+01:12:15,220 --> 01:12:21,699
+So large, I mean data which does not fit into registers, there could be two reasons for
+
+896
+01:12:21,699 --> 01:12:22,699
+it.
+
+897
+01:12:22,699 --> 01:12:27,739
+One is you don't have sufficient registers or the data size itself is not sufficient
+
+898
+01:12:27,739 --> 01:12:30,180
+within the registers.
+
+899
+01:12:30,180 --> 01:12:32,460
+And then second is this indexing.
+
+900
+01:12:32,460 --> 01:12:38,900
+Any other reasons?
+
+901
+01:12:38,900 --> 01:12:42,020
+Let me write some code.
+
+902
+01:12:42,020 --> 01:12:44,020
+So let's say I had var.
+
+903
+01:12:44,020 --> 01:12:51,220
+So let's say I had var,var2.
+
+904
+01:12:51,220 --> 01:13:09,860
+I do something like this.
+
+905
+01:13:09,860 --> 01:13:20,060
+Now can I put var and var2 in registers?
+
+906
+01:13:20,060 --> 01:13:21,060
+Why?
+
+907
+01:13:21,060 --> 01:13:22,060
+Correct.
+
+908
+01:13:22,060 --> 01:13:25,100
+So registers don't have address.
+
+909
+01:13:25,100 --> 01:13:48,220
+So whenever there is a variable whose address is taken, I somehow have to put it in memory.
+
+910
+01:13:49,140 --> 01:13:52,980
+Otherwise, there is a problem.
+
+911
+01:13:52,980 --> 01:13:54,900
+What if I do something like this?
+
+912
+01:13:54,900 --> 01:14:00,820
+I mean let's say compiler was still put var in eax and var2 in ebx.
+
+913
+01:14:00,820 --> 01:14:02,640
+Why can't compiler do this?
+
+914
+01:14:02,640 --> 01:14:15,020
+If condition ptr is equal to content of star ptr is equal to content of eax, else star
+
+915
+01:14:15,020 --> 01:14:17,900
+ptr is equal to ebx.
+
+916
+01:14:17,899 --> 01:14:24,659
+Why can't compiler do this?
+
+917
+01:14:24,659 --> 01:14:31,420
+So I have still allocated var in eax, var2 in ebx and I did something like this.
+
+918
+01:14:31,420 --> 01:14:36,619
+Is it valid?
+
+919
+01:14:36,619 --> 01:14:41,779
+Is this code valid for compiler to translate to?
+
+920
+01:14:41,779 --> 01:14:56,699
+Correct.
+
+921
+01:14:56,699 --> 01:15:01,380
+So it goes back to the same point of registers not having address.
+
+922
+01:15:01,380 --> 01:15:06,899
+But the practical problem to be able to translate it into this is it has to be able to analyze
+
+923
+01:15:06,899 --> 01:15:12,539
+that ptr actually points to these two variables.
+
+924
+01:15:12,539 --> 01:15:17,219
+And in a sufficiently large code, it's going to be a Herculean task.
+
+925
+01:15:17,219 --> 01:15:20,099
+You've learned pointer analysis.
+
+926
+01:15:20,099 --> 01:15:23,460
+How was it?
+
+927
+01:15:23,460 --> 01:15:30,500
+So it kind of starts getting impractical to be able to do it precisely.
+
+928
+01:15:30,500 --> 01:15:36,779
+So that's a, I mean, if you could figure out that this variable is only pointed by
+
+929
+01:15:36,779 --> 01:15:41,340
+this pointer and it's always dereferenced this way, in theory you can do this.
+
+930
+01:15:41,340 --> 01:15:46,420
+But it goes back to the problem of pointer analysis being very hard.
+
+931
+01:15:46,420 --> 01:15:53,579
+So these two, apart from not enough registers, whenever you have address of a variable taken,
+
+932
+01:15:53,579 --> 01:15:57,479
+you will have challenge storing it in register.
+
+933
+01:15:57,479 --> 01:16:02,199
+And whenever you have indexed accessing, you have problem because typically, hardware
+
+934
+01:16:02,199 --> 01:16:06,939
+don't have indexed register accesses.
+
+935
+01:16:06,939 --> 01:16:09,839
+So can we store them in global variables?
+
+936
+01:16:09,839 --> 01:16:14,919
+So whatever local variables I had, can I create a global variable corresponding to that and
+
+937
+01:16:14,919 --> 01:16:26,539
+allocate them in global variables?
+
+938
+01:16:26,539 --> 01:16:28,619
+What kind of scope violation?
+
+939
+01:16:28,619 --> 01:16:33,659
+So this, remember this is being done by compiler, right?
+
+940
+01:16:33,659 --> 01:16:37,300
+So compiler, it's not the programmer which is trying to do.
+
+941
+01:16:37,300 --> 01:16:43,979
+So let's say for every local variable compiler allocated a global variable while generating
+
+942
+01:16:43,979 --> 01:16:46,220
+assembly and use that.
+
+943
+01:16:46,220 --> 01:16:52,340
+So just, so for example, for in this case, it created foo underscore var as a global
+
+944
+01:16:52,340 --> 01:16:58,900
+variable, foo underscore arr as a global variable.
+
+945
+01:16:58,900 --> 01:17:06,079
+What are the issues with that?
+
+946
+01:17:06,079 --> 01:17:12,300
+But for every function, it will create a, I mean, it has to just create a unique prefix,
+
+947
+01:17:12,300 --> 01:17:13,300
+right?
+
+948
+01:17:13,300 --> 01:17:15,460
+It can do that.
+
+949
+01:17:15,460 --> 01:17:32,460
+Any functional issue, why you can't create a global version of a local variable?
+
+950
+01:17:32,460 --> 01:17:37,100
+So one answer is it could impact how much memory is available.
+
+951
+01:17:37,100 --> 01:17:41,180
+That's strictly not true, but yeah, it could be a consideration.
+
+952
+01:17:41,180 --> 01:17:46,940
+Correct.
+
+953
+01:17:46,940 --> 01:17:53,579
+So what will happen is as soon as you create a global variable, you are breaking the recursion
+
+954
+01:17:53,579 --> 01:17:58,900
+semantics because every time the function is called, you have to somehow initialize
+
+955
+01:17:58,900 --> 01:18:00,619
+it properly.
+
+956
+01:18:00,619 --> 01:18:05,060
+And what is, this is the exact same problem we had with the return address.
+
+957
+01:18:05,060 --> 01:18:13,180
+Global variables will create one copy of a variable per function, but is that what
+
+958
+01:18:13,180 --> 01:18:16,020
+really local variables are?
+
+959
+01:18:16,020 --> 01:18:20,580
+Local variables are ones per invocation of the call, right?
+
+960
+01:18:20,580 --> 01:18:22,960
+And that's how they get the semantics.
+
+961
+01:18:22,960 --> 01:18:27,260
+So this will not work in recursion.
+
+962
+01:18:27,260 --> 01:18:28,260
+What about stat?
+
+963
+01:18:28,260 --> 01:18:29,260
+Right?
+
+964
+01:18:29,260 --> 01:18:30,539
+That was the answer.
+
+965
+01:18:31,539 --> 01:18:35,979
+And where we have static local variables, we'll see later.
+
+966
+01:18:35,979 --> 01:18:42,539
+So stack is essentially where actually local variables are stored, right?
+
+967
+01:18:42,539 --> 01:18:48,220
+So there is a term called a stack frame, which is essentially the stack which is allocated
+
+968
+01:18:48,220 --> 01:18:50,279
+for a function.
+
+969
+01:18:50,279 --> 01:18:56,659
+So every, so region of stack which is allocated for a function is called a stack frame of
+
+970
+01:18:56,659 --> 01:18:57,659
+that function.
+
+971
+01:18:57,659 --> 01:19:05,180
+So for example, this is the stack frame of foo and this is the stack frame of main.
+
+972
+01:19:05,180 --> 01:19:10,779
+So we already saw when the call happened, the return address was actually pushed onto
+
+973
+01:19:10,779 --> 01:19:12,279
+the stack.
+
+974
+01:19:12,279 --> 01:19:14,500
+So this return address lives here.
+
+975
+01:19:14,500 --> 01:19:19,460
+There is something called a saved EBP, which we will get to later.
+
+976
+01:19:19,460 --> 01:19:24,420
+And then whatever local variables I have, I have stored them.
+
+977
+01:19:24,420 --> 01:19:30,220
+So I have stored var, I have stored err of 6, err of 5 up to err of 0.
+
+978
+01:19:30,220 --> 01:19:34,140
+And my stack pointer points to the bottom of the stack.
+
+979
+01:19:34,140 --> 01:19:37,579
+This is one of the ways to implement an activation record.
+
+980
+01:19:37,579 --> 01:19:42,260
+Is everyone aware of something called as activation record?
+
+981
+01:19:42,260 --> 01:19:47,779
+So essentially, whenever you do a function call, right, whatever state is needed to be
+
+982
+01:19:47,779 --> 01:19:51,239
+saved is called as activation record.
+
+983
+01:19:51,239 --> 01:19:54,960
+And stack frame is one of the ways to implement an activation record.
+
+984
+01:19:54,960 --> 01:19:55,960
+There are different mechanics.
+
+985
+01:19:55,960 --> 01:20:01,599
+For example, coroutines and higher order functions require a different type of activation record
+
+986
+01:20:01,599 --> 01:20:03,479
+than a stack frame.
+
+987
+01:20:03,479 --> 01:20:07,260
+So it will vary based on what are the semantics you are trying to support.
+
+988
+01:20:07,260 --> 01:20:10,599
+So stack frame is not the only activation record.
+
+989
+01:20:10,599 --> 01:20:15,479
+Depending on the feature you are implementing, it may be different.
+
+990
+01:20:16,479 --> 01:20:22,199
+Yeah, so any questions so far on this?
+
+991
+01:20:22,199 --> 01:20:25,000
+Now how do you allocate space in the stack?
+
+992
+01:20:25,000 --> 01:20:28,839
+So let's say I am compiling this function foo.
+
+993
+01:20:28,839 --> 01:20:35,319
+I know it requires 7 integers for err and 1 integer for var.
+
+994
+01:20:35,319 --> 01:20:38,039
+So I need 32 bytes.
+
+995
+01:20:38,039 --> 01:20:45,600
+So what will compiler simply do is it will insert an instruction called subtract 32 from
+
+996
+01:20:45,600 --> 01:20:47,119
+ESP.
+
+997
+01:20:47,119 --> 01:20:52,199
+So whenever you look at the disassembly of any function, you would see an instruction
+
+998
+01:20:52,199 --> 01:20:57,800
+like this, which is essentially allocating space in the stack.
+
+999
+01:20:57,800 --> 01:21:03,760
+So whatever is your requirement of that function, those stack pointer will be subtracted by
+
+1000
+01:21:03,760 --> 01:21:06,840
+that much.
+
+1001
+01:21:06,840 --> 01:21:10,720
+Now how do you access actually the variables?
+
+1002
+01:21:10,720 --> 01:21:13,520
+So what is address of the var?
+
+1003
+01:21:13,520 --> 01:21:21,239
+So whenever I want to refer to var in the program, how will I refer to var?
+
+1004
+01:21:21,239 --> 01:21:27,039
+So my stack pointer is here and my var is here.
+
+1005
+01:21:27,039 --> 01:21:32,039
+So I could simply compute its address based on stack pointer.
+
+1006
+01:21:32,039 --> 01:21:38,960
+So I can compute how far is the variable from the stack pointer and use that.
+
+1007
+01:21:38,960 --> 01:21:45,399
+So in this case, it is 28 because we had 7 integers in between.
+
+1008
+01:21:45,399 --> 01:21:50,560
+So var will be at stack pointer plus 28 address.
+
+1009
+01:21:50,560 --> 01:22:09,560
+So what you will see is if you look at the actual generated code.
+
+1010
+01:22:39,560 --> 01:22:58,600
+So what you can see is there is some subtraction of stack pointer which has happened, which
+
+1011
+01:22:58,600 --> 01:23:01,680
+is essentially allocating stack.
+
+1012
+01:23:01,680 --> 01:23:30,800
+And then you can actually see the stack pointer being actually.
+
+1013
+01:23:30,920 --> 01:23:41,760
+So you can see that the variables are being accessed relative to the stack pointer.
+
+1014
+01:23:41,760 --> 01:23:45,460
+Now frame pointer, which is EBP.
+
+1015
+01:23:45,460 --> 01:23:48,079
+Any idea why is that needed?
+
+1016
+01:23:48,079 --> 01:23:56,239
+Why do we have a pointer which is pointing here and stack pointer is pointing here?
+
+1017
+01:23:56,239 --> 01:23:59,239
+Sorry.
+
+1018
+01:23:59,239 --> 01:24:03,079
+Correct.
+
+1019
+01:24:03,079 --> 01:24:22,079
+I will get to that.
+
+1020
+01:24:22,079 --> 01:24:28,680
+Yes.
+
+1021
+01:24:28,680 --> 01:24:42,320
+But how will frame pointer ensure that?
+
+1022
+01:24:42,320 --> 01:24:51,159
+But so are you expecting hardware to report some sort of error when someone accesses ESP
+
+1023
+01:24:51,159 --> 01:24:53,840
+plus some offset which goes beyond EBP?
+
+1024
+01:24:53,840 --> 01:24:55,840
+Is that what you were expecting?
+
+1025
+01:24:55,840 --> 01:24:56,840
+Okay.
+
+1026
+01:24:56,840 --> 01:24:57,840
+Yes.
+
+1027
+01:24:58,000 --> 01:24:59,000
+Correct.
+
+1028
+01:24:59,000 --> 01:25:00,000
+Okay.
+
+1029
+01:25:00,000 --> 01:25:17,319
+So far we have three answers.
+
+1030
+01:25:17,319 --> 01:25:22,319
+Any other things then we will try to summarize.
+
+1031
+01:25:22,319 --> 01:25:25,319
+Correct.
+
+1032
+01:25:25,799 --> 01:25:34,799
+So first I will kind of answer your questions, your things.
+
+1033
+01:25:34,799 --> 01:25:41,539
+So one is there is no such mechanism which tries to check whether we are trying to access
+
+1034
+01:25:41,539 --> 01:25:43,840
+something in the caller frame.
+
+1035
+01:25:43,840 --> 01:25:51,039
+There are some security measures which do that, but by default those are not what happens.
+
+1036
+01:25:51,560 --> 01:25:58,359
+To answer your question, your thing, see whenever you are referring to the variables, even in
+
+1037
+01:25:58,359 --> 01:26:06,880
+case of recursion, you are always referring to the variables which are in your stack frame.
+
+1038
+01:26:06,880 --> 01:26:13,640
+So for example, when I am, let's say when foo calls foo, the second foo is still referring
+
+1039
+01:26:13,640 --> 01:26:16,600
+to the variables which are of that instance of the foo.
+
+1040
+01:26:16,600 --> 01:26:21,400
+There is no way to say refer to the parent's variable.
+
+1041
+01:26:21,400 --> 01:26:26,560
+So there is no need for you to generate code which will try to access.
+
+1042
+01:26:26,560 --> 01:26:32,960
+So for example, when let's look at this code, so let's say this was calling foo recursively.
+
+1043
+01:26:32,960 --> 01:26:37,200
+There is no way for me to say access var which is of the parent.
+
+1044
+01:26:37,200 --> 01:26:41,039
+There is no construct and see which will allow you to do that.
+
+1045
+01:26:41,039 --> 01:26:45,440
+Whenever you refer to var or arr, you are always referring to the ones which exist in
+
+1046
+01:26:45,439 --> 01:26:46,679
+your stack frame.
+
+1047
+01:26:46,679 --> 01:26:51,519
+So this will always be the same place from your stack point.
+
+1048
+01:26:51,519 --> 01:26:59,439
+So what happens is as stack keeps growing, the offset of the variables will keep changing.
+
+1049
+01:26:59,439 --> 01:27:06,319
+So var at this point in time is at 28 offset from ESP.
+
+1050
+01:27:06,319 --> 01:27:12,199
+Let's say within the same stack frame, I allocate more stack.
+
+1051
+01:27:12,199 --> 01:27:18,760
+Then relative address of var from foo, from the stack pointer is going to change.
+
+1052
+01:27:18,760 --> 01:27:25,359
+See if stack is going down, then the var also is going up from the stack pointer.
+
+1053
+01:27:25,359 --> 01:27:31,139
+So it might be at 28, then it might become 32, then it might become 36 and so on.
+
+1054
+01:27:31,139 --> 01:27:36,399
+So what happens is it creates issues because the same variable has different addresses
+
+1055
+01:27:36,399 --> 01:27:38,119
+at different points in time.
+
+1056
+01:27:38,920 --> 01:27:44,199
+But if you look at the frame pointer, frame pointer is always at the start of the frame.
+
+1057
+01:27:44,199 --> 01:27:48,079
+So all the variables are always at the fixed offset from it.
+
+1058
+01:27:48,079 --> 01:27:51,279
+So for example, var is always at EBP plus 4.
+
+1059
+01:27:51,279 --> 01:27:58,039
+arr of 6 is always at EBP plus 8, EBP minus 8, minus 12 and so on.
+
+1060
+01:27:58,039 --> 01:28:03,079
+No matter how much stack grows, once you have allocated something on the stack, it will
+
+1061
+01:28:03,079 --> 01:28:07,279
+always be at the fixed offset from the EBP.
+
+1062
+01:28:07,279 --> 01:28:09,439
+Does that make sense?
+
+1063
+01:28:09,439 --> 01:28:12,399
+And you can actually access it like this.
+
+1064
+01:28:12,399 --> 01:28:20,599
+So 5 is being moved into EBP minus 4, which is what is this statement trying to do.
+
+1065
+01:28:20,599 --> 01:28:22,840
+Fair enough?
+
+1066
+01:28:22,840 --> 01:28:25,479
+Now why can't compiler handle this?
+
+1067
+01:28:25,479 --> 01:28:31,960
+See the reason which I gave is kind of bit not good because what I am saying is it is
+
+1068
+01:28:31,960 --> 01:28:37,600
+a complexity to track what is the address of var relative to stack.
+
+1069
+01:28:37,600 --> 01:28:39,439
+So why can't compiler do it this way?
+
+1070
+01:28:39,439 --> 01:28:46,760
+So we have var and in the current set of code, var is at ESP plus 28.
+
+1071
+01:28:46,760 --> 01:28:48,920
+Then compiler updates the stack pointer.
+
+1072
+01:28:48,920 --> 01:28:51,399
+Remember compiler is updating the stack pointer.
+
+1073
+01:28:51,399 --> 01:28:53,840
+So compiler allocates space in the stack.
+
+1074
+01:28:53,840 --> 01:29:00,100
+Then it knows now var is now offsetted at 32 instead of 28.
+
+1075
+01:29:00,100 --> 01:29:04,820
+So why can't compiler do that?
+
+1076
+01:29:04,820 --> 01:29:07,220
+Does everyone understand what I am saying?
+
+1077
+01:29:07,220 --> 01:29:14,380
+So essentially what we said is from EBP a variable is always at fixed offset.
+
+1078
+01:29:14,380 --> 01:29:18,579
+From ESP it is going to be at variable offset at different types.
+
+1079
+01:29:18,579 --> 01:29:22,579
+Now the question is why can't we have compiler track it?
+
+1080
+01:29:22,579 --> 01:29:28,539
+So compiler can track variable var now is at ESP plus 8.
+
+1081
+01:29:28,539 --> 01:29:34,579
+At some point when the stack pointer is updated variable var is...
+
+1082
+01:29:34,579 --> 01:29:35,579
+Yes?
+
+1083
+01:29:35,579 --> 01:29:36,579
+Correct.
+
+1084
+01:29:36,579 --> 01:29:45,859
+So it is a complexity which you have to deal with.
+
+1085
+01:29:45,859 --> 01:29:51,359
+So let's say I had a loop something like this.
+
+1086
+01:29:51,359 --> 01:29:56,460
+So in this region of code let's say var is at ESP plus 28.
+
+1087
+01:29:57,380 --> 01:30:06,260
+Then I have a loop which creates additional variables.
+
+1088
+01:30:06,260 --> 01:30:17,579
+So stack pointer is updated and then int dummy 2.
+
+1089
+01:30:17,579 --> 01:30:25,439
+So my stack pointer further goes down by 8 bytes and now here I access var.
+
+1090
+01:30:25,439 --> 01:30:33,919
+So var is now at actually address ESP plus 36.
+
+1091
+01:30:33,919 --> 01:30:44,719
+But what if this was a loop which goes on from i equal to 0 to n types.
+
+1092
+01:30:44,719 --> 01:30:49,719
+Can compiler handle this?
+
+1093
+01:30:49,720 --> 01:31:02,079
+If value of n is fixed then it can.
+
+1094
+01:31:02,079 --> 01:31:14,680
+If value of n is unknown then?
+
+1095
+01:31:14,680 --> 01:31:22,320
+The language semantics say these are created at every iteration of the loop.
+
+1096
+01:31:22,320 --> 01:31:24,320
+I mean you can save the space.
+
+1097
+01:31:24,320 --> 01:31:26,920
+You don't have to allocate new space every time.
+
+1098
+01:31:26,920 --> 01:31:31,800
+But the semantics are these are not created only once.
+
+1099
+01:31:31,800 --> 01:31:36,320
+They do get created at every iteration.
+
+1100
+01:31:36,320 --> 01:31:37,320
+I'll come to that.
+
+1101
+01:31:37,320 --> 01:31:41,920
+It's bit more subtle but I'll come to that.
+
+1102
+01:31:41,920 --> 01:31:44,880
+So essentially actually compiler can deal with this.
+
+1103
+01:31:44,880 --> 01:31:53,039
+Instead of accessing this as ESP plus 36 it can use a dynamic offset.
+
+1104
+01:31:53,039 --> 01:31:58,399
+So it can keep adjusting the dynamic offset also as it is incrementing the stack point
+
+1105
+01:31:58,399 --> 01:31:59,680
+and access.
+
+1106
+01:31:59,680 --> 01:32:01,680
+So this is not actually a problem.
+
+1107
+01:32:01,680 --> 01:32:23,240
+Yeah but that all it can account for in the offset computer.
+
+1108
+01:32:23,240 --> 01:32:26,700
+See the stack pointer is being manipulated by the compiler.
+
+1109
+01:32:26,700 --> 01:32:30,400
+So it knows at which points how the offset.
+
+1110
+01:32:30,399 --> 01:32:32,719
+So think of it this way.
+
+1111
+01:32:32,719 --> 01:32:37,239
+For every variable compiler keeps track of what is the offset of that.
+
+1112
+01:32:37,239 --> 01:32:41,759
+In common cases it will always be a constant as in an image.
+
+1113
+01:32:41,759 --> 01:32:47,439
+But in some cases it may be a dynamic value which adjusts itself in tandem with how the
+
+1114
+01:32:47,439 --> 01:32:49,879
+stack pointer is being updated by the compiler.
+
+1115
+01:32:49,879 --> 01:32:53,359
+So if stack pointer increments this offset value also increments.
+
+1116
+01:32:53,359 --> 01:32:56,239
+If stack pointer decrements this value also decrements.
+
+1117
+01:32:56,239 --> 01:33:00,039
+So compiler can deal with it.
+
+1118
+01:33:00,119 --> 01:33:02,880
+But in fact you could see that.
+
+1119
+01:33:02,880 --> 01:33:08,880
+So in the code which I had shown you earlier compiler is doing accessing variables relative
+
+1120
+01:33:08,880 --> 01:33:12,800
+to stack pointer.
+
+1121
+01:33:12,800 --> 01:33:20,560
+Now what actually happens is frame pointers actually form a linked list of frames.
+
+1122
+01:33:20,560 --> 01:33:28,300
+So remember this saved EBP is actually holding the original EBP of the main.
+
+1123
+01:33:28,300 --> 01:33:36,860
+So this is actually a content which is pointing to start of the stack frame of main function.
+
+1124
+01:33:36,860 --> 01:33:38,940
+Then main will have its own thing.
+
+1125
+01:33:38,940 --> 01:33:45,340
+So every time I am calling a function and I am saving my EBP what is happening is I
+
+1126
+01:33:45,340 --> 01:33:51,539
+am creating a reverse linked list from one function to other prior function to the prior
+
+1127
+01:33:51,539 --> 01:33:54,460
+function to the prior function.
+
+1128
+01:33:54,460 --> 01:33:59,260
+And this is actually used by debugger to implement backtrace.
+
+1129
+01:33:59,260 --> 01:34:02,220
+So how does debugger know where is the caller function?
+
+1130
+01:34:02,220 --> 01:34:09,380
+It knows by reading the EBP value this value at EBP and then reads that and goes to that
+
+1131
+01:34:09,380 --> 01:34:13,020
+and goes to that and goes to that and so on.
+
+1132
+01:34:13,020 --> 01:34:14,420
+Does that make sense?
+
+1133
+01:34:14,420 --> 01:34:18,060
+So frame pointer is serving two purposes.
+
+1134
+01:34:18,060 --> 01:34:23,039
+One is it is giving you a way to access your variables at fixed offset.
+
+1135
+01:34:23,039 --> 01:34:26,960
+So that reduces the complexity which compiler had to deal with.
+
+1136
+01:34:26,960 --> 01:34:32,199
+But let's say your compiler is sophisticated enough to deal with that complexity.
+
+1137
+01:34:32,199 --> 01:34:37,840
+Then still frame pointer is useful for tools like debugger, profiler or any binary tool
+
+1138
+01:34:37,840 --> 01:34:44,079
+which is going to operate on the program to figure out the call stack.
+
+1139
+01:34:44,079 --> 01:34:48,319
+Now what I did here I kind of went over quickly.
+
+1140
+01:34:48,319 --> 01:34:56,199
+So by default when you compile using the compiler it is going to use the frame pointer.
+
+1141
+01:34:56,199 --> 01:35:08,840
+So if I generate my assembly it is actually going to access variables using frame pointer.
+
+1142
+01:35:08,840 --> 01:35:15,359
+But I have an option to say f omit frame pointer to tell compiler please don't use frame pointer
+
+1143
+01:35:15,359 --> 01:35:19,859
+for being a frame pointer use it as a general purpose register.
+
+1144
+01:35:19,859 --> 01:35:25,639
+So frame pointer can actually be made a general purpose and in that case I will actually have
+
+1145
+01:35:25,639 --> 01:35:30,639
+all the accesses relative to stack pointer.
+
+1146
+01:35:30,639 --> 01:35:31,639
+Yes.
+
+1147
+01:35:31,639 --> 01:35:32,639
+Correct.
+
+1148
+01:35:32,639 --> 01:35:42,819
+So that's what I was saying earlier.
+
+1149
+01:35:42,819 --> 01:35:44,000
+So let's try to do that.
+
+1150
+01:35:44,640 --> 01:35:48,520
+Let's say I had this code.
+
+1151
+01:35:48,520 --> 01:35:53,119
+So here I know because things are statically allocated.
+
+1152
+01:35:53,119 --> 01:36:00,760
+Now here the problem comes because the offset of var has suddenly changed.
+
+1153
+01:36:00,760 --> 01:36:10,279
+And let's say here I create a few more variables new var then here offset has again changed.
+
+1154
+01:36:10,279 --> 01:36:15,539
+Now one option which you have let's say you were writing the compiler what can you do.
+
+1155
+01:36:15,539 --> 01:36:23,439
+So one option you have is you get the initial thing and here whenever you create new variables
+
+1156
+01:36:23,439 --> 01:36:25,259
+you update your stack pointer.
+
+1157
+01:36:25,259 --> 01:36:30,239
+So you keep track of how your stack pointer is being updated and change the offset for
+
+1158
+01:36:30,239 --> 01:36:33,079
+every variable accordingly.
+
+1159
+01:36:33,079 --> 01:36:37,840
+Now compilers actually do something more simpler than this.
+
+1160
+01:36:37,840 --> 01:36:40,360
+Compilers actually don't.
+
+1161
+01:36:40,360 --> 01:36:46,680
+So if you look at the semantics of the language it says dummy and dummy2 are created every
+
+1162
+01:36:46,680 --> 01:36:49,840
+time this loop is entered.
+
+1163
+01:36:49,840 --> 01:36:52,220
+But compilers actually don't do that.
+
+1164
+01:36:52,220 --> 01:37:00,840
+What compilers will do is here only they will allocate space for space for var arr dummy
+
+1165
+01:37:00,840 --> 01:37:03,319
+dummy2.
+
+1166
+01:37:03,319 --> 01:37:07,159
+See because when compiler is analyzing code it is doing multiple passes.
+
+1167
+01:37:07,159 --> 01:37:09,639
+It's not that it is interpreter.
+
+1168
+01:37:09,639 --> 01:37:13,479
+So it's not that it doesn't have visibility of what is going to happen next.
+
+1169
+01:37:13,479 --> 01:37:15,439
+It does have.
+
+1170
+01:37:15,439 --> 01:37:19,840
+So it is going to allocate space for everything.
+
+1171
+01:37:19,840 --> 01:37:25,079
+At this point it is just going to insert code which will reinitialize dummy and dummy2.
+
+1172
+01:37:25,079 --> 01:37:28,500
+It will not actually allocate more space into the stack.
+
+1173
+01:37:28,500 --> 01:37:36,760
+So compiler will actually try to allocate most of the stack space at start of the function.
+
+1174
+01:37:36,760 --> 01:37:39,640
+So let's try to do let's look at this.
+
+1175
+01:37:39,640 --> 01:37:58,920
+So let's say I had var and var is equal to 7.
+
+1176
+01:38:29,600 --> 01:38:42,119
+So if you look at the sub l instruction it occurs only once.
+
+1177
+01:38:42,119 --> 01:38:45,640
+It didn't occur in the loop.
+
+1178
+01:38:45,640 --> 01:38:50,800
+So what compiler simply did is it figured out how much stack space is needed and whatever
+
+1179
+01:38:50,800 --> 01:38:53,380
+is needed it allocated it at once.
+
+1180
+01:38:53,380 --> 01:38:57,900
+So by then it would know where I am putting var, where I am putting i, where I am putting
+
+1181
+01:38:57,900 --> 01:38:59,460
+dummy.
+
+1182
+01:38:59,460 --> 01:39:02,699
+So that simplifies the tracking part for compiler.
+
+1183
+01:39:02,699 --> 01:39:07,859
+But it's more of an implementation simplicity nothing more.
+
+1184
+01:39:07,859 --> 01:39:12,619
+In theory compiler should be able to track whenever stack pointer is updated update the
+
+1185
+01:39:12,619 --> 01:39:14,020
+corresponding offsets.
+
+1186
+01:39:14,020 --> 01:39:21,119
+But compilers kind of hesitate to do that because it causes unnecessary work.
+
+1187
+01:39:21,119 --> 01:39:27,800
+So we saw that frame pointer is useful for referencing variables within the stack frame.
+
+1188
+01:39:27,800 --> 01:39:33,599
+But also it forms the ability to create backtracks.
+
+1189
+01:39:33,599 --> 01:39:39,420
+Now to be able to figure out now what all is needed to return to the caller.
+
+1190
+01:39:39,420 --> 01:39:44,840
+So remember what all happened within the callee function.
+
+1191
+01:39:44,840 --> 01:39:49,099
+Apart from the body of the callee function itself callee function did update the stack
+
+1192
+01:39:49,300 --> 01:39:51,900
+pointer.
+
+1193
+01:39:51,900 --> 01:39:57,060
+And coming back to the point which you were raising earlier what will happen when I do
+
+1194
+01:39:57,060 --> 01:40:03,740
+return when the return address is not at top of the stack.
+
+1195
+01:40:03,740 --> 01:40:10,000
+So we need to ensure just before return the stack pointer is always pointing to the return
+
+1196
+01:40:10,000 --> 01:40:11,000
+address.
+
+1197
+01:40:11,000 --> 01:40:19,079
+And compiler can simply do that by updating stack pointer to move point to the frame pointer
+
+1198
+01:40:19,079 --> 01:40:20,920
+and then return.
+
+1199
+01:40:20,920 --> 01:40:25,840
+Because see what compiler is doing is it is moving the base pointer into the frame pointer.
+
+1200
+01:40:25,840 --> 01:40:29,640
+So stack pointer also started pointing here.
+
+1201
+01:40:29,640 --> 01:40:33,859
+Then it popped the EBP from here.
+
+1202
+01:40:33,859 --> 01:40:40,659
+That means stack pointer is actually pointing to the return address and then it did return.
+
+1203
+01:40:40,659 --> 01:40:41,840
+Does that make sense?
+
+1204
+01:40:41,840 --> 01:40:47,059
+So just before returning you had allocated space into the stack.
+
+1205
+01:40:47,060 --> 01:40:51,440
+So you need to ensure the stack pointer is now pointing to the return address so that
+
+1206
+01:40:51,440 --> 01:40:58,120
+when ret instruction executes it will actually return to the correct address.
+
+1207
+01:40:58,120 --> 01:41:05,000
+So this is essentially called as a stack clean up from callee function.
+
+1208
+01:41:05,000 --> 01:41:07,960
+So there are two terms which you might hear.
+
+1209
+01:41:07,960 --> 01:41:11,520
+There is something called as function prologue and then there is something called as function
+
+1210
+01:41:11,520 --> 01:41:12,800
+epilogue.
+
+1211
+01:41:12,800 --> 01:41:17,100
+So the set of instructions which you see at the beginning of the function is essentially
+
+1212
+01:41:17,100 --> 01:41:18,760
+function prologue.
+
+1213
+01:41:18,760 --> 01:41:25,659
+And function prologue typically includes saving the base pointer, original base pointer, updating
+
+1214
+01:41:25,659 --> 01:41:30,860
+the stack pointer and then subtracting space into the stack.
+
+1215
+01:41:30,860 --> 01:41:34,480
+That means you are allocating space onto the stack.
+
+1216
+01:41:34,480 --> 01:41:39,560
+So all of these instructions will happen at start of the function typically.
+
+1217
+01:41:39,560 --> 01:41:46,720
+And at the epilogue which is just before the return you will update the stack pointer
+
+1218
+01:41:46,720 --> 01:41:48,680
+to point to the base pointer.
+
+1219
+01:41:48,680 --> 01:41:55,080
+You get the value of the base pointer and you pop the return address when you do the
+
+1220
+01:41:55,080 --> 01:41:56,980
+return instruction.
+
+1221
+01:41:56,980 --> 01:42:01,760
+So these two instruction sequences are called function prologue and function epilogue.
+
+1222
+01:42:01,760 --> 01:42:04,720
+And you can actually see them in this.
+
+1223
+01:42:04,720 --> 01:42:14,840
+So if you look at this, so here we see saving of the frame pointer and subtraction of the
+
+1224
+01:42:14,840 --> 01:42:20,079
+stack pointer and pushing the original value of the base pointer.
+
+1225
+01:42:20,079 --> 01:42:23,760
+So this forms the function prologue pretty much.
+
+1226
+01:42:23,760 --> 01:42:29,680
+Epilogue actually is kind of handled by instruction called leave.
+
+1227
+01:42:29,680 --> 01:42:36,000
+So in x86 there is an instruction called leave which essentially does this.
+
+1228
+01:42:36,000 --> 01:42:40,619
+And then there is also an instruction called enter which is equivalent to this.
+
+1229
+01:42:40,619 --> 01:42:44,960
+So you either might see these instructions or you might see a leave instruction or enter
+
+1230
+01:42:44,960 --> 01:42:49,119
+instruction.
+
+1231
+01:42:49,119 --> 01:42:53,800
+Any doubts so far?
+
+1232
+01:42:53,800 --> 01:43:17,400
+So can you tell me what is output of this code?
+
+1233
+01:43:17,400 --> 01:43:20,000
+How many of you think it is garbage value?
+
+1234
+01:43:20,880 --> 01:43:25,399
+Two people, three people.
+
+1235
+01:43:25,399 --> 01:43:28,060
+Garbage okay.
+
+1236
+01:43:28,060 --> 01:43:30,119
+So four or five people think it is garbage.
+
+1237
+01:43:30,119 --> 01:43:33,300
+What do others think?
+
+1238
+01:43:33,300 --> 01:43:38,560
+Undefined behaviour.
+
+1239
+01:43:38,560 --> 01:43:41,239
+Can someone explain what is the problem in this code?
+
+1240
+01:43:41,239 --> 01:43:42,239
+Yes.
+
+1241
+01:43:42,359 --> 01:43:47,359
+Okay.
+
+1242
+01:43:47,359 --> 01:43:56,960
+Then what is the problem with that?
+
+1243
+01:43:56,960 --> 01:43:59,159
+So does everyone understand the problem?
+
+1244
+01:43:59,159 --> 01:44:01,000
+So remember what we did.
+
+1245
+01:44:01,000 --> 01:44:06,039
+In the prior thing I said that once just before the function is returning the stack pointer
+
+1246
+01:44:06,039 --> 01:44:07,039
+was updated.
+
+1247
+01:44:07,039 --> 01:44:08,039
+Right.
+
+1248
+01:44:08,279 --> 01:44:13,920
+So it was pointing to now the caller function.
+
+1249
+01:44:13,920 --> 01:44:21,140
+So what happened in this case is I created this arr variable and I returned address of
+
+1250
+01:44:21,140 --> 01:44:22,279
+it.
+
+1251
+01:44:22,279 --> 01:44:26,399
+And before I returned the stack pointer was updated.
+
+1252
+01:44:26,399 --> 01:44:30,920
+So this was no longer in the stack.
+
+1253
+01:44:30,920 --> 01:44:40,399
+Now the question will it actually print garbage or will it print valid value?
+
+1254
+01:44:40,399 --> 01:44:49,399
+I guess it prints some valid value because the stack manipulation has to be defined to
+
+1255
+01:44:49,399 --> 01:44:53,399
+implement the increment of the stack.
+
+1256
+01:44:53,399 --> 01:44:54,399
+Correct.
+
+1257
+01:44:54,399 --> 01:45:00,480
+So that is the difference between someone knowing the internals versus someone just saying
+
+1258
+01:45:00,479 --> 01:45:03,199
+this is not going to work.
+
+1259
+01:45:03,199 --> 01:45:08,279
+See these type of things will actually help you debug things easily.
+
+1260
+01:45:08,279 --> 01:45:12,619
+This code will actually print a valid value.
+
+1261
+01:45:12,619 --> 01:45:18,159
+So from if you just observe the execution of the program there is nothing wrong with
+
+1262
+01:45:18,159 --> 01:45:23,639
+it because you will still get the expected value.
+
+1263
+01:45:23,639 --> 01:45:29,419
+And the reason for that is stack allocation, deallocation simply move the stack pointer.
+
+1264
+01:45:29,420 --> 01:45:33,659
+It didn't really modified the content of the memory.
+
+1265
+01:45:33,659 --> 01:45:41,300
+So unless something happened with modified that content you would still have that value.
+
+1266
+01:45:41,300 --> 01:45:47,060
+So in most of the cases when you run this program you will actually get a correct and
+
+1267
+01:45:47,060 --> 01:45:48,060
+expected value.
+
+1268
+01:45:48,060 --> 01:45:51,159
+It just that the code is still buggy.
+
+1269
+01:45:51,159 --> 01:45:59,699
+The code is still buggy because in some cases it may actually result in set-fog.
+
+1270
+01:45:59,699 --> 01:46:02,880
+Now he coined something like undefined behavior.
+
+1271
+01:46:02,880 --> 01:46:11,399
+Does everyone know what is undefined behavior?
+
+1272
+01:46:11,399 --> 01:46:20,300
+So if you read any language standard, especially C, C++, it has three terminologies.
+
+1273
+01:46:20,300 --> 01:46:25,840
+It has something called as implementation defined behavior.
+
+1274
+01:46:25,840 --> 01:46:33,279
+So what C says is if your program does this then it is implementation defined behavior.
+
+1275
+01:46:33,279 --> 01:46:37,100
+The conditions are there are just too many conditions.
+
+1276
+01:46:37,100 --> 01:46:42,420
+But essentially whenever you hear a term called as implementation defined behavior what it
+
+1277
+01:46:42,420 --> 01:46:47,940
+means is C language doesn't say only this thing should happen.
+
+1278
+01:46:47,939 --> 01:46:54,119
+C language says compiler and the platform and the system it's free to implement anything
+
+1279
+01:46:54,119 --> 01:47:01,539
+for this particular case but it must document what it is doing.
+
+1280
+01:47:01,539 --> 01:47:10,859
+So for example C might say that size of integer is implementation defined behavior.
+
+1281
+01:47:10,859 --> 01:47:16,819
+So C says I don't know what is size of int but every implementation must define it.
+
+1282
+01:47:16,819 --> 01:47:21,380
+So this is implementation defined which means implementation must document what is the size
+
+1283
+01:47:21,380 --> 01:47:22,380
+of integer.
+
+1284
+01:47:22,380 --> 01:47:27,899
+There is something called as unspecified behavior.
+
+1285
+01:47:27,899 --> 01:47:33,340
+Unspecified behavior implies it is again not spelled out by the standard that in this case
+
+1286
+01:47:33,340 --> 01:47:40,979
+this should happen but it is a bit lower than implementation defined where compiler does
+
+1287
+01:47:40,979 --> 01:47:43,739
+not even need to document what it does.
+
+1288
+01:47:43,739 --> 01:47:47,939
+And we will see one example of unspecified behavior later.
+
+1289
+01:47:47,939 --> 01:47:54,260
+And third is undefined behavior in which case C standard says anything can happen including
+
+1290
+01:47:54,260 --> 01:47:58,979
+compiler generating code which will do RM minus RF slash.
+
+1291
+01:47:58,979 --> 01:48:04,260
+So compiler is free to do anything if your code has undefined behavior.
+
+1292
+01:48:04,260 --> 01:48:08,000
+And these kind of things are defined because they give flexibility to the compiler and
+
+1293
+01:48:08,000 --> 01:48:10,779
+optimizers to do something.
+

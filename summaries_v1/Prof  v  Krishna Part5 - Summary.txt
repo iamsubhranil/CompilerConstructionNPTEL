@@ -1,0 +1,15 @@
+ **Technical Terms Explanation:**
+
+* Constant Propagation: An optimization technique analyzing the flow of constants in a program, replacing variables with constant values when possible.
+	+ Meet Operation: Combining the effects of two different flows in a single flow.
+	+ Non-distributivity Property: Failure of constant propagation to distribute over meet operation, potentially missing opportunities for constant folding.
+* Phase Ordering Problem: Issue concerning the optimal sequence of applying multiple optimizations, due to dependencies between them.
+* Conditional Constant Propagation: Extension to basic constant propagation algorithm, evaluating branch conditions and adding only selected paths to the worklist.
+* Monotonic Progress: Concept ensuring consistency by preventing a variable from transitioning from a "true" state to a "false" state.
+* Basic Block: Sequential instructions without jumps or jump targets except at the beginning and end.
+* Dominance: Control flow graph concept describing relationships between nodes, impacting constant propagation decisions.
+* Reaching Definition Analysis: Identifying the earliest definition affecting a given variable in a program.
+
+**Exam Notes:**
+
+Optimization techniques, specifically constant propagation, face limitations in identifying constant values due to non-distributivity properties over meet operations. These limitations result in phase ordering problems, necessitating careful consideration when combining multiple optimization passes. Extensions like conditional constant propagation aim to mitigate these concerns by selectively evaluating branch conditions and incorporating them into the propagation algorithm. Throughout the optimization process, maintaining monotonic progress prevents inconsistencies in variable states. Applying dominance and reaching definition analyses enable proper decision-making during constant propagation. Understanding the implications of these concepts leads to better comprehension of compiler optimization strategies and performance enhancement techniques.

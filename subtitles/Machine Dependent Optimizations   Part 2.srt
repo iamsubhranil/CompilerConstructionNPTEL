@@ -1,0 +1,3652 @@
+1
+00:00:00,000 --> 00:00:13,560
+So, what we saw is about the data hazard, we will see how data hazards need to be handled.
+
+2
+00:00:13,560 --> 00:00:19,160
+As I mentioned earlier whenever you have a true dependency or what is called a read after
+
+3
+00:00:19,160 --> 00:00:25,640
+write dependency, the subsequent instruction has to wait until the previous instruction
+
+4
+00:00:25,640 --> 00:00:31,560
+writes a result back in the register. Let us look at a situation in which my ith instruction
+
+5
+00:00:31,560 --> 00:00:38,280
+produces a value, but the i plus oneth and i plus second instruction do not need this,
+
+6
+00:00:38,280 --> 00:00:42,760
+but let us say the i plus fourth or the i plus fifth instruction need that value. Then
+
+7
+00:00:42,760 --> 00:00:47,359
+what happens in that situation? So, let us not worry about the immediate second or third
+
+8
+00:00:47,359 --> 00:00:53,240
+instructions, but let us say that dependency is a little further away, may be the fourth
+
+9
+00:00:53,240 --> 00:00:58,359
+or fifth instruction. In this case there is no problem, right. There is a dependency,
+
+10
+00:00:58,359 --> 00:01:03,200
+but there may not be a stall because by that time that instruction goes into the so called
+
+11
+00:01:03,200 --> 00:01:08,320
+instruction fetch phase, this instruction would have completed its execution, correct.
+
+12
+00:01:08,320 --> 00:01:14,120
+So, the problem happens only if the dependent instructions are within one or two instructions
+
+13
+00:01:14,120 --> 00:01:18,879
+away. If you are assuming two stall cycles, then it is one or two instructions away. If
+
+14
+00:01:19,560 --> 00:01:23,879
+assuming one stall cycle, then it is only one instruction. There are some hardware solutions
+
+15
+00:01:23,879 --> 00:01:29,479
+for data hazards and that can actually reduce the data hazards stalls to one cycle in most
+
+16
+00:01:29,479 --> 00:01:34,439
+of the cases, okay. But we are not going to focus on the hardware solution, we are going
+
+17
+00:01:34,439 --> 00:01:40,799
+to focus more on the software solution and let us see what can be done in software to
+
+18
+00:01:40,799 --> 00:01:45,599
+take care of this. Instruction scheduling is a technique which can be used to take care
+
+19
+00:01:45,599 --> 00:01:52,079
+of this problem. As I mentioned earlier, only if the dependent instructions are close
+
+20
+00:01:52,079 --> 00:01:57,759
+to each other, that is one or two instructions within each other, then the stalls matter.
+
+21
+00:01:57,759 --> 00:02:02,199
+Otherwise the dependencies would have been any way been satisfied and you do not incur
+
+22
+00:02:02,199 --> 00:02:08,079
+a stall. So, the question is, is it possible for me to reorder my instructions so that
+
+23
+00:02:08,079 --> 00:02:13,840
+dependent instructions are a little further apart. That is the question, okay. Let us
+
+24
+00:02:13,840 --> 00:02:19,640
+make the question little bit more specific. If I assume, right, the dependent instructions
+
+25
+00:02:19,640 --> 00:02:26,360
+cannot happen within one cycle. That means that between i and i plus one cycle alone
+
+26
+00:02:26,360 --> 00:02:31,520
+I need to worry about. Or more specifically for certain types of instructions like load
+
+27
+00:02:31,520 --> 00:02:37,680
+instruction, right. I say if the load instruction loads some value, then the next instruction
+
+28
+00:02:38,680 --> 00:02:44,920
+on that. But let us say the i plus second onwards can be dependent on that, right. Supposing
+
+29
+00:02:44,920 --> 00:02:51,360
+if that is what we want to look at as a problem, then can compiler help us? That is the question,
+
+30
+00:02:51,360 --> 00:02:56,240
+right. So, instruction scheduling is a technique. We are going to see more about this in the
+
+31
+00:02:56,240 --> 00:03:03,319
+next lecture, okay, in the probably on probably tomorrow afternoon or on Friday, Thursday
+
+32
+00:03:03,319 --> 00:03:08,959
+afternoon or Friday. We will see more about that, right. Essentially that tries to place
+
+33
+00:03:08,959 --> 00:03:13,599
+instructions so that dependent instructions are kept a little further apart from each
+
+34
+00:03:13,599 --> 00:03:18,959
+other. But when you do this you have to ensure that all the dependences are satisfied, right.
+
+35
+00:03:18,959 --> 00:03:22,319
+The true dependences are satisfied and so on, okay.
+
+36
+00:03:22,319 --> 00:03:28,000
+Now if you look at this technique is essentially what we call as a compile time technique because
+
+37
+00:03:28,000 --> 00:03:33,400
+the compiler reorders these instructions, right. And then make sure that the dependent
+
+38
+00:03:33,400 --> 00:03:37,960
+instructions are kept further away from each other. There is also a run time solution to
+
+39
+00:03:37,960 --> 00:03:43,319
+this problem where the hardware does this reordering of instructions in terms of not
+
+40
+00:03:43,319 --> 00:03:48,400
+necessarily moving them out, but in terms of the order in which they are being executed,
+
+41
+00:03:48,400 --> 00:03:53,120
+issued and executed. We will not again go into the details of this because we are again
+
+42
+00:03:53,120 --> 00:03:58,640
+focusing on the compiler related topics here, okay.
+
+43
+00:03:58,640 --> 00:04:04,039
+So as I mentioned earlier we are going to talk about a specific form of a delay called
+
+44
+00:04:04,039 --> 00:04:09,640
+load delay slot. In that what we essentially mean is that if the i-th instruction is a
+
+45
+00:04:09,640 --> 00:04:16,240
+load instruction then the i plus 1-th instruction cannot be dependent on that. That is the only
+
+46
+00:04:16,240 --> 00:04:20,759
+problem that we are trying to solve. In all other cases we will say the hardware solution
+
+47
+00:04:20,759 --> 00:04:27,759
+will take care of things, right. Only in the case of this load delay, right, the software
+
+48
+00:04:27,759 --> 00:04:34,759
+or the compiler has to help, right. Let us look at that particular problem, okay.
+
+49
+00:04:34,759 --> 00:04:40,519
+So here is what I mean by this. Here is an example. So you have a load instruction and
+
+50
+00:04:40,519 --> 00:04:45,839
+that load instruction produces a value in R3 register which has to be consumed by the
+
+51
+00:04:45,919 --> 00:04:51,799
+subsequent add instruction, right. Similarly and then there is one more add instruction
+
+52
+00:04:51,799 --> 00:04:57,719
+which is also dependent on R3. Then another load instruction and again that load instruction
+
+53
+00:04:57,719 --> 00:05:04,719
+produces a value in R13 which is being consumed by this instruction, right.
+
+54
+00:05:04,719 --> 00:05:09,199
+And by what we have described earlier if there is a load instruction and then there is an
+
+55
+00:05:09,240 --> 00:05:15,560
+immediate dependent instruction there will be one stall cycle between them, correct.
+
+56
+00:05:15,560 --> 00:05:21,159
+So again you can see that because of this dependency and if these instructions happen
+
+57
+00:05:21,159 --> 00:05:28,159
+to be successive instructions there will be one stall cycle. Similarly here also. So if
+
+58
+00:05:28,159 --> 00:05:34,839
+I present this code from my compiler to this machine then that machine would incur two
+
+59
+00:05:34,839 --> 00:05:40,039
+stall cycles. That means that if I am only considering these five instructions then the
+
+60
+00:05:40,039 --> 00:05:45,119
+time it would take to execute these five instructions looking at from a throughput point of view
+
+61
+00:05:45,119 --> 00:05:51,359
+is that it will produce the results of these pipeline instructions, right. Five instructions
+
+62
+00:05:51,359 --> 00:05:56,359
+in seven cycles. That is really what would happen because of these two stall cycles,
+
+63
+00:05:56,359 --> 00:06:02,639
+right. So that is why it is important to remove these stall cycles if possible from this,
+
+64
+00:06:02,639 --> 00:06:09,639
+right. Let us see what happens. If I am allowed to reorder these instructions but when I reorder
+
+65
+00:06:10,599 --> 00:06:15,519
+the instructions I have to make sure all the dependences that are given in the instructions
+
+66
+00:06:15,519 --> 00:06:20,759
+are preserved. That is an important condition if I say that. Then how can I do that? For
+
+67
+00:06:20,759 --> 00:06:27,759
+example if I look at this instruction, right, also uses R3. So I cannot move this between
+
+68
+00:06:28,759 --> 00:06:34,759
+these two instructions, right. What about this instruction? This instruction uses R11
+
+69
+00:06:34,759 --> 00:06:41,839
+register and none of these instructions actually write into R11. That means that this instruction
+
+70
+00:06:41,839 --> 00:06:47,800
+is not dependent on any of these instructions, right. So the question is can I move this
+
+71
+00:06:47,800 --> 00:06:54,800
+instruction, right, in between these two instructions, right. And if I do that what will I gain?
+
+72
+00:06:55,759 --> 00:07:02,079
+Okay so let us see that. So the first load instruction is there. Then the add instruction
+
+73
+00:07:02,079 --> 00:07:06,000
+is there because of the dependency I want to put some instructions in between these
+
+74
+00:07:06,000 --> 00:07:13,000
+two instructions. Look at see, right. If I move this load instruction in that location
+
+75
+00:07:13,600 --> 00:07:19,939
+then what happens is that this is an independent instruction which is between this load instruction
+
+76
+00:07:19,939 --> 00:07:25,379
+and the dependent add instruction. Now this instruction can be fetched, let us say if
+
+77
+00:07:25,379 --> 00:07:29,980
+this instruction is fetched in time t, this can be fetched in time t plus 1 and this can
+
+78
+00:07:29,980 --> 00:07:34,740
+be fetched in time t plus 2 and that will not really cause a stall because that one
+
+79
+00:07:34,740 --> 00:07:41,740
+stall cycle that I am talking about I have avoided by putting this instruction in between.
+
+80
+00:07:41,779 --> 00:07:46,860
+Now what about the stall between this instruction and this instruction? I have also taken care
+
+81
+00:07:46,860 --> 00:07:52,060
+of that because immediately after this instruction there is a independent instruction which is
+
+82
+00:07:52,060 --> 00:07:57,220
+independent of this, right. So if I leave the rest of these instructions in the same
+
+83
+00:07:57,220 --> 00:08:03,500
+order, right, you can see that I have taken care of the dependency between the load instruction
+
+84
+00:08:03,500 --> 00:08:08,740
+and the corresponding add instruction as well as this load instruction and the respective
+
+85
+00:08:08,740 --> 00:08:14,259
+add instruction, right. They have been now separated by more than one instruction and
+
+86
+00:08:14,259 --> 00:08:19,500
+as long as they are separated by more than one instruction these stalls will not occur.
+
+87
+00:08:19,500 --> 00:08:24,819
+So in this particular case, sorry, in this particular case I have zero stall cycles that
+
+88
+00:08:24,819 --> 00:08:30,699
+means that in a pipeline execution I can actually finish executing all these five instructions
+
+89
+00:08:30,699 --> 00:08:35,659
+in five cycles. So I have again, now I have improved the throughput to one instruction
+
+90
+00:08:35,659 --> 00:08:40,659
+per cycle. So this is essentially what we call as instruction scheduling. This is done
+
+91
+00:08:40,740 --> 00:08:46,059
+by the compiler. We are going to spend time on Thursday and Friday trying to talk about
+
+92
+00:08:46,059 --> 00:08:52,019
+instruction scheduling, how to do instruction scheduling, right. And this is for what we
+
+93
+00:08:52,019 --> 00:08:57,740
+call as a simple pipeline processor which can issue and execute one instruction every
+
+94
+00:08:57,740 --> 00:09:03,740
+cycle. We will also talk about this in the case where there is instruction level parallelism,
+
+95
+00:09:03,740 --> 00:09:09,620
+right. Again remember that when we talk about these dependencies, data dependencies and
+
+96
+00:09:09,620 --> 00:09:16,460
+data hazards we talked about doing this, right, as a compiler technique. I will very
+
+97
+00:09:16,460 --> 00:09:21,580
+briefly talk about a runtime technique also to do this but only very briefly because again
+
+98
+00:09:21,580 --> 00:09:25,779
+from a compiler perspective that is not very relevant for our discussion.
+
+99
+00:09:25,779 --> 00:09:32,259
+Okay, now let us talk about control hazards which is the third type of hazard, right.
+
+100
+00:09:32,259 --> 00:09:38,379
+So what happens? Let us look at the ith instruction. If the ith instruction is a branch instruction,
+
+101
+00:09:39,379 --> 00:09:45,100
+then let us assume that it is fetched in the instruction fetch phase. Decoded during the
+
+102
+00:09:45,100 --> 00:09:51,139
+decode phase, the operands are also fetched. During the execute phase, we figure out whether
+
+103
+00:09:51,139 --> 00:09:57,539
+the conditions are satisfied or not and we also find out where the target location has
+
+104
+00:09:57,539 --> 00:10:01,939
+to be. So let us see at the end of the execute cycle, we know whether the branch condition
+
+105
+00:10:01,939 --> 00:10:07,460
+is true or not. If the branch condition is satisfied, then we have to go to the target
+
+106
+00:10:07,460 --> 00:10:14,620
+location. The target location is also computed during the execute phase, right. Now if this
+
+107
+00:10:14,620 --> 00:10:21,620
+instruction is fetched in the time t, what happens in time t plus 1? The i plus 1th instruction
+
+108
+00:10:22,139 --> 00:10:28,660
+is normally what is being fetched but if the condition is true, I should not be fetching
+
+109
+00:10:28,660 --> 00:10:35,180
+this instruction, right. So during the decode phase, as soon as I figure out that the ith
+
+110
+00:10:35,179 --> 00:10:42,179
+instruction is a branch instruction, I should stop stalling this instruction, right. I should
+
+111
+00:10:42,620 --> 00:10:48,819
+really stop fetching this or doing anything with the i plus 1th instruction. But only
+
+112
+00:10:48,819 --> 00:10:54,620
+in time t plus 2, correct, I will really know whether the branch condition is satisfied
+
+113
+00:10:54,620 --> 00:11:01,339
+or not. If it is satisfied, then the stalling is fine. If it is not satisfied, I can start
+
+114
+00:11:01,420 --> 00:11:07,980
+fetching the instruction in the next cycle, right. So let us see what happens. Again we
+
+115
+00:11:07,980 --> 00:11:13,540
+stall because only at this point in time we know what we need to do. Then at the next
+
+116
+00:11:13,540 --> 00:11:20,540
+cycle, right, that is if this is t, t plus 1, t plus 2, in cycle t plus 3, we can figure
+
+117
+00:11:21,420 --> 00:11:28,420
+out whether to fetch from i plus 1 or to fetch from the target location. So again what you
+
+118
+00:11:29,179 --> 00:11:35,339
+see here is that you will see two stall cycles. Again this is for a specific pipeline with
+
+119
+00:11:35,339 --> 00:11:41,419
+five stages assuming that condition is being evaluated here. If the condition is evaluated
+
+120
+00:11:41,419 --> 00:11:46,059
+here, then the stalls will be three cycles. If the condition is evaluated only at a later
+
+121
+00:11:46,059 --> 00:11:51,379
+stage, stalls will be even more number of cycles, correct. So the number of stalls depends
+
+122
+00:11:51,379 --> 00:11:56,899
+on where exactly the condition and target addresses are calculated because you need
+
+123
+00:11:56,939 --> 00:12:03,939
+both of them to move forward, correct. If it takes four cycles before you compute that,
+
+124
+00:12:04,100 --> 00:12:11,100
+then there will be four stall cycles, correct. Now again compilers can do little bit of help
+
+125
+00:12:12,019 --> 00:12:17,620
+here. Let us see what happens there. Again as I mentioned earlier, in order for us to
+
+126
+00:12:17,620 --> 00:12:22,620
+resolve about conditional branches, we need to know whether the condition is satisfied
+
+127
+00:12:22,620 --> 00:12:28,179
+and we also need to compute the target address. In our example, we assumed both of these things
+
+128
+00:12:28,179 --> 00:12:33,139
+to be happening in the EX stage, but if you can build an aggressive hardware where both
+
+129
+00:12:33,139 --> 00:12:38,419
+of these could be done in the ID stage itself, then you can reduce the delays to one stall
+
+130
+00:12:38,419 --> 00:12:43,779
+cycle, right. Again depends on how aggressive you want to build your hardware. Today's hardware
+
+131
+00:12:43,779 --> 00:12:47,860
+can actually do that. In fact, it can do much more than that, okay.
+
+132
+00:12:47,860 --> 00:12:51,820
+Let us look at the case when the stall is reduced to one cycle, but minimally it at
+
+133
+00:12:51,820 --> 00:12:57,780
+least requires one stall cycle because after the IF stage only you can decode and execute
+
+134
+00:12:57,780 --> 00:13:04,780
+the instruction. So, minimally you need one stall cycle, okay. So, one possible way to
+
+135
+00:13:04,980 --> 00:13:10,300
+handle this problem is what they call as static branch prediction technique. In a static branch
+
+136
+00:13:10,300 --> 00:13:16,380
+prediction technique, you have this policy of static not taken policy. That means that
+
+137
+00:13:16,700 --> 00:13:22,700
+even when you hit a branch, you pretend that the branch is not going to be taken, right.
+
+138
+00:13:22,700 --> 00:13:26,939
+And if you pretend the branch is not going to be taken, you allow the i plus 1 instruction
+
+139
+00:13:26,939 --> 00:13:33,340
+to be fixed in cycle t plus 1, right. And then one cycle later you will figure out whether
+
+140
+00:13:33,340 --> 00:13:38,700
+the condition is satisfied or not. If the condition is not satisfied, then your prediction
+
+141
+00:13:38,700 --> 00:13:45,019
+is correct. You can move forward without any delay, but if your condition is, if the condition
+
+142
+00:13:45,019 --> 00:13:49,860
+is satisfied and the branch has to be taken, then your prediction is wrong, you incur one
+
+143
+00:13:49,860 --> 00:13:55,340
+stall cycle. But anyway you would have incurred one stall cycle. So, by taking a static not
+
+144
+00:13:55,340 --> 00:14:01,379
+taken policy for branches which are not taken, you can essentially avoid the stall cycle,
+
+145
+00:14:01,379 --> 00:14:08,379
+right. So, this idea is a very simple idea, but quite useful. So, what I want to do is
+
+146
+00:14:08,379 --> 00:14:13,259
+that if in my instruction stream, I will always assume that the branch is not going to be
+
+147
+00:14:13,259 --> 00:14:19,939
+taken, right. And then I will build my hardware such that the i th instruction and the i plus
+
+148
+00:14:19,939 --> 00:14:26,460
+1 th instruction are always executed independent of whether the branch is taken or not taken,
+
+149
+00:14:26,460 --> 00:14:30,580
+correct. So, I am now saying that see whenever you see a branch instruction, the idea is
+
+150
+00:14:30,580 --> 00:14:35,700
+that the condition is satisfied after the i th instruction, you go to the target. But
+
+151
+00:14:35,700 --> 00:14:41,100
+now we are building a hardware in which even if the condition is satisfied, the i plus
+
+152
+00:14:41,180 --> 00:14:46,180
+1 th instruction will also be executed before you go to the target location, right.
+
+153
+00:14:46,180 --> 00:14:53,180
+So, what do you put in the i plus 1 th instruction has to be, you have to be careful about it.
+
+154
+00:14:53,180 --> 00:14:57,540
+That has to be the instruction which you anyway have to execute irrespective of whether the
+
+155
+00:14:57,540 --> 00:15:03,659
+branch is taken or not taken. For example, if I have an instruction above the branch
+
+156
+00:15:03,659 --> 00:15:10,160
+which is independent, right, I can possibly put it below the branch also so that i and
+
+157
+00:15:10,159 --> 00:15:14,559
+i plus 1 are executed, right. That is really what we are going to talk about this rest
+
+158
+00:15:14,559 --> 00:15:18,319
+of it is actually from a hardware perspective, not. So, what we are going to talk about is
+
+159
+00:15:18,319 --> 00:15:23,360
+what we call as delayed branching. In delayed branching what we have is that you are designing
+
+160
+00:15:23,360 --> 00:15:29,639
+a hardware so that irrespective of what happens to the branch instruction, the instruction
+
+161
+00:15:29,639 --> 00:15:35,039
+following the branch is also executed. Question?
+
+162
+00:15:35,039 --> 00:15:42,039
+Sure. Yeah.
+
+163
+00:15:42,039 --> 00:15:46,039
+Question? Do that.
+
+164
+00:15:46,039 --> 00:15:49,039
+Question? Sorry.
+
+165
+00:15:49,039 --> 00:15:59,039
+Question? Yeah, right. In this example is what you
+
+166
+00:15:59,039 --> 00:16:00,039
+are talking about.
+
+167
+00:16:00,039 --> 00:16:07,039
+Yeah, I was talking about this example. So, here let us say I have the first instruction
+
+168
+00:16:07,039 --> 00:16:14,039
+and later I have the branch instruction. So, you said that in a branch instruction if you
+
+169
+00:16:14,039 --> 00:16:15,639
+go to the right side. Just hold on to your question for a few minutes,
+
+170
+00:16:15,639 --> 00:16:20,519
+we will come to it because I want you to first understand what delayed branching is and exactly
+
+171
+00:16:20,519 --> 00:16:25,519
+what I am going to do I will show you, right. So, hold on to your question for a second.
+
+172
+00:16:26,519 --> 00:16:31,519
+So, let us skip this, let us go here, right. My animation is probably little bit messed
+
+173
+00:16:31,519 --> 00:16:36,519
+up, but let us see. Supposing let us say I have the following sequence of instructions,
+
+174
+00:16:36,519 --> 00:16:42,519
+right. There is an add instruction, there is a branch instruction, right. This branch
+
+175
+00:16:42,519 --> 00:16:49,519
+instruction uses the value of R1 and R1 is not being written by this instruction, right.
+
+176
+00:16:50,519 --> 00:16:56,519
+Now, my hardware is that if the branch instruction is executed, the instruction following the
+
+177
+00:16:56,519 --> 00:17:01,519
+branch is also executed before you either go to the instruction below that or go to
+
+178
+00:17:01,519 --> 00:17:06,519
+this location out, right. So, this is how my hardware behaves, right. Hardware has been
+
+179
+00:17:06,519 --> 00:17:11,519
+changed such that not only the branch instruction, but the instruction following the branch is
+
+180
+00:17:11,519 --> 00:17:17,519
+also being executed irrespective of whether the condition is satisfied or not. That means
+
+181
+00:17:17,519 --> 00:17:22,519
+that you react somewhat slowly to the branch, right. That is why it is called delayed branching.
+
+182
+00:17:22,519 --> 00:17:28,519
+You are not going to jump immediately after the branch. You are going to jump one instruction
+
+183
+00:17:28,519 --> 00:17:32,519
+after means one instruction. You are going to execute one more instruction before you
+
+184
+00:17:32,519 --> 00:17:37,519
+take the branch. That is why it is called delayed branching. So, in delayed branching,
+
+185
+00:17:37,519 --> 00:17:42,519
+if the ith instruction is a branch, the i plus oneth instruction is always executed,
+
+186
+00:17:42,519 --> 00:17:48,519
+correct. One simple way by which I can fill the i plus oneth instruction slot is to put
+
+187
+00:17:48,519 --> 00:17:54,519
+a no op instruction. A no op instruction is a no operation dummy instruction. If I put
+
+188
+00:17:54,519 --> 00:18:00,519
+that, nothing will happen, correct. It will execute that instruction and then after that,
+
+189
+00:18:00,519 --> 00:18:04,519
+it either branches to the target location or continue its execution from that. That
+
+190
+00:18:04,519 --> 00:18:09,519
+is a very simple thing to do, but what have I achieved by that? Really nothing because
+
+191
+00:18:09,519 --> 00:18:15,519
+no op instruction is a wasteful instruction. Instead of having a stall, I executed a wasteful
+
+192
+00:18:15,519 --> 00:18:21,519
+instruction which is equivalent to having a stall, correct. But instead of putting a
+
+193
+00:18:21,519 --> 00:18:28,519
+no op, let us say in this example, if I can pull this instruction down and put it over
+
+194
+00:18:28,519 --> 00:18:34,519
+here because there is no dependency that I am violating, right, this instruction produces
+
+195
+00:18:34,519 --> 00:18:40,519
+a value in R3. This instruction is not dependent on that. If I pull this instruction below
+
+196
+00:18:40,519 --> 00:18:47,519
+and if I execute that, then I can have delayed branching. This branch can execute the instruction
+
+197
+00:18:48,519 --> 00:18:53,519
+following that can also execute and after that depending on the condition, either I
+
+198
+00:18:53,519 --> 00:19:00,519
+can follow that location or I can go to the target, correct. That is fine. So, my hardware
+
+199
+00:19:01,519 --> 00:19:07,519
+essentially allows me to, I mean hardware essentially says that I am going to execute
+
+200
+00:19:07,519 --> 00:19:12,519
+the branch instruction and the following instruction. So, if you want to put any useful instruction
+
+201
+00:19:12,519 --> 00:19:18,519
+in that, go ahead and put. That is essentially what the hardware tells the compiler, okay.
+
+202
+00:19:18,519 --> 00:19:24,519
+So, unfortunately the delay slot is hiding the branch instruction. So, sorry about that,
+
+203
+00:19:24,519 --> 00:19:28,519
+okay. The instruction following the branch will also be executed. The slot has to be
+
+204
+00:19:28,519 --> 00:19:35,519
+one step down, okay. Now, you see the action happening, right. So, technically speaking,
+
+205
+00:19:35,519 --> 00:19:41,519
+this should have been, let me just go back and show it to you correctly. So, let us again
+
+206
+00:19:41,519 --> 00:19:48,519
+look at this. So, I have the add instruction, correct, and I have the branch instruction,
+
+207
+00:19:48,519 --> 00:19:55,519
+okay, and then I have the delay slot, correct. What is the hardware ensuring? The hardware
+
+208
+00:19:56,519 --> 00:20:02,519
+is ensuring that after the ith instruction, the i plus oneth instruction will always be
+
+209
+00:20:02,519 --> 00:20:08,519
+executed, correct, right. This is what the hardware is saying irrespective of whether
+
+210
+00:20:08,519 --> 00:20:15,519
+the branch condition is satisfied or not, that instruction will always execute, correct.
+
+211
+00:20:15,519 --> 00:20:22,519
+Okay. So, what I am going to do is that this delay slot which is that I need to put some
+
+212
+00:20:26,240 --> 00:20:32,139
+useful instructions there. One way of doing is that take this instruction which is not
+
+213
+00:20:32,139 --> 00:20:38,139
+dependent or this branch instruction is not dependent on that and move it in this delay
+
+214
+00:20:38,139 --> 00:20:45,139
+slot, correct. Then what happens is that instead of having this sequence, you will have branch
+
+215
+00:20:45,519 --> 00:20:52,519
+instruction R1 and then add R3 instruction, right. Now, if this is executed in the ith
+
+216
+00:20:55,160 --> 00:21:02,160
+cycle and this is executed in the i plus oneth cycle, right, because of the delayed branching,
+
+217
+00:21:02,639 --> 00:21:07,359
+you can see that the add instruction will be fetched in the next cycle and it will be
+
+218
+00:21:07,359 --> 00:21:13,879
+executed, right. And after one cycle, the branch condition would have been evaluated
+
+219
+00:21:13,880 --> 00:21:19,360
+and you know whether you have to go to i plus 2 or to the target location out, right.
+
+220
+00:21:19,360 --> 00:21:25,600
+So, after that instruction, it can jump, right. And what I have done is that this one delay
+
+221
+00:21:25,600 --> 00:21:31,440
+slot that we had where a useful instruction can be filled, we have moved an instruction
+
+222
+00:21:31,440 --> 00:21:38,440
+and moved it down, correct. Now, does that answer your question? This is the kind of
+
+223
+00:21:39,000 --> 00:21:46,000
+delay slot that you want to fill in. Now, these are two independent things, right.
+
+224
+00:21:49,120 --> 00:21:52,440
+Sometimes you can move a branch instruction between a load instruction and a dependent
+
+225
+00:21:52,440 --> 00:21:57,279
+instruction to take care of both of them. But if you have a branch instruction and if
+
+226
+00:21:57,279 --> 00:22:01,860
+delayed branching is supported, may not even have to be a load instruction, it can be any
+
+227
+00:22:01,859 --> 00:22:07,579
+other instruction also which can be moved, okay. That is really what we are talking,
+
+228
+00:22:07,579 --> 00:22:12,299
+okay, all right. So, this animation was a little bit messed up. That is why you do not
+
+229
+00:22:12,299 --> 00:22:16,459
+see the things correctly. You see a sequence of two add instructions, but it should have
+
+230
+00:22:16,459 --> 00:22:20,619
+been that this add instruction, there is a branch instruction and then subsequently an
+
+231
+00:22:20,619 --> 00:22:25,899
+add instruction, okay. So, this way the stall cycles can be avoided.
+
+232
+00:22:26,820 --> 00:22:32,540
+Now when you do this filling of delay slot, you can actually fill instructions from above
+
+233
+00:22:32,540 --> 00:22:39,540
+the branch or sometimes you can also take instructions from below the branch, okay.
+
+234
+00:22:40,800 --> 00:22:45,780
+But you have to take instructions that do not affect the branching condition. Again,
+
+235
+00:22:45,780 --> 00:22:51,300
+it is essentially saying that we have to satisfy the dependencies. So, where do you get these
+
+236
+00:22:51,339 --> 00:22:57,700
+instructions from? As I mentioned earlier, it could be from the target branch or from
+
+237
+00:22:57,700 --> 00:23:03,339
+the fall through, okay, or from above. Any of these things is possible. I do not know
+
+238
+00:23:03,339 --> 00:23:08,339
+whether I have an example for this, but if you want, I can always say this thing, okay.
+
+239
+00:23:08,339 --> 00:23:15,339
+Go through this animation and the case that we discussed was one where you have from before
+
+240
+00:23:15,740 --> 00:23:22,740
+the branch, right. This is because those instructions are anyway executed before the branch instruction
+
+241
+00:23:22,740 --> 00:23:28,579
+is executed. So, if you move them down to the delay slot, it is always used, okay. But
+
+242
+00:23:28,579 --> 00:23:32,859
+you have to make sure that you are not violating any dependencies.
+
+243
+00:23:32,859 --> 00:23:37,339
+Now if this is not possible and you do not have any independent instructions which is
+
+244
+00:23:37,339 --> 00:23:42,759
+above the branch, which could be moved into the delay slot, then you can think in terms
+
+245
+00:23:42,759 --> 00:23:48,160
+of taking an instruction from the target location. Remember, we were supposed to jump
+
+246
+00:23:48,160 --> 00:23:53,400
+out whenever the condition is true, right. So, I can take the first instruction or the
+
+247
+00:23:53,400 --> 00:24:00,400
+second instruction from that and I can also put it in that provided, right, certain conditions
+
+248
+00:24:00,519 --> 00:24:05,759
+are satisfied. I have to make sure that executing that instruction does not cause any violation
+
+249
+00:24:05,759 --> 00:24:12,759
+of dependencies, okay. And that is useful only if the branch is taken more often than
+
+250
+00:24:12,920 --> 00:24:18,000
+not. If the branch is, you know, very few times it is taken, then taking an instruction
+
+251
+00:24:18,000 --> 00:24:23,200
+from the target location and filling it up is of no use because by executing that instruction,
+
+252
+00:24:23,200 --> 00:24:29,700
+I am actually doing a dummy action. When the branch is more often not taken, then I can
+
+253
+00:24:29,700 --> 00:24:34,160
+take an instruction from the fall through branch and I can put it in the delay slot
+
+254
+00:24:34,240 --> 00:24:39,720
+and I can do that provided again it does not violate any dependencies, okay. And this is
+
+255
+00:24:39,720 --> 00:24:45,040
+useful whenever it is more often not taken than taken. So, these are the ways by which
+
+256
+00:24:45,040 --> 00:24:49,720
+we can do and a compiler can actually help you to do this thing. That is why we study
+
+257
+00:24:49,720 --> 00:24:51,680
+this here, okay.
+
+258
+00:24:51,680 --> 00:24:56,759
+Now, let us move on to the next topic which is about instruction level parallelism where
+
+259
+00:24:56,759 --> 00:25:03,759
+you are trying to execute more than one instruction every cycle, okay. So, here the idea is that
+
+260
+00:25:03,920 --> 00:25:09,400
+you have an instruction sequence, but from that instruction sequence you try to identify
+
+261
+00:25:09,400 --> 00:25:12,920
+what are called independent instructions. Instructions which are not dependent on each
+
+262
+00:25:12,920 --> 00:25:19,920
+other and you try to issue and execute them together in a single cycle, right. So, why
+
+263
+00:25:19,920 --> 00:25:24,680
+do we want to do this? We want to do this because we want to improve the throughput.
+
+264
+00:25:24,680 --> 00:25:29,680
+With ideal pipelining, you get a throughput of one instruction per cycle, right. But if
+
+265
+00:25:29,680 --> 00:25:33,480
+you want to get more than one instruction per cycle, even an ideal pipeline cannot
+
+266
+00:25:33,480 --> 00:25:40,000
+give that. So, an ideal superscalar processor or an ideal VLIW processor which can fetch
+
+267
+00:25:40,000 --> 00:25:45,279
+decode and execute let us say four operations per cycle can give you an IPC or throughput
+
+268
+00:25:45,279 --> 00:25:50,400
+of four instructions per cycle. So, that is the reason why we want to do that. But you
+
+269
+00:25:50,400 --> 00:25:57,080
+can only execute independent instructions in every cycle because dependent instructions
+
+270
+00:25:57,159 --> 00:26:01,679
+have to be delayed by appropriately so that the dependences are satisfied, okay.
+
+271
+00:26:01,679 --> 00:26:06,839
+Now, how do we identify these independent instructions which can be issued and executed
+
+272
+00:26:06,839 --> 00:26:12,839
+together? That is the question, right. In superscalar processors, this is done by the
+
+273
+00:26:12,839 --> 00:26:18,960
+hardware. Hardware is presented a sequence of instructions. It fetches four instructions
+
+274
+00:26:18,960 --> 00:26:24,799
+together every cycle. It decodes this understands whether these instructions are independent
+
+275
+00:26:24,839 --> 00:26:29,919
+or not. And if they are independent, whichever instructions which are independent, it tries
+
+276
+00:26:29,919 --> 00:26:36,919
+to issue and execute them in parallel. Whereas, in VLIW processor, VLIW stands for very long
+
+277
+00:26:37,079 --> 00:26:44,079
+instruction word. In VLIW processor, the compiler analyzes the code, identifies these independent
+
+278
+00:26:44,319 --> 00:26:51,319
+instructions and puts them in parallel, okay. And the hardware essentially fetches these
+
+279
+00:26:51,480 --> 00:26:57,960
+instructions together and executes them. We are going to spend more time on understanding
+
+280
+00:26:57,960 --> 00:27:03,559
+this phase of how the compiler can do that. But very briefly, we will also see what should
+
+281
+00:27:03,559 --> 00:27:08,679
+be done here, okay. So, essentially this is pictorially what happens in a superscalar
+
+282
+00:27:08,679 --> 00:27:15,679
+processor. You have a sequence of instructions, right. So, two or four of them are fetched
+
+283
+00:27:15,680 --> 00:27:22,039
+in each cycle in the instruction fetch phase and they are put into some kind of a queue
+
+284
+00:27:22,039 --> 00:27:28,279
+where they are being decoded. So, from here to here, things happen in program order. That
+
+285
+00:27:28,279 --> 00:27:33,360
+means that in whatever order the instructions are, they are actually decoded in the same
+
+286
+00:27:33,360 --> 00:27:37,160
+order. That is when you will understand what the programmer has intended. If there is a
+
+287
+00:27:37,160 --> 00:27:42,400
+data dependency from this instruction to this instruction, if you decode them only in that
+
+288
+00:27:42,400 --> 00:27:46,680
+order, you will understand that the dependency is from that instruction to this instruction.
+
+289
+00:27:46,680 --> 00:27:51,759
+Otherwise, you do not know which way is the dependency, right. So, if you look at here,
+
+290
+00:27:51,759 --> 00:27:55,920
+pictorially the green instruction happens first, then the blue instruction, then the
+
+291
+00:27:55,920 --> 00:28:01,320
+red instruction, gray and then the purple instruction, correct. So, that is the order
+
+292
+00:28:01,320 --> 00:28:08,320
+in which it has to go. So, decode is done in the program order. And after you have decoded,
+
+293
+00:28:08,480 --> 00:28:13,039
+you would understand the dependencies between the instruction, the true dependencies between
+
+294
+00:28:13,039 --> 00:28:18,720
+the instruction. For example, in this case, the gray instruction is dependent both on
+
+295
+00:28:18,720 --> 00:28:25,079
+the green and red instructions, right. And the blue instruction produces some value which
+
+296
+00:28:25,079 --> 00:28:32,119
+is being consumed by the purple instruction, right. But the gray instruction is not dependent
+
+297
+00:28:32,119 --> 00:28:39,039
+on the red or green. The red is not dependent on the green, right. So, given this series
+
+298
+00:28:39,039 --> 00:28:45,799
+of instructions which are decoded and after decode, the hardware now understands this
+
+299
+00:28:45,799 --> 00:28:51,519
+dependence relations between them, right. The hardware tells that as soon as you are
+
+300
+00:28:51,519 --> 00:28:58,519
+ready, you can execute the red and green instruction, right. And similarly, you can execute the
+
+301
+00:28:59,079 --> 00:29:06,079
+blue instruction also or you can execute all of these three instructions in parallel, right,
+
+302
+00:29:06,160 --> 00:29:11,559
+whenever you want. Let us say the hardware decides to execute the green instruction and
+
+303
+00:29:11,559 --> 00:29:17,879
+blue instruction in the next cycle, right. And let us say they produce a value. Then
+
+304
+00:29:17,879 --> 00:29:23,119
+in the next cycle, because the blue instruction has finished executing, the purple instruction
+
+305
+00:29:23,119 --> 00:29:30,119
+can execute. But what about this gray instruction? It still has to wait. Why? The red instruction
+
+306
+00:29:31,519 --> 00:29:38,519
+has not finished its execution. So, this will wait until this red instruction finishes the
+
+307
+00:29:38,559 --> 00:29:44,219
+execution. When the red instruction finishes execution, some kind of a signal is given
+
+308
+00:29:44,219 --> 00:29:50,159
+and the hardware figures out that the gray instruction is now ready for execution. So,
+
+309
+00:29:50,160 --> 00:29:57,160
+in this what happens is that the instructions are decoded in program order and their dependencies
+
+310
+00:29:57,920 --> 00:30:02,720
+and they are stored in what is called the instruction window. And in the instruction
+
+311
+00:30:02,720 --> 00:30:09,040
+window, we understand the dependencies between these instructions, correct. And whenever
+
+312
+00:30:09,040 --> 00:30:15,279
+instructions have all their data operands available, they can be issued to the execution
+
+313
+00:30:15,279 --> 00:30:22,279
+unit, right, and they can be executed, right. And after they finish execution, right, to
+
+314
+00:30:26,079 --> 00:30:32,279
+the dependent instructions, they send the data value or they send some kind of a signal,
+
+315
+00:30:32,279 --> 00:30:37,240
+so that the gray instruction can figure out that the green has finished execution or the
+
+316
+00:30:37,240 --> 00:30:42,720
+red has finished execution or when all of them has finished execution, the gray itself
+
+317
+00:30:42,720 --> 00:30:49,720
+can go for execution, right. And then after that, the values of each of these instructions
+
+318
+00:30:50,680 --> 00:30:56,319
+are written in the destination location again in program order. This is again important.
+
+319
+00:30:56,319 --> 00:31:03,319
+Remember, they are decoded in program order. They are issued possibly out of program order,
+
+320
+00:31:03,759 --> 00:31:08,920
+right, that is out of order. But again, the result values are written back in program
+
+321
+00:31:08,920 --> 00:31:13,960
+order. This is again required for certain hardware reasons. I will not go into the details
+
+322
+00:31:13,960 --> 00:31:16,960
+of that, okay. Yeah.
+
+323
+00:31:16,960 --> 00:31:21,640
+Sir, is this done by hardware or the entire software?
+
+324
+00:31:21,640 --> 00:31:27,160
+All of this is done by the hardware, okay. In the superscalar processor, you give the
+
+325
+00:31:27,160 --> 00:31:31,880
+series of instructions just like the way we saw on the left-hand side of the static instruction
+
+326
+00:31:31,880 --> 00:31:37,120
+scheduling example, correct. And the hardware will figure out that the first load has a
+
+327
+00:31:37,159 --> 00:31:43,679
+dependent instruction, maybe this gray. So, it will hold on to that and it will possibly
+
+328
+00:31:43,679 --> 00:31:49,079
+figure out that the blue instruction or the red instruction is another load instruction
+
+329
+00:31:49,079 --> 00:31:53,559
+which it will try to independently issue and execute. So, the hardware will figure out
+
+330
+00:31:53,559 --> 00:31:56,559
+all of these mechanisms.
+
+331
+00:31:56,559 --> 00:32:00,839
+Sir, what is the difference between hardware and hardware?
+
+332
+00:32:00,839 --> 00:32:04,599
+I am going to see in the next slide, okay. I will tell you how that is going to happen.
+
+333
+00:32:05,079 --> 00:32:10,959
+This is just at a high level pictorially what is likely to happen, okay. This is not necessarily
+
+334
+00:32:10,959 --> 00:32:17,959
+say anything about how it happens in the real hardware, okay. So, more question or we are
+
+335
+00:32:19,000 --> 00:32:24,879
+okay. So, let us look at how the hardware would look like, okay. So, I have skipped
+
+336
+00:32:24,879 --> 00:32:29,439
+a few things and then now I am introducing what is called the instruction cache. Remember,
+
+337
+00:32:29,439 --> 00:32:33,879
+we talked about doing instruction fetch and instruction fetch if it has to happen in a
+
+338
+00:32:33,960 --> 00:32:38,920
+single cycle that instruction obviously has to be in the cache. So, let us assume that
+
+339
+00:32:38,920 --> 00:32:43,280
+there is an instruction cache and we will fetch the data from the fetch the instruction
+
+340
+00:32:43,280 --> 00:32:50,280
+from the instruction cache. Every cycle I will fetch multiple such instructions, right.
+
+341
+00:32:50,600 --> 00:32:57,040
+Four consecutive instructions will be fetched and they will be put in the instruction buffer.
+
+342
+00:32:57,040 --> 00:33:02,280
+From the instruction buffer, okay, this part of it let us skip. From the instruction buffer
+
+343
+00:33:02,399 --> 00:33:09,399
+I move them to what is called a decode, rename and a dispatch phase, okay, where the four
+
+344
+00:33:09,480 --> 00:33:15,279
+successive instructions are being decoded, right and the dependencies between them are
+
+345
+00:33:15,279 --> 00:33:20,960
+understood, okay. It also does something called the register renaming which for the time being
+
+346
+00:33:20,960 --> 00:33:25,559
+we will skip. We will not go into the details of that, right.
+
+347
+00:33:25,559 --> 00:33:31,000
+And then after the decode and the dependency information is understood, right, at the same
+
+348
+00:33:31,000 --> 00:33:37,119
+time I put the order in which these instructions are decoded into my reorder buffer. This is
+
+349
+00:33:37,119 --> 00:33:41,559
+again finally I am going to use this because I want to write the results in the destination
+
+350
+00:33:41,559 --> 00:33:47,599
+location in the program order. I am just trying to remember this, right. After the instructions
+
+351
+00:33:47,599 --> 00:33:53,759
+are decoded I am going to push them into appropriate instruction queues, right, in which they can
+
+352
+00:33:53,759 --> 00:33:58,599
+be from which they can be taken and executed. This can be in the form of a queue or this
+
+353
+00:33:58,599 --> 00:34:03,679
+can be in the form of a buffer. It depends on the architecture. So, the instructions
+
+354
+00:34:03,679 --> 00:34:09,400
+go and wait there for all the operands to become available. As soon as all the operands
+
+355
+00:34:09,400 --> 00:34:15,360
+of an instruction becomes available they can go from the instruction queue to the execution
+
+356
+00:34:15,360 --> 00:34:21,559
+unit. And as you can see here there are multiple execution units. There could be an integer
+
+357
+00:34:21,559 --> 00:34:26,679
+add unit, there could be an integer multiply unit, there could be a floating point add,
+
+358
+00:34:26,919 --> 00:34:31,239
+floating point multiply or there could be multiple integer add units, there could be
+
+359
+00:34:31,239 --> 00:34:36,159
+a separate load store unit, there could be a separate, right, floating point unit, there
+
+360
+00:34:36,159 --> 00:34:40,799
+could be a separate branch processing unit and so on and so forth. So, there could be
+
+361
+00:34:40,799 --> 00:34:47,960
+multiple functional units. So, in every cycle whatever instructions whose operands are available
+
+362
+00:34:47,960 --> 00:34:53,480
+who have become data ready they can now be moved to the appropriate functional units
+
+363
+00:34:53,559 --> 00:35:00,559
+and can be executed. That is what we mean by they get executed in parallel. After they
+
+364
+00:35:00,559 --> 00:35:06,159
+get executed in parallel the result values are returned to this reorder buffer which
+
+365
+00:35:06,159 --> 00:35:13,159
+stores the order of these instructions, right. And then from there it actually, my animation,
+
+366
+00:35:13,159 --> 00:35:19,559
+yes, my animation is little bit off. So, it goes to the reorder buffer and then from there
+
+367
+00:35:19,639 --> 00:35:25,519
+it goes to the register file, okay. So, essentially what happens is that instructions
+
+368
+00:35:25,519 --> 00:35:32,000
+are fetched in program order, decoded in program order, put into this instruction queue and
+
+369
+00:35:32,000 --> 00:35:37,440
+in the instruction queue they need not necessarily how to be executed in program order. They
+
+370
+00:35:37,440 --> 00:35:43,559
+can be executed depending on the availability of the data operands. And once the execution
+
+371
+00:35:43,559 --> 00:35:50,519
+is complete the result is written back into the reorder buffer where it stays there, right.
+
+372
+00:35:50,519 --> 00:35:56,019
+And from the reorder buffer we write the result values back into the register file in program
+
+373
+00:35:56,019 --> 00:36:03,019
+order, okay. That should partly answer some questions that you asked me and also your
+
+374
+00:36:03,119 --> 00:36:10,119
+questions, right. Any more questions? Unfortunately we are not going to see more details on this.
+
+375
+00:36:10,119 --> 00:36:17,119
+So, this is for the load instruction because load instructions has to access the data cache
+
+376
+00:36:17,119 --> 00:36:23,000
+part of it and instruction fetch, if the instruction is not there has to also fetch it from the
+
+377
+00:36:23,000 --> 00:36:29,639
+memory. So, that is a memory interface part, right. So, this is how a superscalar processor
+
+378
+00:36:29,639 --> 00:36:35,679
+kind of executes instructions, right. And all of this as I mentioned earlier is done
+
+379
+00:36:35,679 --> 00:36:42,679
+by the hardware, okay. Software essentially presents a sequence of instructions. If it
+
+380
+00:36:43,059 --> 00:36:50,059
+wants it can do some instruction reordering and give the instruction to the hardware,
+
+381
+00:36:50,639 --> 00:36:57,639
+but once it has done whatever it can do the rest of it is all done by the hardware, okay.
+
+382
+00:36:57,639 --> 00:37:04,039
+Any questions? Okay. Now, let us look at another kind of an instruction level parallelism processor
+
+383
+00:37:04,079 --> 00:37:11,079
+called VLIW processor, right. In the superscalar processor as I mentioned earlier independent
+
+384
+00:37:11,639 --> 00:37:16,559
+instructions which can be executed in parallel they are identified by hardware in this stage,
+
+385
+00:37:16,559 --> 00:37:22,920
+okay, when they are being put into the instruction queue, right. And therefore, this hardware
+
+386
+00:37:22,920 --> 00:37:28,880
+has to be a complex hardware. It has to understand what are the instructions, what are the dependencies
+
+387
+00:37:28,880 --> 00:37:34,519
+between the instructions, which instructions have got their operands available or for which
+
+388
+00:37:34,519 --> 00:37:40,280
+instructions the previous dependent instructions their predecessors have already completed execution.
+
+389
+00:37:40,280 --> 00:37:44,440
+I have to take those values, I have to take those things and then find out which instructions
+
+390
+00:37:44,440 --> 00:37:50,720
+are ready I can send them to the execution unit for execution, correct. So, this piece
+
+391
+00:37:50,720 --> 00:37:56,559
+of hardware which is going to do all of this is going to be complex, right. Whereas, in
+
+392
+00:37:56,559 --> 00:38:03,320
+the case of a VLIW processor the compiler is going to detect all the independent instructions
+
+393
+00:38:03,320 --> 00:38:09,119
+and is going to put them together in one large instruction board. That the processor can
+
+394
+00:38:09,119 --> 00:38:16,119
+fetch, do the decode and simply execute. The processor can execute all of these instructions
+
+395
+00:38:16,159 --> 00:38:23,159
+together because the compiler guarantees that they are independent, okay. That means that
+
+396
+00:38:24,159 --> 00:38:31,159
+my hardware does not have to do any check, right. The hardware simply can say that if
+
+397
+00:38:31,279 --> 00:38:36,000
+these are the four operations that can be that are together in an instruction, I can
+
+398
+00:38:36,000 --> 00:38:40,920
+execute all of them in parallel, right. I do not really have to worry about checking
+
+399
+00:38:40,920 --> 00:38:47,559
+their dependencies are in it, right. So, that is why in a VLIW processor the compiler does
+
+400
+00:38:47,559 --> 00:38:53,440
+all the work and the hardware is simpler. Whereas, in a superscalar processor the hardware
+
+401
+00:38:53,440 --> 00:38:58,920
+does all the work and the compiler really does a little bit of reordering and nothing
+
+402
+00:38:58,920 --> 00:39:04,759
+more. So, there the hardware is much more expensive, right. So, typically this is what
+
+403
+00:39:04,759 --> 00:39:11,759
+we call as a smart compiler the one which does a lot of hard work and a dumb hardware,
+
+404
+00:39:11,760 --> 00:39:18,760
+okay. So, this is how the VLIW processor looks like. It has an instruction memory from which
+
+405
+00:39:18,880 --> 00:39:23,680
+the instructions are fetched every cycle. That instruction itself will have multiple
+
+406
+00:39:23,680 --> 00:39:29,800
+operations and each of these operations because the compiler has compiled it this way we know
+
+407
+00:39:29,800 --> 00:39:35,400
+are independent and therefore, can be sent to the appropriate function unit and those
+
+408
+00:39:35,400 --> 00:39:41,500
+function units can execute them taking their operand from the respective register files
+
+409
+00:39:41,699 --> 00:39:46,900
+and after finishing execution they will write the result back in the respective register
+
+410
+00:39:46,900 --> 00:39:52,500
+file, right. If they need to do load store operations then they will access the data
+
+411
+00:39:52,500 --> 00:39:59,500
+memory, right. So, this is a simple pipeline hardware is simple, right. No detecting of
+
+412
+00:39:59,820 --> 00:40:06,420
+dependencies and other things. It can simply go through this cycle, right and it can execute
+
+413
+00:40:06,420 --> 00:40:11,659
+parallel instructions every cycle. This is what that happens in the case of a VLIW processor.
+
+414
+00:40:11,659 --> 00:40:17,260
+So, the question is if you are writing the compiler for this VLIW processor what all
+
+415
+00:40:17,260 --> 00:40:22,460
+do we need to do during the instruction scheduling stage? That is the problem that we will talk
+
+416
+00:40:22,460 --> 00:40:28,300
+about, right. That is the reason why we are talking about VLIW processor. So, again we
+
+417
+00:40:28,300 --> 00:40:33,340
+have the super scalar processor where the detecting of independence between instructions
+
+418
+00:40:33,340 --> 00:40:39,340
+is done by the hardware. We have a VLIW processor where this is done by the compiler, okay.
+
+419
+00:40:39,340 --> 00:40:45,260
+I think this is probably where we are going to stop. This is an example of a VLIW processor
+
+420
+00:40:45,260 --> 00:40:51,780
+which has a 256 bit instruction and can hold up to 7 wide operations, okay. So, at this
+
+421
+00:40:51,780 --> 00:40:57,940
+point in time we probably have to switch and then stop here discussing about machine, machine
+
+422
+00:40:57,940 --> 00:41:03,860
+architecture to a large extent, okay. We will come back and talk about memory hierarchy
+
+423
+00:41:03,860 --> 00:41:08,420
+mostly on Friday and data parallelism also on Friday, okay.
+
+424
+00:41:08,420 --> 00:41:15,420
+Any questions before we switch the slides? So far things are good, right. Suppose to
+
+425
+00:41:15,500 --> 00:41:21,700
+give you a quick overview of architecture, right that is required for us to write the
+
+426
+00:41:21,699 --> 00:41:28,699
+compiler, right, okay. So, again so as I mentioned earlier we started off with machine architecture.
+
+427
+00:41:29,419 --> 00:41:36,419
+We covered most of what we wanted to see immediately, okay. Now we are going to move on to code
+
+428
+00:41:36,500 --> 00:41:43,500
+generation, right. So, that is basically what we are going to discuss for the rest of today,
+
+429
+00:41:43,500 --> 00:41:50,299
+okay. So, again we will have some introduction why code generation, what is code generation
+
+430
+00:41:50,300 --> 00:41:56,140
+and you know how do we need to do that and so on. Then we will talk about a simple code
+
+431
+00:41:56,140 --> 00:42:03,140
+generator which is just based on usage counts, okay, sorry not usage counts, simple code
+
+432
+00:42:03,140 --> 00:42:09,180
+generation, right. Then we will go to more sophisticated code generation mechanisms and
+
+433
+00:42:09,180 --> 00:42:15,019
+specifically talk about the construction of a directed acyclic graph for basic blocks
+
+434
+00:42:15,019 --> 00:42:19,620
+and then do code generation for that. And we will see that even in this case if you
+
+435
+00:42:19,619 --> 00:42:26,699
+want to generate what is called the optimal code that problem is an NP-hard problem, right.
+
+436
+00:42:26,699 --> 00:42:33,339
+And therefore, we will resolve to some simpler mechanisms like using certain heuristics for
+
+437
+00:42:33,339 --> 00:42:39,940
+generating code. But fortunately if you are talking about code generation for expressions
+
+438
+00:42:39,940 --> 00:42:46,099
+which are like trees, which is a specific case of a DAG, then in those cases you can
+
+439
+00:42:46,500 --> 00:42:51,980
+generate optimal code either by using the Seti-Wilman algorithm or by doing what is
+
+440
+00:42:51,980 --> 00:42:57,940
+called dynamic programming. So, we will talk about those approaches as well and then subsequently
+
+441
+00:42:57,940 --> 00:43:02,659
+we will talk about how do you do instruction selection using tree pattern matching, instruction
+
+442
+00:43:02,659 --> 00:43:06,900
+selection and code generation using tree pattern matching, right.
+
+443
+00:43:06,900 --> 00:43:11,659
+And finally, we will also talk about little bit of machine dependent optimization called
+
+444
+00:43:11,699 --> 00:43:15,980
+peephole optimization. So, this is how we are going to cover, these are the things that
+
+445
+00:43:15,980 --> 00:43:22,980
+we are going to cover in this module and we will kind of get to a shape by which we can
+
+446
+00:43:23,139 --> 00:43:30,139
+do code generation, right. So, you might have seen that these are the different phases of
+
+447
+00:43:30,139 --> 00:43:37,139
+the compiler, right. And obviously things on lexical analysis, syntax analysis and semantic
+
+448
+00:43:37,139 --> 00:43:44,139
+analysis would have been covered. You would have also seen intermediate code generation,
+
+449
+00:43:44,139 --> 00:43:51,139
+correct. And you would have also seen machine independent optimization in the last two days,
+
+450
+00:43:51,659 --> 00:43:58,659
+correct. So, all of this has been covered so far, right. So, what we are going to assume
+
+451
+00:43:58,739 --> 00:44:04,699
+is that you are given an optimized intermediate code. What kinds of intermediate representations
+
+452
+00:44:04,699 --> 00:44:11,699
+did you people see? Three address code, anything else? AST, then. So, we are going to assume
+
+453
+00:44:15,579 --> 00:44:20,219
+that you are going to be given one of those things and we are going to assume that all
+
+454
+00:44:20,219 --> 00:44:26,419
+the machine independent optimization have already been performed, right.
+
+455
+00:44:26,419 --> 00:44:33,419
+Now our objective is to take this optimized intermediate code and generate an efficient
+
+456
+00:44:34,699 --> 00:44:40,460
+target code, right. And we are, as I mentioned earlier, we are only going to consider about
+
+457
+00:44:40,460 --> 00:44:45,739
+generating assembly code. From the assembly code going to the machine code is a part of
+
+458
+00:44:45,739 --> 00:44:52,739
+the assembler which we will not discuss, okay. So, again as far as the machine dependent
+
+459
+00:44:56,579 --> 00:45:01,139
+optimizations are concerned, these are the different phases. You do code generation and
+
+460
+00:45:01,139 --> 00:45:07,619
+as a part of the code generation you do instruction selection. Then you do a set of machine dependent
+
+461
+00:45:07,619 --> 00:45:12,779
+optimizations which is what I call as the peephole optimization. And once you have finished
+
+462
+00:45:12,779 --> 00:45:19,500
+all of these things you have a so called an efficient code, right. On that you may possibly
+
+463
+00:45:19,500 --> 00:45:25,179
+do the register allocation. Then after that you do instruction scheduling
+
+464
+00:45:25,179 --> 00:45:30,379
+in, it is not after that you actually do that before doing register allocation. But then
+
+465
+00:45:30,380 --> 00:45:35,180
+again it is possible to think of doing it in any order. So, these are two other components
+
+466
+00:45:35,180 --> 00:45:41,579
+that we are going to see. And the essential challenges here are that generating code,
+
+467
+00:45:41,579 --> 00:45:48,059
+right, is a non-trivial task, okay, given the intermediate code. Intermediate code is
+
+468
+00:45:48,059 --> 00:45:53,019
+in what form? Three address code form, right. But the three address code, how complex or
+
+469
+00:45:53,019 --> 00:45:58,220
+simple is it? Relatively simple, right. From the high level you have reduced it down to,
+
+470
+00:45:59,019 --> 00:46:03,419
+right, simple things. And if you look at it in some sense it is closer to the assembly
+
+471
+00:46:03,419 --> 00:46:09,779
+code, correct. It is somewhat closer to the assembly code. But yet going from that intermediate
+
+472
+00:46:09,779 --> 00:46:14,939
+code to the assembly code is not that trivial. There are several ways by which you can do
+
+473
+00:46:14,939 --> 00:46:21,299
+this and each will have its own cost. And you may end up incurring unnecessary cost
+
+474
+00:46:21,299 --> 00:46:26,899
+if you are not being efficient about it. The problem of generating the so called optimal
+
+475
+00:46:26,900 --> 00:46:34,019
+code is an NP-hard problem. In fact several of these problems that you see here, right,
+
+476
+00:46:34,019 --> 00:46:41,500
+fall in this NP class. And therefore getting the optimal solution for them will take a
+
+477
+00:46:41,500 --> 00:46:48,340
+large amount of compile time, that is computation time, right. And therefore we may end up going
+
+478
+00:46:48,340 --> 00:46:52,700
+for certain heuristic solutions for these things. Again I will talk, when we talk about
+
+479
+00:46:52,699 --> 00:46:57,259
+code generation we will talk about which problem is NP-hard and why, what kind of solutions
+
+480
+00:46:57,259 --> 00:47:01,299
+we go for that. Similarly when we talk about register allocation we will talk about why
+
+481
+00:47:01,299 --> 00:47:05,779
+register allocation problem is like that and so on and so on, right.
+
+482
+00:47:05,779 --> 00:47:10,539
+So optimal code generation, register allocation, instruction scheduling, all of these problems
+
+483
+00:47:10,539 --> 00:47:16,659
+are NP-hard. So if you want to get the optimal solution you have to spend a lot of, the complexity
+
+484
+00:47:16,659 --> 00:47:21,379
+is high so you have to spend a lot of time for that. So we will not obviously get that.
+
+485
+00:47:21,380 --> 00:47:27,340
+We will try to see efficient solutions for all of them. Okay, just to put things in perspective
+
+486
+00:47:27,340 --> 00:47:32,619
+as I mentioned earlier we are going to take an optimized intermediate code and generate
+
+487
+00:47:32,619 --> 00:47:37,820
+an efficient target assembly code. So this consists of two parts which is basically the
+
+488
+00:47:37,820 --> 00:47:43,380
+target code generator and then certain code optimizations. And these code optimizations
+
+489
+00:47:43,380 --> 00:47:49,700
+are specific for the target machine that you are talking about. Okay, so what could be
+
+490
+00:47:49,699 --> 00:47:55,480
+the forms in which intermediate code can be? It can be a three address code, it can
+
+491
+00:47:55,480 --> 00:48:01,619
+be some kind of a syntax tree, okay or it can be a linear representation, right.
+
+492
+00:48:01,619 --> 00:48:07,179
+When you talk about other kinds of compilation environments you also talk about what is called
+
+493
+00:48:07,179 --> 00:48:12,579
+byte code, right. Many of you who are familiar with Java, Java generates, when you compile
+
+494
+00:48:12,579 --> 00:48:18,339
+a Java code it generates a byte code and the byte code is what is being executed by the
+
+495
+00:48:18,340 --> 00:48:25,340
+Java virtual machine, correct. Typically the byte code is interpreted by the Java virtual
+
+496
+00:48:25,700 --> 00:48:32,700
+machine, right. But then in your Java virtual machine you can write a compiler which is
+
+497
+00:48:33,059 --> 00:48:39,660
+what they call as a just-in-time compiler that can take the byte code and generate executable
+
+498
+00:48:39,660 --> 00:48:46,019
+code for that, correct. So in that case if you are considering of let us say a JIT compiler,
+
+499
+00:48:46,019 --> 00:48:50,059
+that JIT compiler would have the byte code sequence as its intermediate representation,
+
+500
+00:48:50,059 --> 00:48:55,820
+right. Or like any of the other intermediate representation that you are familiar with
+
+501
+00:48:55,820 --> 00:48:59,980
+in the case of a normal, right, offline compilation kind of thing.
+
+502
+00:48:59,980 --> 00:49:05,259
+The output that you generate is basically the target assembly code and depending on
+
+503
+00:49:05,259 --> 00:49:09,420
+whether your processor is a RISC processor you generate a RISC code. If your processor
+
+504
+00:49:09,420 --> 00:49:15,619
+is a CISC processor you generate the appropriate RISC code. If you are generating code for
+
+505
+00:49:15,619 --> 00:49:20,500
+let us say if you are generating byte code taking the Java as your input language, okay
+
+506
+00:49:20,500 --> 00:49:26,299
+and you are generating byte code, Java byte code then you are essentially generating that
+
+507
+00:49:26,299 --> 00:49:32,819
+byte code as your output code. So again this notion of what is input, what is output depends
+
+508
+00:49:32,819 --> 00:49:37,619
+on what is the context in which you are working on. If you are talking about a JIT compiler
+
+509
+00:49:37,619 --> 00:49:41,980
+your input is a byte code and your output is an object code. If you are talking about
+
+510
+00:49:41,980 --> 00:49:48,219
+a Java compiler your input might be a three address code or a syntax tree and your output
+
+511
+00:49:48,219 --> 00:49:54,699
+might be a byte code, correct. So all of this can be called as code generation
+
+512
+00:49:54,699 --> 00:49:59,820
+in some sense. Of course we are going to focus more on taking a three address code and generating
+
+513
+00:49:59,820 --> 00:50:07,380
+an assembly code and we are going to give all our examples for a CISC machine, okay
+
+514
+00:50:07,579 --> 00:50:12,860
+But the techniques are general enough that you can extend it to RISC machines as well,
+
+515
+00:50:12,860 --> 00:50:21,780
+right. But examples are unfortunately going to be for a CISC machine, all right. Okay.
+
+516
+00:50:21,780 --> 00:50:26,980
+So again we have already answered this question what do we need to know about the target machine
+
+517
+00:50:26,980 --> 00:50:32,460
+for code generation, okay. The simple answer is whatever you wanted to know we have already
+
+518
+00:50:32,460 --> 00:50:39,300
+covered in the last lecture, right. So what are the instructions in the target machine,
+
+519
+00:50:39,300 --> 00:50:45,260
+right. What are the addressing modes that are required, right. I mean that are supported
+
+520
+00:50:45,260 --> 00:50:49,900
+in the architecture. What is the cost of each instruction, right. There are many ways of
+
+521
+00:50:49,900 --> 00:50:54,940
+executing the same instruction or implementing the same instruction. They may have different
+
+522
+00:50:54,940 --> 00:51:00,460
+cost. I need to know the cost of this so that I will choose the one which is with the lower
+
+523
+00:51:00,659 --> 00:51:07,220
+cost that is the idea. And of course I also need to know how the runtime storage management
+
+524
+00:51:07,220 --> 00:51:14,579
+and other things are done, okay. So has runtime environment been covered as a part of this
+
+525
+00:51:14,579 --> 00:51:23,579
+workshop so far? Will be covered later, right. Next week it will be covered, okay. That is
+
+526
+00:51:23,579 --> 00:51:27,460
+fine. The stack frames and other related things. I am not very sure whether that is going to
+
+527
+00:51:27,460 --> 00:51:35,340
+be covered but okay. Unfortunately you will have to have that gap. I am not planning to
+
+528
+00:51:35,340 --> 00:51:47,860
+cover. We can, I can see whether I can give you a quick reading on that, okay. Sure, sure,
+
+529
+00:51:47,860 --> 00:51:54,260
+sure, sure. Typically runtime environment how the stack frames are maintained and they
+
+530
+00:51:54,300 --> 00:52:00,140
+need to know the parameters, parameter passing, local variables, that kind of a thing, right.
+
+531
+00:52:00,140 --> 00:52:11,460
+Okay. I should have checked this before but unfortunately I forgot to, right. So this
+
+532
+00:52:11,460 --> 00:52:16,780
+part is something that I am sure that Shekhar will take care of coordinating and getting
+
+533
+00:52:16,780 --> 00:52:22,580
+at least some part of it covered otherwise you can read it, right. Again remember when
+
+534
+00:52:22,579 --> 00:52:28,420
+we talked about local variables, local variables are allocated in the stack, correct. So you
+
+535
+00:52:28,420 --> 00:52:34,099
+need to know how those variables are addressed. They are always addressed with reference to
+
+536
+00:52:34,099 --> 00:52:38,940
+either a stack pointer or a frame pointer, more like a frame pointer rather than a stack
+
+537
+00:52:38,940 --> 00:52:43,900
+pointer because that stack frame, right, both the stack pointer and the frame pointer will
+
+538
+00:52:43,900 --> 00:52:49,099
+be pointing to that. You typically use the frame pointer to address the local variables,
+
+539
+00:52:49,099 --> 00:52:53,779
+right. Similarly for the parameters that you are passing to your function, they will be with
+
+540
+00:52:53,779 --> 00:52:59,699
+reference to the stack, a frame pointer, right. And when you want to do return that is with
+
+541
+00:52:59,699 --> 00:53:05,380
+reference to the stack pointer. So managing the stack frame is one aspect that you need to know
+
+542
+00:53:05,380 --> 00:53:09,819
+in order for you to do the code generation and that part of it is typically covered in
+
+543
+00:53:09,819 --> 00:53:15,500
+runtime storage management, okay. Another thing is about call convention. So certain
+
+544
+00:53:15,500 --> 00:53:21,179
+processors have this notion of caller saved register, callee saved registers and so on,
+
+545
+00:53:21,179 --> 00:53:27,099
+right. In a caller saved register before you make the call, the caller will save some of these
+
+546
+00:53:27,099 --> 00:53:33,420
+register contents in the stack before making the call. In the callee saved registers, the callee
+
+547
+00:53:33,420 --> 00:53:40,019
+will save those things in the stack frame before they modify those registers and then before they
+
+548
+00:53:40,019 --> 00:53:44,900
+return from the callee to the caller, they will actually restore those values. So these are
+
+549
+00:53:44,900 --> 00:53:49,860
+responsibilities that are, you know, given to these things. So as a compiler or as a compiler
+
+550
+00:53:49,860 --> 00:53:55,179
+writer, you need to know that so that when you generate code before you make a function call,
+
+551
+00:53:55,179 --> 00:54:00,500
+all the caller saved registers have to be saved in the stack frame. And in order for you to save
+
+552
+00:54:00,500 --> 00:54:06,139
+them in the stack frame, the stack frame size has to be designed appropriately, decided appropriately.
+
+553
+00:54:06,139 --> 00:54:11,099
+So those are the things that the compiler writer has to take care of and for that purpose, they
+
+554
+00:54:11,099 --> 00:54:17,940
+need to know about the runtime storage management, okay. For now, we will assume that you have that
+
+555
+00:54:17,940 --> 00:54:23,539
+knowledge, but wherever you require, I will kind of tell you what it is and maybe we can figure out
+
+556
+00:54:23,539 --> 00:54:32,339
+how to implement that later on, okay. So why is efficient code generation kind of complex, right?
+
+557
+00:54:32,340 --> 00:54:37,980
+The answer is that there are many possible ways of implementing the same instruction or the same
+
+558
+00:54:37,980 --> 00:54:44,300
+three address code and you have to choose the one which is the most efficient one, right? And the
+
+559
+00:54:44,300 --> 00:54:49,260
+different sequences obviously will have different cost. So the one which is with the lower cost is
+
+560
+00:54:49,260 --> 00:54:55,300
+what needs to be set. And then particularly when you talk about using registers, right, there are,
+
+561
+00:54:55,300 --> 00:55:00,420
+let's say, several program variables. You want to figure out which of these variables need to be
+
+562
+00:55:00,420 --> 00:55:05,579
+stored in the register and which of them can be accessed from the memory directly. This is only
+
+563
+00:55:05,579 --> 00:55:10,860
+in Sysc architectures because in Sysc architectures, you can afford to have some operands in memory.
+
+564
+00:55:10,860 --> 00:55:16,139
+And when you can afford to have some operands in memory, essentially the decision of what is
+
+565
+00:55:16,139 --> 00:55:22,380
+in memory, what is in register or what should be loaded into register has to be, that decision has
+
+566
+00:55:22,380 --> 00:55:29,539
+to be made and again that decision influences the cost of your code, right? And therefore,
+
+567
+00:55:29,539 --> 00:55:34,380
+again there are many choices and you have to choose the right one in order for you to generate
+
+568
+00:55:34,380 --> 00:55:42,940
+the efficient code. Again my, okay, sorry about this animations coming out of order, but let's,
+
+569
+00:55:42,940 --> 00:55:50,099
+let's try to work this out, okay? So look at this simple instruction A is equal to B plus C. In this
+
+570
+00:55:50,099 --> 00:55:55,579
+case, what I am going to do is that I am going to load B into a register, C into another register.
+
+571
+00:55:55,579 --> 00:56:01,539
+I can, I am sorry, I am not loading B into a register, I am loading the address of B, load
+
+572
+00:56:01,539 --> 00:56:08,619
+address of B into a register, load address of C into another register and I am moving the contents
+
+573
+00:56:08,619 --> 00:56:15,699
+of the location pointed by R naught register into R2. Then I am adding the contents of the memory
+
+574
+00:56:15,699 --> 00:56:24,799
+location pointed by R1 with R2, right? So this has A, sorry, yeah, let's look at it. So this is
+
+575
+00:56:24,800 --> 00:56:32,120
+basically moving the value of B into R2. This is the pointer to A. So I am adding the contents
+
+576
+00:56:32,120 --> 00:56:39,560
+of A now with the contents of B and I am then putting it back into that location, right? So
+
+577
+00:56:39,560 --> 00:56:44,440
+that is essentially what is happening. If you look at it, basically I have five instructions and
+
+578
+00:56:44,440 --> 00:56:50,120
+then in couple of instructions I have this move address which is possibly using the absolute address
+
+579
+00:56:50,119 --> 00:56:57,559
+mode and that has an additional cost, right? So I add up those costs. Another way of generating
+
+580
+00:56:57,559 --> 00:57:05,599
+code for this, again things are coming slightly out of order. Let me just get all of this and
+
+581
+00:57:05,599 --> 00:57:12,359
+then work on it, right? So this is the second way of generating instruction for this in which I
+
+582
+00:57:12,359 --> 00:57:18,639
+don't move any of these addresses into register or even the values into register. I simply move
+
+583
+00:57:18,639 --> 00:57:24,960
+the value of B using a move instruction into this R0 register. Similarly, move the value,
+
+584
+00:57:24,960 --> 00:57:31,079
+sorry, add the value of C which is in memory with the value of B which is in R0 register,
+
+585
+00:57:31,079 --> 00:57:38,279
+put the result in R0 register and subsequently move that value into A register. This takes
+
+586
+00:57:38,279 --> 00:57:43,839
+only three instructions, right? But then some of these instructions are heavy duty instructions,
+
+587
+00:57:43,840 --> 00:57:49,600
+right? As opposed to some of those instructions. So again the cost of this need to be estimated.
+
+588
+00:57:49,600 --> 00:57:55,519
+Here I have used a simple cost mechanism, one for each instruction plus one for any additional
+
+589
+00:57:55,519 --> 00:58:00,880
+words that I am using. So this has a different cost. Again for each architecture this may be
+
+590
+00:58:00,880 --> 00:58:06,559
+different and you have to use the appropriate cost. If I have the facility to just move,
+
+591
+00:58:07,519 --> 00:58:20,000
+so here is what happens. I first copy the contents of B into memory location A and then I add C to
+
+592
+00:58:20,000 --> 00:58:26,119
+memory location A and put the value back in A. So provided my architecture supports and add
+
+593
+00:58:26,119 --> 00:58:32,320
+instruction with two memory operators. If that is possible then I can do this. Whatever is the
+
+594
+00:58:32,320 --> 00:58:36,760
+cost for that I have to pay for that. So this is another way of generating this instruction,
+
+595
+00:58:36,760 --> 00:58:43,920
+right? So here is the third way where you basically, so here you are basically moving,
+
+596
+00:58:43,920 --> 00:58:49,200
+you are assuming that the values of B and C are available in these two registers.
+
+597
+00:58:49,200 --> 00:58:56,640
+I am first moving the value of B into again register A. I am adding register A with register
+
+598
+00:58:56,639 --> 00:59:02,239
+C and I am now writing the value into this, right? Again just to show that there are different
+
+599
+00:59:02,239 --> 00:59:08,639
+ways by which you can achieve the same instruction and each may have a different cost. So essentially
+
+600
+00:59:08,639 --> 00:59:16,799
+in a code generation phase, yes? I have assumed some way by which each instruction has a cost
+
+601
+00:59:17,519 --> 00:59:22,639
+and then every instruction which use additional bytes. For example, here I have to store the
+
+602
+00:59:22,639 --> 00:59:29,839
+absolute address of B following that instruction as an additional cost, right? So the machine
+
+603
+00:59:29,839 --> 00:59:36,159
+architecture will tell you exactly what the cost is, right? And as a compiler writer one needs to
+
+604
+00:59:36,159 --> 00:59:41,039
+understand that cost and then incorporate that cost. That is really what it is. So in this
+
+605
+00:59:41,039 --> 00:59:46,799
+particular example, see the address of B has to be following this instruction. So that has to be
+
+606
+00:59:46,800 --> 00:59:52,960
+fetched and you know used. Therefore, I have added an additional cost for that. Similarly,
+
+607
+00:59:52,960 --> 00:59:59,200
+the address of C. Similarly, the address of A. Here I am assuming that the value of B is already
+
+608
+00:59:59,200 --> 01:00:05,200
+available in a register, right? If that is available, then I can actually move that into
+
+609
+01:00:05,200 --> 01:00:10,480
+another register. I can do the add with the memory location or with another register and then write
+
+610
+01:00:10,480 --> 01:00:15,600
+the value back. Here I am assuming that all of this is register operands and therefore,
+
+611
+01:00:15,599 --> 01:00:21,199
+they incur only one cost. I mean they only incur a cost for the instruction and only in this
+
+612
+01:00:21,199 --> 01:00:27,519
+instruction I have an additional memory address and therefore, I am assuming a cost of one, right?
+
+613
+01:00:27,519 --> 01:00:33,039
+So when you generate code for a target architecture, right, you say that each instruction has this kind
+
+614
+01:00:33,039 --> 01:00:38,319
+of a cost and if the operand is like this, then there is an additional cost for that. So that
+
+615
+01:00:38,319 --> 01:00:43,599
+information is being specified to you or you can understand that from the instruction set manual
+
+616
+01:00:43,599 --> 01:00:49,119
+and based on that you will try to generate the code for that. That is really what happens, right?
+
+617
+01:00:49,119 --> 01:00:54,880
+Okay, if it is a Sysc machine, this is what you will do. If it is a Rysc machine, what can we do?
+
+618
+01:00:54,880 --> 01:01:02,639
+You have to move the memory locations to registers, right, and then perform the operation
+
+619
+01:01:02,639 --> 01:01:12,799
+and then store them back, right? Okay, so here is what you have, right? Load B into R naught
+
+620
+01:01:13,920 --> 01:01:23,360
+load C into R1, add R1 and R2, put the result in R naught and store it back into A, right?
+
+621
+01:01:23,360 --> 01:01:29,279
+So if you assume that each instruction is one word, there are four instructions, there is nothing
+
+622
+01:01:29,279 --> 01:01:40,079
+additional in here, so you will have a cost of, right? Here is again I am assuming that this B and
+
+623
+01:01:40,079 --> 01:01:48,239
+C can be specified simply, I mean simply meaning like using some kind of displacement addressing
+
+624
+01:01:48,239 --> 01:01:53,599
+mode with a small offset. That is what I mean, that is why I said that these could be four bytes.
+
+625
+01:01:54,880 --> 01:02:00,880
+Whereas if these addresses are not there, I mean that can typically happen if these are
+
+626
+01:02:00,880 --> 01:02:07,039
+local variables are available in the stack frame. If this is not available in the stack frame,
+
+627
+01:02:07,039 --> 01:02:11,679
+but if these are variables which are global variables, then their addresses first need to
+
+628
+01:02:11,679 --> 01:02:17,360
+be moved into some locations from there it can be do. For example, in order for me to move A,
+
+629
+01:02:17,920 --> 01:02:24,320
+or sorry move B, first I need to store the most significant word of the address of B,
+
+630
+01:02:25,519 --> 01:02:34,719
+right? That is the upper 16 bits into one register. Then I have to add the least significant 16 bits,
+
+631
+01:02:35,519 --> 01:02:40,879
+okay, with that in another. See, remember my immediate constant can only be 16 bits long
+
+632
+01:02:42,000 --> 01:02:47,039
+in the MIPS architecture. So in that MIPS architecture, the immediate constant can be
+
+633
+01:02:47,039 --> 01:02:53,919
+at most 16 bits, whereas the addresses are supposed to be 32 bits, right? So I have to do it in two
+
+634
+01:02:53,919 --> 01:03:00,239
+steps. First get the most significant bit, then add the least significant bit to it, get the address
+
+635
+01:03:00,239 --> 01:03:10,000
+in R naught, then use that address, load it, put it into R. Similarly for the C, right? And then
+
+636
+01:03:10,000 --> 01:03:18,239
+I perform the addition, I again get the address of A in register R phi and then I store the value.
+
+637
+01:03:19,199 --> 01:03:25,599
+In fact, this is what I have to do if A, B and C happen to be global variables, right? Or their
+
+638
+01:03:25,599 --> 01:03:31,519
+addresses are truly 32 bits and they are not available in any registers, right? If I know A
+
+639
+01:03:31,519 --> 01:03:37,679
+and B are offset by four locations, right? I could have used that in some efficient way,
+
+640
+01:03:38,400 --> 01:03:45,039
+right? You understand that, right? For example, if A and B happen to be part of
+
+641
+01:03:46,239 --> 01:03:52,639
+a structure fields, correct? A happens first and then B happens next. The compiler allocates
+
+642
+01:03:52,639 --> 01:03:56,960
+saying that the first one is going to take four bytes, the next one is four bytes off from that.
+
+643
+01:03:57,679 --> 01:04:04,960
+Then once I have loaded B's address, A's address is only four bytes offset from that. I do not need
+
+644
+01:04:04,960 --> 01:04:11,679
+any of these things. I could have simply used 4 minus 4 or 0. I could have done that, correct?
+
+645
+01:04:11,679 --> 01:04:16,639
+So similarly some intelligent decisions could have been done. So depending on where the variables
+
+646
+01:04:16,639 --> 01:04:22,159
+are and how they are relative to each other, when the compiler generates code, it has to generate
+
+647
+01:04:22,159 --> 01:04:27,359
+the complete code so that it can load that information. In this case, if these are local
+
+648
+01:04:27,359 --> 01:04:32,480
+variables, they are available in the frame pointer, right? And offset within the frame
+
+649
+01:04:32,480 --> 01:04:38,799
+pointer is a short offset. So that can be a part of the immediate concept, right? So I can specify
+
+650
+01:04:38,799 --> 01:04:44,319
+it within the same instruction, right? For local variables, local variables are always stored in the
+
+651
+01:04:44,319 --> 01:04:49,679
+stack frame and they are always referenced with regard to the frame pointer. So there will be a
+
+652
+01:04:49,679 --> 01:04:55,039
+small offset from the frame pointer so that can be specified. So that is where these instructions
+
+653
+01:04:55,039 --> 01:05:01,440
+are simpler and has a lower cost. Whereas these instructions, they require more instructions and
+
+654
+01:05:01,440 --> 01:05:09,759
+their cost is correct and therefore the total cost is, okay? So depending on whether you are generating
+
+655
+01:05:09,759 --> 01:05:15,359
+code for a Sysc machine or for a Rysc machine, what types of instructions are supported, what types of
+
+656
+01:05:15,360 --> 01:05:20,160
+addressing modes are supported, right? You have to generate code appropriately and you have to
+
+657
+01:05:20,160 --> 01:05:26,160
+generate a code which is supposedly more efficient, right? And there are several possibilities. The
+
+658
+01:05:26,160 --> 01:05:32,400
+idea here is to just show that there are several possibilities, okay? All right. So let us just
+
+659
+01:05:32,400 --> 01:05:35,840
+first start off with a simple code generation. Yes, question.
+
+660
+01:05:35,840 --> 01:05:50,559
+Right. So for every global variable, right, there is something like, okay, so for every global
+
+661
+01:05:50,559 --> 01:05:55,440
+variable it is going to associate a location, right, saying that it is going to be in that
+
+662
+01:05:55,440 --> 01:06:02,720
+particular location starting from the data segment. So the data segment starts off from some place.
+
+663
+01:06:02,719 --> 01:06:08,559
+So everything is offset from that, right? So all the global variables are going to keep allocating
+
+664
+01:06:08,559 --> 01:06:14,719
+from that, right? It is a little bit, so if you think of your entire C program as a single C file,
+
+665
+01:06:15,359 --> 01:06:20,879
+right, that picture is kind of easier to look at than thinking of it as multiple C files.
+
+666
+01:06:20,879 --> 01:06:26,399
+Even multiple C files can be done. So if I have a single C file and let us say I have three global
+
+667
+01:06:26,399 --> 01:06:32,000
+variables A, B and C, the compiler can understand that there are only three global variables,
+
+668
+01:06:32,000 --> 01:06:36,639
+all of them have to be in the data segment. The first variable is an integer variable,
+
+669
+01:06:36,639 --> 01:06:43,199
+so it will be at an offset 0. The second variable let us say is a double precision variable,
+
+670
+01:06:43,199 --> 01:06:48,719
+so it will be from the first variable which is 4 bytes, the next variable will be at an offset of 4.
+
+671
+01:06:48,719 --> 01:06:55,039
+The third variable let us say is another integer because the previous one is a double and then the
+
+672
+01:06:55,039 --> 01:07:01,119
+one before that is an integer, so it is 4 plus 8, 12 bytes offset. It can actually work out all
+
+673
+01:07:01,119 --> 01:07:06,960
+of these details. So it can say that global variable A will be at offset 0, global variable
+
+674
+01:07:06,960 --> 01:07:12,960
+B will be at offset 4, global variable C will be at offset 12. It can fix that thing, right,
+
+675
+01:07:12,960 --> 01:07:19,119
+and it can use that. Now when you have multiple such files which you are linking together,
+
+676
+01:07:19,119 --> 01:07:24,319
+then something has to be above, something has to be below, but then again they are relative,
+
+677
+01:07:24,319 --> 01:07:30,000
+right, and the compiler can work those things out. Compiler and then subsequently the linkers
+
+678
+01:07:30,000 --> 01:07:35,039
+and loaders, not just the compiler, it is also the linkers and loaders because each file is compiled
+
+679
+01:07:35,039 --> 01:07:40,079
+separately, you remember that, right. So as far as that single C file is concerned,
+
+680
+01:07:40,079 --> 01:07:46,639
+there are only these global variables, right. Again, unfortunately I may not be able to provide
+
+681
+01:07:46,639 --> 01:07:51,360
+a complete answer because there are several other things also, but it gives you an idea, right.
+
+682
+01:07:52,320 --> 01:07:59,519
+If it is a stack frame, it is simple. Local variable is simple, right. Good. Shall we move forward?
+
+683
+01:08:00,320 --> 01:08:07,360
+Okay, so let us look at a very simple code generation scheme, right. So this is going
+
+684
+01:08:07,360 --> 01:08:13,440
+to essentially go and then do the following thing. It will read one, right, intermediate
+
+685
+01:08:13,440 --> 01:08:22,239
+statement and it will generate the code for that, right. That is essentially what it is going to do,
+
+686
+01:08:22,960 --> 01:08:28,319
+but then when it generates a code depending on what the architecture allows, it has to decide,
+
+687
+01:08:28,319 --> 01:08:33,599
+you know, what stays in the register and what stays in the memory and so on and so forth, right.
+
+688
+01:08:34,639 --> 01:08:38,799
+So it is going to essentially maintain two data structures, one called register
+
+689
+01:08:38,799 --> 01:08:45,840
+and another called address descriptor, right. The register descriptor essentially keeps track of
+
+690
+01:08:45,840 --> 01:08:51,840
+which register holds what variable names, right. For example, let us say if you have moved contents
+
+691
+01:08:51,840 --> 01:08:59,039
+of A into register R1, then you have to remember that R1 contains variable A. So that subsequently
+
+692
+01:08:59,039 --> 01:09:04,239
+if there is any instruction which is making use of variable A, instead of again loading it into
+
+693
+01:09:04,239 --> 01:09:10,560
+one more register, you might as well use this R1 because you save cost, correct. Once you have
+
+694
+01:09:10,560 --> 01:09:15,680
+already moved it into a register R1, it will be good to remember that, right. So that whenever
+
+695
+01:09:15,680 --> 01:09:23,119
+A is being used, instead you can use R1 to do that, right. The other data structure which
+
+696
+01:09:23,119 --> 01:09:28,159
+is the address descriptor essentially kind of holds the other kind of the map.
+
+697
+01:09:28,159 --> 01:09:35,520
+For every variable name, it says where all it is being held, right. For example, variable A,
+
+698
+01:09:35,520 --> 01:09:42,640
+you say whether it is in memory or you say whether it is in memory and register, you say that,
+
+699
+01:09:43,520 --> 01:09:52,079
+okay. Because it is possible that you could have it in both places, right. And similarly,
+
+700
+01:09:52,079 --> 01:09:59,920
+when a variable is being copied into another variable, right, the register descriptor can
+
+701
+01:09:59,920 --> 01:10:07,280
+have for the same register multiple variable names. Say for example, A is copied into B and then I have
+
+702
+01:10:07,279 --> 01:10:13,840
+loaded A, sorry A is copied into B, then I have loaded B into R1 register, right. If I have the
+
+703
+01:10:13,840 --> 01:10:20,559
+sequence of statement A equal to B and then move B to R1, then R1 essentially holds B,
+
+704
+01:10:21,439 --> 01:10:27,920
+but R1 also holds A. To remembering this would be helpful because if I am going to do something with
+
+705
+01:10:27,920 --> 01:10:36,000
+A, I might as well use R1. However, I have to be careful not to overwrite something, right.
+
+706
+01:10:36,000 --> 01:10:42,720
+Because if B is going to write onto itself some value or let us say the register which is holding
+
+707
+01:10:42,720 --> 01:10:48,800
+B is going to be modified, then at that point in time I have to go and say that A no longer
+
+708
+01:10:48,800 --> 01:10:54,960
+resides in register, A is only in the memory, correct. Otherwise, I will be using the wrong
+
+709
+01:10:54,960 --> 01:11:01,840
+location. So, this kind of a mapping is what needs to be maintained by these two descriptors.
+
+710
+01:11:01,840 --> 01:11:08,480
+That means the current up to date value for every variable, where is it available or in what all
+
+711
+01:11:08,480 --> 01:11:14,159
+locations is it available. Similarly, each register what are all the variables that it is
+
+712
+01:11:14,159 --> 01:11:19,279
+currently holding. You need to kind of remember this in order for you to do this code generation.
+
+713
+01:11:19,279 --> 01:11:24,560
+I will show you a simple scheme and also a simple example. We will not really bother too much about
+
+714
+01:11:24,560 --> 01:11:29,680
+it because nobody is going to write a code generator using this method. I mean it is going
+
+715
+01:11:29,680 --> 01:11:34,560
+to produce a very very inefficient code if you use this method. So, there is no need to
+
+716
+01:11:35,920 --> 01:11:40,720
+learn this completely and then generate code using that because you are not ever
+
+717
+01:11:40,720 --> 01:11:46,079
+whenever ever going to use this thing. But just to have a quick idea of what it is, right.
+
+718
+01:11:46,880 --> 01:11:51,440
+So, in this code generation scheme what we want to do is that we want to use the register location
+
+719
+01:11:52,000 --> 01:11:57,600
+whenever the operand is available both in the memory and register because using register location
+
+720
+01:11:57,600 --> 01:12:06,720
+saves cost, right. That is simply what it is, okay. And for every destination operand you try to
+
+721
+01:12:06,720 --> 01:12:13,920
+allocate a register whenever it is possible and hold that value in that register as long as possible.
+
+722
+01:12:14,720 --> 01:12:20,720
+But if no free registers are available you can also use memory. That means that you are going
+
+723
+01:12:20,720 --> 01:12:25,920
+to incur more cost. That is the only difference, right. If they are if the see particularly in the
+
+724
+01:12:25,920 --> 01:12:31,440
+case of a Sysc machine which allows your operand to be in memory or register you could have used
+
+725
+01:12:31,440 --> 01:12:36,800
+either one of them, right. Again it depends whether that particular Sysc architecture allows
+
+726
+01:12:36,800 --> 01:12:42,319
+your destination operand to be in memory. If it allows it to be in memory then you can use it.
+
+727
+01:12:42,319 --> 01:12:46,720
+If it does not then necessarily you have to allocate a register for that. So, you have to
+
+728
+01:12:46,720 --> 01:12:52,720
+find a register and so on. So, essentially this algorithm is going to go in the following way
+
+729
+01:12:53,199 --> 01:12:58,560
+but it is very I mean it is going to generate a very inefficient code. Let us see how it works,
+
+730
+01:12:59,119 --> 01:13:05,440
+right. For each three address code which is of this form x is equal to y operation z,
+
+731
+01:13:06,240 --> 01:13:13,360
+right. It first finds out, okay. It first gets a register for the destination location,
+
+732
+01:13:14,320 --> 01:13:20,079
+right. So, we will find out how get register works but the idea is that get register is going
+
+733
+01:13:20,079 --> 01:13:27,439
+to identify a location L which could either be a register or a memory location, right for the
+
+734
+01:13:27,439 --> 01:13:37,039
+destination operand, right. And then next it determines where y is available. So, it finds out
+
+735
+01:13:37,039 --> 01:13:43,760
+the location y prime where y is available, okay. It could y prime could either be a register or a
+
+736
+01:13:43,760 --> 01:13:49,920
+memory, okay. The location where it is available. Then what it is going to do is that it is going
+
+737
+01:13:49,920 --> 01:13:56,880
+to copy this y into this location L, right. Remember we are going to talk about generating
+
+738
+01:13:56,880 --> 01:14:03,039
+address for CISC machines and in this CISC machines typically it is a two address,
+
+739
+01:14:03,039 --> 01:14:09,359
+two operand instruction address format, okay. And one of the operands is also the destination
+
+740
+01:14:09,359 --> 01:14:16,480
+location. That is why we are taking the first operand and then putting it in the destination
+
+741
+01:14:16,479 --> 01:14:23,039
+location, right. So, remember earlier itself we figured out that L should be the location where
+
+742
+01:14:23,039 --> 01:14:30,239
+the destination is going to be, right. So, we have said that x is going to be available in L
+
+743
+01:14:31,119 --> 01:14:37,199
+and in that location I have now moved the value of y. Now I find out where z would be,
+
+744
+01:14:37,199 --> 01:14:47,359
+right. Find out the location where z is, okay. And then generate code operation z prime, L.
+
+745
+01:14:48,159 --> 01:14:56,239
+If z prime is a register, then it is a register, register. If z prime is a memory, then it is
+
+746
+01:14:56,880 --> 01:15:02,639
+memory register, right. Assuming this machine supports one operand to be in the memory and
+
+747
+01:15:02,640 --> 01:15:09,680
+the other to be in the register, right. This kind of works. So, that is the reason why we have
+
+748
+01:15:09,680 --> 01:15:14,880
+done this, okay. Actually, I am sorry, I will take that back a little bit because I do not know
+
+749
+01:15:14,880 --> 01:15:20,800
+whether L is a register, right. We only know that L is the location where the destination has to be.
+
+750
+01:15:20,800 --> 01:15:25,840
+This could even be a memory, memory operation. All that I know is that I have moved the value of
+
+751
+01:15:26,480 --> 01:15:32,320
+the first source operand into the destination location. Then I have performed the operation
+
+752
+01:15:32,319 --> 01:15:38,159
+of performed the operation with regard to the second source operand and the first source operand
+
+753
+01:15:38,159 --> 01:15:43,119
+which is already available in my destination location and the result is also available in my
+
+754
+01:15:43,119 --> 01:15:50,479
+destination location, right. After I have done that, now I have to say that x is now available in L,
+
+755
+01:15:51,439 --> 01:15:58,719
+right. x is available in L. I cannot say anything about y prime. I am sorry, I cannot say anything
+
+756
+01:15:58,720 --> 01:16:04,640
+about y except that y is available in y prime which is where it was available earlier. So,
+
+757
+01:16:04,640 --> 01:16:09,760
+I do not have to necessarily do any update on that. He said also I am not moving anywhere,
+
+758
+01:16:11,280 --> 01:16:17,440
+right. You understand that prior to this instruction, y was available in the location
+
+759
+01:16:17,440 --> 01:16:23,520
+y prime and z was available in the location z prime. Neither of them have been disturbed,
+
+760
+01:16:23,520 --> 01:16:30,080
+right. They have not been modified. So, both y and y prime continue to stay wherever they were
+
+761
+01:16:30,080 --> 01:16:38,320
+before. Only thing is that x is now available in L. If L happens to be a register, then we know
+
+762
+01:16:38,320 --> 01:16:43,360
+that it is a register. If L happens to be a memory location, then it is a memory location.
+
+763
+01:16:43,360 --> 01:16:49,840
+So, the address registers, address descriptor and the register descriptors have to be appropriately
+
+764
+01:16:50,720 --> 01:16:57,600
+updated, ok. x was not already available in L.
+
+765
+01:16:57,600 --> 01:17:04,880
+x was not already available in L. We have to use this getreg function to find out a location for
+
+766
+01:17:04,880 --> 01:17:10,960
+L and if that happens to be a register, it is something different. Otherwise, it will be memory
+
+767
+01:17:10,960 --> 01:17:20,000
+location x, ok. Let us see what the getreg function is doing, right. So, getreg function
+
+768
+01:17:20,000 --> 01:17:26,239
+is essentially supposed to find a location L for x for computing this operation. So,
+
+769
+01:17:27,520 --> 01:17:32,480
+it is actually going to do something very interesting. It first finds out whether y is
+
+770
+01:17:32,480 --> 01:17:38,960
+in a register R, ok. If y is already in a register, y is the first source operand,
+
+771
+01:17:39,840 --> 01:17:49,359
+ok. And that register is not holding any other location. That means that only y and R has only
+
+772
+01:17:49,359 --> 01:17:55,920
+y, nothing else, right. And of course, y is not needed anymore, y is not live anymore,
+
+773
+01:17:57,119 --> 01:18:01,520
+right. That is that value which is available in the R register is not needed anymore.
+
+774
+01:18:02,159 --> 01:18:06,319
+Then I can use that itself. See, it is possible that you have computations
+
+775
+01:18:06,880 --> 01:18:13,119
+where certain value is in a location. You use it once or you use it a few times and after that,
+
+776
+01:18:13,119 --> 01:18:18,880
+you do not again need it for a long time. In which case, I can actually overwrite onto that location,
+
+777
+01:18:18,880 --> 01:18:27,759
+right. That is what it says. So, if y is available in a register R and R does not hold anything other
+
+778
+01:18:27,759 --> 01:18:34,239
+than y, then I can and of course, y is not needed anymore and I can go and modify that itself. That
+
+779
+01:18:34,239 --> 01:18:41,039
+register itself I can reuse. That is essentially what it is saying. So, allocate that register to
+
+780
+01:18:41,039 --> 01:18:44,960
+x and say that that is the location where your destination is going to be.
+
+781
+01:18:45,679 --> 01:18:52,479
+And if you do that, you remember that your y is already in R, ok, in your destination location.
+
+782
+01:18:53,679 --> 01:19:00,239
+Else, if there is an empty register R prime, you can allocate that, right. If no register is
+
+783
+01:19:00,239 --> 01:19:07,760
+available, ok, and if the operand requires the destination to be in a register, then you have to
+
+784
+01:19:07,760 --> 01:19:12,639
+spill one of those existing variables which is already holding all your registers, throw that
+
+785
+01:19:12,639 --> 01:19:17,760
+out and give that register to this location, right. So, that is essentially what you are going to do.
+
+786
+01:19:18,319 --> 01:19:25,920
+So, spill a register into memory and give that, ok. If none of this is true, then this particular
+
+787
+01:19:25,920 --> 01:19:32,239
+instruction can have a memory operand. So, you say that x is in memory, right. So, again let me
+
+788
+01:19:32,239 --> 01:19:39,039
+go through this one more time. So, you either find out if the first source operand is a register
+
+789
+01:19:39,840 --> 01:19:47,039
+and that register is no longer required for y, then you can use that itself as the location for
+
+790
+01:19:47,039 --> 01:19:52,239
+x. If that is not the case, if there is a free register which is available,
+
+791
+01:19:52,800 --> 01:19:57,920
+then you can say that free register will hold that. If that is also not the case,
+
+792
+01:19:58,800 --> 01:20:05,039
+but if your operand can be in memory, sorry, if your operand has to be in a register, then
+
+793
+01:20:05,599 --> 01:20:10,719
+spill one of the existing variables which is in one of those registers and then give that register
+
+794
+01:20:10,719 --> 01:20:18,800
+to x. If none of this is the case, then you simply use a memory location for x, right.
+
+795
+01:20:18,800 --> 01:20:30,079
+Questions? The third one, ok. So, let us say that I have four registers and they are storing y, z,
+
+796
+01:20:30,720 --> 01:20:41,119
+w and v, right. But now this particular operation, right, the target machine specification says that
+
+797
+01:20:41,119 --> 01:20:47,279
+the destination has to be a register operand. It cannot be a memory operand, correct. Then I
+
+798
+01:20:47,279 --> 01:20:53,840
+cannot say that x can be in memory, x has to be in a register, right, as far as this operation is
+
+799
+01:20:53,840 --> 01:20:59,359
+concerned. Let us say that this is some multiply operation or something like that, just as an
+
+800
+01:20:59,359 --> 01:21:05,359
+example. So, multiply the destination has to be a register, it cannot be a memory operand, right.
+
+801
+01:21:05,359 --> 01:21:12,399
+Then what I need to do is that, right, this x which is a temporary, I will say that it has to
+
+802
+01:21:12,399 --> 01:21:17,759
+be in one of the registers. I have only four registers and these four registers are being
+
+803
+01:21:17,759 --> 01:21:27,439
+taken by y, z, w and v. I do not have a place for x. What do you do? You ask one of these people,
+
+804
+01:21:27,439 --> 01:21:34,399
+y, z or w, right, to get out and then give that register. That is what is called as spill.
+
+805
+01:21:34,960 --> 01:21:42,159
+So, let us say that we are going to say that, ok, w is the victim. So, I will spill the value
+
+806
+01:21:42,159 --> 01:21:49,039
+of w into the memory location and whichever register w was holding, I will assign that to x,
+
+807
+01:21:50,559 --> 01:21:52,000
+right. That is really what happens.
+
+808
+01:21:57,039 --> 01:22:00,000
+There is no use of y subsequently.
+
+809
+01:22:12,159 --> 01:22:16,319
+After this instruction, it is going to hold the value of x.
+
+810
+01:22:18,880 --> 01:22:25,439
+Absolutely. It is not holding the address, it is holding the value of y, value of y, ok.
+
+811
+01:22:33,920 --> 01:22:38,639
+All the four registers might be, will be used later also.
+
+812
+01:22:38,640 --> 01:22:44,960
+So, let us say that here I have spilled w and give that register to.
+
+813
+01:22:49,680 --> 01:22:56,880
+No, in this instruction there are going to be only two operands, correct. Remember,
+
+814
+01:22:56,880 --> 01:23:00,320
+this simple code, this, remember, remember this is a simple code generation.
+
+815
+01:23:01,200 --> 01:23:07,600
+We do code generation for one intermediate statement at a point in time. It has only two
+
+816
+01:23:07,600 --> 01:23:13,520
+operands. I have to have y definitely in the register or I have to, means I have to have x
+
+817
+01:23:13,520 --> 01:23:18,880
+in the register. So, eventually I am going to move y into that register and do something, correct.
+
+818
+01:23:18,880 --> 01:23:24,400
+But that is ok. Other than that, right, if there is a variable w which is holding a register,
+
+819
+01:23:25,039 --> 01:23:31,520
+which is not needed for this instruction, right, my immediate point is to get this instruction done
+
+820
+01:23:32,240 --> 01:23:38,480
+and in order for me to do that, I will spill w. It may so be the case that the next instruction
+
+821
+01:23:38,480 --> 01:23:48,320
+is w, correct, and I want to reload it into the register. I will incur the cost. That is why this
+
+822
+01:23:48,320 --> 01:23:55,680
+is called a simple code generator and that is why it generates inefficient code. It does not look
+
+823
+01:23:55,680 --> 01:24:03,600
+beyond how it takes a decision of what to spill, right. We have not really said it could spill any
+
+824
+01:24:03,600 --> 01:24:09,200
+one of those things arbitrarily and that might be required immediately after that, right. So,
+
+825
+01:24:09,200 --> 01:24:16,000
+you will incur a cost for that, no doubt, but you can generate code. Functionally,
+
+826
+01:24:16,000 --> 01:24:19,520
+correct code, it will execute, but it may be inefficient, right.
+
+827
+01:24:19,520 --> 01:24:32,160
+Yes, yes, if I have only two registers, what will I do? That is an architecture which may not be
+
+828
+01:24:32,160 --> 01:24:37,920
+a useful architecture, right. So, you will have enough registers to work with, but all of them may
+
+829
+01:24:37,920 --> 01:24:43,840
+have some values. Then you have to take a decision of which one to spill. It may so happen that the
+
+830
+01:24:43,840 --> 01:24:48,320
+one that you have spilled may have to be reloaded again. There is a cost that you pay for.
+
+831
+01:24:49,600 --> 01:24:52,560
+Right. That is really what happened. Any more questions? Yeah.
+
+832
+01:24:58,960 --> 01:25:05,040
+Okay. So, this has to go a little bit more into the details of how this intermediate code is,
+
+833
+01:25:05,040 --> 01:25:10,800
+what these temporaries are. The assumption here is that this is a new temporary which is being
+
+834
+01:25:10,800 --> 01:25:15,280
+generated. That is why you try to find a location. If it is already in a register,
+
+835
+01:25:15,279 --> 01:25:20,639
+you can definitely use that. Okay. You just modify this slightly so that that is taken into
+
+836
+01:25:20,639 --> 01:25:24,479
+account. This is assuming that this is a newly generated value, right.
+
+837
+01:25:24,479 --> 01:25:36,639
+Which register to spill is it? Okay. We are going to talk about separate,
+
+838
+01:25:37,359 --> 01:25:42,319
+as far as this simple code generation scheme is concerned, nobody is using it or nobody will be
+
+839
+01:25:42,319 --> 01:25:48,960
+using it. So, the answer is very simple. Use anything that you want, okay, randomly. But,
+
+840
+01:25:50,000 --> 01:25:54,639
+yeah, it is going to be inefficient. You could do something smarter. Like you could look ahead
+
+841
+01:25:54,639 --> 01:25:58,799
+and then see which variable you are not going to use for a longer time, etcetera, etcetera,
+
+842
+01:25:58,799 --> 01:26:03,920
+and you can make your decision smarter. But then this mechanism itself, this way of generating
+
+843
+01:26:03,920 --> 01:26:09,439
+code itself is so inefficient that you do not want to fix some part of it. So, let us not worry
+
+844
+01:26:09,439 --> 01:26:14,319
+about it, right. Let it do something very, very inefficient. It is okay. It only adds to our
+
+845
+01:26:14,319 --> 01:26:20,399
+motivation that we have to build a more efficient code generator, right. Good. But I think the
+
+846
+01:26:20,399 --> 01:26:24,879
+points are very well taken and your answers and as well as questions are indeed in the right
+
+847
+01:26:24,879 --> 01:26:29,199
+direction. That tells you how to think about writing a good code generator. That is really
+
+848
+01:26:29,199 --> 01:26:34,239
+what is important, right. If I ask you, okay, can you make it better? You would obviously make it
+
+849
+01:26:34,239 --> 01:26:40,479
+better. But then for what purpose, I do not know, right, because this whole process itself is very
+
+850
+01:26:40,479 --> 01:26:44,800
+inefficient. We are going to see something significantly better than this. Please stay
+
+851
+01:26:44,800 --> 01:26:48,399
+with me for some time. Just wanted to get the concepts through. That is why I am just saying
+
+852
+01:26:49,039 --> 01:26:54,239
+this, okay. So, here is an example that we are going to see, right. So, we have these variables
+
+853
+01:26:54,239 --> 01:27:02,399
+t, u, v and w which are being generated and they are basically these things, right, these expressions.
+
+854
+01:27:03,279 --> 01:27:08,879
+So, what I do is that I take each statement and try to generate code for that statement.
+
+855
+01:27:09,679 --> 01:27:14,319
+Taking into account whatever is the current registered descriptor and address descriptor
+
+856
+01:27:14,319 --> 01:27:21,119
+at that point in time, right. So, let us say that at this point in time r naught has t,
+
+857
+01:27:22,159 --> 01:27:28,399
+right. So, let us say initially nothing was there in my data structures. So, now what I do is that
+
+858
+01:27:28,399 --> 01:27:36,399
+I move first a to r naught and I subtract b from r naught and therefore, r naught will contain the
+
+859
+01:27:36,399 --> 01:27:42,799
+value of a minus b which is my t. So, in this instruction, when I am generating code for this
+
+860
+01:27:42,799 --> 01:27:50,319
+instruction, for this destination location t, when I ask to get register, I assume that it gave me
+
+861
+01:27:50,319 --> 01:27:57,439
+r naught, right. Therefore, my first code is move b to r naught and then subtract, I move a to r naught
+
+862
+01:27:57,439 --> 01:28:03,039
+and then subtract b from r naught and then store it into, I mean that essentially puts the value
+
+863
+01:28:03,599 --> 01:28:11,279
+a minus b in r naught, ok. So, after this instruction is over, I know that r naught has
+
+864
+01:28:11,279 --> 01:28:18,799
+t, right and that is of course, the same thing t is in r naught, right. Now, when I go to the next
+
+865
+01:28:18,799 --> 01:28:25,919
+instruction u, I am again asking the question give me a location for u, right and this time let us
+
+866
+01:28:25,920 --> 01:28:36,000
+say it gave r 1, right. Now, I generate the code move a to r 1, subtract c from r 1, the result is
+
+867
+01:28:36,000 --> 01:28:43,440
+in r 1. Now, we can say that r naught has t and r 1 has u, the same thing in the address descriptor,
+
+868
+01:28:43,440 --> 01:28:49,520
+put the other way around, right, t in r 1 and this one. Now, let us say v is equal to u,
+
+869
+01:28:50,320 --> 01:28:57,200
+this is a copy operation, right. Now, in this case, I do not necessarily need to generate any code for
+
+870
+01:28:57,200 --> 01:29:06,880
+this, right. I find out what is u, u is in r 1, correct, it is a copy operation and for the copy
+
+871
+01:29:06,880 --> 01:29:13,040
+operation, I can simply say if this is already in a location, this will also be in the same location,
+
+872
+01:29:13,039 --> 01:29:21,840
+right. So, after this we say that r naught has t and r 1 has both u and v, same thing over here.
+
+873
+01:29:21,840 --> 01:29:28,479
+Now, let us see here, here I am going to do t plus v, right and I am going to write it into w,
+
+874
+01:29:29,439 --> 01:29:36,800
+right. Again, when I try to say get register for w, it gave me r 2, right and I find out where t
+
+875
+01:29:36,800 --> 01:29:44,800
+is in r naught. So, I move r naught to r 2 and then of course, find out where v is, v is in r 1.
+
+876
+01:29:44,800 --> 01:29:52,640
+So, I add r 1 to r 2, right. So, at the end of this r naught has t, r 1 has both u, v
+
+877
+01:29:53,360 --> 01:30:01,440
+and r 2 has w, same information mapping in the reverse direction. So, I keep updating my register
+
+878
+01:30:01,439 --> 01:30:07,119
+descriptor and address descriptor and I keep working on these things, every statement one
+
+879
+01:30:07,119 --> 01:30:12,399
+after another and I keep updating it. I keep generating the code for this, right.
+
+880
+01:30:12,960 --> 01:30:18,799
+You can see that in this particular case, right, I first move a to r naught, then again I move a to
+
+881
+01:30:18,799 --> 01:30:26,239
+r 1, right. I could have avoided this by giving a register for this and keeping a in that register,
+
+882
+01:30:26,880 --> 01:30:32,239
+but I do not do those intelligent decisions in this simple code generator. All I do is that
+
+883
+01:30:32,239 --> 01:30:37,119
+for this instruction, what is that I need to do? For that instruction, what is that I need to do?
+
+884
+01:30:37,119 --> 01:30:43,119
+And based on that, I generate code and therefore, I may end up moving the same operand into
+
+885
+01:30:43,679 --> 01:30:50,159
+different registers at different points in time, right. See, if I have moved a into r naught,
+
+886
+01:30:50,800 --> 01:30:56,399
+b into r 1 and subtracted a minus b as r naught minus r 1 or something like that,
+
+887
+01:30:56,399 --> 01:31:01,359
+my a would have been saved and I could have used it later, but I did not do that, right. So,
+
+888
+01:31:01,359 --> 01:31:07,439
+that is why this kind of generates inefficient code, okay. Essentially, the point is that we
+
+889
+01:31:07,439 --> 01:31:12,639
+are not looking ahead, we are just concerned about that particular statement and generating code for
+
+890
+01:31:12,639 --> 01:31:18,000
+that. So, if you want to generate more efficient code, obviously, you have to have a global picture.
+
+891
+01:31:18,000 --> 01:31:21,840
+Well, let us not call it as a global picture, let us first let us call it as a big picture,
+
+892
+01:31:21,840 --> 01:31:28,239
+because the word global is going to be used in compiler in a very specific way, right. So,
+
+893
+01:31:28,239 --> 01:31:33,840
+we need to have a slightly bigger picture of the whole thing, right. Obviously, the bigger picture
+
+894
+01:31:33,840 --> 01:31:39,359
+cannot be too big, then we will be there may be too many details and we may not be able to see.
+
+895
+01:31:39,359 --> 01:31:44,640
+So, we are going to focus on a small region of code for which we can generate and this region
+
+896
+01:31:44,640 --> 01:31:51,280
+of code is what we are going to call as the basic block, right. So, in control flow analysis,
+
+897
+01:31:51,280 --> 01:31:55,200
+right you would have seen data flow, sorry in data flow analysis you would have talked about
+
+898
+01:31:55,200 --> 01:32:00,160
+basic blocks and other things. So, what is a basic block? Sequence of instructions.
+
+899
+01:32:02,079 --> 01:32:06,880
+One follows the other and if one instruction is executed, then all of them are executed,
+
+900
+01:32:07,600 --> 01:32:14,079
+correct. Let us say that is what is called a basic block, single entrance, single exit, correct.
+
+901
+01:32:14,079 --> 01:32:19,279
+So, essentially if I ask the question, can you come up with a code generation scheme which looks
+
+902
+01:32:19,279 --> 01:32:26,000
+at a basic block and generates efficient code for that, right. And then of course, you have
+
+903
+01:32:26,000 --> 01:32:31,439
+different basic blocks which are combined by means of control flow, you can generate code for that
+
+904
+01:32:31,439 --> 01:32:36,000
+and so on and so forth. So, the code generation problem we are essentially going to look at
+
+905
+01:32:36,000 --> 01:32:41,359
+at a basic block level to start with, right. Anything which is beyond basic block is what
+
+906
+01:32:41,359 --> 01:32:45,679
+is called the global in the compiler terminology. So, that is why we did not want to say we want to
+
+907
+01:32:45,679 --> 01:32:51,839
+have a global picture. We want to have well a big picture, okay, which is at the level of a
+
+908
+01:32:51,839 --> 01:32:56,799
+basic block to start with, okay. Then of course, we will look at how this basic block are connected
+
+909
+01:32:56,799 --> 01:33:02,239
+by means of these control flow graphs and so on and so forth, right. So, that is the next step,
+
+910
+01:33:03,519 --> 01:33:09,039
+right. And when you talk about basic blocks, right, the way to kind of capture the information in the
+
+911
+01:33:09,039 --> 01:33:16,239
+basic block and what variables are being repeatedly used, etcetera, is can be captured by means of a
+
+912
+01:33:16,239 --> 01:33:22,239
+DAG which is a directed acyclic graph. So, we will talk about constructing a DAG
+
+913
+01:33:22,239 --> 01:33:26,479
+and then doing code generation for the DAG. That is our next step.
+

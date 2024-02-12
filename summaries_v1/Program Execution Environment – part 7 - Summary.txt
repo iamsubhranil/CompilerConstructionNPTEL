@@ -1,0 +1,14 @@
+ Technicals Terms Explained:
+
+1. Position Independent Code (PIC): Code generation technique that ensures relocations previously present in the text section are moved to the data section, enabling shared libraries to store global variables in a separate, shared location.
+2. Copy Relocation: A relocation method used to copy contents of a Global Offset Table (GOT) entry from the shared library to the data section of the executable when the shared library is loaded.
+3. PLT (Procedure Linkage Table): Additional level of indirection introduced to delay population of Global Offset Table (GOT) entries until a function is first called, improving efficiency and reducing overhead.
+4. Resolver: Part of the dynamic linker that determines the appropriate symbol to pick up when multiple shared libraries define the same symbol.
+5. Code Models: Set of assumptions made by the compiler regarding address ranges accessible from instructions. Examples include Small (accessible addresses within ±2GB), Medium (-2GB <= accessible addresses <= +2GB), and Large (no restrictions).
+6. Interrupt: Field in ELF program headers indicating the dynamic linker (interpreter) responsible for loading and resolving symbols in the shared library.
+7. dlopen(): Function that allows an application to manually load and unload shared libraries, controlling their lifetimes and offering fine-grained control over symbol resolution timings.
+8. Handle: Opaque value representing a loaded shared library or symbol obtained using dlopen() and dlsym(), respectively, allowing applications to interact with shared libraries as needed.
+9. dlclose(): Function that releases resources associated with a loaded shared library identified by its handle.
+10. dlerror(): Function that retrieves error messages resulting from failures during operations involving dlopen(), dlsym(), and dlclose().
+
+These terms explain the techniques and components utilized in implementing shared libraries, including position independent code generation, Procedure Linkage Tables, resolvers, and various levels of indirections aimed at enhancing efficiency and flexibility. Additionally, understanding code models, interrupts, and dynamic linking APIs like dlopen(), dlsym(), and dlclose() offer developers greater control over shared library usage and integration within their applications.

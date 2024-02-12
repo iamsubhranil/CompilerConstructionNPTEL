@@ -1,0 +1,33 @@
+ **Exam Notes: Memory Hierarchy & Vectorization Optimizations**
+
+* The goal is to exploit higher performance and parallelism, focusing on data level parallelism.
+* Some optimizations are better suited for higher levels (e.g., compiler code), while others work best at the machine code or intermediate code level.
+* Techniques include memory hierarchy exploitation and vectorization.
+* Vector machines, M D machines, sub-word parallelism, and GPUs utilize data level parallelism.
+* OpenMP is a popular programming model for shared memory systems in multi-core architectures, allowing parallel execution of loops.
+* Loop transformations can enhance performance and locality.
+* Dependence analysis identifies relationships between statements and helps determine independence for parallelization.
+* Key terms:
+	+ Memory hierarchy
+	+ Vectorization
+	+ Data level parallelism
+	+ Thread level parallelism
+	+ Task level parallelism
+	+ Locality
+	+ OpenMP
+	+ Strip mining
+	+ Loop interchange
+	+ Dependence analysis
+	+ Independence
+	+ Legal vector
+	+ Scalar expansion
+	+ Anti-dependence
+	+ True dependence
+	+ Permutation
+	+ Row-major order
+	+ Column-major order
+	+ Blocked multiplication
+	+ Spatial locality
+	+ Temporal locality
+	+ Conflict miss
+	+ Capacity miss

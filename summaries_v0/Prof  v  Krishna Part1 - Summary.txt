@@ -1,0 +1,15 @@
+ Compiler optimization is the process of improving the performance of a program's execution without changing its functionality. A compiler is a software tool that converts source code written in a high-level programming language into machine code. Optimization techniques can be applied during the compilation process to enhance the efficiency of the resulting code.
+
+Interpretation and compilation are two ways of executing code. An interpreter reads and executes the code line by line, while a compiler converts the entire code into machine code before execution. The main difference between interpretation and execution is that the former occurs at runtime, while the latter is performed beforehand by the compiler.
+
+An interpreter generates byte code, which is a form of machine code that is designed to be executed by a specific platform. On the other hand, a compiler generates native machine code that is specific to the underlying hardware architecture.
+
+Debugging is easier with an interpreter due to the step-by-step execution nature of the interpreter. Additionally, interpreters can perform runtime checks for errors such as type mismatches and array bounds violations, which can help prevent crashes.
+
+Compilers have the advantage of producing faster code since the machine code is generated before execution, allowing the processor to execute it directly. Furthermore, compilers can perform extensive optimization techniques to produce highly optimized code.
+
+Optimization techniques aim to improve program performance in areas such as code size, execution time, and power consumption. Examples of optimization techniques include dead code elimination, loop unrolling, constant folding, and register allocation.
+
+When designing an optimization, it is essential to ensure that the optimized code maintains the original program's intended behavior. Semantic preservation ensures that the meaning of the code remains unchanged despite any transformations performed during the optimization process. Program analysis is critical for performing effective optimization, enabling the compiler to understand the code's behavior and determine suitable optimization strategies.
+
+May and must analyses are two types of program analyses used in optimization. May analysis provides conservative estimates of possible behaviors, while must analysis provides definite guarantees. Context sensitivity refers to the consideration of the surrounding context of a program entity, while context insensitivity ignores the context. Flow sensitivity considers the ordering of operations, while flow insensitivity disregards the order.

@@ -1,0 +1,3268 @@
+1
+00:00:00,000 --> 00:00:13,400
+Okay, I think we will get started, right. So, next we will see the graph coloring based
+
+2
+00:00:13,400 --> 00:00:21,440
+register allocation, right. So, this is where we were. So, in doing global register allocation,
+
+3
+00:00:21,440 --> 00:00:29,199
+the idea is to essentially make sure that two variables whose live ranges overlap, they
+
+4
+00:00:29,199 --> 00:00:35,519
+are allocated different registers, right. So, this information about which live ranges
+
+5
+00:00:35,519 --> 00:00:41,280
+are overlapping with which other live ranges can be captured in the form of a graph, right.
+
+6
+00:00:41,280 --> 00:00:49,719
+So, you can actually graph with nodes representing these variables and two variables kind of
+
+7
+00:00:49,719 --> 00:00:54,600
+conflict with each other or their live ranges overlap with each other, then you can actually
+
+8
+00:00:55,600 --> 00:01:01,000
+between them, right. So, that is essentially what you are going to call this graph as the
+
+9
+00:01:01,000 --> 00:01:08,000
+interference graph and in the interference graph, nodes represent the variables, right.
+
+10
+00:01:08,000 --> 00:01:13,599
+That that have to be allocated registers and edges between these variables essentially
+
+11
+00:01:13,599 --> 00:01:19,960
+represent whether there is a conflict between those two variables or not, okay. So, there
+
+12
+00:01:19,959 --> 00:01:25,319
+is an edge between V 1 and V 2 if V 1 and V 2 conflict with each other. That means
+
+13
+00:01:25,319 --> 00:01:32,079
+that the live ranges of these overlap or they are live at the same time. Then this register
+
+14
+00:01:32,079 --> 00:01:37,759
+allocation problem itself will turn into what is called the graph coloring problem.
+
+15
+00:01:37,759 --> 00:01:44,439
+Given a graph, we want to color all the nodes of the graph such that, right, two nodes do
+
+16
+00:01:44,439 --> 00:01:50,000
+not have the same color if they have an edge between them, right. That is called the graph
+
+17
+00:01:50,000 --> 00:01:54,560
+coloring problem, right. So, also chromatic number, right, what is the minimum number
+
+18
+00:01:54,560 --> 00:02:00,640
+of colors that are required to color the graph, right. So, if you find the minimum number
+
+19
+00:02:00,640 --> 00:02:05,840
+of colors that are required to color that graph or if you find out whether k colors
+
+20
+00:02:05,840 --> 00:02:12,800
+can be used to color that graph, right, that is essentially a graph coloring problem, okay.
+
+21
+00:02:12,800 --> 00:02:20,800
+Now, given a machine with k registers and given a program, if we can actually construct
+
+22
+00:02:20,800 --> 00:02:26,280
+the interference graph for that program and then ask the question can this graph is k
+
+23
+00:02:26,280 --> 00:02:32,360
+colorable, is this graph k colorable. And if it is yes, then we can actually allocate
+
+24
+00:02:32,360 --> 00:02:39,240
+registers for all the variables in that particular graph. If the answer is no, then of course,
+
+25
+00:02:39,240 --> 00:02:44,680
+not all variables can be allocated this, but some of them can be allocated and the
+
+26
+00:02:44,680 --> 00:02:47,760
+remaining have to be used from the memory, right.
+
+27
+00:02:47,760 --> 00:02:53,760
+So, if the k coloring is possible, then based on the color, those variables or those nodes
+
+28
+00:02:53,760 --> 00:02:58,879
+which have the same color are assigned to the same register and all the variables are
+
+29
+00:02:58,879 --> 00:03:04,879
+assigned these colors, okay. Now, let us see how, what is the complexity of this graph
+
+30
+00:03:05,479 --> 00:03:10,560
+coloring algorithm, right. The complexity of coloring a graph with color greater than
+
+31
+00:03:10,560 --> 00:03:19,560
+3 is NP-hard, okay. And therefore, we have to use heuristic approach to solve this problem,
+
+32
+00:03:19,560 --> 00:03:25,280
+okay. Now, before we go to the heuristic, we will also ask the question what if the
+
+33
+00:03:25,280 --> 00:03:30,199
+graph is not k colorable or what if the graph is k colorable, but we are not able to find
+
+34
+00:03:30,199 --> 00:03:36,799
+that coloring, right. What do we do in those cases? In those cases, of course, we have
+
+35
+00:03:36,799 --> 00:03:42,759
+to spill some of the variables and those variables will be from memory and the remaining variables
+
+36
+00:03:42,759 --> 00:03:49,560
+will be from the registers. So, essentially given a code, we want to construct the interference
+
+37
+00:03:49,560 --> 00:03:55,319
+graph for that code and then see whether the graph can be colored using k colors.
+
+38
+00:03:55,319 --> 00:04:00,159
+And if they can be colored using k colors, then what are the colors that need to be assigned
+
+39
+00:04:00,359 --> 00:04:05,159
+for these different nodes? That essentially tells which registers are being assigned to
+
+40
+00:04:05,159 --> 00:04:11,280
+what variables and which variables share the same register. All of this is basically obtained
+
+41
+00:04:11,280 --> 00:04:17,319
+by doing the graph coloring problem, correct. That is really what we want to do. If it is
+
+42
+00:04:17,319 --> 00:04:23,800
+not k colorable, then which registers or which variables, sorry, which variables are going
+
+43
+00:04:23,879 --> 00:04:31,000
+to come from memory, which variables are actually going to be spilled, correct. And those variables
+
+44
+00:04:31,000 --> 00:04:34,079
+which are spilled, how do we handle them, right.
+
+45
+00:04:34,079 --> 00:04:41,680
+Okay. Now, let us take a bigger example than what we saw earlier, okay. Here I have a sequence
+
+46
+00:04:41,680 --> 00:04:47,680
+of instructions and as you can see that this sequence of instruction has some conditional
+
+47
+00:04:47,680 --> 00:04:53,400
+branches and labels and things like that. So, this is no longer a single basic block,
+
+48
+00:04:53,400 --> 00:05:00,400
+correct. It is not a single basic block because there is a branch instruction here and there
+
+49
+00:05:00,400 --> 00:05:08,399
+is a branch instruction here and there are jumps into this code, right, isn't it.
+
+50
+00:05:08,399 --> 00:05:16,399
+So, this is basically a piece of code which is represented using this control flow graph,
+
+51
+00:05:17,120 --> 00:05:24,120
+right. So, this set of instruction form one basic block. These two instructions form another
+
+52
+00:05:24,120 --> 00:05:31,120
+basic block. This forms a basic block and this one forms a basic block, right. However,
+
+53
+00:05:31,120 --> 00:05:37,120
+when you take this control flow graph and then write it as a linear sequence of instruction,
+
+54
+00:05:37,120 --> 00:05:43,560
+right, it is going to be in one of these two forms. Either you put this instruction first
+
+55
+00:05:43,759 --> 00:05:50,000
+and then branch to this and then subsequently this instruction and then code further or
+
+56
+00:05:50,000 --> 00:05:55,800
+you go this way and then this and then this, right. So, you have to linearize it in some
+
+57
+00:05:55,800 --> 00:06:02,800
+form, right. So, basic block B 1, B 2, B 3 and B 4 or basic
+
+58
+00:06:02,879 --> 00:06:09,879
+block B 1, B 3, B 2 and B 4, correct. So, this is going to be the sequence of instructions
+
+59
+00:06:10,480 --> 00:06:16,279
+and this is the corresponding control flow graph, okay. Now, let us see what happens
+
+60
+00:06:16,279 --> 00:06:23,279
+in terms of live ranges, right. So, S 1, S 2, S 3, S 4 up to S 6 are the temporary variables
+
+61
+00:06:24,759 --> 00:06:30,759
+that we are talking about to which registers need to be allocated, right. So, here are
+
+62
+00:06:30,759 --> 00:06:36,360
+the live ranges for these variables and the important thing to look at is first let us
+
+63
+00:06:36,360 --> 00:06:42,800
+look at S 1. S 1 is being defined here and is used by these instructions and this is
+
+64
+00:06:42,800 --> 00:06:49,800
+the last use of S 1. After this in this code there is no use of S 1. So, the live range
+
+65
+00:06:49,800 --> 00:06:56,800
+of S 1 is from this point to this point, correct. What about the live range of S 2? The live
+
+66
+00:06:57,879 --> 00:07:04,879
+range of S 2, so live range of S 2 is from here, right, till this point, okay, till this
+
+67
+00:07:06,360 --> 00:07:13,199
+point, okay. Well, let us take it live range of S 2 is up to here and then it is not being
+
+68
+00:07:13,199 --> 00:07:19,860
+used anywhere in this basic block. It is not even used in any of these two basic blocks
+
+69
+00:07:19,860 --> 00:07:25,520
+and only used here, right. In other words what happens is that S 2 starts
+
+70
+00:07:25,520 --> 00:07:32,520
+its live range here, but its last use is at this point in time. So, if I consider let
+
+71
+00:07:32,519 --> 00:07:39,519
+us say a point here, technically speaking there is a definition of S 2 prior to this
+
+72
+00:07:39,899 --> 00:07:46,899
+and there is an use of S 2 after this. So, that means that the live range of S 2 is from
+
+73
+00:07:46,899 --> 00:07:53,899
+here to here even though it is not being used in either of these basic blocks, right. So,
+
+74
+00:07:55,799 --> 00:08:02,039
+technically speaking the live range of S 2 is something like this, but it goes I think
+
+75
+00:08:02,040 --> 00:08:07,080
+the some coloring is kind of missing in my thing. So, let us come to that, okay. It
+
+76
+00:08:07,080 --> 00:08:14,080
+is actually from here till here or you can think of this as having two live ranges, right,
+
+77
+00:08:14,920 --> 00:08:20,040
+with a break in between, right, also another way of thinking about it. We will see what
+
+78
+00:08:20,040 --> 00:08:25,040
+are the pros and cons of thinking in this way, what do we mean by the holes and other
+
+79
+00:08:25,040 --> 00:08:30,860
+things, okay. Whereas S 3 is being defined here and is continuously
+
+80
+00:08:31,100 --> 00:08:37,300
+being used in all of these basic blocks including up to this point. So, its live range is kind
+
+81
+00:08:37,300 --> 00:08:44,300
+of continuous from here to here, similarly for S 4, S 5 and S 6, right, yeah. So, what
+
+82
+00:08:46,019 --> 00:08:53,019
+we see here is that there is a hole in the use of S 2's live range in this point, right,
+
+83
+00:08:53,019 --> 00:09:00,019
+because these two basic blocks do not use S 2. We can think of this as having a hole,
+
+84
+00:09:00,579 --> 00:09:05,819
+but both of these variables are going to be recognized as S 2, right. So, let us stick
+
+85
+00:09:05,819 --> 00:09:11,620
+with that for the time being and then see. Now, we can see that S 1 interferes with S
+
+86
+00:09:11,620 --> 00:09:18,059
+2, it interferes with S 3, it also interferes with S 4, right. That means that there will
+
+87
+00:09:18,059 --> 00:09:25,059
+be an edge from S 1 to S 2, S 3 and S 4. S 1 does not interfere with S 5 or S 6, right.
+
+88
+00:09:25,059 --> 00:09:32,059
+Like that you have to identify, right, for each variable with what all it interferes.
+
+89
+00:09:34,059 --> 00:09:41,059
+So, for example, if I take S 5, it interferes with S 6, it also interferes with S 2, because
+
+90
+00:09:42,619 --> 00:09:47,899
+this is actually a live range of S 2. The live range of S 2 is from this point to this
+
+91
+00:09:47,899 --> 00:09:53,899
+point and again from this point to this point. You could have considered this as contiguous
+
+92
+00:09:53,899 --> 00:09:58,899
+across all of these points, but then there is a disadvantage to that, okay. So, we will
+
+93
+00:09:58,899 --> 00:10:03,740
+for the time being consider it like this, right.
+
+94
+00:10:03,740 --> 00:10:10,740
+Now, given this interference graph, the question is we can now ask is this graph 3 colorable,
+
+95
+00:10:12,579 --> 00:10:19,579
+right. Is this graph 3 colorable? The answer is no. I do not know how you got it, but let
+
+96
+00:10:19,860 --> 00:10:26,860
+us say it is no, okay. Okay, there is a clique having four nodes, right. So, it has to be
+
+97
+00:10:29,620 --> 00:10:34,259
+four colorable. It has to be at least four colorable or it has to have at least four
+
+98
+00:10:34,259 --> 00:10:41,259
+colors to color it, right. Okay, now let us ask this question. Is it four colorable? No.
+
+99
+00:10:41,259 --> 00:10:48,259
+No. Yeah, in this one I have not shown S 2, S 2 S 5, okay. Yeah, S 2 S 5 I have shown,
+
+100
+00:10:50,259 --> 00:10:57,259
+right. S 2 S 5 there is an interference. S 2 S 6 there is an interference, yes. Is it
+
+101
+00:10:57,580 --> 00:11:00,259
+four colorable or no? Yes.
+
+102
+00:11:00,259 --> 00:11:07,259
+So, those who are saying no, those who are saying no are on this side and those who are
+
+103
+00:11:07,419 --> 00:11:14,419
+on this side, is it? Okay, so let us see if it can be colored using four colors, right.
+
+104
+00:11:17,179 --> 00:11:24,179
+Is that a valid coloring? For this interference graph, it is a valid coloring, right. You
+
+105
+00:11:26,980 --> 00:11:31,980
+only need four colors. You do not need five, right, because these two nodes have to have
+
+106
+00:11:32,180 --> 00:11:37,180
+colors which are other than red. This has to have color which is other than red, blue
+
+107
+00:11:37,180 --> 00:11:43,259
+or yellow, right and I can actually give the same color to this because these two do not
+
+108
+00:11:43,259 --> 00:11:50,259
+have a overlap, right. Problem? It is okay, right. So, this is four colorable. So, the
+
+109
+00:11:53,580 --> 00:11:58,500
+moment I identify this as four colorable and if I have four registers then I will give
+
+110
+00:11:58,820 --> 00:12:05,820
+register 1 to S 1, 2 to S 2, 3 to S 3, 4 to S 4 and again 1 to S 5 and then 3 to S 6.
+
+111
+00:12:09,860 --> 00:12:13,460
+I have to be careful because I should not allocate the same register which was given
+
+112
+00:12:13,460 --> 00:12:19,179
+to S 2 or I should not allocate this. Well, I could have allocated S 4 also for this,
+
+113
+00:12:19,179 --> 00:12:24,179
+but for this I should not have allocated S 4 or S 3 or S 2. I should only allocate S
+
+114
+00:12:24,179 --> 00:12:31,179
+4, right. So, to identify this coloring that problem for K greater than or equal to 3 is
+
+115
+00:12:33,219 --> 00:12:38,219
+NP hot, okay. Now, let us see how Chaitan's graph coloring algorithm works, right. Chaitan
+
+116
+00:12:38,219 --> 00:12:44,059
+was the first one who have kind of formulated this as a graph coloring problem and proposed
+
+117
+00:12:44,059 --> 00:12:50,259
+a solution to this. He made one key observation which is actually very simple. The sense that
+
+118
+00:12:50,259 --> 00:12:57,259
+you take the interference graph and if there is any node with a degree less than K, strictly
+
+119
+00:12:59,460 --> 00:13:06,460
+less than K, then you can remove that node and then color the rest of the graph, sorry,
+
+120
+00:13:07,340 --> 00:13:12,860
+and you can remove that node and you can keep applying this rule again and again and if
+
+121
+00:13:12,860 --> 00:13:18,419
+you are able to do this and then completely remove all the nodes from the graph then that
+
+122
+00:13:18,419 --> 00:13:24,259
+particular graph is K colorable, right. So, what is the idea? Take the graph, find out
+
+123
+00:13:24,259 --> 00:13:30,620
+if there is an edge, if there is a node with degree less than K, then remove that node
+
+124
+00:13:30,620 --> 00:13:37,620
+along with all its edges, right. Keep doing this again and again and then if you are successful
+
+125
+00:13:39,699 --> 00:13:46,699
+in removing all the nodes from the graph then that graph is K colorable, right. Let us see
+
+126
+00:13:46,780 --> 00:13:53,780
+why this is true or why this helps, right. So, let us take, we take a graph G, right
+
+127
+00:13:55,500 --> 00:14:00,860
+and then remove one node which has degree less than K. The resulting node, resulting
+
+128
+00:14:00,860 --> 00:14:07,860
+graph let us call it as G prime, right. The question is if G prime is K colorable, then
+
+129
+00:14:08,259 --> 00:14:15,259
+G is also K colorable. Why? Because the node that you have removed only has K minus 1 edge
+
+130
+00:14:16,700 --> 00:14:23,700
+at most K minus 1 edges, correct. So, it will at least have one spare color other than
+
+131
+00:14:23,980 --> 00:14:30,980
+this K minus 1. That color can be given to that node, right. So, I have the graph G prime
+
+132
+00:14:31,220 --> 00:14:38,220
+and I have the node G, I mean I have the node N. This node has at most K minus 1 edges,
+
+133
+00:14:38,220 --> 00:14:44,340
+right. That means that it is going to be adjacent only to K minus 1 nodes and even if all of
+
+134
+00:14:44,340 --> 00:14:50,300
+these K minus 1 nodes have different colors, I have one more color to be given for this
+
+135
+00:14:50,300 --> 00:14:57,300
+node, correct. Therefore, if I color this graph with K colors,
+
+136
+00:14:57,300 --> 00:15:04,300
+I can color this entire graph also using K colors, got it, right. So, you can now eliminate
+
+137
+00:15:06,180 --> 00:15:13,180
+this particular node and now you can apply this idea again and again and then keep removing
+
+138
+00:15:13,179 --> 00:15:20,179
+nodes which are which have less than K edges, right. Why do we say strictly less than and
+
+139
+00:15:20,779 --> 00:15:27,779
+not less than or equal to? Because if it is equal to, then if the adjacent nodes all have
+
+140
+00:15:29,779 --> 00:15:36,779
+different colors, then there will be no color left for this, right. Therefore, in that case,
+
+141
+00:15:36,899 --> 00:15:43,899
+if it is equal to K, we cannot guarantee that the entire G can be colored using K colors.
+
+142
+00:15:44,259 --> 00:15:50,459
+But if it is less than K, then if G prime is K colorable, then G is also K colorable,
+
+143
+00:15:50,459 --> 00:15:55,500
+right. So, this is the simple observation that Chai then made and then using this he
+
+144
+00:15:55,500 --> 00:16:02,500
+proposed this graph coloring algorithm, right. So, let us see where this how this works and
+
+145
+00:16:02,700 --> 00:16:09,700
+right. Essentially, the idea is that you take the graph repeatedly, remove nodes which have
+
+146
+00:16:10,740 --> 00:16:17,340
+fewer than K colors, fewer than K edges, right. So, this step is what we are going to call
+
+147
+00:16:17,340 --> 00:16:24,340
+as the simplified step. Keep removing the nodes which have less than K edges, right.
+
+148
+00:16:25,559 --> 00:16:31,679
+If you end up with an empty graph, then we are done. The simplified step is over. If
+
+149
+00:16:31,759 --> 00:16:38,120
+you end up with a graph in which all nodes have degree greater than or equal to K, then
+
+150
+00:16:38,120 --> 00:16:45,120
+you cannot do simplify anymore, right. At that point in stamp, you have to take the
+
+151
+00:16:45,199 --> 00:16:52,199
+decision to spill a variable because now you have a graph which has in which every node
+
+152
+00:16:52,799 --> 00:16:59,799
+has K or more edges. That means that it cannot, it may not be K colorable. It may not be K
+
+153
+00:17:00,799 --> 00:17:07,799
+colorable, right. So, you decide and pick one node and then say that this node we are
+
+154
+00:17:08,200 --> 00:17:15,200
+going to spill. Then you remove that node with all the associated edges, right. Now,
+
+155
+00:17:15,319 --> 00:17:21,039
+you have a reduced graph. Now, again start doing your simplify operation. If you can
+
+156
+00:17:21,039 --> 00:17:27,919
+keep removing more nodes with you know edges a degree less than K, keep removing them.
+
+157
+00:17:27,920 --> 00:17:33,100
+If you end up again in a graph in which all nodes have K or more edges, then make one
+
+158
+00:17:33,100 --> 00:17:40,100
+more spill decision. Like this you iterate, right. You cannot, right. The processor does
+
+159
+00:17:44,759 --> 00:17:51,759
+not have more than K registers, right. You remember it. You are doing it for a specific
+
+160
+00:17:51,759 --> 00:17:58,759
+reason, right. Okay. So, yes. Not arbitrary. One of the nodes which has degree greater
+
+161
+00:18:06,319 --> 00:18:13,319
+than K, yes. Possibly. Among the nodes which have degree greater than K, which one to pick?
+
+162
+00:18:14,319 --> 00:18:21,319
+You are saying pick one with certain heuristics. Possibly. We will talk about that. We will
+
+163
+00:18:22,559 --> 00:18:28,359
+come back to that point, right. Okay. So, essentially the algorithm works in the following
+
+164
+00:18:28,359 --> 00:18:35,359
+way, right. Given a program, you compute all the live ranges, build the interference graph,
+
+165
+00:18:35,439 --> 00:18:40,799
+right. After you have built the interference graph, do this simplify operation. What does
+
+166
+00:18:40,799 --> 00:18:47,319
+simplify do? Keep removing nodes with degree less than or equal to, sorry less than K,
+
+167
+00:18:47,319 --> 00:18:54,319
+not less than or equal to, degree less than K. If the simplify process is completely over,
+
+168
+00:18:54,559 --> 00:19:01,559
+right. So, if you cannot simplify, then select a node and spill and then go back again and
+
+169
+00:19:02,559 --> 00:19:09,559
+then try to do simplify. And if you cannot do again, do this process. After having done
+
+170
+00:19:11,159 --> 00:19:15,799
+this, then what you are going to do is that we are once you have simplified the entire
+
+171
+00:19:15,799 --> 00:19:21,319
+graph, right. After this entire process, you would have simplified and you would have got
+
+172
+00:19:21,319 --> 00:19:25,799
+all the nodes being removed. We need to do the coloring part which is not described in
+
+173
+00:19:25,799 --> 00:19:29,679
+this diagram. I will talk about that later and that is really what is called the reverse
+
+174
+00:19:29,680 --> 00:19:35,680
+path. This figure has been wrongly drawn, okay. We will talk about that. So, here is
+
+175
+00:19:35,680 --> 00:19:42,200
+the algorithm for doing this, okay. Before I go into that, maybe I can just talk about
+
+176
+00:19:42,200 --> 00:19:48,000
+it here. So, what I do is that whenever I do simplify, what did I say? You can remove
+
+177
+00:19:48,000 --> 00:19:55,000
+a node from the graph and if it has less than K edges, then we know that if the rest of
+
+178
+00:19:55,000 --> 00:20:00,079
+the graph can be colored, then this can be colored, correct. So, that means that when
+
+179
+00:20:00,079 --> 00:20:06,720
+I want to color this graph, first I should color this part and after having colored this
+
+180
+00:20:06,720 --> 00:20:12,400
+part, I can come and color this node. Then I remove one more node and I have some other
+
+181
+00:20:12,400 --> 00:20:19,400
+graph. What do I say? Color that remaining graph, color this node and then color this
+
+182
+00:20:19,440 --> 00:20:24,400
+node. So, what we are going to do is that we are going to color the node in the reverse
+
+183
+00:20:24,400 --> 00:20:30,360
+order in which they have been simplified. That means the first one which I have removed
+
+184
+00:20:30,360 --> 00:20:35,920
+would be the last one to be assigned a color, correct. That means that I need to use some
+
+185
+00:20:35,920 --> 00:20:41,800
+kind of a data structure to remember in what order I am removing the nodes. Since I am
+
+186
+00:20:41,800 --> 00:20:47,240
+going to color them in the reverse order, the obvious data structure is a stack. So,
+
+187
+00:20:47,240 --> 00:20:54,240
+as you keep removing the nodes, you keep pushing them into a stack with an annotation saying
+
+188
+00:20:54,240 --> 00:21:00,120
+that whether this is removed because you have fewer than k edges or you have removed
+
+189
+00:21:00,120 --> 00:21:05,120
+it because you decided as a spill candidate, correct. So, these are the two possibilities.
+
+190
+00:21:05,120 --> 00:21:11,079
+Whenever you remove a node, you remove it because it has fewer than k edges. Therefore,
+
+191
+00:21:11,079 --> 00:21:15,480
+there is no spill that is required for that. But if you have removed it because no other
+
+192
+00:21:15,480 --> 00:21:20,680
+nodes can be removed, you chose this as a spill candidate, then it is going to be spilled.
+
+193
+00:21:21,120 --> 00:21:28,120
+So with that information, you actually push it into a stack. Now, sorry, yeah, go ahead.
+
+194
+00:21:28,120 --> 00:21:32,320
+Instead of removing from the graph, can you merge two nodes?
+
+195
+00:21:32,320 --> 00:21:37,160
+You may not be able to merge two nodes, right, because these may be two different variables.
+
+196
+00:21:37,160 --> 00:21:43,920
+They may be having different values, right. But hold on to your question of merging. It
+
+197
+00:21:43,920 --> 00:21:44,920
+is actually a…
+
+198
+00:21:44,920 --> 00:21:45,920
+It is the same register.
+
+199
+00:21:46,160 --> 00:21:51,360
+Yeah, you cannot, yeah, okay. So, let me ask you the question in the following way. So,
+
+200
+00:21:51,360 --> 00:21:57,519
+two nodes represent two different variables. When can you say that they will, they can
+
+201
+00:21:57,519 --> 00:21:58,519
+be merged?
+
+202
+00:21:58,519 --> 00:22:03,519
+They have all the same numbers and there is no less connecting there.
+
+203
+00:22:03,519 --> 00:22:09,519
+No, no, no, do not think of this just as a graph, okay. The graph also has a meaning,
+
+204
+00:22:10,119 --> 00:22:15,720
+right. One of them is S 1, variable S 1. Another is variable S 2. Can I say S 1 is
+
+205
+00:22:15,720 --> 00:22:22,720
+equal to S 2? S 1 has computed something. S 1 maybe has computed i plus 4. S 2 has computed,
+
+206
+00:22:22,720 --> 00:22:29,720
+let us say j times 4. Are these two variables the same? Temporary is the same. How can I
+
+207
+00:22:29,720 --> 00:22:35,720
+merge them? I cannot. Strictly speaking, I cannot. But there is a point in what you said.
+
+208
+00:22:36,420 --> 00:22:43,120
+If they have the same value, correct, then I can merge them. If they evaluate the same
+
+209
+00:22:43,120 --> 00:22:50,120
+thing, then I can merge them, right. That is possible. That we will talk about it little
+
+210
+00:22:50,120 --> 00:22:55,240
+later, right. So, that is why you cannot say that if node 1 and node 2 are connecting to
+
+211
+00:22:55,240 --> 00:23:00,519
+the same set of edges, I can merge them. No, because these two are two different variables.
+
+212
+00:23:00,519 --> 00:23:07,519
+They possibly hold different values, right. If I merge them, then my program is different,
+
+213
+00:23:07,519 --> 00:23:13,400
+correct. Yes, sir. Okay. So, what we are going to do is that during the simplify phase as
+
+214
+00:23:13,400 --> 00:23:17,639
+we keep removing the nodes, we are going to push them into the stack with the annotation
+
+215
+00:23:17,639 --> 00:23:23,599
+whether they are removed because they have fewer edges or because they are spill candidates.
+
+216
+00:23:23,599 --> 00:23:27,879
+Then when you want to color them, you pop these nodes from the stack and then color
+
+217
+00:23:27,960 --> 00:23:33,840
+them. And as you color them, you keep adding these edges back into the graph and then see
+
+218
+00:23:33,840 --> 00:23:39,120
+how new colors can be assigned. So, we will go through that process, right, using an example.
+
+219
+00:23:39,120 --> 00:23:44,800
+But before that, here is this entire algorithm, okay. So, in the forward pass, what you do
+
+220
+00:23:44,800 --> 00:23:51,080
+is that you after, so first step is of course building the interference graph. Then you
+
+221
+00:23:51,079 --> 00:23:59,039
+keep doing this repeatedly. If G has a node V such that its degree is less than K, right,
+
+222
+00:23:59,039 --> 00:24:05,699
+number of neighbors is less than K, then you can do the simplify step, remove this node,
+
+223
+00:24:05,699 --> 00:24:10,079
+push it into the stack and say there is no spill for this node, right, that this is going
+
+224
+00:24:10,079 --> 00:24:16,119
+to be allocated a register, right. After this step, you delete the node V along with all
+
+225
+00:24:16,239 --> 00:24:21,799
+the edges, all the edges that are incident on V, right. And you keep doing this. As long
+
+226
+00:24:21,799 --> 00:24:28,799
+as you can do simplify. If you end up in a sub graph in which all nodes have K or more
+
+227
+00:24:28,799 --> 00:24:34,919
+edges, right, that means that G is non-empty and every node has a degree greater than or
+
+228
+00:24:34,919 --> 00:24:41,919
+equal to K at this point in time. Then you choose a node for spilling. You can actually
+
+229
+00:24:42,440 --> 00:24:47,480
+choose a node which is least profitable, right, not necessarily an arbitrary node, but the
+
+230
+00:24:47,480 --> 00:24:52,480
+one which is, which incurs minimum cost. That can be decided using various heuristics,
+
+231
+00:24:52,480 --> 00:24:57,720
+right. And then you say that that is a node which is going to be spilled. Push that node
+
+232
+00:24:57,720 --> 00:25:04,160
+into the stack, right, and then say that this is a spill node, right, and then delete that
+
+233
+00:25:04,160 --> 00:25:10,060
+node along with all its incident edges. And after you have done this, you go back here
+
+234
+00:25:10,259 --> 00:25:14,740
+and then you start doing this. So, there is a, remember there is a repeat until loop here,
+
+235
+00:25:14,740 --> 00:25:19,899
+okay. So, once you remove one node for spill, again you try to see if you can simplify.
+
+236
+00:25:19,899 --> 00:25:26,139
+If you can simplify, keep doing that. If you cannot, come back and then spill one more
+
+237
+00:25:26,139 --> 00:25:32,339
+node and keep doing this until the entire graph, all the nodes in the graphs are removed.
+
+238
+00:25:32,339 --> 00:25:38,740
+As and when the nodes are being removed, they are being pushed into the stack, okay. In
+
+239
+00:25:38,740 --> 00:25:42,779
+the reverse pass which is the coloring pass, which is what I have not indicated in the
+
+240
+00:25:42,779 --> 00:25:47,140
+diagram, right. In the coloring pass what we are going to do is that we are going to
+
+241
+00:25:47,140 --> 00:25:54,980
+pop each node from the stack and then see the tag. If the tag is no spill, then we have
+
+242
+00:25:54,980 --> 00:26:02,180
+to allocate a register, right. We allocate a register by considering all the edges, right,
+
+243
+00:26:02,180 --> 00:26:09,180
+that we have removed and then see to which nodes it is incident on, right. Obviously,
+
+244
+00:26:09,180 --> 00:26:14,299
+since we have removed it and pushed it into the stack with a no spill, right, at this
+
+245
+00:26:14,299 --> 00:26:21,299
+point in time it will only have fewer than k neighbors. Therefore, we can allocate the
+
+246
+00:26:21,420 --> 00:26:26,700
+color which is not being assigned to any of its neighbors, right, at this point in time.
+
+247
+00:26:26,700 --> 00:26:31,980
+It may eventually have more than k neighbors, but at this point in time as we have popped
+
+248
+00:26:31,980 --> 00:26:36,980
+the node there is a sub graph that we have. It will only have fewer than k, so I can
+
+249
+00:26:36,980 --> 00:26:43,980
+always assign a color for this, right. So, that is really what we are going to do, but
+
+250
+00:26:44,299 --> 00:26:50,700
+if the tag says that it is spill, right, then it is a spill node. I will mark v as not being
+
+251
+00:26:50,700 --> 00:26:57,700
+allocated a register and I will reintroduce all the edges, okay and I will continue to
+
+252
+00:26:58,100 --> 00:27:05,100
+do this until the stack becomes empty, all right. Let us see how this works. Any questions
+
+253
+00:27:05,180 --> 00:27:07,420
+before we go into the details, right.
+
+254
+00:27:07,420 --> 00:27:13,380
+So, the coloring process is very simple. You pop the element from the stack, see if it
+
+255
+00:27:13,380 --> 00:27:19,500
+has a tag spill or no spill. If it has a tag spill then of course, you are going to say
+
+256
+00:27:19,500 --> 00:27:25,700
+that this is not going to be allocated a register, introduce the node and all its incident edges.
+
+257
+00:27:25,700 --> 00:27:32,420
+If it says no spill then what you need to do is you introduce all the incident edges
+
+258
+00:27:32,420 --> 00:27:38,019
+and then see which are the nodes to which this is a neighbor to, right and you are guaranteed
+
+259
+00:27:38,019 --> 00:27:43,140
+that this will be less than k, right. That is why you have removed this node and then
+
+260
+00:27:43,140 --> 00:27:50,140
+put into the stack saying no spill because it has only fewer than k nodes, right. At
+
+261
+00:27:50,340 --> 00:27:55,700
+most only k minus 1 colors would have been used. So, you can assign the kth color to
+
+262
+00:27:55,700 --> 00:28:00,700
+this or you can assign, yeah you can assign the kth color to it, right. That is really
+
+263
+00:28:00,700 --> 00:28:06,700
+how you color this and you keep doing this and then rebuild this interference graph completely.
+
+264
+00:28:06,700 --> 00:28:11,900
+By the time all the nodes would have been colored. So, let us see this in the form of
+
+265
+00:28:11,900 --> 00:28:18,259
+an example, okay but before we go into that let us talk about the complexity. Since you
+
+266
+00:28:18,259 --> 00:28:23,019
+are going to go through all the nodes one by one it is going to have a complexity which
+
+267
+00:28:23,019 --> 00:28:29,660
+is proportional to the number of nodes, okay.
+
+268
+00:28:29,660 --> 00:28:33,940
+And this is an algorithm which is actually used in many production compilers. Again there
+
+269
+00:28:33,940 --> 00:28:38,460
+are some positives as well as some negatives which we will talk about it little later,
+
+270
+00:28:38,460 --> 00:28:45,460
+right. We will take an example. So, in this particular case I am going to take this example,
+
+271
+00:28:46,460 --> 00:28:52,900
+and these are the live ranges for these variables and let us not worry how I have constructed
+
+272
+00:28:52,900 --> 00:28:57,220
+the interference graph but this is the interference graph, right because it will take you quite
+
+273
+00:28:57,220 --> 00:29:02,299
+some time to figure out all the edges and other things but you can go back and check.
+
+274
+00:29:02,299 --> 00:29:09,299
+For example if you want to look at B, right, node B interferes with M, E, C and D and also
+
+275
+00:29:09,299 --> 00:29:16,299
+K, right. So, you can see that M, E, C, D, J and K, okay, J also, right, J also because
+
+276
+00:29:27,980 --> 00:29:32,980
+I think J, yeah I think this is wrong. J should have been from here to here, sorry about that,
+
+277
+00:29:32,980 --> 00:29:38,940
+right. And remember this also talks about which variables are live out. So, for live
+
+278
+00:29:39,539 --> 00:29:43,580
+out variables we would like to keep them in the register so that live range is also being,
+
+279
+00:29:43,580 --> 00:29:50,580
+I mean that is shown by this extra point over here, extra program point over here, okay,
+
+280
+00:29:52,299 --> 00:29:58,620
+all fine. So, we have started off with this graph. Let us try to see if K colorable for
+
+281
+00:29:58,620 --> 00:30:05,620
+K equal to 4, right. Now pick any node arbitrarily which has fewer
+
+282
+00:30:06,419 --> 00:30:13,419
+than K edges, 4 edges, right. In this case I have picked H, I can remove that, I will
+
+283
+00:30:14,019 --> 00:30:21,019
+push it into the stack. Next one G, I can remove that. Next one K, F, right, E, I could
+
+284
+00:30:28,299 --> 00:30:35,299
+have removed M also because M has only 3 edges at this point in time, right. Then B, I can
+
+285
+00:30:36,259 --> 00:30:43,259
+remove D, right. Then of course J and C have 0 edges, I can remove them one by one, right.
+
+286
+00:30:44,979 --> 00:30:51,979
+So, as I keep removing them I have pushed them into my stack, right. So, you will see
+
+287
+00:30:53,019 --> 00:30:59,139
+this, right. So, this is finally what I have. Now I have to start coloring them. Since J
+
+288
+00:30:59,139 --> 00:31:04,899
+is the only node at this point in time I can give one color for this and then I will pop
+
+289
+00:31:04,940 --> 00:31:11,019
+this node. I have given the yellow color for this. Now the next node is C. I see what are
+
+290
+00:31:11,019 --> 00:31:16,660
+the incident edges on this. C and J originally did not have an edge between them. So, it
+
+291
+00:31:16,660 --> 00:31:23,660
+can also be given the same color, right. I can remove that. Then I introduce node D.
+
+292
+00:31:24,259 --> 00:31:30,380
+Node D has an edge to J as well as an edge to C. So, it has to be any color other than
+
+293
+00:31:30,380 --> 00:31:36,620
+the color of J or C. Fortunately for us J and C share the same color. Therefore, it
+
+294
+00:31:36,620 --> 00:31:43,380
+has to be any color other than yellow. So, let us say it was given red, right. Then the
+
+295
+00:31:43,380 --> 00:31:49,740
+next one, right. So, D has been now removed from the stack. The next one is B. You put
+
+296
+00:31:49,740 --> 00:31:56,140
+B, right and these are the edges. B has an edge to C, B has an edge to D and B has an
+
+297
+00:31:56,220 --> 00:32:02,340
+edge to J. So, it cannot be yellow. It cannot be red. So, let us give it a color blue. We
+
+298
+00:32:02,340 --> 00:32:09,340
+still have only used three colors. Then we remove B. We have the next node is M and M
+
+299
+00:32:10,300 --> 00:32:17,300
+has edges to B, C and D. Something is wrong. My coloring scheme has gone bad. So, this
+
+300
+00:32:17,299 --> 00:32:24,299
+cannot be red. This has to be green, okay. So, let us try to write it as green. Hopefully,
+
+301
+00:32:27,619 --> 00:32:34,619
+that will not cause a problem, but that is the only color I can give, right.
+
+302
+00:32:34,619 --> 00:32:41,619
+So, this has to be green because this cannot be yellow. It cannot be blue. It cannot be
+
+303
+00:32:47,539 --> 00:32:54,539
+red. Those are the three colors. So, it has to be green, right. Now, what about the next
+
+304
+00:32:54,539 --> 00:33:01,539
+node E? Bad, my bad, okay. But we will try to give a different color for E, okay. Let
+
+305
+00:33:02,539 --> 00:33:09,539
+us see. Maybe you can suggest me what color to be given for this. Yes, yeah, red or orange,
+
+306
+00:33:12,859 --> 00:33:19,859
+whatever we say, right. Remember, this is not red. This is green, right. That is why
+
+307
+00:33:20,659 --> 00:33:27,659
+we are changing this. So, this is red, not green. I became color blind when I was doing
+
+308
+00:33:27,660 --> 00:33:34,660
+this, okay, right, all right. Now, we can remove E also from our stack. Then the next
+
+309
+00:33:41,980 --> 00:33:48,980
+one is F and as you introduce F, now there is no problem, okay. Now, F is adjacent to
+
+310
+00:33:49,220 --> 00:33:56,220
+J, E and M. So, it cannot be green. It cannot be red. It cannot be yellow. So, we will give
+
+311
+00:33:56,460 --> 00:34:03,460
+blue for that. The next one is K, right. K is adjacent to B, D and J. Therefore, we
+
+312
+00:34:06,220 --> 00:34:13,220
+give a color which is other than blue, red or yellow. And then finally, we have G for
+
+313
+00:34:13,940 --> 00:34:20,940
+which we can give red and then H for which we can give blue, correct. So, effectively
+
+314
+00:34:21,940 --> 00:34:28,940
+we have colored this using four colors, right. This is how Chaitanya's algorithm works.
+
+315
+00:34:29,059 --> 00:34:34,340
+Now let us see what happens if we have three colors, right. Four, it is four colorable.
+
+316
+00:34:34,340 --> 00:34:39,780
+Let us see if it is three colorable, right. Of course, you only do for the number of registers
+
+317
+00:34:39,780 --> 00:34:43,619
+that are available in your architecture. But let us say I have another architecture in
+
+318
+00:34:43,619 --> 00:34:49,139
+which I have only three registers available. Then what happens in this example? We again
+
+319
+00:34:49,139 --> 00:34:55,259
+go through the same way. Now you remove only nodes which have two or fewer edges, right
+
+320
+00:34:55,259 --> 00:35:02,259
+because K is three. So, H can be removed, G can be removed, but then after this any
+
+321
+00:35:03,019 --> 00:35:10,019
+node at least has three edges. For example, yeah, every node has three or four edges or
+
+322
+00:35:12,339 --> 00:35:17,339
+even more. Nothing even has three. Everything has four edges. Well, F has three edges, correct.
+
+323
+00:35:18,340 --> 00:35:24,420
+C also has three edges, but they cannot be removed. K also has three edges. They cannot
+
+324
+00:35:24,420 --> 00:35:31,420
+be removed because we have only three registers. We have to take nodes which have fewer than
+
+325
+00:35:31,420 --> 00:35:38,420
+three. That means two or one, right. So, none of these nodes can now be removed. So, now
+
+326
+00:35:38,620 --> 00:35:45,620
+we have to take a call and spill. So, let us say somehow I pick node B for spilling,
+
+327
+00:35:45,619 --> 00:35:52,619
+right. So, now I push B with the tag spill, right. Now what happens? B can be removed.
+
+328
+00:35:54,739 --> 00:36:01,739
+Now do I have any node which has two edges? K. So, I can say K is no spill, remove K.
+
+329
+00:36:04,980 --> 00:36:11,980
+Then C is no spill, I can remove that. Then D. Then almost every node has now M. So, now
+
+330
+00:36:15,819 --> 00:36:22,819
+we have E, F, J, right. So, here we were trying to color this graph using three colors, but
+
+331
+00:36:27,900 --> 00:36:34,900
+then we have ended up with one node tagged as spill. So, Chaitan's algorithm essentially
+
+332
+00:36:35,299 --> 00:36:41,500
+says, you have a question? Do you have a question? Yeah.
+
+333
+00:36:41,500 --> 00:36:48,500
+You have chosen some other node other than B. Yes, very good. Yes. Possibly, possibly,
+
+334
+00:36:49,860 --> 00:36:56,139
+right. You can try with some spilling some other node and then, see I chose B because
+
+335
+00:36:56,139 --> 00:37:02,840
+B had more neighbors. By removing that, I am removing so many edges from that, okay.
+
+336
+00:37:02,840 --> 00:37:08,780
+But it may be the case that B may be required more often, in which case this may not be
+
+337
+00:37:08,780 --> 00:37:12,820
+a good decision. That is why you remember you asked the question. Instead of arbitrarily
+
+338
+00:37:12,820 --> 00:37:18,780
+spilling, now we may not necessarily arbitrarily pick a node. We may pick it slightly intelligently.
+
+339
+00:37:18,780 --> 00:37:25,780
+So one cost that was used by Chaitan in his algorithm is the number of times it is used
+
+340
+00:37:26,060 --> 00:37:31,620
+divided by the number of edges, okay. So, you are basically taking into account both
+
+341
+00:37:31,620 --> 00:37:38,620
+the usage and the number of overlap that it is causing. By doing that, you are actually
+
+342
+00:37:38,780 --> 00:37:45,780
+saying there is no guarantee that this will be optimal, but likely to be efficient. It
+
+343
+00:37:45,780 --> 00:37:52,780
+is a heuristic. So, what you say is correct. If you.
+
+344
+00:37:57,620 --> 00:38:04,340
+Again this is done arbitrarily in Chaitan's algorithm and that by itself can, well that
+
+345
+00:38:04,340 --> 00:38:09,519
+can influence to only certain extent. It will not influence in terms of whether something
+
+346
+00:38:09,519 --> 00:38:16,519
+becomes colorable or not colorable because that is decided by your thing, okay. So, it
+
+347
+00:38:16,539 --> 00:38:23,539
+does not affect any other thing other than what color goes where, okay, all right. Now,
+
+348
+00:38:23,740 --> 00:38:28,460
+let us start coloring this, right. Let us go through the reverse pass. Now, J has to
+
+349
+00:38:28,460 --> 00:38:35,460
+be given a color, right. So, let us give J yellow color and we give blue color to F,
+
+350
+00:38:36,619 --> 00:38:41,619
+although we could have, sorry, yeah, right, because there is an edge between J and F.
+
+351
+00:38:41,619 --> 00:38:48,619
+Next, we remove E because E is connected to both J and F. It has to be given a color other
+
+352
+00:38:49,579 --> 00:38:55,380
+than blue and yellow. So, these are the three colors that we have. We do not have green
+
+353
+00:38:55,700 --> 00:39:01,380
+anymore. Remember that. Now, I know why that became red. Okay, now, now let us look at
+
+354
+00:39:01,380 --> 00:39:08,380
+M next, okay. M is connected to E and F. So, it can be given the yellow color. D is connected
+
+355
+00:39:12,980 --> 00:39:19,980
+to J and M and it can be given the red color. C which is connected to D and M and it can
+
+356
+00:39:19,980 --> 00:39:26,980
+be given the blue color, right. Then K which is connected to J and D, right. These are
+
+357
+00:39:35,380 --> 00:39:40,059
+the connections that we have removed. Very good point, yes. So, somehow you have to remember
+
+358
+00:39:40,059 --> 00:39:45,659
+these edges that you have removed also or you can actually look at your original graph
+
+359
+00:39:45,659 --> 00:39:52,219
+and only connect those edges for the nodes that are already present, correct. So, for
+
+360
+00:39:52,219 --> 00:39:58,219
+example, B is not there. So, an edge between K and B need not have to be considered, right.
+
+361
+00:39:58,219 --> 00:40:03,219
+So, it need not have to be stored. You can actually infer it from other, correct. Now,
+
+362
+00:40:03,219 --> 00:40:10,219
+what, what is the next node? B. B is a spill node. So, it need not have to be allocated
+
+363
+00:40:10,859 --> 00:40:17,859
+any color. So, it is not being colored, but now keep introducing all the edges, right.
+
+364
+00:40:19,939 --> 00:40:26,939
+And of course, you have G which can be colored and H which can be colored, right. To go back
+
+365
+00:40:28,099 --> 00:40:32,859
+to your question, what would have happened if I have chosen a different color? See for
+
+366
+00:40:32,859 --> 00:40:37,939
+example, when I colored F instead of blue if I have chosen red, then the colors would
+
+367
+00:40:37,940 --> 00:40:43,980
+have cyclically gone around somewhere else, not necessarily cyclically. Some change would
+
+368
+00:40:43,980 --> 00:40:50,019
+have happened, but in terms of whether it is colorable or not colorable, no other change
+
+369
+00:40:50,019 --> 00:40:54,980
+would have happened. No additional cost would have changed, right. So, that coloring decision
+
+370
+00:40:54,980 --> 00:41:01,980
+can be pretty much arbitrary. Choose a color which is not used by any of the previous ones,
+
+371
+00:41:02,460 --> 00:41:09,460
+right. So, this graph we have colored it using three colors, but then we have to spill one
+
+372
+00:41:09,460 --> 00:41:16,460
+node, right. And we have chosen a node which possibly has the least cost, right. If B is
+
+373
+00:41:18,420 --> 00:41:22,940
+being used more often, then you should have chosen some other node, maybe E or maybe something
+
+374
+00:41:22,940 --> 00:41:29,260
+else, right at that point in time and then chose to spill that which might have caused
+
+375
+00:41:29,260 --> 00:41:35,100
+more nodes to spill, right, which might have caused. We do not know. It is a heuristic
+
+376
+00:41:35,100 --> 00:41:38,100
+algorithm, right. Yes.
+
+377
+00:41:38,100 --> 00:41:43,100
+Sir, it is still possible, this is not optimal for this matrix.
+
+378
+00:41:43,100 --> 00:41:44,100
+Definitely not optimal, yes.
+
+379
+00:41:44,100 --> 00:41:45,100
+Because in this case, it is still optimal.
+
+380
+00:41:45,100 --> 00:41:52,100
+But you cannot color this graph using three colors. That much is sure, right. I mean at
+
+381
+00:41:52,099 --> 00:41:59,099
+least this graph. In general, you cannot guarantee that, okay. I will give you an example little
+
+382
+00:42:01,860 --> 00:42:08,860
+later on, okay. A case where Chaitin's algorithm would say you need to spill, but you do not
+
+383
+00:42:09,980 --> 00:42:14,980
+necessarily need to spill. That is also possible. I will give you an example for that, right.
+
+384
+00:42:14,980 --> 00:42:21,980
+So, do you have a question Phil? Okay, it is not optimal. Definitely not.
+
+385
+00:42:22,500 --> 00:42:27,500
+And depending on what node you choose to spill, right, like what you pointed out earlier,
+
+386
+00:42:27,500 --> 00:42:33,420
+if I have not chosen B, but I have chosen something else like a E or a M, I may end
+
+387
+00:42:33,420 --> 00:42:40,420
+up spilling more nodes, right. I may end up, okay. So, the spill heuristic which we talked
+
+388
+00:42:43,179 --> 00:42:49,179
+about earlier is that you have to identify a node which gives you least cost. Chaitin
+
+389
+00:42:49,179 --> 00:42:56,179
+actually defined this cost to be the number of times the node is being used, okay. So,
+
+390
+00:42:56,539 --> 00:43:01,019
+the spill heuristics takes into account the cost which is the number of times the node
+
+391
+00:43:01,019 --> 00:43:07,500
+is being, the variable is being used and the degree which is the number of adjacent or
+
+392
+00:43:07,500 --> 00:43:12,940
+number of variables with which they interfere. It takes into account a combination of these
+
+393
+00:43:12,940 --> 00:43:17,899
+two costs and from what I understand, it is actually cost of n divided by degree of n.
+
+394
+00:43:18,099 --> 00:43:25,099
+So, the more degree you have, the fewer would be the overall cost or the fewer cost you
+
+395
+00:43:25,300 --> 00:43:30,860
+have, then also it will be more. So, if the cost is higher, then spilling that node is
+
+396
+00:43:30,860 --> 00:43:36,820
+not a good decision. If the degree is lower, spilling that node may not be a good decision,
+
+397
+00:43:36,820 --> 00:43:43,820
+may not be, right. So, it basically uses this ratio of cost to degree as the overall metric
+
+398
+00:43:44,820 --> 00:43:50,900
+by we saw, there you go. It is cost of n by degree of n and the one which has fewer cost
+
+399
+00:43:50,900 --> 00:43:54,100
+is what is chosen for spill at that point in time, okay.
+
+400
+00:43:54,100 --> 00:43:57,100
+Alright, any questions so far? Nan, right.
+
+401
+00:43:57,100 --> 00:44:00,100
+How will you get the cost?
+
+402
+00:44:00,100 --> 00:44:07,100
+How will you get the cost? Again, remember we talked about the usage based register allocation
+
+403
+00:44:07,100 --> 00:44:11,500
+method where we counting the, where we are counting the number of times each variable
+
+404
+00:44:11,500 --> 00:44:18,500
+is being used and where we are using the dynamic counts, something similar to that,
+
+405
+00:44:18,500 --> 00:44:25,500
+right. Alright, okay. Now, let us see some extensions to this, right. There are three
+
+406
+00:44:27,179 --> 00:44:31,420
+possible extensions that people have talked about. One is what is called the optimistic
+
+407
+00:44:31,420 --> 00:44:36,980
+spill. The other one is coalescing which you talked about and the third one is live range
+
+408
+00:44:37,019 --> 00:44:44,019
+splitting. We will introduce that also, right. So, optimistic spill is essentially that when
+
+409
+00:44:44,099 --> 00:44:49,699
+the graph cannot be simplified further, we remove one node as a spill node and then tag
+
+410
+00:44:49,699 --> 00:44:55,860
+it as spill. At that point in time we say that because I cannot simplify the graph,
+
+411
+00:44:55,860 --> 00:45:01,019
+I have to necessarily spill this. Why do I say that? Because even if I remove the node,
+
+412
+00:45:01,340 --> 00:45:08,340
+I cannot, sorry, I cannot simplify because in the reduced graph it has nodes which are
+
+413
+00:45:08,860 --> 00:45:14,019
+adjacent to this. It has at least k nodes which are adjacent to this and therefore by
+
+414
+00:45:14,019 --> 00:45:19,539
+removing this, I cannot guarantee that if the rest can be colored, this can be colored.
+
+415
+00:45:19,539 --> 00:45:26,539
+So, I am assuming that because it has k neighbors at that point in time, I may not have a free
+
+416
+00:45:27,219 --> 00:45:33,980
+color, but the k neighbors it has may not necessarily use k different colors. Some of
+
+417
+00:45:33,980 --> 00:45:40,980
+them can possibly use the same color in which case I may still have a color left out, right.
+
+418
+00:45:41,019 --> 00:45:46,500
+I will give you a very, very simple example where this becomes really obvious, right.
+
+419
+00:45:46,500 --> 00:45:53,019
+So, this Chaitin's algorithm was subsequently improved by Briggs who said that do not take
+
+420
+00:45:53,019 --> 00:45:58,500
+the decision of spill when you do the simplified step. Take the decision of spill when you
+
+421
+00:45:58,500 --> 00:46:04,699
+do the coloring step, okay. That means that you say that this may spill, right, but when
+
+422
+00:46:04,699 --> 00:46:10,259
+you are introducing the color, check all the neighbors. If you have, you know, k minus
+
+423
+00:46:10,259 --> 00:46:17,259
+1 different colors being used, then obviously this can be colored. But if you have k colors
+
+424
+00:46:17,259 --> 00:46:21,579
+being used for the adjacent nodes, then this cannot be colored, right. So, that is the
+
+425
+00:46:21,579 --> 00:46:28,179
+decision he says. So, that is Briggs algorithm, right. So, the actual spill decision is taken
+
+426
+00:46:28,179 --> 00:46:33,900
+during the coloring process, during the coloring phase, right. And when you push it into the
+
+427
+00:46:33,900 --> 00:46:40,539
+stack you say it may spill. Do not say it will spill, it may spill, right. So, here
+
+428
+00:46:40,539 --> 00:46:47,539
+is a very, very simple example. Is this graph too colorable? Yes, right. So, now if you
+
+429
+00:46:48,340 --> 00:46:55,340
+apply Chaitin's algorithm what happens? What is the simplified step? Can I simplify? Can
+
+430
+00:46:59,619 --> 00:47:06,619
+I remove any nodes? Each node has two edges, correct. So, I cannot simplify. If I have
+
+431
+00:47:07,900 --> 00:47:14,900
+applied Chaitin's algorithm, I would say spill a node, right. So, if I apply Briggs algorithm,
+
+432
+00:47:15,220 --> 00:47:19,780
+I am going to say that, okay, I have, I may have to spill a node. I still do not know.
+
+433
+00:47:19,780 --> 00:47:25,260
+So, let me pick a node, right. Maybe I have picked a in this case and then push it into
+
+434
+00:47:25,260 --> 00:47:31,340
+the stack and then say a may spill, right. I have not done anything very different. Only
+
+435
+00:47:31,340 --> 00:47:37,660
+thing is that instead of saying a spills, I am saying a may spill. Now, I have a graph
+
+436
+00:47:37,660 --> 00:47:44,660
+which can be simplified, right. And thought I can simplify it, simplify it, simplify it,
+
+437
+00:47:45,500 --> 00:47:52,500
+and remove all the nodes, right. Now, I start coloring it. When I color it using two colors,
+
+438
+00:47:54,660 --> 00:48:01,660
+B can be given a color, right. C can be, my coloring is not working. I think animation
+
+439
+00:48:01,740 --> 00:48:06,980
+will come later. Sorry about it. So, C can be given a color which is other than B. And
+
+440
+00:48:06,980 --> 00:48:13,980
+now what about B? B can also be colored which is a color which is other than C. So, I can
+
+441
+00:48:15,180 --> 00:48:22,180
+and that could be same as D, right. And now when you come to A, you see that A has two
+
+442
+00:48:23,980 --> 00:48:30,980
+neighbors B and D, but both share the same color. So, you still have one color left for
+
+443
+00:48:31,019 --> 00:48:35,740
+it. So, it can be colored. So, hopefully the colors know. Some of the coloring did not
+
+444
+00:48:35,740 --> 00:48:40,019
+come. Sorry about that, right. So, here you have, you can, you could have colored this
+
+445
+00:48:40,019 --> 00:48:47,019
+red, this would be green, this would be red, and this would be green. So, just because
+
+446
+00:48:47,219 --> 00:48:54,219
+a graph has all nodes and each of which having K or more edges does not mean that it is not
+
+447
+00:48:56,860 --> 00:49:03,860
+K colorable, right. It only says that it may be possible, it may be, it may happen that
+
+448
+00:49:04,740 --> 00:49:10,980
+one node has to be spilled, correct. That is all it says. So, Briggs algorithm essentially
+
+449
+00:49:10,980 --> 00:49:16,980
+says that take this decision of spilling not at the time of pushing it into the stack,
+
+450
+00:49:16,980 --> 00:49:21,980
+but at the time of popping it out. Because at that point in time, you know which are
+
+451
+00:49:21,980 --> 00:49:27,180
+the other edges which have already been colored and whether they have used K or fewer colors.
+
+452
+00:49:27,180 --> 00:49:31,980
+If they have used fewer than K color, then you can still color it using one of the remaining
+
+453
+00:49:31,980 --> 00:49:38,980
+colors. So, that is the change between the Briggs algorithm and the Chaitin's algorithm,
+
+454
+00:49:40,099 --> 00:49:41,099
+right.
+
+455
+00:49:41,099 --> 00:49:48,099
+So, next we will talk about a step called the coalescing, right. So, when we are coloring
+
+456
+00:49:48,099 --> 00:49:53,219
+this graph, we are assuming that, okay, there are these different variables and these variables
+
+457
+00:49:53,219 --> 00:49:58,099
+correspond to these nodes and I do not know anything about these nodes except about their
+
+458
+00:49:58,099 --> 00:50:04,019
+coordinates. But it may so happen that in my code, right, I would have two nodes which
+
+459
+00:50:04,019 --> 00:50:11,019
+are one is the copy of the other, right, something like this, right. For example, I have x is
+
+460
+00:50:11,819 --> 00:50:18,219
+equal to something and then I have written y is equal to x, right. Now, assuming that
+
+461
+00:50:18,219 --> 00:50:25,219
+these two are two different live ranges, I have one node for x and one node for y. If
+
+462
+00:50:25,379 --> 00:50:32,379
+I so happen, if it so happens that I have one node as a copy of the other node, right,
+
+463
+00:50:32,739 --> 00:50:39,739
+then in that case and only in that case, I can merge these two nodes, right. But then
+
+464
+00:50:40,619 --> 00:50:46,459
+when I merge these two nodes, the nodes which are adjacent to x and the nodes which are
+
+465
+00:50:46,459 --> 00:50:53,259
+adjacent to y will be adjacent to the union of that would be adjacent to x y. So, you
+
+466
+00:50:53,380 --> 00:50:59,820
+may increase the number of adjacent nodes, but still it is okay, right, still it may
+
+467
+00:50:59,820 --> 00:51:04,300
+give you better solution. So, this step is what is called the coalescing, right. So,
+
+468
+00:51:04,300 --> 00:51:10,740
+at some point in time, you go back and look at your code and then see if you find code
+
+469
+00:51:10,740 --> 00:51:15,300
+which is, that is when you generate your interference graph, you can actually say which of these
+
+470
+00:51:15,300 --> 00:51:20,500
+nodes are coalescible and which of them are not, right. They call it as move or non-move
+
+471
+00:51:20,579 --> 00:51:27,099
+nodes. For example, here y is basically called a move node because it is a move from move
+
+472
+00:51:27,099 --> 00:51:33,380
+of x to y, right. So, they kind of annotate it this way and then use this information
+
+473
+00:51:33,380 --> 00:51:39,699
+in coalescing node. And when you coalesce nodes, the number of interferences may increase,
+
+474
+00:51:39,699 --> 00:51:45,699
+but still it may help you to find solutions or color the things without having to go for
+
+475
+00:51:45,699 --> 00:51:50,539
+a spell. So, typically what they do is that they do the simplify pass, I think I have
+
+476
+00:51:50,539 --> 00:51:55,739
+this slide there, okay. So, you keep doing the simplify pass, right, and then you simplify
+
+477
+00:51:55,739 --> 00:52:02,739
+only non-move nodes, right. And then if you come to a situation where, okay, so, yes,
+
+478
+00:52:04,980 --> 00:52:10,460
+so simplify by removing all the non-move related nodes and if you come to a situation where
+
+479
+00:52:10,500 --> 00:52:15,860
+you cannot do simplify, but you have let us say move related nodes and if some of these
+
+480
+00:52:15,860 --> 00:52:21,900
+move related nodes can be combined, then you merge them, right. And then on the resultant
+
+481
+00:52:21,900 --> 00:52:27,220
+graph you try to apply simplify. If you can simplify, it is fine. If you cannot simplify,
+
+482
+00:52:27,220 --> 00:52:33,780
+try to see if you can do more coalescing, right. Keep doing this, okay, until you cannot
+
+483
+00:52:33,780 --> 00:52:40,300
+do any more coalescing or you cannot do any more simplify. If you cannot do simplify or
+
+484
+00:52:40,300 --> 00:52:47,300
+coalescing, then of course you have no option other than spill and then you come back and
+
+485
+00:52:47,580 --> 00:52:54,580
+then redo this whole thing again, right. So, that is how you can improve things, okay.
+
+486
+00:52:55,019 --> 00:53:01,340
+Now let us talk about the last optimization which is live range splitting, okay. So, again
+
+487
+00:53:01,340 --> 00:53:07,220
+I have a part of the example here. I did not do the full example for some reason, but let
+
+488
+00:53:07,500 --> 00:53:12,659
+us just try to see what it is and maybe with that, well with that we will kind of close
+
+489
+00:53:12,659 --> 00:53:18,099
+this graph coloring based allocation. So, every time you look at the live range and
+
+490
+00:53:18,099 --> 00:53:24,259
+then you see that two different variables are conflicting with each other and then you
+
+491
+00:53:24,259 --> 00:53:29,739
+take a decision of splitting, spilling a node, right. Whenever you cannot color, you take
+
+492
+00:53:29,739 --> 00:53:33,699
+the decision of spilling the node. Whether you do the spill at a time of pushing it in
+
+493
+00:53:33,699 --> 00:53:39,019
+the stack or you take the decision of spilling at a time of popping it from the stack, it
+
+494
+00:53:39,019 --> 00:53:44,019
+does not matter. You are only saying that this cannot be colored, we will give it a
+
+495
+00:53:44,019 --> 00:53:49,379
+different, I mean sorry, it cannot be colored, therefore it has to be spilled. One of them
+
+496
+00:53:49,379 --> 00:53:54,379
+has to be spilled. So, you take that decision anyway. So, this live range splitting approach
+
+497
+00:53:54,379 --> 00:54:01,379
+essentially instead of just choosing between, I mean instead of deciding it as spill, it
+
+498
+00:54:01,740 --> 00:54:07,019
+now goes back and then say should I spill or should I split. That is the decision you
+
+499
+00:54:07,019 --> 00:54:13,900
+try to take and wherever splitting incurs less cost, you will go ahead and do the splitting
+
+500
+00:54:13,900 --> 00:54:18,660
+as opposed to spilling. I will show you examples of this and you will understand what that
+
+501
+00:54:18,660 --> 00:54:24,940
+is, right. Again we will consider the same example that we saw earlier, okay and you
+
+502
+00:54:25,500 --> 00:54:32,500
+see that there is this gap, okay, for S 2 which is what I called as the hole, right.
+
+503
+00:54:32,500 --> 00:54:39,500
+Now, so this original graph is not three colorable, right, which we saw earlier. Now supposing
+
+504
+00:54:40,940 --> 00:54:47,940
+I say that this S 3 variable that you are looking at, right, has some use here, sorry,
+
+505
+00:54:48,940 --> 00:54:55,940
+it is being defined here but has no use here, correct, and has an use over here, right,
+
+506
+00:54:58,340 --> 00:55:05,340
+until here. So, let me try to decide and then say that I will split this live range S 3
+
+507
+00:55:07,539 --> 00:55:14,539
+into two parts, one part which is this and another part which is this, right. But if
+
+508
+00:55:15,420 --> 00:55:20,539
+I want to decide it to split here, what does it really mean? It means that at this point
+
+509
+00:55:20,539 --> 00:55:26,940
+in time I have to somehow get the value of S 3 again. So, it has some cost of spill versus
+
+510
+00:55:26,940 --> 00:55:32,940
+whatever it is, right, that cost is there. But let us try to think of that as a split,
+
+511
+00:55:32,940 --> 00:55:39,940
+right, then what happens, right. And similarly I will think of my S 2 as not as one live
+
+512
+00:55:40,659 --> 00:55:46,659
+range, right, going from here to here or this live range S 2 interfering with S 5 and so
+
+513
+00:55:46,659 --> 00:55:52,099
+on. But think of this as a fresh live range. That means that I will reload this value or
+
+514
+00:55:52,099 --> 00:55:58,300
+do something about it. Now when I do this, my interference graph changes to this. I have
+
+515
+00:55:58,300 --> 00:56:05,300
+all the original nodes but because of these split live ranges I have an S 2 prime and
+
+516
+00:56:05,300 --> 00:56:10,660
+S 3 prime. S 3 prime because I have split this live range into two parts and S 2 prime
+
+517
+00:56:10,660 --> 00:56:16,340
+because I am now considering these two live ranges as two different live ranges, okay.
+
+518
+00:56:16,340 --> 00:56:21,019
+In order for me to decide to do this there is a cost that I am incurring that I need
+
+519
+00:56:21,019 --> 00:56:26,340
+to calculate and I need to kind of evaluate whether this cost is worse than the spill
+
+520
+00:56:26,340 --> 00:56:31,180
+cost or better than the spill cost. If it is better than the spill cost then only I
+
+521
+00:56:31,179 --> 00:56:36,899
+should do this, okay. So the splitting decision again is taken based on whether the split
+
+522
+00:56:36,899 --> 00:56:43,579
+is going to be more, is less costly than the spill. Then only you do the split. So let
+
+523
+00:56:43,579 --> 00:56:48,699
+us look at having decided that, right, it is less cost and we are going to do the split.
+
+524
+00:56:48,699 --> 00:56:52,419
+How does it help to color? Okay, go ahead.
+
+525
+00:56:52,420 --> 00:57:05,300
+Yes and no, okay. Splitting has certain advantages as well. We will not go into that right now,
+
+526
+00:57:05,300 --> 00:57:14,300
+okay, right. So one thing is that, how do I put this? Yeah, it may appear to be somewhat
+
+527
+00:57:14,380 --> 00:57:19,380
+similar but let us let differ the discussion some other point, okay.
+
+528
+00:57:19,380 --> 00:57:26,380
+Yeah. S 2 prime and S 6 has two conflict, yes.
+
+529
+00:57:26,380 --> 00:57:31,740
+I think that edge is missing. But hopefully they will be given different colors. Let us
+
+530
+00:57:31,740 --> 00:57:37,140
+see what happens. They can be given different colors, right. Even though there is an edge
+
+531
+00:57:37,219 --> 00:57:48,219
+they can still be given different colors. We can correct it, okay, no problem, right.
+
+532
+00:57:48,219 --> 00:57:56,219
+So these are the optimizations or extensions that can be done to J. Tens algorithm. So
+
+533
+00:57:56,219 --> 00:58:03,059
+think of doing this optimistic spilling, think of doing this coalescing, think of doing this
+
+534
+00:58:03,059 --> 00:58:07,699
+live range splitting wherever it is possible, okay.
+
+535
+00:58:07,699 --> 00:58:12,460
+Now let us just briefly talk about local register allocation. This is typically done, typically
+
+536
+00:58:12,460 --> 00:58:16,980
+what is done is that it is global register allocation which is done and then in certain
+
+537
+00:58:16,980 --> 00:58:22,420
+cases where it is required you do some local register allocation which is essentially allocation
+
+538
+00:58:22,420 --> 00:58:29,420
+within a basic block. Let us see why this is useful or why this is simpler than the
+
+539
+00:58:29,420 --> 00:58:36,420
+other allocation. Now in local register allocation we are only considering register allocation
+
+540
+00:58:36,820 --> 00:58:43,820
+within a basic block, right. That means that within that basic block we are going to identify
+
+541
+00:58:43,940 --> 00:58:50,260
+what are the variables and what are their live ranges, okay.
+
+542
+00:58:50,260 --> 00:58:57,260
+Now the advantage here is that since it is a basic block there will be no notion of a
+
+543
+00:58:58,260 --> 00:59:04,540
+whole, right, because there is nothing like control flow graphs, right, the variable not
+
+544
+00:59:04,540 --> 00:59:09,060
+being used in this particular basic block which is kind of sequentially arranged and
+
+545
+00:59:09,060 --> 00:59:15,700
+because of that it is appearing to be together, etc., etc., right. Okay, I will maybe come
+
+546
+00:59:15,700 --> 00:59:19,420
+back and then talk about this point a little later but let us look at it in the following
+
+547
+00:59:19,420 --> 00:59:20,300
+way.
+
+548
+00:59:20,300 --> 00:59:27,300
+So I have these different variables S1 to S7 and their live ranges are shown here, right.
+
+549
+00:59:27,660 --> 00:59:34,660
+Now if I have to color this graph or if I have to, yeah, color this, I have not built
+
+550
+00:59:35,100 --> 00:59:38,660
+the interference graph because it may not be necessary to build the interference graph
+
+551
+00:59:38,660 --> 00:59:44,580
+here, but let us say if I build the interference graph and then I try to color it, how many
+
+552
+00:59:44,579 --> 00:59:50,500
+colors would I need, right. You can look at the graph and then say at what point in
+
+553
+00:59:50,500 --> 00:59:57,500
+time is the graph really fat, how many, means where more number of live ranges are interfering,
+
+554
+00:59:57,500 --> 01:00:03,299
+right. So you can see that at this point in time five live ranges are interfering. Again
+
+555
+01:00:03,299 --> 01:00:08,460
+at this point in time also five live ranges are interfering. Any other interval it is
+
+556
+01:00:08,460 --> 01:00:15,460
+only fewer than five. So if I have to color all of these variables without any spill,
+
+557
+01:00:16,619 --> 01:00:22,300
+how many registers would I require? Five. Five because it says that at this point in
+
+558
+01:00:22,300 --> 01:00:27,380
+time all these live ranges are interfering with each other. That means that I have a
+
+559
+01:00:27,380 --> 01:00:34,380
+graph with a click, right, a sub graph S1, S2, S3, S4, S5 with a click, right. Similarly
+
+560
+01:00:35,380 --> 01:00:42,380
+at this point in time I have a sub graph S2, S3, S4, S5, S6 with a click. So to color
+
+561
+01:00:44,420 --> 01:00:50,420
+them I need at least five colors, right. So in this case you can actually color this entire
+
+562
+01:00:50,420 --> 01:00:57,420
+graph without even constructing the interference graph because construction of the interference
+
+563
+01:00:57,500 --> 01:01:04,019
+graph is also expensive, right. It is actually O n squared depending on the number of variables
+
+564
+01:01:04,019 --> 01:01:07,219
+you set for which you want to construct the graph, okay.
+
+565
+01:01:07,219 --> 01:01:13,219
+So how do you color this particular graph? We will see that. So this local register allocation
+
+566
+01:01:13,219 --> 01:01:19,219
+is essentially within a basic block, right. And here as I mentioned earlier these live
+
+567
+01:01:19,219 --> 01:01:25,340
+ranges do not have any holes, correct. The interference graph in this particular case
+
+568
+01:01:25,340 --> 01:01:31,219
+if at all you construct they become what is called an interval graph. And these interval
+
+569
+01:01:31,299 --> 01:01:38,299
+graphs can be optimally colored, okay. And that problem is not NP hot, okay. So optimal
+
+570
+01:01:39,500 --> 01:01:46,500
+allocation can be done in linear time, right. And of course you can find out what is the
+
+571
+01:01:46,619 --> 01:01:52,619
+minimum number of colors that you need and that is given by the fatness of the graph,
+
+572
+01:01:52,619 --> 01:01:53,619
+alright.
+
+573
+01:01:53,619 --> 01:02:00,619
+Okay, now let us see how do we go about coloring this graph. So we can actually do the coloring
+
+574
+01:02:00,619 --> 01:02:05,539
+by starting going through these different points in time. And you only need to consider
+
+575
+01:02:05,539 --> 01:02:10,539
+the point in time when a live range starts. You do not even have to consider all other
+
+576
+01:02:10,539 --> 01:02:16,059
+points. So for example let us say I start with this live range S 1. So if all the live
+
+577
+01:02:16,059 --> 01:02:23,059
+ranges are kind of arranged in the ascending order of their start time then I can go through
+
+578
+01:02:23,059 --> 01:02:28,339
+each one of them at a time, right. So the first live range is S 1. I look at that start
+
+579
+01:02:28,460 --> 01:02:35,100
+point, right. And I have the available number of registers in a data structure called free.
+
+580
+01:02:35,100 --> 01:02:40,900
+So free has all the registers which are free at that point in time. So you start with the
+
+581
+01:02:40,900 --> 01:02:46,900
+live range whose start time is the lowest and keep going this in the increasing order,
+
+582
+01:02:46,900 --> 01:02:51,900
+right. And you only need to consider those points where a live range starts. Any point
+
+583
+01:02:51,900 --> 01:02:55,820
+of course in this example you have a live range starting at each one of those points.
+
+584
+01:02:55,980 --> 01:03:00,380
+So you will consider all the points. But in some other cases where you know a new live
+
+585
+01:03:00,380 --> 01:03:05,380
+range does not start you do not have to worry about that particular point, okay. So we assume
+
+586
+01:03:05,380 --> 01:03:10,740
+that when a live range ends its color can be free and that can even be decided at a
+
+587
+01:03:10,740 --> 01:03:17,740
+later point in time. So let us start off at the first point in which all the registers
+
+588
+01:03:18,100 --> 01:03:24,300
+are free. Here the fatness is 5. So if you want to color it you need 5 colors, right.
+
+589
+01:03:24,300 --> 01:03:31,060
+So we can give color 1 to S 1. The free colors would be the remaining colors. Then after
+
+590
+01:03:31,060 --> 01:03:37,780
+that when you come to S 2 you can give the second color to it, then the third color,
+
+591
+01:03:37,780 --> 01:03:43,980
+then the fourth color, then the fifth color. So far there is no problem. Now you have no
+
+592
+01:03:43,980 --> 01:03:49,780
+more free registers. But when you come to the next point you know that one is being
+
+593
+01:03:49,980 --> 01:03:56,980
+freed because its live range has ended. So one can be freed and that can go into the
+
+594
+01:03:58,300 --> 01:04:05,300
+free pool. Then you consider live range 6, variable S 6, it can be given the same color,
+
+595
+01:04:06,300 --> 01:04:13,300
+right. And then you consider the next live range S 7. By that time S 2 has finished.
+
+596
+01:04:13,740 --> 01:04:20,019
+So that register can be returned back and it can be assigned the color 2, right. So
+
+597
+01:04:20,019 --> 01:04:25,820
+this is how you color this. The essential advantage here is that you have these live
+
+598
+01:04:25,820 --> 01:04:32,340
+ranges which do not have pool, right. And because of that, right, you can actually go
+
+599
+01:04:32,340 --> 01:04:39,340
+through and because of that your interval graph is essentially your interference graph
+
+600
+01:04:40,340 --> 01:04:46,579
+becomes an interval graph and that makes your coloring process simple, okay.
+
+601
+01:04:46,579 --> 01:04:53,579
+Now let us see how this is useful. In fact this idea is more useful not only in doing
+
+602
+01:04:54,100 --> 01:04:59,700
+this local register allocation but this has also inspired one global register allocation
+
+603
+01:04:59,700 --> 01:05:05,340
+mechanism which is what is called the linear scan register allocation mechanism. Let us
+
+604
+01:05:05,340 --> 01:05:11,100
+talk about that next, right. So for global register allocation using graph coloring
+
+605
+01:05:11,100 --> 01:05:16,100
+you have to construct the interference graph and that is an expensive step in the register
+
+606
+01:05:16,100 --> 01:05:22,620
+allocation process, okay. And in many cases you may want to do this register allocation
+
+607
+01:05:22,620 --> 01:05:27,620
+or you may want to do code generation, right, and the time for doing the code generation
+
+608
+01:05:27,620 --> 01:05:33,620
+may matter. Okay let me give you one example, example of dynamic compilation just like you
+
+609
+01:05:33,819 --> 01:05:38,539
+talk about just-in-time compilation, right. When you do just-in-time compilation or dynamic
+
+610
+01:05:38,539 --> 01:05:45,539
+compilation what happens is that the compile time for compiling is actually a part of your
+
+611
+01:05:45,539 --> 01:05:51,539
+execution time, right. Are you familiar with languages which require dynamic compilation?
+
+612
+01:05:51,539 --> 01:05:55,259
+Yeah, one of them is Java.
+
+613
+01:05:55,259 --> 01:05:57,019
+Java, anything else?
+
+614
+01:05:57,019 --> 01:05:58,019
+. .
+
+615
+01:05:58,019 --> 01:05:59,019
+. .
+
+616
+01:05:59,019 --> 01:06:00,019
+. .
+
+617
+01:06:00,019 --> 01:06:01,019
+. .
+
+618
+01:06:01,019 --> 01:06:02,019
+. .
+
+619
+01:06:02,019 --> 01:06:03,019
+. .
+
+620
+01:06:03,460 --> 01:06:09,340
+Let me give you a little bit for that, right.
+
+621
+01:06:09,340 --> 01:06:10,340
+.
+
+622
+01:06:10,340 --> 01:06:11,340
+.
+
+623
+01:06:11,340 --> 01:06:13,340
+Some Python implementations have that. That is what I was expecting you to say. Some R
+
+624
+01:06:13,340 --> 01:06:19,320
+implementations have that, right. So these are all things which were normally interpreted
+
+625
+01:06:19,320 --> 01:06:25,900
+languages but interpretation is very expensive. So during the execution you decide that you
+
+626
+01:06:25,900 --> 01:06:30,460
+will compile some part of the code and then when you try to compile these part of the
+
+627
+01:06:30,460 --> 01:06:36,179
+the code if you want to do register allocation for them you cannot be doing a very expensive
+
+628
+01:06:36,179 --> 01:06:42,539
+register allocation right. So, that the compile time for compiling the code is also an important
+
+629
+01:06:42,539 --> 01:06:50,699
+aspect right. So, that you need faster method for generating efficient code right. So, the
+
+630
+01:06:50,699 --> 01:06:58,019
+linear scan allocator is one such method which was actually proposed in 1999 and it uses
+
+631
+01:06:58,019 --> 01:07:03,019
+the notion of what is called the live interval ok. We will define what this live interval
+
+632
+01:07:03,019 --> 01:07:08,179
+is and this is being used instead of what is called the live range ok.
+
+633
+01:07:08,179 --> 01:07:17,300
+Now, we will explain this a little later on ok and because of this your register allocator
+
+634
+01:07:17,300 --> 01:07:22,980
+your global register allocator is actually going to look like a local register allocator
+
+635
+01:07:23,139 --> 01:07:28,619
+and it can be done in linear time or near linear time right that is the idea. So, let
+
+636
+01:07:28,619 --> 01:07:33,860
+us see what this is, but before we go to that let us first define what is the live interval
+
+637
+01:07:33,860 --> 01:07:41,740
+ok. So, for every variable we find the first point where it is defined and the last point
+
+638
+01:07:41,740 --> 01:07:47,460
+where it is used and irrespective of whether there are other control blocks or otherwise
+
+639
+01:07:47,460 --> 01:07:53,099
+we simply say that this variable is live from this point in the program to this point
+
+640
+01:07:53,099 --> 01:08:00,019
+in the program right. So, a live interval may include multiple live ranges. Remember
+
+641
+01:08:00,019 --> 01:08:05,780
+when we talked about the variable S 2 in the previous example it had a hole right and we
+
+642
+01:08:05,780 --> 01:08:10,820
+said that that hole is because there are these control flow paths control flow there are
+
+643
+01:08:10,820 --> 01:08:16,220
+these basic blocks in the control flow graph in which those variables are not being used
+
+644
+01:08:16,900 --> 01:08:22,699
+right. So, we were talking about that now what happens is that we do not kind of consider
+
+645
+01:08:22,699 --> 01:08:28,340
+these holes and consider this live interval as basically the combination of all of these
+
+646
+01:08:28,340 --> 01:08:33,780
+live ranges right. So, it is an approximation right it is a conservative approximation
+
+647
+01:08:33,780 --> 01:08:41,420
+of live ranges ok. Now, for the same example right now what happens
+
+648
+01:08:41,420 --> 01:08:48,819
+is that S 2 which is first defined here and is being used here its live interval is from
+
+649
+01:08:48,819 --> 01:08:54,260
+here to here whereas, when we talked about its live range we said that the live range
+
+650
+01:08:54,260 --> 01:09:02,020
+is from here to here and then from here to here right. In between we were thinking that
+
+651
+01:09:02,020 --> 01:09:08,140
+it is not live right because if I have taken this point sorry let us say if I have taken
+
+652
+01:09:08,220 --> 01:09:13,940
+this point in program I could have said that there are points which are where it is need
+
+653
+01:09:13,940 --> 01:09:17,700
+not have to be live right so that that was that ok.
+
+654
+01:09:17,700 --> 01:09:23,900
+Now, having approximated the live range with regard to the live interval now what happens
+
+655
+01:09:23,900 --> 01:09:30,900
+is that this graph now looks like your interval graph or looks like your interference graph
+
+656
+01:09:30,900 --> 01:09:37,579
+for basic block because there are no holes right. So, the interference graph for this
+
+657
+01:09:37,659 --> 01:09:43,779
+is something like this which is also what is called an interval graph ok. Now, this
+
+658
+01:09:43,779 --> 01:09:49,059
+graph can be colored in linear time but you do not even need to do that you can actually
+
+659
+01:09:49,059 --> 01:09:54,899
+go through the just like the way that you went through for the linear register allocator
+
+660
+01:09:54,899 --> 01:09:58,300
+and you can color it. So, we will see that algorithm next.
+
+661
+01:09:58,300 --> 01:10:04,859
+So, here since the fatness is 4 I have calculated it correctly right the fatness is 4 it requires
+
+662
+01:10:05,339 --> 01:10:10,899
+4 colors right and you see that it can be colored using 4 this is the click that we
+
+663
+01:10:10,899 --> 01:10:17,899
+talked about and ok. Now, let us see how the linear scan allocator works ok. So, first
+
+664
+01:10:20,259 --> 01:10:25,859
+thing is that you compute the live intervals for all the variables which is similar to
+
+665
+01:10:25,859 --> 01:10:30,299
+computing the live range but then it is an approximation and this can be calculated even
+
+666
+01:10:30,420 --> 01:10:37,420
+easier. Now, the interference among these live intervals ok if they interfere among
+
+667
+01:10:37,739 --> 01:10:44,739
+this then you assume that they cannot be given the same register ok. Now, the number of overlapping
+
+668
+01:10:45,980 --> 01:10:50,820
+intervals changes only at the start point and at the end points of the interval. So,
+
+669
+01:10:50,820 --> 01:10:56,320
+if you go back and look at this graph right if at some point in time the number of overlapping
+
+670
+01:10:56,319 --> 01:11:03,319
+intervals is 4 right it is going to be the same until either a live range finishes or
+
+671
+01:11:03,519 --> 01:11:10,039
+a new live range starts right it value is going to remain the same as long as no new
+
+672
+01:11:10,039 --> 01:11:15,359
+live range starts. For example, between this point and this point the number of live ranges
+
+673
+01:11:15,359 --> 01:11:20,759
+which are interfering with each other is exactly the same. At this point it is different because
+
+674
+01:11:20,759 --> 01:11:25,599
+this live range has ended at this point it is different because there is a new live range
+
+675
+01:11:25,680 --> 01:11:32,680
+starting. So, what happens in the linear scan allocator is that we will start worrying about
+
+676
+01:11:33,440 --> 01:11:40,440
+these points where the live ranges are starting that is really what this is saying ok. So,
+
+677
+01:11:40,440 --> 01:11:46,640
+it changes only at the start and end point of the interval ok. So, the linear scan allocator
+
+678
+01:11:46,640 --> 01:11:53,640
+uses the following data structures for doing this it uses what is called live intervals
+
+679
+01:11:53,640 --> 01:12:00,360
+ok which are basically all the variables and their live intervals, but they are stored
+
+680
+01:12:00,360 --> 01:12:07,360
+in the increasing order of the start point ok. It also maintains what is called an active
+
+681
+01:12:07,400 --> 01:12:14,000
+list which is basically the set of variables which are interfering at that point in time
+
+682
+01:12:14,000 --> 01:12:18,760
+to variables who have already been allocated registers ok.
+
+683
+01:12:18,880 --> 01:12:25,400
+This is stored in the decreasing order of the end points sorry in the this is stored
+
+684
+01:12:25,400 --> 01:12:32,400
+so the active list is stored in the again increasing order, but of the end points ok.
+
+685
+01:12:32,520 --> 01:12:37,480
+So we have two data structures both of them are sorted in the increasing order the first
+
+686
+01:12:37,480 --> 01:12:42,920
+one is started in the increasing order of the start point and the second one which is
+
+687
+01:12:42,920 --> 01:12:48,920
+the active list which is the set of variables which are interfering with variables which
+
+688
+01:12:48,920 --> 01:12:54,520
+have already been assigned a register right, but this is stored in the decreasing sorry
+
+689
+01:12:54,520 --> 01:13:00,520
+in the increasing order of the end points ok we will see why that is important ok.
+
+690
+01:13:00,520 --> 01:13:07,520
+So, the algorithm proceeds in the following way right you start with an initial active
+
+691
+01:13:07,680 --> 01:13:14,360
+list which is 0 because no register no live no variable has been assigned a register so
+
+692
+01:13:14,360 --> 01:13:21,360
+far so this is empty and in your live interval you have all the variables correct and those
+
+693
+01:13:22,480 --> 01:13:28,920
+variables are arranged in the increasing order of the start point. So, you take the first
+
+694
+01:13:28,920 --> 01:13:35,920
+interval in that thing that is the first live range ok. Now what you do here is that at
+
+695
+01:13:36,039 --> 01:13:43,039
+this point in time you expire any old interval that has expired ok initially this may not
+
+696
+01:13:44,000 --> 01:13:50,119
+kick in, but later on you will see that why this is useful right and then if you see the
+
+697
+01:13:50,119 --> 01:13:56,440
+length of active active is the all the live intervals which are interfering with variables
+
+698
+01:13:56,440 --> 01:13:58,840
+which have already been allocated registers right.
+
+699
+01:13:58,840 --> 01:14:05,840
+So, for example if I have allocated registers to four variables right and if I have allocated
+
+700
+01:14:06,119 --> 01:14:12,279
+active is four then it means that I have already used up four colors right and active will
+
+701
+01:14:12,279 --> 01:14:19,279
+only have intervals which are currently active that is why the name active any variable for
+
+702
+01:14:19,760 --> 01:14:26,760
+which a register has been assigned, but it interval is over will not be a part of active
+
+703
+01:14:27,159 --> 01:14:31,520
+right. So, that is essentially what you try to do in expire interval we will talk about
+
+704
+01:14:31,520 --> 01:14:36,960
+that little later on right. So, if you see that how many variables are currently active
+
+705
+01:14:36,960 --> 01:14:42,400
+and have been assigned registers and if that is equal to or the number of registers that
+
+706
+01:14:42,400 --> 01:14:48,280
+is available then at this point in time you have to do a spill right, but if it is less
+
+707
+01:14:48,280 --> 01:14:53,680
+than or then you have a register which is available. So, this interval is going to be
+
+708
+01:14:53,680 --> 01:14:59,880
+given that register by removing a register from the pool of free registers right because
+
+709
+01:14:59,960 --> 01:15:05,239
+there is some free register which is available and now add i to the active because now i
+
+710
+01:15:05,239 --> 01:15:12,239
+is an active interval and add it in the place. So, that it is the end time is always in the
+
+711
+01:15:12,760 --> 01:15:16,880
+increasing order active is end times are always in the increasing order.
+
+712
+01:15:16,880 --> 01:15:22,520
+So, this is how you go about this, but let us see what is expire interval expire interval
+
+713
+01:15:22,520 --> 01:15:26,720
+is that you at some point in time you are now looking at and then you look at what all
+
+714
+01:15:26,760 --> 01:15:32,960
+intervals have expired between the last time that you consider to now. So, for each interval
+
+715
+01:15:32,960 --> 01:15:39,520
+j in the active in the increasing order of the end time you keep looking at it if the
+
+716
+01:15:39,520 --> 01:15:45,720
+end point of j right is greater than the start point of i that means start of i is the current
+
+717
+01:15:45,720 --> 01:15:50,760
+point that you are talking about. So, if its end point is greater that means that the interval
+
+718
+01:15:50,760 --> 01:15:57,760
+is not is still live it is not over yet you do not do anything right, but if it is less
+
+719
+01:15:57,760 --> 01:16:04,760
+than this then you remove j from active and then whatever register j was given you release
+
+720
+01:16:04,760 --> 01:16:10,280
+it to the free pool. In fact, this need not even have to be continue because you can actually
+
+721
+01:16:10,280 --> 01:16:16,440
+break because you have seen one interval whose end point is greater than the current time
+
+722
+01:16:16,440 --> 01:16:19,720
+all other intervals will also be greater than the current time.
+
+723
+01:16:19,720 --> 01:16:26,079
+So, you do not need to do continue you could have done right. So, I am talking about this.
+
+724
+01:16:26,079 --> 01:16:32,119
+So, it is clear right what we are trying to do in expire intervals see remember in this
+
+725
+01:16:32,119 --> 01:16:36,600
+algorithm what you do is that you go from one start point to the next start point to
+
+726
+01:16:36,600 --> 01:16:41,480
+the next start point. So, when you go from one start point to another start point some
+
+727
+01:16:41,480 --> 01:16:46,920
+intervals may have finished. So, those finished intervals you are trying to remove from active
+
+728
+01:16:47,680 --> 01:16:52,760
+and we are trying to free that register and then put them back in the free register that
+
+729
+01:16:52,760 --> 01:16:58,239
+is really what we are doing. Now, again look at it. So, that is what expire
+
+730
+01:16:58,239 --> 01:17:05,239
+interval is about right. Now, what about this function spill at interval right you are going
+
+731
+01:17:05,920 --> 01:17:11,840
+to come to this function whenever all the registers are being used and then you have
+
+732
+01:17:11,920 --> 01:17:17,239
+one more live variable one more variable for which you want to see whether it should be
+
+733
+01:17:17,239 --> 01:17:23,720
+allocated register or not right. So, at that point in time you take a decision whether
+
+734
+01:17:23,720 --> 01:17:29,800
+this variable is going to be spilled or one of the variables which is in the active can
+
+735
+01:17:29,800 --> 01:17:36,800
+be spilled right. See active is all the variables which have been allocated registers which
+
+736
+01:17:36,960 --> 01:17:42,880
+is interfering with this particular time point right. If I decide that one of them can be
+
+737
+01:17:42,880 --> 01:17:49,880
+now spilled right I can give that register to this variable i how do I decide between
+
+738
+01:17:52,000 --> 01:17:58,579
+them I decide whichever interval which is shorter right sorry whichever interval which
+
+739
+01:17:58,579 --> 01:18:04,720
+is longer is the one which will be spilled. So, I compare the end point of i and the end
+
+740
+01:18:04,800 --> 01:18:10,800
+point of that register and then choose whichever one which is longer I will spill. So, this
+
+741
+01:18:10,800 --> 01:18:17,320
+is how the spill interval works right. So, I start off with the last interval in the
+
+742
+01:18:17,320 --> 01:18:23,079
+active because that has the highest end time if I check the end time of that with the end
+
+743
+01:18:23,079 --> 01:18:29,039
+time of the variable for which I need to allocate register whichever one is longer I choose
+
+744
+01:18:29,039 --> 01:18:36,039
+that as the spilling. So, if the end point of the last interval is greater than the end
+
+745
+01:18:36,720 --> 01:18:43,159
+point then I going to take the register back from that particular variable and give it
+
+746
+01:18:43,159 --> 01:18:50,159
+to i. So, I say register of i is register of spill and location of spill it gives you
+
+747
+01:18:50,640 --> 01:18:56,279
+a new location in the stack and then we remove spill from the active and we add i to the
+
+748
+01:18:56,279 --> 01:18:59,439
+active right. So, in this case what happens is that I will
+
+749
+01:18:59,439 --> 01:19:04,880
+again give you an example. So, what happens is that we have already allocated registers
+
+750
+01:19:04,880 --> 01:19:10,599
+right and we have now come to a new live range for sorry new variable for which we want to
+
+751
+01:19:10,599 --> 01:19:16,599
+see whether a register has to be given or not. Now, for all the live variables for all
+
+752
+01:19:16,599 --> 01:19:22,359
+the variables which are interfering with it find out whether the end point of this versus
+
+753
+01:19:22,399 --> 01:19:28,319
+the end point of any of this if the end point of one of them is longer than the last one
+
+754
+01:19:28,319 --> 01:19:34,119
+is longer than this then we decide to spill that one right or if the end point of this
+
+755
+01:19:34,119 --> 01:19:41,119
+is greater than all of those then we decide to spill this one again this is a heuristic
+
+756
+01:19:41,159 --> 01:19:47,799
+right if you decide to spill then if you decide to spill one of the existing active variables
+
+757
+01:19:47,800 --> 01:19:53,920
+active live ranges then that register is given to this otherwise this is being that
+
+758
+01:19:53,920 --> 01:19:58,199
+is essentially what this algorithm is. Let us again look at this this is what we
+
+759
+01:19:58,199 --> 01:20:05,199
+have okay I have put all the intervals over here now again I will illustrate the point.
+
+760
+01:20:05,239 --> 01:20:09,720
+What happens is that the algorithm the main part of the algorithm goes from this point
+
+761
+01:20:09,720 --> 01:20:14,600
+to this point to this point to this point and then it will go to this point it will
+
+762
+01:20:14,600 --> 01:20:21,600
+not consider these intermediate points because no new live range starts in those points right.
+
+763
+01:20:21,600 --> 01:20:27,720
+So it will be at this point at this point at this point this point and then after it
+
+764
+01:20:27,720 --> 01:20:33,760
+jumps to here and when it jumps to here it tries to see which live ranges have ended
+
+765
+01:20:33,760 --> 01:20:38,320
+this live range has ended so it will try to free the register okay.
+
+766
+01:20:38,319 --> 01:20:45,319
+So let us take this interval put it over here right and then see all the intervals
+
+767
+01:20:46,279 --> 01:20:51,519
+are sorted in the increasing order live intervals are sorted in the increasing order so it is
+
+768
+01:20:51,519 --> 01:20:58,519
+S 1 based on the start point so that is S 1 S 2 S 3 S 4 S 5 and S 6 because the start
+
+769
+01:20:59,880 --> 01:21:05,559
+points are in the increasing order right you can see them to be in the increasing order.
+
+770
+01:21:05,560 --> 01:21:12,560
+Now initially the active list is empty let us look at this particular point right and
+
+771
+01:21:12,680 --> 01:21:18,760
+let us assume the case that we have three registers dollar 1 dollar 2 and dollar 3.
+
+772
+01:21:18,760 --> 01:21:25,760
+Now S 1 can be assigned the register dollar 1 right then we come to the next point S 2
+
+773
+01:21:27,840 --> 01:21:34,120
+no interval has expired before this right now S 2 can be assigned the register because
+
+774
+01:21:34,119 --> 01:21:40,159
+you have a free register right so dollar 2 can be assigned now that also has to be
+
+775
+01:21:40,159 --> 01:21:47,159
+put into the active list and then you sort the active list in terms of the end time okay.
+
+776
+01:21:48,319 --> 01:21:55,319
+So when you come to S 3 you have active list as S 1, S 2 right and when you come to S 3
+
+777
+01:21:56,760 --> 01:22:01,880
+no more live ranges have expired so that is fine have nothing else to do.
+
+778
+01:22:01,880 --> 01:22:06,539
+Now you look at your free register pool you have one free register which is available
+
+779
+01:22:06,539 --> 01:22:13,539
+that can be given to S 3 now the active is S 1, S 2, S 3 but if you arrange it in terms
+
+780
+01:22:13,539 --> 01:22:20,539
+of the end point it will be S 1, S 3 and then S 2 correct so the active and the next point
+
+781
+01:22:22,199 --> 01:22:29,199
+is S 1, S 3 and S 2. Now you do not have any more free registers
+
+782
+01:22:29,399 --> 01:22:35,359
+and when you are at S 4 no live range is ending either so you have nothing to release right.
+
+783
+01:22:35,359 --> 01:22:41,880
+So at this point in time you have to make a decision about spill right because you have
+
+784
+01:22:41,880 --> 01:22:48,880
+no free registers you consider the end point so now you look at your active list which
+
+785
+01:22:48,880 --> 01:22:55,880
+is the last one in that S 2 when does S 2 end point end yeah as opposed to this S 4
+
+786
+01:22:55,880 --> 01:23:02,880
+ends earlier correct. So now because S 4 end point is less than S 2 end point you
+
+787
+01:23:07,880 --> 01:23:14,119
+decide to spill S 2 the idea here is that the one which has the longest live interval
+
+788
+01:23:14,119 --> 01:23:21,119
+if you spill then you can accommodate several variables with that spill right.
+
+789
+01:23:21,199 --> 01:23:28,199
+So you spill S 2 and assign that register to S 4 so when you come to point S 5 this
+
+790
+01:23:29,000 --> 01:23:34,680
+is the first point where you see that one live interval has ended so you can say now
+
+791
+01:23:34,680 --> 01:23:41,680
+you can remove S 1 from the active list and you can put back that register into free registers
+
+792
+01:23:41,880 --> 01:23:47,359
+right so you have one free register which is available and that can be given to S 5
+
+793
+01:23:47,479 --> 01:23:54,479
+alright. So then you come to S 6 by that time S 3 and S 4 have ended so you can free those
+
+794
+01:23:54,880 --> 01:24:00,639
+registers and then you can assign one register to S right.
+
+795
+01:24:00,639 --> 01:24:07,239
+So this is essentially how this linear scan algorithm works jumps from one start point
+
+796
+01:24:07,239 --> 01:24:11,759
+of an interval to the next start point and so on and at every point in time whenever
+
+797
+01:24:11,840 --> 01:24:18,159
+it has to make a decision about spill it considers the live interval of the variable for which
+
+798
+01:24:18,159 --> 01:24:25,159
+it wants to allocate the register with the live interval of the last variable which is
+
+799
+01:24:25,760 --> 01:24:32,760
+in the active list which is S 2 whichever one is further that is spilled the other one
+
+800
+01:24:32,760 --> 01:24:39,239
+is given the register. If S 2 had been smaller right or all of them are of the same distance
+
+801
+01:24:39,359 --> 01:24:43,960
+then you would have decided to spill S 4 and S 4 would not have been allocated. So that
+
+802
+01:24:43,960 --> 01:24:49,599
+kind of completes our discussion in register allocation that is really what we wanted to
+
+803
+01:24:49,599 --> 01:24:54,679
+do. There is something that I will talk about as far as the interaction between register
+
+804
+01:24:54,679 --> 01:25:00,159
+allocation and instruction scheduling that we will take it up later okay.
+
+805
+01:25:00,159 --> 01:25:07,159
+So I think it is time to close so essentially what we have seen yeah have a question.
+
+806
+01:25:09,239 --> 01:25:16,239
+Oh okay so I have not really talked about those kinds of things if S 2 appears to be
+
+807
+01:25:20,519 --> 01:25:26,880
+a left operand of something or let us say if you are talking about doing this for a
+
+808
+01:25:26,880 --> 01:25:31,880
+risk architecture eventually S 2 has to be loaded into a register so you will incur a
+
+809
+01:25:31,880 --> 01:25:38,880
+cost for that right all right. So again you must understand that yesterday we talked about
+
+810
+01:25:39,639 --> 01:25:44,760
+static single assignment right so when you do static single assignment that actually
+
+811
+01:25:44,760 --> 01:25:51,760
+does a lot of things to live ranges and the interference graph sorry the interference
+
+812
+01:25:52,119 --> 01:25:57,239
+essentially becomes much simpler to handle because again there will be no holes and things
+
+813
+01:25:57,239 --> 01:26:04,239
+like that. So again that makes register allocation much faster but the traditional way of looking
+
+814
+01:26:05,239 --> 01:26:11,039
+at it is this graph coloring based approach which is later on modified by this linear
+
+815
+01:26:11,039 --> 01:26:15,559
+scan approach but the linear scan approach is inefficient in the sense that it does lot
+
+816
+01:26:15,559 --> 01:26:21,439
+of approximation and therefore even though it does a faster allocation it may do inefficiently
+
+817
+01:26:21,439 --> 01:26:24,359
+right that is really what we need to understand here.
+

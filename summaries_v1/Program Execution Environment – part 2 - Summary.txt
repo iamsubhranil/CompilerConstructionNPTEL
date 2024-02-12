@@ -1,0 +1,23 @@
+ Exam Notes:
+
+1. **Variable Length Arrays (VLA):** Introduced in C99, VLAs allow arrays to be declared with a dynamic size determined by a variable at runtime. Offsets for VLAs are calculated dynamically due to their varying sizes.
+
+2. **Local Variables:** Local variables are stored in the stack frame of the respective function. The Extended Base Pointer (EBP) or Stack Pointer (ESP) can be used to calculate the offsets of local variables within the stack frame.
+
+3. **Parameter Handling:** Parameters are passed from the caller to the callee function using the stack. They are stored in the caller's stack frame, immediately above the return address. Parameters are generally passed in right-to-left order to accommodate variable argument functions like `printf`.
+
+4. **Return Value:** Return values are commonly passed via the EAX register. However, larger structures are often passed indirectly by storing the structure in memory and passing the address of the structure as a hidden parameter.
+
+5. **Caller Save and Callee Save Registers:** To manage shared registers between the caller and callee, a distinction is made between caller save (scratch) registers and callee save (preserved) registers. Caller save registers are managed by the caller, while callee save registers are managed by the callee. On x86, EAX, ECX, and EDX are caller save registers, while EBX, ESI, and EDI are callee save registers. Additionally, the stack pointer (ESP) and extended base pointer (EBP) are considered callee save registers.
+
+6. **Application Binary Interface (ABI):** An ABI defines the rules governing interactions between software components. ABIs specify aspects such as data alignment, size of basic types, and calling conventions. Different platforms may have different ABIs, affecting factors like the number of parameters passed via registers and the organization of the stack frame. Components interacting with each other, including compiled code and assembly routines, must adhere to the same ABI to communicate effectively.
+
+Key Terms:
+
+* Variable Length Array (VLA)
+* Activation Record / Stack Frame
+* Parameter Passing
+* Return Value
+* Caller Save Registers
+* Callee Save Registers
+* Application Binary Interface (ABI)

@@ -1,0 +1,3136 @@
+1
+00:00:00,000 --> 00:00:13,200
+Okay, so what we saw in the morning was a simple code generation scheme and as I said
+
+2
+00:00:13,200 --> 00:00:18,519
+in the morning what we are going to now see is a more sophisticated code generation scheme
+
+3
+00:00:18,519 --> 00:00:24,280
+that is by constructing the directed acyclic graph for a basic bra and then from that trying
+
+4
+00:00:24,280 --> 00:00:32,560
+to generate code. Okay, so the reason why the simple code generator was not efficient
+
+5
+00:00:32,560 --> 00:00:38,679
+is that it has no big picture, right. It has no idea of how, what are the variables which
+
+6
+00:00:38,679 --> 00:00:44,400
+are going to be used in subsequent statements, right and other things. Okay, and even simple
+
+7
+00:00:44,400 --> 00:00:50,680
+optimizations like common sub-expression elimination which sometimes is required in the generated
+
+8
+00:00:50,679 --> 00:00:55,920
+code, it does not have any knowledge of that to do that. That is because it is considering
+
+9
+00:00:55,920 --> 00:01:02,519
+one intermediate statement at a point in time. Okay, and the order of evaluation of expression
+
+10
+00:01:02,519 --> 00:01:08,680
+again may change the cost and it does not really take that also into account. So, let
+
+11
+00:01:08,680 --> 00:01:17,159
+us see how we can form code generation by constructing a directed acyclic graph. Okay,
+
+12
+00:01:17,159 --> 00:01:22,679
+so if you look at a basic block, the basic block has a sequence of statements and these
+
+13
+00:01:22,679 --> 00:01:27,079
+sequence of statements for these sequence of statements again we are talking about statements
+
+14
+00:01:27,079 --> 00:01:31,519
+which are three address formats, right. We look at all of them and then we generate or
+
+15
+00:01:31,519 --> 00:01:38,079
+we construct a DAG for that directed acyclic graph and in this DAG the reads represent
+
+16
+00:01:38,079 --> 00:01:45,079
+okay unique identifiers that means that variables are constant in your program. Okay, and the
+
+17
+00:01:45,079 --> 00:01:52,079
+interior nodes are operations like for example, plus or minus or whatever it is. Okay, and
+
+18
+00:01:52,560 --> 00:01:56,439
+you have to now have a sequence by which you have to go through this so that you will be
+
+19
+00:01:56,439 --> 00:02:03,079
+able to generate code for this in an efficient way. Okay, so the order in which they have
+
+20
+00:02:03,079 --> 00:02:08,560
+to be visited is basically the sequence number or the ID that we are going to give and if
+
+21
+00:02:08,560 --> 00:02:13,919
+you visit them in that order or in that reverse order so to say then you will be able to generate
+
+22
+00:02:13,919 --> 00:02:19,679
+efficient code for that. So let me explain this by means of an example, right. So here
+
+23
+00:02:19,679 --> 00:02:26,679
+is a piece of three address code, right, which is computing something, right.
+
+24
+00:02:26,679 --> 00:02:33,679
+So if you look at it, it is basically calculating A of I, B of I, right and then that product,
+
+25
+00:02:33,680 --> 00:02:40,680
+okay and then with that product it is basically adding that, okay adding that. Okay, so it
+
+26
+00:02:49,120 --> 00:02:55,120
+is basically accumulating A of I into B of I across all of them some kind of a vector
+
+27
+00:02:55,120 --> 00:03:02,120
+product is what it is kind of computing, incrementing I and then iterating, right. So if you look
+
+28
+00:03:03,120 --> 00:03:08,400
+at it, this is a basic block because there is no control transfer instruction till the
+
+29
+00:03:08,400 --> 00:03:14,800
+last instruction and there is no instruction to which control can jump into also, right.
+
+30
+00:03:14,800 --> 00:03:21,659
+So that is why it is called a single entry single exit. If it enters here, it can only
+
+31
+00:03:21,659 --> 00:03:27,319
+exit here, it cannot exit anywhere else, correct. This is the property of a basic block, single
+
+32
+00:03:27,319 --> 00:03:34,319
+entry and single entry, okay. So how many of you follow this three address code? Yeah,
+
+33
+00:03:34,319 --> 00:03:40,319
+afternoon, it is because of afternoon or we are all following it, right, okay.
+
+34
+00:03:40,319 --> 00:03:46,400
+Okay, so now if I look at the right hand side that is where I have the DAG for that, it
+
+35
+00:03:46,400 --> 00:03:52,599
+is also easy to understand, right. For example, here I am doing some indexing operation, okay
+
+36
+00:03:52,599 --> 00:03:58,879
+for A, some indexing operation for B. Here I am multiplying 4 and I, of course I use
+
+37
+00:03:58,879 --> 00:04:05,719
+I naught for some reason, let me explain that little later. Then the same 4 I is used in
+
+38
+00:04:05,719 --> 00:04:11,400
+indexing operation of both of this, correct. And then you can see that on this side I am
+
+39
+00:04:11,400 --> 00:04:17,240
+adding I with 1 and then I am checking for less than or equal to, that is possibly this
+
+40
+00:04:17,240 --> 00:04:23,800
+statement. And of course here I am multiplying A of I and B of I and I am adding it with
+
+41
+00:04:23,800 --> 00:04:30,720
+product, okay. And I keep doing this. As far as this basic block is concerned, this is
+
+42
+00:04:30,720 --> 00:04:36,199
+what is happening. As it is you can see in this three address code that 4 I is calculated
+
+43
+00:04:36,199 --> 00:04:42,439
+twice, right. You could avoid that by doing common sub expression elimination or by constructing
+
+44
+00:04:42,439 --> 00:04:47,040
+this DAG itself you can actually identify the common sub expression and you can eliminate
+
+45
+00:04:47,040 --> 00:04:52,600
+that also, right. You will see how to construct the DAG, but I am just giving you this example
+
+46
+00:04:52,600 --> 00:04:56,800
+and then giving you the picture how the DAG will look like, right.
+
+47
+00:04:56,800 --> 00:05:02,680
+Now once you have this as I mentioned earlier, all the leaf nodes are either variables, variables
+
+48
+00:05:02,680 --> 00:05:07,720
+meaning typically these are program variables A, B and 4. Here in this example you can think
+
+49
+00:05:07,720 --> 00:05:13,520
+that variables which start with the name T are temporaries created by your intermediate
+
+50
+00:05:13,520 --> 00:05:19,320
+code. They are not program variables in the sense that, I mean in the sense that after
+
+51
+00:05:19,320 --> 00:05:25,120
+this basic block or after this region of code if those variable values are not saved anywhere
+
+52
+00:05:25,120 --> 00:05:33,760
+it is okay. But variable values like A, B or in this case I etcetera, A and B are non-scalar
+
+53
+00:05:33,759 --> 00:05:40,759
+variables arrays, okay. So, they have multiple values whereas variable like I or product,
+
+54
+00:05:40,759 --> 00:05:48,560
+right. They are scalar variables, right. Their values need to be saved because they are program
+
+55
+00:05:48,560 --> 00:05:54,439
+variables. Others are temporaries generated by your intermediate code.
+
+56
+00:05:54,439 --> 00:06:03,039
+Now in this what we can see is that each leaf node is either a variable or a constant, okay.
+
+57
+00:06:03,040 --> 00:06:09,720
+And each internal node is some kind of an operation multiplication, addition or indexing
+
+58
+00:06:09,720 --> 00:06:15,720
+less than or equal to and so on, right. So, this is what we mean by a DAG and if you go
+
+59
+00:06:15,720 --> 00:06:21,120
+back to the previous thing that is exactly what we have said, right. Leafs are labeled
+
+60
+00:06:21,120 --> 00:06:27,879
+by unique identifiers, variables are constants and interior nodes are labeled by an operator,
+
+61
+00:06:27,879 --> 00:06:32,040
+some kind of an operation that we perform. And we are going to give a sequence ID for
+
+62
+00:06:32,040 --> 00:06:37,840
+each one of these nodes and that tells us in what order we want to compute them, okay.
+
+63
+00:06:37,840 --> 00:06:42,720
+So, first let us see how to construct the DAG. Then we will go about how to give the
+
+64
+00:06:42,720 --> 00:06:48,160
+sequence ID for them. So, again you process the tree address code one by one. Take each
+
+65
+00:06:48,160 --> 00:06:54,920
+piece of each tree address code, right. And then you add certain nodes or edges in the
+
+66
+00:06:55,800 --> 00:07:02,120
+So, let us take the statement of the form x is equal to y of z, right. It is basically
+
+67
+00:07:02,120 --> 00:07:10,120
+performing an operation on y and z. So, you find out if node y is not defined in the graph,
+
+68
+00:07:10,120 --> 00:07:18,080
+okay. That means that, right, it is not already been used. y is a program variable or y could
+
+69
+00:07:18,079 --> 00:07:25,279
+either be a program variable or could be a temporary, okay. Now, if y is not defined
+
+70
+00:07:25,279 --> 00:07:30,599
+in the DAG and you are seeing it for the first time, then it has to be a program variable
+
+71
+00:07:30,599 --> 00:07:35,759
+because if it is a temporary, it must have been defined before that, correct. If you
+
+72
+00:07:35,759 --> 00:07:40,039
+are going to use a temporary which is a part of this expression, the temporary should have
+
+73
+00:07:40,039 --> 00:07:44,560
+had some value defined to it without which you cannot use it in some other expression.
+
+74
+00:07:45,040 --> 00:07:48,839
+If it is a program variable, yes, program variable would have been defined elsewhere
+
+75
+00:07:48,839 --> 00:07:53,519
+in some other basic block, okay. And it would have a value which you are going to use it,
+
+76
+00:07:53,519 --> 00:08:00,519
+okay. So, if node y is not defined in the DAG, right, then it must be a program variable.
+
+77
+00:08:00,519 --> 00:08:07,800
+So, you create a leaf node with the label y. If similarly for node z, if it is not defined
+
+78
+00:08:07,800 --> 00:08:15,319
+in the DAG, you create another leaf node and name it as z. And now you have, so basically
+
+79
+00:08:15,319 --> 00:08:19,879
+otherwise you have some other node which is named y, which has been computed as a part
+
+80
+00:08:19,879 --> 00:08:25,439
+of any of the previous statements. So, whichever node you have as y and whichever node you
+
+81
+00:08:25,439 --> 00:08:32,000
+have as z, connect them and then call that as x. And the connecting node from which you
+
+82
+00:08:32,000 --> 00:08:38,879
+draw edges to y and z, okay, is basically what is called x and that has the operation
+
+83
+00:08:38,879 --> 00:08:44,120
+op, okay. So, here you are also going to check if there
+
+84
+00:08:44,120 --> 00:08:50,000
+is a node with the same operation and the left child which is node y and the right child
+
+85
+00:08:50,000 --> 00:08:55,200
+which is node z. That means that this expression is also already computed and there is already
+
+86
+00:08:55,400 --> 00:09:02,400
+a temporary for this, in which case you can call that node itself also as x, okay. That
+
+87
+00:09:02,400 --> 00:09:07,759
+is really what it is saying, okay. So, again let me go through this. If there is a node
+
+88
+00:09:07,759 --> 00:09:14,759
+with operator op and left and right children as node y and z, then call this node y, sorry,
+
+89
+00:09:15,560 --> 00:09:20,640
+call this node also as n because that already computes y op z. It is already existing in
+
+90
+00:09:20,640 --> 00:09:24,680
+the graph, you can reuse it, okay. I will show you the example of this when we come
+
+91
+00:09:24,679 --> 00:09:30,959
+to that 4 i statement. If it is not, then you create a node as n and then put a left
+
+92
+00:09:30,959 --> 00:09:37,000
+child of this as node y and right child of this as node z. Again the left and right are
+
+93
+00:09:37,000 --> 00:09:43,000
+important because not all operations are commutative. You have to be careful about that, right.
+
+94
+00:09:43,000 --> 00:09:47,799
+So, you have to do that and you in this particular case, in the else case you actually create
+
+95
+00:09:47,879 --> 00:09:54,879
+a new node, okay. Now, delete x from the list of attached identifiers and append x to the,
+
+96
+00:09:55,559 --> 00:10:02,299
+so for the new node you basically call this as x because x may be redefined, okay or it
+
+97
+00:10:02,299 --> 00:10:06,199
+may be the case x is defined for the first time, x could be a temporary and it could
+
+98
+00:10:06,199 --> 00:10:11,799
+be defined for the first time. Node n is the one which is going to be called as x, okay.
+
+99
+00:10:11,799 --> 00:10:17,759
+So, you give the name x to that node and if there is any other identifier which also has
+
+100
+00:10:17,759 --> 00:10:24,159
+x you delete it, okay and maybe they can be renamed as x naught or x 1 or something
+
+101
+00:10:24,159 --> 00:10:30,279
+like that, okay. If you have a statement of the form x is equal to y which is a copy statement,
+
+102
+00:10:30,279 --> 00:10:35,240
+then identify if there is a node y, right. If there is a node y then you can attach x
+
+103
+00:10:35,240 --> 00:10:42,240
+to it. If there is no node y, you create a node, leaf node with label y, add x to it.
+
+104
+00:10:43,200 --> 00:10:48,600
+That is essentially what you try to do. In other words, every time you encounter an operation,
+
+105
+00:10:48,600 --> 00:10:54,240
+right, you find out whether its left and right children already exist. If it exists and you
+
+106
+00:10:54,240 --> 00:10:58,840
+also see whether the operation exists. If that operation with the left and right child already
+
+107
+00:10:58,840 --> 00:11:03,240
+exists that means that you have already computed the value. So, you can actually go and call
+
+108
+00:11:03,240 --> 00:11:08,480
+that also as x. Otherwise, you create that operation, connect the left and right child
+
+109
+00:11:08,480 --> 00:11:14,879
+to it. If the nodes y and node z do not exist, create them. These are, you know, variables
+
+110
+00:11:14,879 --> 00:11:19,039
+which are going to be started. So, that is essentially what we do. Let us just go through
+
+111
+00:11:19,039 --> 00:11:24,480
+that example step by step and then try to understand how this works, okay.
+
+112
+00:11:24,480 --> 00:11:31,480
+So, let us take the first statement 4 i, right. So, here one of the operand is i, the other
+
+113
+00:11:32,480 --> 00:11:39,480
+one is 4, right. We are starting with an empty graph. So, neither of them is available. So,
+
+114
+00:11:40,240 --> 00:11:47,240
+we can start off with the leaf nodes 4 and i and star is the operation that you perform,
+
+115
+00:11:47,639 --> 00:11:53,440
+correct. So, you put a node with star and then left child and right child are 4 and
+
+116
+00:11:53,440 --> 00:12:00,440
+i and this is going to be called t 1. So, attach the name t 1 to this node, right.
+
+117
+00:12:01,600 --> 00:12:08,600
+The next step is t 2 equal to a of t 1, right. So, here the operation is the indexing operation
+
+118
+00:12:10,399 --> 00:12:17,399
+which we show it like this, correct. And one operand for this is a which is a variable
+
+119
+00:12:17,879 --> 00:12:24,879
+name and a does not exist in this graph originally. Therefore, we create a leaf node for a and
+
+120
+00:12:24,879 --> 00:12:31,879
+attach it to the left child, attach it as a left child and the right child is t 1. t
+
+121
+00:12:32,000 --> 00:12:37,399
+1 already exists in the graph. So, you connect it to t 1, correct.
+
+122
+00:12:37,399 --> 00:12:44,399
+Now, the next statement is 4 i, right. 4 and i already exist in the graph, constant 4 and
+
+123
+00:12:45,120 --> 00:12:51,320
+constant i already exist. In fact, there is a node with star and left child as 4 and right
+
+124
+00:12:51,320 --> 00:12:56,640
+child as i. That means what? This value has already been computed. You have seen another
+
+125
+00:12:56,640 --> 00:13:03,080
+statement which is exactly of this form, right. So, there is no need to create another node
+
+126
+00:13:03,080 --> 00:13:09,400
+t 3 for that. You can call this itself as t 3. That is why you are attaching t 3 to
+
+127
+00:13:09,400 --> 00:13:16,400
+the same node. Now, by doing this what have I achieved? We have achieved common sub-expression
+
+128
+00:13:16,600 --> 00:13:20,919
+elimination. You are going to compute this only once, correct.
+
+129
+00:13:20,919 --> 00:13:27,919
+Now, let us go to the next one. Next statement is b is equal to t 3. That means that it is
+
+130
+00:13:28,079 --> 00:13:34,919
+an indexing operation. Question, yeah. Question or? Okay. Okay. Right. The next one is b is
+
+131
+00:13:34,919 --> 00:13:41,919
+equal to t 3, right. So, b does not exist. So, we create b as a leaf node. We put an
+
+132
+00:13:42,399 --> 00:13:49,399
+indexing node and then connect t 3 to this, okay. This is called t 4, right. t 3 can also
+
+133
+00:13:50,919 --> 00:13:55,679
+exist here. I do not know why it was got removed, but t 3 will also exist here because if there
+
+134
+00:13:55,679 --> 00:14:02,679
+is a future reference for t 3, right, that is same as 4 i. This value has to be taken.
+
+135
+00:14:02,719 --> 00:14:08,679
+So, t 3 is not removed from here. Do not take it that way. t 1 comma t 3 is here. t 4 is
+
+136
+00:14:08,679 --> 00:14:15,679
+created which is the indexing operation. Then the next step is t 2 star t 4. Create
+
+137
+00:14:15,719 --> 00:14:22,719
+a new node, put star for that and call that as t 5. The next step is one more addition,
+
+138
+00:14:24,679 --> 00:14:31,359
+okay. t 6 equal to product plus t 5. Product does not exist. So, you create a leaf node
+
+139
+00:14:31,359 --> 00:14:38,000
+for that and this is the right child. Create a new node, call that as t 6. Then one more
+
+140
+00:14:38,000 --> 00:14:45,000
+step, right. So, here, so this is an equal thing. Remember, this is, if you see in that
+
+141
+00:14:46,360 --> 00:14:51,360
+algorithm, we have a separate set of statement to be executed when you have a equal to b
+
+142
+00:14:51,360 --> 00:14:57,159
+kind of an operation. So, in this case, what you need to do is whatever is the node t 6,
+
+143
+00:14:57,159 --> 00:15:02,960
+attach the label product to that, right, prod to that and wherever prod was there, you renumber
+
+144
+00:15:03,040 --> 00:15:09,600
+them as prod 0, prod 1, prod 2 and so on. This is an earlier value of prod. This is a new
+
+145
+00:15:09,600 --> 00:15:14,600
+value of prod. That is really what it is, okay. So, originally, if you see the previous
+
+146
+00:15:14,600 --> 00:15:19,800
+slide, this was prod and this was t 6. Now, when you process this statement, prod equal
+
+147
+00:15:19,800 --> 00:15:26,800
+to t 6, right, this label prod is attached to t 6 and the earlier statement prod is deleted
+
+148
+00:15:27,799 --> 00:15:33,279
+or it has been renumbered. You can consider that as being renumbered and that is renumbered
+
+149
+00:15:33,279 --> 00:15:38,919
+to t prod 0. See, subsequently, if you do one more, let us say a plus prod or something
+
+150
+00:15:38,919 --> 00:15:43,839
+like that, this will become prod 1 and the new one will become prod because that is the
+
+151
+00:15:43,839 --> 00:15:47,559
+value of prod that you have to use subsequently in the basic block, correct.
+
+152
+00:15:47,559 --> 00:15:53,000
+See, remember that this value of prod is the one that you have to use in the any statement
+
+153
+00:15:53,000 --> 00:15:58,919
+subsequently. That is the reason why we rename this as prod and then renumber this to prod
+
+154
+00:15:58,919 --> 00:16:04,960
+0 or whatever. Is that okay? Is that clear? Okay. So, again, a similar thing is going
+
+155
+00:16:04,960 --> 00:16:11,039
+to happen here when you say t 7 is equal to i plus 1 and i is equal to t 7. Essentially,
+
+156
+00:16:11,039 --> 00:16:15,919
+what is happening is i is going to become i plus 1, right. So, when you process the
+
+157
+00:16:15,919 --> 00:16:22,919
+next statement, i is already there, okay, you create a constant 1 and you have to use
+
+158
+00:16:23,000 --> 00:16:28,240
+and then put plus there, call that as t 7. Then the next statement is i is equal to t
+
+159
+00:16:28,240 --> 00:16:38,240
+7. So, you attach the label i also to this and then renumber this to i naught, got it?
+
+160
+00:16:38,240 --> 00:16:47,000
+Okay. Then the last statement is less than or equal to go to, right. For that, this constant
+
+161
+00:16:47,000 --> 00:16:52,120
+20 is needed which is another internal node. I think that number is not being put in here,
+
+162
+00:16:52,240 --> 00:16:58,639
+but that is 20, right. And then this is basically what it is. So, if you look at this, this
+
+163
+00:16:58,639 --> 00:17:03,919
+is the sequence of intermediate statements, okay, the DAG for this sequence of intermediate
+
+164
+00:17:03,919 --> 00:17:10,680
+statements. This already has removed constant sub-expression. Now, if you can come up a
+
+165
+00:17:10,680 --> 00:17:15,960
+very efficient way of implementing this DAG or generating code for this DAG, that is what
+
+166
+00:17:15,960 --> 00:17:20,079
+I mean by implementing. If you can come up with an efficient way of generating code for
+
+167
+00:17:20,079 --> 00:17:26,399
+this DAG, that would essentially mean we are able to generate code being able to look
+
+168
+00:17:26,399 --> 00:17:31,079
+this far down in the code, what is being used and what is not being used, right.
+
+169
+00:17:31,079 --> 00:17:35,599
+Remember earlier when we said we did not have a big picture, we were saying that we were
+
+170
+00:17:35,599 --> 00:17:40,639
+not even seeing the next statement in the intermediate code. Now, we are able to see
+
+171
+00:17:40,639 --> 00:17:46,960
+a sequence of statements at the level of a basic block and then able to generate code
+
+172
+00:17:46,960 --> 00:17:52,480
+for that, right. That is a slightly better situation, isn't it? Okay. Now that you have
+
+173
+00:17:52,480 --> 00:17:58,360
+this DAG, how do you generate code for this? In what order do we generate code for this?
+
+174
+00:17:58,360 --> 00:18:05,360
+That is the next question, right. Okay. So, before we go that, let us just say that if you look at
+
+175
+00:18:05,360 --> 00:18:11,600
+this DAG, it also represents data dependence, right. For example, it says to compute T6,
+
+176
+00:18:11,599 --> 00:18:21,679
+you need T5. To compute T5, you need A of 4i or T2. To compute this, you need T4 and to compute
+
+177
+00:18:21,679 --> 00:18:28,480
+that you need the address of B plus 4i. To compute this, you need i and 1, all of these things. So,
+
+178
+00:18:28,480 --> 00:18:35,159
+that the data dependence information is already stored and when you generate code, right, you
+
+179
+00:18:35,160 --> 00:18:43,640
+have to generate code bottom up, right. Because you cannot generate code for this unless you
+
+180
+00:18:43,640 --> 00:18:48,560
+have generated code for these two. You cannot generate code for this unless you have generated
+
+181
+00:18:48,560 --> 00:18:54,960
+code for this. So, in the instruction sequence also, the code generated, right, you need to have
+
+182
+00:18:54,960 --> 00:19:02,080
+the code for this, the code for this and then only the code for that, right. That is what that makes
+
+183
+00:19:02,079 --> 00:19:10,439
+sense, right. So, code generation is always bottom up, okay. So, as we mentioned, this represents
+
+184
+00:19:10,439 --> 00:19:18,079
+data dependences. It is useful for eliminating common sub-expression, okay. It is going to be
+
+185
+00:19:18,079 --> 00:19:23,679
+useful in identifying the expression evaluation of code generation order, okay, that we said earlier
+
+186
+00:19:23,679 --> 00:19:30,960
+also. So, if you want to do instruction reordering, again, dependence is an important information that
+
+187
+00:19:30,960 --> 00:19:36,960
+you need to know. And if you use this DAG, later on, we will not exactly this DAG, but we will use
+
+188
+00:19:36,960 --> 00:19:41,880
+some form of a DAG to show how to do instruction reordering, right. That also we will talk about
+
+189
+00:19:41,880 --> 00:19:49,360
+it or instruction scheduling to exploit parallelism, okay. Now, let us just look at how do we go about
+
+190
+00:19:49,360 --> 00:19:56,319
+generating code for the DAG, how do we order them and how do we list them, okay. The first step is
+
+191
+00:19:56,319 --> 00:20:02,839
+to list them and give a number for that and then traverse them in some reverse order of numbering
+
+192
+00:20:02,839 --> 00:20:09,960
+to generate the code. So, the algorithm proceeds in the following way. You first select an unlisted
+
+193
+00:20:09,960 --> 00:20:16,480
+node n in your DAG, okay, all of whose parents have already been listed. That means that whenever
+
+194
+00:20:16,480 --> 00:20:20,919
+you want to visit a node, you have to make sure that their parents have already been visited,
+
+195
+00:20:20,920 --> 00:20:26,960
+all their parents have been visited. Remember this is a DAG, so your node may have multiple parents,
+
+196
+00:20:26,960 --> 00:20:31,759
+parents meaning nodes which are above that. If you want to look at the graph, again look at it here,
+
+197
+00:20:31,759 --> 00:20:38,960
+right. So, if you want to visit, let us say this node, you have to make sure that its parent has
+
+198
+00:20:38,960 --> 00:20:45,720
+already been visited, okay. So, this visiting you are going to do top down, code generation you are
+
+199
+00:20:45,720 --> 00:20:52,559
+going to do bottom up, right. So, if you want to visit this node, you have to ensure that its
+
+200
+00:20:52,559 --> 00:20:57,799
+parent has already been visited. Similarly, for this node, similarly for this node. In order for
+
+201
+00:20:57,799 --> 00:21:03,039
+you to visit this, both these nodes must have been visited already and must have been labeled
+
+202
+00:21:03,039 --> 00:21:11,039
+already. That is the condition, right, alright. So, first select an unlisted node n, all of whose
+
+203
+00:21:11,039 --> 00:21:16,559
+parents have been listed. If the node itself is the root, that means that it did not have any parents,
+
+204
+00:21:16,559 --> 00:21:23,200
+that also can be selected in that step, right. Call that node as n and list that node. So,
+
+205
+00:21:23,200 --> 00:21:29,960
+basically the unlisted node n, all of whose parents have been listed is going to be listed first,
+
+206
+00:21:29,960 --> 00:21:38,839
+right. And then you take that node and then take the leftmost child of that node, right,
+
+207
+00:21:38,839 --> 00:21:48,679
+that is m, okay. Leftmost child of m that has no unlisted parents. Again, among the left, among the
+
+208
+00:21:48,679 --> 00:21:54,279
+children, you choose the one which is leftmost and all of whose parents have already been listed,
+
+209
+00:21:54,279 --> 00:22:02,240
+right. Now, and is not a leaf node and it is that itself is not a leaf node, then you do the
+
+210
+00:22:02,240 --> 00:22:07,839
+following thing. You then list m, that left node, because all his parents have been listed. So,
+
+211
+00:22:07,839 --> 00:22:14,519
+you can now list the node and then depth first. You go on that node and go further down. That is
+
+212
+00:22:14,519 --> 00:22:21,439
+really what you do. If you do not have any nodes, okay, which satisfy this condition, maybe there
+
+213
+00:22:21,439 --> 00:22:26,439
+are children, but their parents have not been listed, their other parent has not been listed,
+
+214
+00:22:26,439 --> 00:22:34,480
+then what you do is you go breath first, right. So, in this step, you go to the next sibling in
+
+215
+00:22:34,480 --> 00:22:40,240
+this while loop. Here you go depth first. We will again see an example and then see how the
+
+216
+00:22:40,240 --> 00:22:45,960
+traversal takes place, okay. So, I am going to take this particular graph, okay, which is little
+
+217
+00:22:45,960 --> 00:22:54,360
+bit more of a DAG than the one that we saw earlier, right, all right. Okay, so we start with node 1,
+
+218
+00:22:54,360 --> 00:23:04,400
+okay. Node 1 has no parents, that means it can be listed, right. Then what is the next step? Then
+
+219
+00:23:04,400 --> 00:23:12,680
+you have to go to each children, leftmost child, all of whose parents have been listed. So, which
+
+220
+00:23:12,680 --> 00:23:27,280
+one is that? 2, right. Can 2 be listed? Yes, 2 has only one parent, which has already been listed.
+
+221
+00:23:27,279 --> 00:23:35,079
+So, 2 can be listed. Then what you do? Just tell me the node number, there are several pluses and
+
+222
+00:23:35,079 --> 00:23:45,759
+minuses in the thing. Then you try 6, but can 6 be listed? Leftmost child, all of whose parents
+
+223
+00:23:45,759 --> 00:23:53,079
+have been listed. That is not the case because 5 was not listed, right. So, then you go breath
+
+224
+00:23:53,079 --> 00:24:01,240
+first, right. Then you go to the next child of this one. In fact, sorry, if you look at 2,
+
+225
+00:24:01,240 --> 00:24:08,679
+2 has this as the leftmost child, this as the rightmost child or the right child if you want
+
+226
+00:24:08,679 --> 00:24:15,639
+to call it, but this also has one of its parent not listed, correct. When you were in 2, 3 was
+
+227
+00:24:15,639 --> 00:24:22,519
+not listed. So, you have found that none of these nodes can be listed next. So, you go breath first.
+
+228
+00:24:22,519 --> 00:24:29,639
+Correct, at that point in time you go breath first and then you go to the node 3. Node 3 can
+
+229
+00:24:29,639 --> 00:24:37,000
+be listed because its parent has already been listed, right. Now, next is you look at the
+
+230
+00:24:37,000 --> 00:24:47,359
+children of 3, 4. 4 can be listed because both 2 and 3 have been listed, right. Then you go depth
+
+231
+00:24:47,359 --> 00:25:01,119
+first, right. 6 can be listed, right. 9 and 10 you do not list them because they are leaf nodes,
+
+232
+00:25:01,119 --> 00:25:08,000
+right. If they are leaf nodes, you do not list them now, right. Leave that, right. Then you go
+
+233
+00:25:08,000 --> 00:25:16,960
+up, go up. Sorry, I am sorry, I am going. I went in the opposite direction, sorry, right.
+
+234
+00:25:18,960 --> 00:25:25,519
+Then of course, you have finished the left child of 4. You have to go to the right child that is 8,
+
+235
+00:25:26,480 --> 00:25:32,240
+right. Then its left child, 8 can be listed because 8 has only one parent that has already
+
+236
+00:25:32,240 --> 00:25:38,960
+been listed, right. Then you go to 8. After 8 is done, 11 and 12 need not have to be listed
+
+237
+00:25:38,960 --> 00:25:47,759
+because they are leaf nodes. Now, this is your listing order, okay. Now, if you see this,
+
+238
+00:25:47,759 --> 00:25:54,000
+you will see that if I am going to generate code for 1 after generating code for 2 and 3,
+
+239
+00:25:54,960 --> 00:26:01,279
+then these dependencies are satisfied, right. Similarly, if I am going to generate code for 2
+
+240
+00:26:01,920 --> 00:26:10,480
+after generating code for 4 and 6, that is correct because it depends on 4 and 6.
+
+241
+00:26:11,039 --> 00:26:18,399
+But even to generate 4, I need code for 5 that is below, correct. So, in some sense,
+
+242
+00:26:18,399 --> 00:26:25,119
+if you look at this listing order, it essentially satisfy all my dependencies, correct.
+
+243
+00:26:25,119 --> 00:26:29,599
+It satisfies everything, right. Any questions?
+
+244
+00:26:34,639 --> 00:26:37,759
+One step backward. No, no. What is your question?
+
+245
+00:26:40,799 --> 00:26:41,359
+What is the?
+
+246
+00:26:41,359 --> 00:26:56,479
+What was the problem with that one, I said? It is the same thing. Just follow the same algorithm.
+
+247
+00:26:57,679 --> 00:27:02,000
+Only thing is I chose to do the diagram, I mean, chose to do this example rather than that example,
+
+248
+00:27:02,719 --> 00:27:09,599
+okay. That are, that have, that are root, is it?
+
+249
+00:27:10,240 --> 00:27:13,199
+That did not have any parent. Does not matter, you can start off with anything,
+
+250
+00:27:15,599 --> 00:27:20,480
+okay. If you have multiple options, which one to choose, right, that is the first node.
+
+251
+00:27:20,480 --> 00:27:25,119
+That is your question, sorry, I did not understand that. So, for example, if I have one more node,
+
+252
+00:27:25,119 --> 00:27:30,879
+which did not have any parent, right, I can choose either one of them, right. Obviously,
+
+253
+00:27:30,879 --> 00:27:36,399
+one of them may be more efficient than the other one. I will tell you later on what is that efficient
+
+254
+00:27:36,400 --> 00:27:42,480
+means, but I am not guaranteeing that you will generate optimal code, right. You will generate
+
+255
+00:27:42,480 --> 00:27:48,000
+more efficient code, more efficient than the simple method, but there is no guarantee that this will
+
+256
+00:27:48,000 --> 00:27:53,360
+be the best one, okay. Let us say, remember, we said that there are several possible orders in
+
+257
+00:27:53,360 --> 00:27:59,759
+which you can do that and that ordering essentially changes certain things, okay. We will, we are
+
+258
+00:27:59,759 --> 00:28:06,879
+going to talk about it very, very soon. So, wait on that, okay, right. So, if I had multiple options,
+
+259
+00:28:06,879 --> 00:28:13,119
+I would have chosen one of them and that may, may not necessarily be the best one. That,
+
+260
+00:28:13,119 --> 00:28:21,440
+that is really what it is, okay. Now, having done this, okay, we basically have this evaluation
+
+261
+00:28:21,440 --> 00:28:28,160
+order in the following way, right. I am also including all the leaf nodes in this evaluation,
+
+262
+00:28:28,800 --> 00:28:39,920
+right. So, in order for me to evaluate 8, I need 11 and 12. So, start with 11, then 12, then 8,
+
+263
+00:28:40,560 --> 00:28:52,080
+okay. Then we have 6 and in order for me to evaluate 6, I need 9 and 10, okay. Then 6,
+
+264
+00:28:52,079 --> 00:29:04,879
+in order for me to evaluate 5, I need 7, okay. 5, 4, in order for me to evaluate 3, well,
+
+265
+00:29:04,879 --> 00:29:14,559
+I have already evaluated 12, so I do not need to worry about it. So, 3, 2 and 2, okay. Question?
+
+266
+00:29:14,559 --> 00:29:26,159
+Go ahead. No question? Okay, right. So, essentially we have listed all the internal
+
+267
+00:29:26,159 --> 00:29:32,399
+nodes in this order and when you generate code, you have to go in the reverse order.
+
+268
+00:29:32,399 --> 00:29:38,960
+But before you generate code for 8, you have to make sure that the leaf nodes are also covered.
+
+269
+00:29:39,519 --> 00:29:44,400
+The reason that we do the leaf nodes in the end is also the following. For example,
+
+270
+00:29:44,400 --> 00:29:50,640
+I have 11 and 12 here in order for me to calculate 8 or in order for me to generate code for 8.
+
+271
+00:29:51,519 --> 00:29:55,600
+Now, later on you will see schemes in which you will say that the left node,
+
+272
+00:29:56,400 --> 00:30:01,519
+this is specifically for CISC code generation, the left node is first moved to a register,
+
+273
+00:30:02,480 --> 00:30:09,200
+the right node can be in memory, then this operation is register memory operation result
+
+274
+00:30:09,200 --> 00:30:15,920
+going into register, right. So, that way what I will do is that I will do a move operation for
+
+275
+00:30:15,920 --> 00:30:23,440
+this. I do not need to generate any code for 12, I can generate code for 8 or I can generate a
+
+276
+00:30:23,440 --> 00:30:30,960
+move operation for this, a move operation for this and an operation with two registers for this,
+
+277
+00:30:30,960 --> 00:30:35,519
+either one of them I can do. So, the correct order is to traverse the nodes
+
+278
+00:30:37,360 --> 00:30:44,079
+top down using that algorithm and then when you want to generate code, you go bottom up,
+
+279
+00:30:45,680 --> 00:30:51,039
+first generating code for all the leaf nodes and then for the other nodes and so on, right.
+
+280
+00:30:53,759 --> 00:30:59,279
+So, what we have seen so far is code generation, DAC construction and code generation.
+
+281
+00:31:01,039 --> 00:31:09,279
+Now, this part we saw as was pointed out depending on which root node I choose,
+
+282
+00:31:09,279 --> 00:31:15,759
+my ordering might change, okay and this may necessarily generate different sets of code,
+
+283
+00:31:16,400 --> 00:31:24,799
+right. We will talk about the notion of optimal code generation and then say that when my DAC is
+
+284
+00:31:24,799 --> 00:31:32,000
+a tree, right, how this optimal, how this code generation schemes turns out to be an
+
+285
+00:31:32,000 --> 00:31:36,559
+optimal code generation scheme, that is really what we are going to see. For that we are going
+
+286
+00:31:36,559 --> 00:31:42,399
+to first talk about this algorithm called Seti-Wulman algorithm, this was developed way back in the 70s.
+
+287
+00:31:42,399 --> 00:31:47,759
+So, first we will talk about that. Then of course, we will talk about dynamic programming approach
+
+288
+00:31:48,480 --> 00:31:53,200
+and then we will also talk about tree pattern matching and then conclude this with
+
+289
+00:31:53,200 --> 00:31:57,920
+people optimization. Any questions so far? DAC construction is clear?
+
+290
+00:31:58,880 --> 00:32:05,680
+So, given a basic block, you first construct the DAC and if that DAC happens to be a tree,
+
+291
+00:32:06,640 --> 00:32:12,480
+then you can use any one of these two algorithms to generate efficient code for that. That is an
+
+292
+00:32:12,480 --> 00:32:17,600
+optimal code generator, okay. We will see what optimality is that, right, what is optimality,
+
+293
+00:32:18,399 --> 00:32:25,519
+right. So, again when you talk about code generation, the order of evaluation of expression
+
+294
+00:32:25,519 --> 00:32:30,480
+really matters and that essentially influences the quality of the code generated.
+
+295
+00:32:31,519 --> 00:32:36,319
+Now, I will actually go more into this problem when we talk about the Seti-Wulman algorithm
+
+296
+00:32:36,319 --> 00:32:41,119
+and then talk in the context of using the number of registers, stores and other things.
+
+297
+00:32:41,119 --> 00:32:49,119
+So, the problem is how do we determine the optimal code generation order for a basic block
+
+298
+00:32:49,119 --> 00:32:55,759
+specified in the DAC representation. If it is in the DAC, this problem is NP-HOT, okay.
+
+299
+00:32:55,759 --> 00:33:03,359
+But if this happens to be a tree, then we can actually do it in polynomial time, right. So,
+
+300
+00:33:03,919 --> 00:33:09,119
+when we say optimal, what we really mean is that it is optimal in terms of the code length,
+
+301
+00:33:09,119 --> 00:33:14,959
+number of instructions that are generated, okay. And it is also optimal in terms of the number of
+
+302
+00:33:14,959 --> 00:33:20,479
+registers that were used because often times what you are given is that you are given a basic block
+
+303
+00:33:20,479 --> 00:33:26,319
+and you have a machine architecture which says that you have this many free registers available
+
+304
+00:33:26,319 --> 00:33:32,399
+for you which can be used for generating code for this, right. And if the number of registers
+
+305
+00:33:32,400 --> 00:33:39,600
+available is fewer than what this thing minimally requires, then you will generate code which will
+
+306
+00:33:39,600 --> 00:33:46,560
+involve spills, spill loads and stores and that will again add to additional code and that is why
+
+307
+00:33:46,560 --> 00:33:51,600
+your code may not be optimal. So, we really have to see how do we do this efficiently
+
+308
+00:33:52,160 --> 00:33:57,920
+and if this happens to be a tree, we can actually generate this efficiently, right.
+
+309
+00:33:57,920 --> 00:34:03,600
+So, if the DAG is a tree, then either we can use the Seti-Wulman algorithm or we can use
+
+310
+00:34:03,600 --> 00:34:10,240
+dynamic programming and we can solve that problem, okay. So, again let us take another example here,
+
+311
+00:34:10,880 --> 00:34:19,200
+right. Here we have a piece of four instructions, okay. Now, what we will do is that we will try
+
+312
+00:34:19,200 --> 00:34:25,840
+to generate code for this, right, without really thinking too much about it, right. By that what I
+
+313
+00:34:25,840 --> 00:34:31,760
+mean is that we will use the DAG. This is also a DAG, but it is a tree, right. It is a directed
+
+314
+00:34:31,760 --> 00:34:39,600
+acyclic graph, right and it specifies all the dependencies, okay. Internal nodes are operations
+
+315
+00:34:39,600 --> 00:34:46,320
+and leaf nodes are, okay, variables. Now, if you are given this graph and you want to
+
+316
+00:34:46,320 --> 00:34:52,559
+generate code for this, okay, and you are going to generate code for a Sysc machine,
+
+317
+00:34:52,559 --> 00:35:00,480
+right and this supports only one memory operand in an arithmetic instruction. That means that the
+
+318
+00:35:00,480 --> 00:35:07,199
+other operand has to be in register, okay. So, the left operand is same register as the destination,
+
+319
+00:35:08,159 --> 00:35:14,559
+okay. That is really what it says, okay. Also, I will say that in this particular code,
+
+320
+00:35:15,199 --> 00:35:23,599
+ABCD are the program variables, ABCDE are the program variables, T1, T2, T3, T4 are temporaries
+
+321
+00:35:24,159 --> 00:35:31,360
+and at the end of the basic block only T4 is live. That means that I do not really need to worry
+
+322
+00:35:31,360 --> 00:35:38,320
+about the values of T1, T2, T3 after this basic block. That means that I do not have to save
+
+323
+00:35:38,320 --> 00:35:44,800
+these values in some memory locations, right, okay. So, what you are going to do is that since
+
+324
+00:35:44,800 --> 00:35:49,760
+you are going to generate code for each basic block, at the end of each basic block,
+
+325
+00:35:49,760 --> 00:35:54,080
+we have to make sure that any variable which is live outside that basic block,
+
+326
+00:35:54,720 --> 00:36:03,920
+their value is stored in a memory location, okay. We will see that, right. So, first thing is that
+
+327
+00:36:03,920 --> 00:36:07,920
+let us try to generate code for this. I am going to just use some arbitrary order,
+
+328
+00:36:08,559 --> 00:36:14,880
+right, arbitrary bottom-up order just to show that one order is better than the other order.
+
+329
+00:36:14,880 --> 00:36:20,480
+That is really what I wanted to do, okay. So, let us take, I like the left-hand side better. So,
+
+330
+00:36:21,280 --> 00:36:26,800
+let us start with the left-hand side. This is the bottom-most node. I need to generate code for this,
+
+331
+00:36:26,800 --> 00:36:33,440
+correct. I can generate code saying that A is moved into a register, B is added to it.
+
+332
+00:36:34,880 --> 00:36:41,440
+Remember here R0 which is my left operand is also the destination operand, okay, same as the
+
+333
+00:36:41,440 --> 00:36:50,639
+destination. So, this generates code for A plus B, right. Now, next I go and generate code for,
+
+334
+00:36:50,639 --> 00:36:56,639
+I cannot generate code for any of these things, right, because in order for me to generate code
+
+335
+00:36:56,639 --> 00:37:00,480
+for this, I must have generated code for this. In order for me to generate code for this,
+
+336
+00:37:01,119 --> 00:37:07,440
+I must have generated code for that. So, let me go and generate code for T2. Again T2,
+
+337
+00:37:07,440 --> 00:37:16,960
+I do a similar thing, right. Here I move C to R1 and then do the addition. Remember when I did this,
+
+338
+00:37:17,519 --> 00:37:25,599
+I kept the added value T1 in R0 register, right. Why? Because this is going to be used somewhere
+
+339
+00:37:25,599 --> 00:37:31,360
+else in the calculation. So, keeping that in R0 register is useful for me because the next
+
+340
+00:37:31,360 --> 00:37:37,279
+operation I am going to perform on that, I can make use of this register value, right. So,
+
+341
+00:37:37,279 --> 00:37:43,519
+if it is possible, keep it in the register. So, that is why I gave a new register for this,
+
+342
+00:37:43,519 --> 00:37:52,319
+right. Now, after this, if I want to do this subtract operation, right, what should I do?
+
+343
+00:37:56,559 --> 00:38:07,679
+This is in R1, this I can reuse, but this R1 is in a register, but this is the right operand,
+
+344
+00:38:08,880 --> 00:38:14,799
+okay. So, let us assume that only the right operand in this instruction can be a
+
+345
+00:38:15,519 --> 00:38:23,679
+memory instruction. Left operand has to be a register instruction, right. Then what happens,
+
+346
+00:38:23,759 --> 00:38:33,039
+sorry, right. Let us assume that we have only two registers, R0 is in this, R1 is in this.
+
+347
+00:38:33,039 --> 00:38:39,119
+Now, you say that you want to load this in one more register, you do not have a register. This
+
+348
+00:38:39,119 --> 00:38:45,440
+being in a register is not very useful because this is right operand. So, we ended up doing the
+
+349
+00:38:46,799 --> 00:38:52,719
+wrong way, correct. You understand that, right. So, the machine architecture says that you need
+
+350
+00:38:52,719 --> 00:38:57,759
+a register for the, yeah, you need a register for the left operand, the right operand can only be
+
+351
+00:38:57,759 --> 00:39:02,879
+in memory. Right operand can also be in register, that is not a problem, but the left operand cannot
+
+352
+00:39:02,879 --> 00:39:09,439
+be in a memory, that is the problem, right. If your architecture specifies that your left
+
+353
+00:39:09,439 --> 00:39:16,000
+operand cannot be in memory, then you have ended up in the wrong side, correct. So, now, what you
+
+354
+00:39:16,000 --> 00:39:23,119
+have to do is you either have to spill this to memory, right, and then load this in that particular
+
+355
+00:39:23,119 --> 00:39:30,639
+register and then perform this operation, right, or you spill this in memory, take that register,
+
+356
+00:39:31,199 --> 00:39:37,280
+load it, perform this operation, reload it and then perform that or you can use it even from
+
+357
+00:39:37,280 --> 00:39:41,039
+the memory because left, sorry, you cannot use it from the memory. This has to be a register,
+
+358
+00:39:41,679 --> 00:39:46,719
+right. Left operand has to be a register. So, you have to reload it. So, let us see what is the cost
+
+359
+00:39:46,719 --> 00:39:53,599
+that we are going to pay for that. So, I am going to save T 1, back into the memory location,
+
+360
+00:39:53,599 --> 00:39:59,119
+that means that R naught is being put back into location T 1, right. That is the spill that we
+
+361
+00:39:59,119 --> 00:40:05,759
+are talking about. Now, R naught is available. I load E into R naught. I perform this operation,
+
+362
+00:40:05,760 --> 00:40:12,720
+but again look at it. I have my register available, but this is in memory. I have to
+
+363
+00:40:12,720 --> 00:40:20,560
+reload it again in register, right. So, I load T 1 again into R 1 register and then perform my
+
+364
+00:40:20,560 --> 00:40:26,720
+operation and because at the end of it, I have to save the value of T 4 which is live out of this
+
+365
+00:40:26,720 --> 00:40:33,200
+basic block. I do a store file, correct. So, if you look at the sequence of instruction,
+
+366
+00:40:33,199 --> 00:40:40,399
+this is something which is unexpected, right. Store of R 1 to T 1 is unexpected and similarly,
+
+367
+00:40:40,399 --> 00:40:46,960
+this load of T 1 to R 1 is also unexpected, right. We could have avoided these things
+
+368
+00:40:47,599 --> 00:40:53,759
+or we could have possibly avoided this how we did some other order of evaluation of expression.
+
+369
+00:40:53,759 --> 00:40:58,000
+This is what we mean by order of evaluation of expression. I could have computed the left
+
+370
+00:40:58,000 --> 00:41:02,800
+hand side first and then the right hand side or the right hand side first and then the left
+
+371
+00:41:02,800 --> 00:41:09,519
+hand side. I could have even done something worse. I could have computed this first, this, this and
+
+372
+00:41:09,519 --> 00:41:15,519
+then found out that something else is not possible. Go do spill. I could have gone all these way.
+
+373
+00:41:15,519 --> 00:41:20,719
+If the DAG is big enough, there are many such possibilities. Correct, we cannot obviously
+
+374
+00:41:21,280 --> 00:41:27,199
+explore all of them in order to generate the efficient code. So, when we say efficient code,
+
+375
+00:41:27,199 --> 00:41:32,799
+we want to make sure that the number of instructions, right, that you have generated
+
+376
+00:41:32,799 --> 00:41:37,919
+is fewer in number, right. And you are given some number of registers. In this case, we assume that
+
+377
+00:41:37,919 --> 00:41:42,079
+we had only two registers, right. If you had three registers, there would not have been a problem,
+
+378
+00:41:43,039 --> 00:41:48,000
+right. This could have been in R naught, this could have been in R, sorry, this could have been in R 1.
+
+379
+00:41:48,000 --> 00:41:53,759
+This we could have loaded it into R 2 and then computed the whole thing peacefully, right.
+
+380
+00:41:53,760 --> 00:42:00,400
+Because you had only two registers, these spills and stores are required, sorry, spills and saves
+
+381
+00:42:00,400 --> 00:42:07,360
+are required, right, spills are stored, correct. Okay, so this particular order of evaluation of T
+
+382
+00:42:07,360 --> 00:42:15,600
+1, T 3, sorry, T 1, T 2, T 3, T 4, right, incurs ten instructions and one spill and a corresponding
+
+383
+00:42:15,600 --> 00:42:22,960
+save, right, or a corresponding load so to say. Now, let us look at the same thing, but in this order,
+
+384
+00:42:23,440 --> 00:42:31,920
+right. Here my order of evaluation is T 2 first, T 3 next, T 1 later and then T 4, right. So,
+
+385
+00:42:31,920 --> 00:42:38,720
+what happens is if I want to do T 2 first, I will load C into R naught, I will add R naught to and
+
+386
+00:42:38,720 --> 00:42:44,880
+then I have to calculate T 3 for which I will load E into a register. I already have a register,
+
+387
+00:42:44,880 --> 00:42:51,840
+I have two registers, only R naught has been used. I can now use R 1, right. So, I can load E into R
+
+388
+00:42:51,840 --> 00:42:59,680
+1 and I can now do this operation subtract, the result will be in R 1. Now, I can release R naught
+
+389
+00:42:59,680 --> 00:43:06,480
+and I can use R naught to load A and I can compute this. Then of course, I can compute the remaining
+
+390
+00:43:06,480 --> 00:43:11,920
+things, right. So, if I have started off somehow from here and gone all the way up,
+
+391
+00:43:12,640 --> 00:43:18,400
+I would have done it using two registers and with no spill loads and stores, correct.
+
+392
+00:43:19,039 --> 00:43:25,280
+Whereas, if I did the other way around, I would have incurred more instructions, right. Yes,
+
+393
+00:43:26,000 --> 00:43:33,680
+okay. So, the question is given a tree like this, how do I find out in what order I have to traverse
+
+394
+00:43:34,720 --> 00:43:40,320
+and how do I make sure that that order results in the minimal number of instructions and spills?
+
+395
+00:43:41,120 --> 00:43:52,720
+That is the question, right. Question? Could be happy, no? Okay. Is it afternoon or is it
+
+396
+00:43:52,720 --> 00:43:59,280
+things are so simple or things are too bad? One of the three, multiple choice question.
+
+397
+00:43:59,840 --> 00:44:25,600
+Yes, yes. Afternoon, sleepy situation, no? Yes, yes. More than the temporary variables,
+
+398
+00:44:25,599 --> 00:44:31,440
+you definitely need to distinguish between what is live out outside of the basic block,
+
+399
+00:44:32,400 --> 00:44:38,319
+right. For example, here look at T 3, right. If I know that T 3 is not going to be used anywhere
+
+400
+00:44:38,319 --> 00:44:49,119
+else, right, I have calculated T 3. Let us look at it. So, this is the calculation for T 3,
+
+401
+00:44:49,839 --> 00:44:58,559
+right. At the end of this calculation, T 3 is in R 1, okay. But T 3 is not in memory.
+
+402
+00:44:59,279 --> 00:45:07,119
+T 3 is in R 1. Now, after this, similarly if I look at T 1, T 1 when it was subsequently,
+
+403
+00:45:07,119 --> 00:45:15,440
+I am computing T 1 which is in R 0, right. But when I calculate T 4, I overwrite into that R 0.
+
+404
+00:45:15,440 --> 00:45:20,480
+That means that the value of T 1 is gone, right. Value of T 1 is no longer needed,
+
+405
+00:45:21,360 --> 00:45:27,760
+right. Similarly, the value of T 3 is no longer needed, right, outside of this basic block. So,
+
+406
+00:45:27,760 --> 00:45:34,240
+I am not trying to save these values from these registers into some memory location, right. So,
+
+407
+00:45:34,240 --> 00:45:42,000
+if it is not live out, you do not have to save them, okay. And that is the essential difference
+
+408
+00:45:42,000 --> 00:45:48,159
+that you have to make in code generation. Only the variables which are live out of the basic block
+
+409
+00:45:48,159 --> 00:45:55,039
+need to be saved into their memory locations. So, for example, here we store R 0 into T 4
+
+410
+00:45:55,039 --> 00:46:00,719
+because after this basic block, we will take some other basic block. There we may to reuse R 0.
+
+411
+00:46:01,360 --> 00:46:08,719
+And that should not lose the value of T 4, right. So, you need to save that value.
+
+412
+00:46:08,719 --> 00:46:13,039
+That is the distinction you have to make. Which one?
+
+413
+00:46:14,639 --> 00:46:21,839
+T 4. You have to find the location for T 4 and then store it, okay. This is temporary.
+
+414
+00:46:21,839 --> 00:46:26,239
+This could be in the local variable stack frame possibly, right.
+
+415
+00:46:30,399 --> 00:46:30,639
+Yeah.
+
+416
+00:46:38,719 --> 00:46:55,759
+This kind of, okay, height is one possible thing, but I could have both the left child
+
+417
+00:46:55,759 --> 00:47:00,879
+and right child or left sub tree and right sub tree of the same height, okay. There is something
+
+418
+00:47:00,879 --> 00:47:05,519
+more that is needed which we are going to talk about it next. But yes, that is really what we
+
+419
+00:47:05,519 --> 00:47:17,519
+need to find out. Yes. Height may be something, okay. Again, it is here. Okay.
+
+420
+00:47:20,480 --> 00:47:25,920
+So, let us come to this Saiti-Wulman algorithm, right. So, again as I mentioned earlier,
+
+421
+00:47:25,920 --> 00:47:32,000
+we talk about this optimal code generation for trees using this algorithm and said to be optimal
+
+422
+00:47:32,000 --> 00:47:38,559
+in the sense that it produces the shortest instruction sequence, okay, over all instruction
+
+423
+00:47:38,559 --> 00:47:43,679
+sequences that you evaluate it. That means that you cannot do it with fewer instructions than what
+
+424
+00:47:43,679 --> 00:47:49,920
+is generated by the Saiti-Wulman algorithm, okay. And it takes into account the register requirement,
+
+425
+00:47:49,920 --> 00:47:55,760
+right, and generates the code with this register requirement. Now, if the tag representing the data
+
+426
+00:47:55,760 --> 00:48:00,480
+flow graph is a basic block tree, of course, this is what I said. If it is a tree, then we can use
+
+427
+00:48:00,480 --> 00:48:05,760
+the Saiti-Wulman algorithm, okay. How does the Saiti-Wulman algorithm work? Again,
+
+428
+00:48:05,760 --> 00:48:10,880
+it works in two phases. In the first phase, we are going to label and in the second phase,
+
+429
+00:48:10,880 --> 00:48:17,199
+we are going to do code generation, okay. So, labeling is also going to be done bottom up,
+
+430
+00:48:18,079 --> 00:48:23,920
+okay. Sorry, labeling is going to be done bottom up according to the number of registers required
+
+431
+00:48:23,920 --> 00:48:30,079
+to generate the code. Label essentially represents if a node has a label k, it means that the minimum
+
+432
+00:48:30,079 --> 00:48:36,799
+number of registers required to generate code for that node without any spill is k. That is what
+
+433
+00:48:36,799 --> 00:48:44,480
+it means. So, we have to somehow identify this number and put it, right. Code generation is top
+
+434
+00:48:44,480 --> 00:48:50,000
+down. Remember, see what is going to happen is that labeling is bottom up, code generation is
+
+435
+00:48:50,559 --> 00:48:55,840
+top down, okay. It is not that the root node's code is going to be generated first,
+
+436
+00:48:55,840 --> 00:49:00,480
+but the procedure is a depth first procedure going top down, right.
+
+437
+00:49:01,039 --> 00:49:05,039
+So, one of the important things that is being followed in this code generation
+
+438
+00:49:05,039 --> 00:49:10,559
+is what is going to be called as contiguous evaluation. By contiguous evaluation, what we
+
+439
+00:49:10,559 --> 00:49:18,079
+mean is that, right, you want to complete code generation of a sub-tree in full before you move
+
+440
+00:49:18,079 --> 00:49:23,600
+to the other sibling. That means that let us say when you are working on the left child or left
+
+441
+00:49:23,599 --> 00:49:29,920
+sub-tree of a node, if you have done some part of code generation, you do not stop it half way
+
+442
+00:49:29,920 --> 00:49:36,880
+through and then jump to the other sub-tree. You complete this entire sub-tree before you move
+
+443
+00:49:36,880 --> 00:49:42,079
+to that other one. The reason for doing that is that if you leave some part of this sub-tree
+
+444
+00:49:42,880 --> 00:49:49,279
+computed and then you want to jump, then whatever registers that you have used, either you have to
+
+445
+00:49:50,240 --> 00:49:55,760
+save them in memory and give those registers for the computation of the other sub-tree,
+
+446
+00:49:56,640 --> 00:50:04,080
+right, or you have to incur more spills, right. That is the reason. So, if you complete that entire
+
+447
+00:50:04,080 --> 00:50:10,640
+sub-tree first and then go to the other sub-tree, then it is guaranteed that that code necessarily
+
+448
+00:50:10,640 --> 00:50:16,960
+results in minimum instruction sequence, okay. So, we are going to do this for a machine model
+
+449
+00:50:16,960 --> 00:50:23,280
+where these computations are carried out in registers and the instructions are of the form
+
+450
+00:50:23,280 --> 00:50:29,760
+either having two register operands or one register operand and a memory operand.
+
+451
+00:50:29,760 --> 00:50:35,679
+The left operand has to be a register, cannot be a memory. Right operand can be a memory,
+
+452
+00:50:36,480 --> 00:50:43,360
+okay. So, same as what we have seen earlier, okay. Now, the labeling algorithm is a very simple
+
+453
+00:50:43,360 --> 00:50:50,880
+algorithm, okay. You look at that node. If the node is a leaf node and it is a left node,
+
+454
+00:50:51,680 --> 00:50:58,160
+right, because the left has to be in register, correct. Leaf node is typically a
+
+455
+00:50:58,720 --> 00:51:02,960
+variable or a value, right. So, if it has to go into a register,
+
+456
+00:51:03,680 --> 00:51:10,240
+you have to move that value to a register. So, it requires some cost. So, if the node is a leaf
+
+457
+00:51:10,239 --> 00:51:17,679
+node and it is a left node, then it incurs a cost of one to move that value into a register.
+
+458
+00:51:18,799 --> 00:51:25,199
+Whereas, if it is a right node, it can be in memory. I do not have to move it because my operands
+
+459
+00:51:25,199 --> 00:51:31,519
+allow my right operand to be in memory, right. So, I will node, I will label those nodes,
+
+460
+00:51:31,519 --> 00:51:41,119
+right nodes as value 0, okay. This is for the leaf node, right. Then for any other node,
+
+461
+00:51:41,840 --> 00:51:48,880
+which has let us say two children, okay. If both children have the same label,
+
+462
+00:51:48,880 --> 00:51:53,920
+let us look at this case. If both, sorry, if both do not have the same label value,
+
+463
+00:51:53,920 --> 00:51:59,199
+then whichever one is maximum, that will be the label value. If they have the same label value,
+
+464
+00:52:00,159 --> 00:52:07,119
+then it is either one of them plus one, right. So, this is exactly what you are going to do.
+
+465
+00:52:07,119 --> 00:52:12,879
+Again, I will show you the example and tell you why this makes sense. Again, remember the label
+
+466
+00:52:12,879 --> 00:52:20,639
+of a node represents what? Minimum number of registers required to compute that node without
+
+467
+00:52:20,639 --> 00:52:26,799
+any spill. That is also important, right. Minimum number of registers required to compute without
+
+468
+00:52:26,800 --> 00:52:33,200
+any spill, okay. Now, let us see how this makes sense, right. Yeah, go ahead.
+
+469
+00:52:37,200 --> 00:52:46,320
+Is, well, here what we are going to assume is that if it is a left node and it is a constant,
+
+470
+00:52:46,320 --> 00:52:52,560
+it has to be moved to a register, right. If it is a right node, it can be, it need not have to be,
+
+471
+00:52:52,559 --> 00:52:57,920
+okay. Again, as I mentioned to you, this scheme that we are going to discuss in the example that
+
+472
+00:52:57,920 --> 00:53:02,960
+we are going to see is for CISC code generation because we are going to assume this model,
+
+473
+00:53:03,759 --> 00:53:09,440
+right. If this model changes, then the algorithm also has to be adapted accordingly,
+
+474
+00:53:11,279 --> 00:53:17,519
+okay. Now, let us look at this algorithm and then see when it is applied to this DAG, what happens,
+
+475
+00:53:18,480 --> 00:53:27,440
+right. So, this is a leaf node and it is a left child. So, what should be the label value for this?
+
+476
+00:53:28,559 --> 00:53:41,759
+1. What about here? 0. 0. 1. 1. 0. So, we can easily label all the leaf nodes without a problem.
+
+477
+00:53:42,720 --> 00:53:51,440
+Take all the leaf nodes. If it is a left child, 1, right child, 0, right. Now, if I look at this
+
+478
+00:53:51,440 --> 00:54:00,880
+particular subtree, how many registers do I need to evaluate that? Only 1. And if I apply my
+
+479
+00:54:00,880 --> 00:54:06,080
+algorithm, my algorithm says that the left child and right child do not have same value,
+
+480
+00:54:06,880 --> 00:54:18,559
+then it is a maximum of the 2, which means 1, okay, correct. So, if I consider this particular 1,
+
+481
+00:54:19,599 --> 00:54:25,440
+right, these two have different values, maximum of this is 1. Now, if you ask me why is that that
+
+482
+00:54:26,239 --> 00:54:34,159
+computing T1 requires only 1 register even though computing one of its child also requires 1 register.
+
+483
+00:54:34,319 --> 00:54:44,319
+The other can be in memory, right. That is the reason. Now, what about T3? T3 requires 2 by our
+
+484
+00:54:44,319 --> 00:54:48,639
+algorithm. That is true. You people remember the algorithm and you have applied it correctly.
+
+485
+00:54:48,639 --> 00:54:59,440
+That is good. But why does it require 2? Both are not leaf. Both will be in the register.
+
+486
+00:55:04,639 --> 00:55:12,480
+So, E has to be in the register. So, that requires 1 register, correct. But this can be in memory.
+
+487
+00:55:17,440 --> 00:55:25,039
+To calculate T3, you need at least 1 register, correct. To calculate T2, you need at least 1
+
+488
+00:55:25,039 --> 00:55:30,319
+register. Without that, you cannot calculate, right. Therefore, even if you say that you do not need
+
+489
+00:55:30,960 --> 00:55:35,840
+any register for doing this, you need to do this first before you can do this thing.
+
+490
+00:55:36,559 --> 00:55:41,120
+So, essentially the minimum register that is required to do this would be the
+
+491
+00:55:43,039 --> 00:55:49,120
+maximum of this plus 1. Sorry, not the maximum. These are equal. Sorry. So, any one of them plus
+
+492
+00:55:49,120 --> 00:55:58,080
+1, correct. So, if I have 2 registers, right, then I can use one register to calculate this
+
+493
+00:55:58,719 --> 00:56:03,039
+and another register to load this and then compute this value.
+
+494
+00:56:04,639 --> 00:56:09,599
+I am going to extend this little later, but let us go with this example for the time being.
+
+495
+00:56:10,319 --> 00:56:16,719
+Now, what about here? Again, we can say T1 requires 1 register. What about T4?
+
+496
+00:56:20,719 --> 00:56:27,599
+2. Why 2? Maximum of that. Algorithm says maximum of that. So, say T and Wolman are
+
+497
+00:56:27,599 --> 00:56:31,119
+correct. They are intelligent. They said that correctly, but why are they intelligent?
+
+498
+00:56:35,920 --> 00:56:40,319
+For computing, correct.
+
+499
+00:56:44,400 --> 00:56:50,319
+But for calculating T3, I need 2 registers. For calculating T1, I need 1 register.
+
+500
+00:56:50,400 --> 00:56:51,760
+Should not it be totally 3?
+
+501
+00:56:57,600 --> 00:57:03,120
+Even though I might require 2 registers for this, after calculating the result,
+
+502
+00:57:03,120 --> 00:57:10,320
+I can keep the value in one register and then reuse the other registers for the other calculation.
+
+503
+00:57:10,320 --> 00:57:15,840
+So, essentially after computing this value, there is only one register that I need for storing this,
+
+504
+00:57:16,480 --> 00:57:20,320
+correct. And if these 2 are different, the maximum is at least going to be
+
+505
+00:57:21,039 --> 00:57:26,960
+one more than the other, right. Therefore, if I take one out of this,
+
+506
+00:57:26,960 --> 00:57:34,000
+the remaining should be enough for computing this one. So, the requirement for this is specified by
+
+507
+00:57:34,000 --> 00:57:39,760
+the requirement of the one which has more registers, which requires more registers, right.
+
+508
+00:57:39,760 --> 00:57:45,280
+That is the reason for this. So, does that mean that the order of evaluation does not matter?
+
+509
+00:57:46,320 --> 00:57:53,360
+Say that it is only the maximum subtree that I have to, the one which requires the maximum register.
+
+510
+00:57:57,600 --> 00:58:04,559
+It matters because if I do end up generating code for this first and want to keep this in
+
+511
+00:58:04,559 --> 00:58:11,760
+the register, then I would require 2 more registers for doing this, correct. That is a bad decision.
+
+512
+00:58:12,560 --> 00:58:18,960
+Whereas, if I have done this first, I could have done it with 2 registers and then given up all,
+
+513
+00:58:18,960 --> 00:58:25,600
+but one register and then use those registers for calculating this subtree. That means that
+
+514
+00:58:25,600 --> 00:58:32,160
+whenever you have a subtree, sorry, whenever you have a node with left subtree and right subtree
+
+515
+00:58:32,160 --> 00:58:37,760
+having different register requirement, you must first compute the one with the
+
+516
+00:58:38,560 --> 00:58:44,960
+higher requirement. First satisfy them and then generate code for that. Then after that,
+
+517
+00:58:44,960 --> 00:58:50,320
+go ahead and generate code for the other one. And when you do that, what really happens is that you
+
+518
+00:58:50,320 --> 00:58:57,120
+can release all but one register and that should be sufficient for generating code for the other
+
+519
+00:58:57,120 --> 00:59:05,280
+side. So, even if I say this requires m registers, right, and this requires m minus 3 registers,
+
+520
+00:59:06,160 --> 00:59:14,000
+right, I can use all these m registers to calculate this and then I can release m minus 1 registers,
+
+521
+00:59:14,800 --> 00:59:21,440
+right, except for one register which holds the result value and then use those m minus 1 registers.
+
+522
+00:59:21,440 --> 00:59:27,440
+I only require m minus 3 here. Even better that, right. I can compute this without any problem
+
+523
+00:59:27,440 --> 00:59:32,960
+and then I can go ahead and complete, right. That is why in the Sethi-Wulman algorithm,
+
+524
+00:59:32,960 --> 00:59:39,519
+when you do the labeling, right, if you have different values, different label values for
+
+525
+00:59:39,519 --> 00:59:45,280
+the left and right side, right side, then you take the maximum of the two and label it as the
+
+526
+00:59:45,280 --> 00:59:50,800
+root node value. And in those cases, you have to calculate the one which has higher register
+
+527
+00:59:50,800 --> 00:59:58,079
+requirement first and then the other. And again, when you calculate the generate code for
+
+528
+00:59:58,079 --> 01:00:04,400
+this subtree first, remember you have to complete this entire subtree before you go here.
+
+529
+01:00:04,400 --> 01:00:08,799
+Because if you do some part of the subtree and then say, okay, stop, I will go to the other side,
+
+530
+01:00:09,440 --> 01:00:15,920
+then you are gone. Why? Because you have partial results evaluated and those needs to be kept
+
+531
+01:00:16,480 --> 01:00:22,639
+and you cannot release your m minus 1 registers, right. That is the reason why you have to complete
+
+532
+01:00:22,639 --> 01:00:29,920
+code generation for this before you move to the other side, right. Is that clear? Any questions?
+
+533
+01:00:31,199 --> 01:00:39,039
+Okay. So, let us see how this happens. Okay. So, we have this. So, the code generation algorithm
+
+534
+01:00:39,039 --> 01:00:47,119
+is that, okay. So, once you have labeled all of these nodes, the minimum number of registers that
+
+535
+01:00:47,119 --> 01:00:55,119
+you require to generate code for this is given by the label of the root node, okay. So, if you have
+
+536
+01:00:55,119 --> 01:01:01,440
+that many number of registers, then you can generate code for this without any spill, okay.
+
+537
+01:01:01,440 --> 01:01:06,159
+And you can actually generate the optimal code. And to generate the optimal code, what you need
+
+538
+01:01:06,159 --> 01:01:11,839
+to do is that you need to start off with the root, okay. There is an algorithm which actually goes
+
+539
+01:01:11,840 --> 01:01:18,000
+step by step, which we will also describe little later on, right. And essentially that algorithm,
+
+540
+01:01:18,000 --> 01:01:24,079
+the way by which it calculates is that it will see whether the left child or the right child,
+
+541
+01:01:24,079 --> 01:01:29,200
+which has more register requirement. It will try to generate code for that side first
+
+542
+01:01:30,000 --> 01:01:34,880
+and then go to the other side. And then once it goes to a particular side, it goes
+
+543
+01:01:34,880 --> 01:01:40,400
+depth first, right. That is really what it does. Again, it applies the same algorithm.
+
+544
+01:01:40,400 --> 01:01:45,519
+Between left child and right child, whichever one which has more number of requires,
+
+545
+01:01:45,519 --> 01:01:50,160
+whichever one which requires more number of registers, that is done first, okay.
+
+546
+01:01:50,160 --> 01:01:54,960
+So, let us see what happens here. This is the detail of that particular algorithm. We will
+
+547
+01:01:54,960 --> 01:02:06,880
+look at it carefully, right, okay. Now, this uses two data structures, one called R stack,
+
+548
+01:02:06,880 --> 01:02:13,760
+which is the register stack and the other called T stack, which is the temporary stack, right.
+
+549
+01:02:14,320 --> 01:02:20,800
+Supposing, let us say you are given R register and you want to generate code for this using R
+
+550
+01:02:20,800 --> 01:02:28,079
+registers, right. It may be possible that, I mean, it may be the case that the root of this tree
+
+551
+01:02:28,880 --> 01:02:33,840
+has a label less than R, in which case you should be able to generate less than or equal to R,
+
+552
+01:02:33,840 --> 01:02:39,600
+in which case you should be able to generate code without any spill. Or it may be the case that
+
+553
+01:02:39,600 --> 01:02:46,640
+it is greater than R. If it is greater than R, right, then obviously there will be some spills
+
+554
+01:02:46,640 --> 01:02:52,000
+and some temporaries which are needed. So, this T stack is the temporaries that we are going to
+
+555
+01:02:52,000 --> 01:03:00,640
+talk about, okay. So, this uses a recursive procedure called gen code, which generates
+
+556
+01:03:00,639 --> 01:03:09,039
+code for node n. And when it generates code for node n and this R stack, which is actually a stack,
+
+557
+01:03:09,039 --> 01:03:15,039
+stack means what? Lost in first out data structure, okay. So, you should be able to do push and pop.
+
+558
+01:03:15,759 --> 01:03:24,719
+The top of the stack always holds the value computed of the left side. So, look at the last
+
+559
+01:03:24,719 --> 01:03:30,959
+statement, right. So, in doing this code generation, we are always ensured that the left
+
+560
+01:03:30,959 --> 01:03:36,000
+child is calculated on the top of the stack, on the register on the top of the stack. That is
+
+561
+01:03:36,000 --> 01:03:42,480
+really what we are trying to ensure, okay. I will go through that code generation in detail and you
+
+562
+01:03:42,480 --> 01:03:49,919
+will understand what is really happening, okay. And not only the left child holds the left child
+
+563
+01:03:50,000 --> 01:03:55,280
+values being held in the top of the R stack, the rest of the R stack remains in the same state
+
+564
+01:03:55,920 --> 01:04:01,360
+as the one before the call. That is also very important, okay. It also uses a particular
+
+565
+01:04:01,360 --> 01:04:06,079
+operation on the stack, which is an unusual operation, which is called the swap operation,
+
+566
+01:04:06,079 --> 01:04:10,960
+which is typically what is not defined in the stack, right. Stack you only have push and pop,
+
+567
+01:04:11,519 --> 01:04:18,240
+but swap essentially swaps the top two values of the stack. So, that is an additional operation
+
+568
+01:04:18,239 --> 01:04:23,439
+which is needed and that is needed to ensure that this previous condition that we talked about.
+
+569
+01:04:23,439 --> 01:04:29,119
+We will see what that is, okay. And again this is needed to prove the optimality case,
+
+570
+01:04:29,119 --> 01:04:33,359
+that is really what it is. We are not going to go into the proof, but it is needed for that.
+
+571
+01:04:33,919 --> 01:04:38,879
+The code generation algorithm proceeds in the following way. It has five cases to consider
+
+572
+01:04:39,439 --> 01:04:44,239
+and let us look at each one of those cases and then see what is the code generated, right.
+
+573
+01:04:44,239 --> 01:04:51,839
+This is case one. In case one, the node is a leaf node and is the left most child or the left
+
+574
+01:04:51,839 --> 01:04:57,039
+child, let us say because we have only two children, we only talk about left child, right.
+
+575
+01:04:57,839 --> 01:05:03,919
+That means that it is a case like this, where there is a root node or there is a parent node
+
+576
+01:05:03,919 --> 01:05:10,719
+and then there is possibly a right tree or it could also be a leaf node. We do not know,
+
+577
+01:05:10,879 --> 01:05:17,279
+but this could potentially be a sub tree, right. That is the case, how do we generate code for this,
+
+578
+01:05:17,279 --> 01:05:22,959
+right. Let us say that given the R stack in the current form, after generating code for this,
+
+579
+01:05:22,959 --> 01:05:30,000
+we have to ensure that the R stack is in the same form and the top of the stack has the value of the
+
+580
+01:05:30,000 --> 01:05:37,519
+left most child, right. So, in this case what we do is that we take the top of the stack,
+
+581
+01:05:37,519 --> 01:05:42,960
+whatever is that, whatever is the register and we load the value of n into that register.
+
+582
+01:05:43,599 --> 01:05:49,280
+Since this is a left child, remember the left child cannot be a memory operand, it has to be
+
+583
+01:05:49,280 --> 01:05:56,159
+a register operand. So, I load this n into that register, which register, the top of the stack
+
+584
+01:05:56,800 --> 01:06:02,239
+and when I do that, I am automatically guaranteeing that the top of the stack contains the
+
+585
+01:06:03,199 --> 01:06:11,679
+result of the left sub tree, correct, right. So, in case one, we generate the code which is
+
+586
+01:06:11,679 --> 01:06:19,439
+load n, which is this particular node, right into the top of the stack, right. So, by that what we
+
+587
+01:06:19,439 --> 01:06:24,799
+are doing is that we are ensuring that the top of the stack, whichever whatever is the register there,
+
+588
+01:06:24,799 --> 01:06:31,439
+that contains the result of the left sub tree, correct and the rest of the stack is not disturbed.
+
+589
+01:06:31,920 --> 01:06:40,480
+It is as it is, as it was what it was before, okay. That is good, right. Now, if that is not the case,
+
+590
+01:06:41,440 --> 01:06:49,679
+right, it could be the right child, okay. If it is the right child, okay. If it is the right child,
+
+591
+01:06:49,679 --> 01:06:57,119
+its label has to be equal to 0, right. That means it is the right child. If its label is not 0,
+
+592
+01:06:57,119 --> 01:07:02,799
+then it could be an internal node, right. If it is a leaf node only, its value would be 0,
+
+593
+01:07:03,759 --> 01:07:11,279
+right. So, in this case, what I do is that, so in the first case, the node itself is the leaf node.
+
+594
+01:07:11,279 --> 01:07:16,319
+In the second case that I am talking about, the node is not the leaf node or the right node. If
+
+595
+01:07:16,319 --> 01:07:21,519
+it is the right node, you do not need to generate any code for that, okay, because it could be a
+
+596
+01:07:21,519 --> 01:07:29,519
+memory operand. It could be the variable itself, right. So, in this case, the node is this, okay.
+
+597
+01:07:31,119 --> 01:07:40,159
+N is an internal node. It has a left child and a right child. The right child is a leaf node,
+
+598
+01:07:41,199 --> 01:07:48,239
+okay. The right child has a label n equal to 0, right. So, this is the node for which we want
+
+599
+01:07:48,239 --> 01:07:53,279
+to generate code in this case, right. Earlier, I was thinking about this. If it is actually
+
+600
+01:07:53,279 --> 01:08:00,239
+right child, you do not generate any code for that. It is a node whose right child is a leaf node
+
+601
+01:08:00,959 --> 01:08:08,559
+and the left child can be a sub-tree, right. In which case, what you need to do is that
+
+602
+01:08:08,559 --> 01:08:15,039
+recursively, you need to generate code for n 1 and then generate code for this.
+
+603
+01:08:15,679 --> 01:08:20,800
+This operand can be in the memory and when you generate code for this n 1 sub-tree,
+
+604
+01:08:21,359 --> 01:08:26,720
+that is going to be in the, the result of that is going to be in the top of the stack or the
+
+605
+01:08:26,720 --> 01:08:31,680
+register which is on the top of the stack. So, the operation here is that operation,
+
+606
+01:08:32,560 --> 01:08:40,880
+top of the stack register n 2, which is label n, correct. Let us go through that again, okay.
+
+607
+01:08:40,880 --> 01:08:48,239
+So, the situation is it is an internal node. Its right child is a leaf node with label 0,
+
+608
+01:08:49,199 --> 01:08:55,760
+correct. So, I need to generate code for the left sub-tree and when I generate the code for
+
+609
+01:08:55,760 --> 01:09:01,840
+the left sub-tree, this generate code routine is going to generate code using the registers
+
+610
+01:09:01,840 --> 01:09:08,800
+which is given in the label value, correct. And the result of this sub-tree is going to be
+
+611
+01:09:08,800 --> 01:09:16,239
+in the register which is the top of the stack. These are known properties. So, first I generate
+
+612
+01:09:16,239 --> 01:09:21,680
+code for the left sub-tree. The top of the stack contains the result of this sub-tree.
+
+613
+01:09:22,400 --> 01:09:30,400
+So, I perform operation using the register which is the top of the stack and its right operand is
+
+614
+01:09:30,639 --> 01:09:38,799
+n, okay, which could be a memory operand. We do not care about it, right. So, in this case,
+
+615
+01:09:38,799 --> 01:09:46,000
+this sequence of instruction would generate the optimal code for this case. Not only it will
+
+616
+01:09:46,000 --> 01:09:52,000
+generate the optimal code for this case, it will generate the optimal code saying that the top,
+
+617
+01:09:52,000 --> 01:09:59,199
+the I mean when you do this, this has the result values available in the top of the stack.
+
+618
+01:09:59,199 --> 01:10:04,479
+Similarly, this has the result value available in the top of the stack and nothing else has been
+
+619
+01:10:04,479 --> 01:10:09,039
+altered, right. The nothing else has been altered. You are not going to see it unfortunately in the
+
+620
+01:10:09,039 --> 01:10:13,599
+code generation algorithm. You are only going to see it in the proof and we are not going to go
+
+621
+01:10:13,599 --> 01:10:19,199
+into the proof anyway. So, let us not worry about it, right. But it is required for proving the
+
+622
+01:10:19,199 --> 01:10:27,279
+optimality, okay. Now, the third case is one where the left child and the right child are not leaf
+
+623
+01:10:27,279 --> 01:10:35,599
+nodes, right. So, here I have a node n, right, which has a left subtree and a right subtree,
+
+624
+01:10:36,800 --> 01:10:43,119
+right. And let us assume that the left subtree requires fewer registers than the right subtree.
+
+625
+01:10:44,880 --> 01:10:51,039
+And I know that the left subtree also requires fewer than R registers, correct. It requires
+
+626
+01:10:51,039 --> 01:10:57,199
+fewer than R registers. The right child or the right subtree requires more than what the left
+
+627
+01:10:57,199 --> 01:11:02,239
+subtree requires. But I do not know whether it is less than or equal to R. It could be greater
+
+628
+01:11:02,239 --> 01:11:10,880
+than R also, right. So, in this case what I am going to do, right, remember that the top of the
+
+629
+01:11:10,880 --> 01:11:18,399
+stack register should always calculate the left side result, okay. But because this is higher,
+
+630
+01:11:19,279 --> 01:11:25,279
+we have to calculate the right subtree first. Whichever one which has greater requirement is
+
+631
+01:11:25,279 --> 01:11:31,599
+what we need to calculate first, right. But if I generate code for this and then generate code for
+
+632
+01:11:31,599 --> 01:11:38,719
+this, I may not necessarily keep the registers in the correct way. So, what I do here first is that
+
+633
+01:11:38,719 --> 01:11:45,840
+I do a swap of the top two registers, right. So, let us say if R1 has been in the top and R2 is
+
+634
+01:11:45,840 --> 01:11:57,840
+the second top, then it changes as R2 and R1. I now use R2 to generate code for this, okay.
+
+635
+01:11:58,880 --> 01:12:06,159
+And then after that I push back my R1 and generate code for this one. That way I will ensure
+
+636
+01:12:06,159 --> 01:12:13,119
+that the rest of my stack is maintained as it is and the top of the stack has the, right, result
+
+637
+01:12:13,119 --> 01:12:18,559
+of the left subtree. That is the reason why we do this. So, remember here I have done the swap.
+
+638
+01:12:19,279 --> 01:12:24,800
+I generate the code for N2. So, N2 is going to be generated and the result will be in the
+
+639
+01:12:25,599 --> 01:12:33,439
+second register which we will call it as R2 for the time being, okay, right. So, after I have
+
+640
+01:12:33,439 --> 01:12:40,399
+generated code for N2 in R2 register, I pop the stack. When I pop the stack what happens?
+
+641
+01:12:41,279 --> 01:12:47,199
+R2 is ejected, right. And then I hold it in a temporary location called R,
+
+642
+01:12:48,079 --> 01:12:52,799
+right. I remember this which register was the previous top of the stack register,
+
+643
+01:12:52,799 --> 01:12:59,039
+happened to be R2, right. Let us remember that for the time being until we finish this code
+
+644
+01:12:59,039 --> 01:13:06,319
+generation, right. Then I generate code for N1, all right. Then see what happens. When I generate
+
+645
+01:13:06,319 --> 01:13:13,920
+code for N1, what was the top of the stack at that point in time? R2 was popped out,
+
+646
+01:13:15,439 --> 01:13:23,279
+R1, right. Remember R1 was on the top, R2 was next. We swapped it. We generated code with R2.
+
+647
+01:13:23,279 --> 01:13:28,399
+We popped R2. So, what is remaining? R1. R1 is on the top of the stack. So,
+
+648
+01:13:28,399 --> 01:13:33,840
+you are going to generate code for N1 with R1 on the top of the stack. So, since the
+
+649
+01:13:33,840 --> 01:13:38,880
+generate code procedure, let us assume that, right, inductively is going to generate code
+
+650
+01:13:38,880 --> 01:13:45,039
+for this left subtree correctly, then it will have the result value in R1, right.
+
+651
+01:13:45,760 --> 01:13:52,800
+Then after that, this is what we are going to do, right. This node has operation to be performed.
+
+652
+01:13:52,800 --> 01:13:57,840
+So, that is the operation to be performed. If it is an add or subtract, you put that operation.
+
+653
+01:13:58,800 --> 01:14:11,279
+Then top of R stack, which is R1, correct and R. What is R? R2, right. Remember you evaluated
+
+654
+01:14:11,279 --> 01:14:20,640
+this subtree in R2, correct. And then you remember that somehow you evaluated this subtree in R1.
+
+655
+01:14:21,280 --> 01:14:33,039
+Now, you are saying that you are doing op R1 and R2, okay. Now, you push R2 again, push R stack,
+
+656
+01:14:33,039 --> 01:14:41,600
+R2 and then again you swap. So, R2 and R1 will go back in the same order and the top of the stack
+
+657
+01:14:41,600 --> 01:14:49,039
+still will contain R1 and that contains the left subtree value or the subtree value, correct.
+
+658
+01:14:49,039 --> 01:14:54,560
+That is really how we go by this. Any questions? Slightly complicated,
+
+659
+01:14:54,560 --> 01:15:00,000
+but if you go through this step by step, you can understand how it works, right. Question? Yeah.
+
+660
+01:15:06,159 --> 01:15:11,920
+Okay. So, one condition, again we are not going to go why this condition is required,
+
+661
+01:15:11,920 --> 01:15:17,920
+right. That goes into the proof of the optimality. The condition is that whenever you evaluate
+
+662
+01:15:18,560 --> 01:15:24,159
+the left side, left subtree, that left subtree result has to be in the top of the stack.
+
+663
+01:15:25,119 --> 01:15:30,159
+That is the condition. So, in order to do that, you are essentially doing all these juggleries.
+
+664
+01:15:31,840 --> 01:15:37,440
+Otherwise, you are fine. You are generating code for N2, okay. And then you will generate code for
+
+665
+01:15:37,440 --> 01:15:42,960
+N1. Then you will generate this operation. As far as code generation part is concerned,
+
+666
+01:15:42,960 --> 01:15:48,319
+what you are going to see in the generated code, right, you are only going to see this part of the
+
+667
+01:15:48,319 --> 01:15:56,720
+code, right. See the print statement is what is going to go in the generated code. These are all
+
+668
+01:15:57,279 --> 01:16:04,880
+what we call as bookkeeping activities of the code generator, right.
+
+669
+01:16:04,880 --> 01:16:12,800
+So, what happens is that you have the left subtree and you have the right subtree and then
+
+670
+01:16:12,960 --> 01:16:19,199
+you are trying to generate code for this, right. And we know that this has a value 5,
+
+671
+01:16:19,760 --> 01:16:26,319
+this has a value 3, right. Then our intuition says that which is basically the depth of the tree
+
+672
+01:16:26,319 --> 01:16:31,279
+intuition. It is not just the depth, but it is the label value which could be caused by the depth
+
+673
+01:16:31,279 --> 01:16:38,079
+also, right. So, we say that we have to generate code for this part first. When I generate code
+
+674
+01:16:38,079 --> 01:16:46,880
+for this part, the result let us say is in some register R2, correct, right. And out of these five
+
+675
+01:16:46,880 --> 01:16:54,159
+registers except R2, all other registers are free for me to use, right. Now, I can come back and
+
+676
+01:16:54,159 --> 01:17:01,279
+generate code for this, right. And I generate code for this and the result is in R1, right.
+
+677
+01:17:01,840 --> 01:17:07,840
+And then as far as generating code for this node is concerned, it is basically operation R1.
+
+678
+01:17:08,239 --> 01:17:14,559
+Comma R2, correct. It is also correct. So, the code that I am going to generate as a part of my
+
+679
+01:17:14,559 --> 01:17:22,800
+code generation is the code which is generated for this, okay. Let us call this code CR, right hand
+
+680
+01:17:22,800 --> 01:17:30,800
+side. The code which is generated for this, let us call this code CL and the code which is generated
+
+681
+01:17:30,800 --> 01:17:37,279
+for this node, correct. In other words, because it is a recursive call and it goes like this,
+
+682
+01:17:37,279 --> 01:17:42,079
+the way that it is going to look like in the order. So, what I am going to do is that I am
+
+683
+01:17:42,079 --> 01:17:48,559
+going to do, let me write it here, okay. First, I am going to generate the code for the right sub
+
+684
+01:17:48,559 --> 01:17:55,759
+tree. So, that is code CR. Then I am going to generate the code for the left sub tree which is
+
+685
+01:17:55,759 --> 01:18:02,960
+code CL. Then I am going to generate the code for the node which is code N. This is the order in
+
+686
+01:18:02,960 --> 01:18:08,800
+which the code is going to appear in the program or in the compiled code, let us say.
+
+687
+01:18:09,760 --> 01:18:15,520
+For the program, this is the code that is generated. The rest of the statements that you see,
+
+688
+01:18:15,520 --> 01:18:21,920
+save this popped stack in some register, etc. are all maintenance code of the code generator,
+
+689
+01:18:22,480 --> 01:18:28,079
+okay. The condition that we require is that you have the top of the stack, okay, and the top of
+
+690
+01:18:28,079 --> 01:18:35,359
+the stack is R1, then R1 must compute the left sub tree, okay. In order for you to do that,
+
+691
+01:18:35,359 --> 01:18:42,000
+originally you had R1 and R2 like this. When you generate code, if you have generated code for this
+
+692
+01:18:42,000 --> 01:18:50,159
+using R1, correct, then what would have happened is this will have R1 instead of R2, correct.
+
+693
+01:18:50,159 --> 01:18:59,519
+Then your top of the stack condition would not be satisfied, right. That is the reason why we do
+
+694
+01:18:59,519 --> 01:19:05,439
+not do that. That is why what we do is that we swap these two values and then temporarily make
+
+695
+01:19:05,439 --> 01:19:12,479
+R2 as the top of the stack, generate code for this. The result value will be in R2. Then after that,
+
+696
+01:19:12,479 --> 01:19:19,039
+you remember R2 and pop it out. Then R1 becomes the top of the stack, correct. Generate code for
+
+697
+01:19:19,039 --> 01:19:26,479
+the left side which will actually produce a result in R1. Then after that, push R2, swap again so
+
+698
+01:19:26,479 --> 01:19:32,319
+that you will have R1, R2 in the reverse direction, right. So, all of these juggleries that you do,
+
+699
+01:19:32,880 --> 01:19:37,600
+that is only in your data structure or stack and other things. That has nothing to do with the
+
+700
+01:19:37,600 --> 01:19:42,800
+code that you generate. The code that you generate is only these three parts. Of course,
+
+701
+01:19:42,800 --> 01:19:47,920
+these are all recursive parts. So, it will further go down into each one of its left sub tree and
+
+702
+01:19:47,920 --> 01:19:52,880
+right sub tree and so on, correct. So, that is really what happens, okay.
+
+703
+01:19:52,880 --> 01:19:57,920
+Let me just take two more minutes and then complete the rest of the discussion, okay,
+
+704
+01:19:59,199 --> 01:20:05,600
+right. This is one case. We have more cases to cover, right. So, this is the fourth case and
+
+705
+01:20:05,600 --> 01:20:12,800
+let us see what happens here, right. Here the right sub tree requires fewer registers and the
+
+706
+01:20:12,800 --> 01:20:18,239
+left sub tree requires more registers. Again, we do not know whether it is greater than R or
+
+707
+01:20:18,239 --> 01:20:24,159
+less than R, but it is greater than the right sub tree. So, in this case, we have to generate
+
+708
+01:20:24,159 --> 01:20:29,760
+the code for the left sub tree first and then the right sub tree. Because you are going to
+
+709
+01:20:29,760 --> 01:20:36,400
+generate code for the left sub tree, right, it is actually easy. You generate code for N1
+
+710
+01:20:36,960 --> 01:20:43,920
+with the top of the stack, okay. Then you pop the stack, right. That means that R1 comes out
+
+711
+01:20:44,719 --> 01:20:48,719
+and you hold it in a temporary register. Again, this is your bookkeeping code,
+
+712
+01:20:48,719 --> 01:20:54,799
+not a part of the generated code. Then you generate code for N2. Now R2 is the top of the stack.
+
+713
+01:20:54,799 --> 01:21:00,719
+You generate the result in R2, right. And then now this is the code that you generate for N,
+
+714
+01:21:00,720 --> 01:21:09,199
+which is basically operation, right, or top of the stack, okay. So, that is how this code is
+
+715
+01:21:09,199 --> 01:21:16,800
+generated, right. And then you push R stack back into it so that now R2 is on the top of the stack.
+
+716
+01:21:16,800 --> 01:21:21,920
+Again, all of this is again going to go into the proof of why this is optimal,
+
+717
+01:21:21,920 --> 01:21:27,840
+okay, which we are not going to see in detail, okay. Let us just quickly go to the last case.
+
+718
+01:21:27,840 --> 01:21:32,800
+And so far what we have seen is that we have seen the cases where one side is at least less
+
+719
+01:21:32,800 --> 01:21:40,000
+than R, right. Let us see what happens in the last case where actually both sides can be
+
+720
+01:21:40,800 --> 01:21:46,560
+greater than or equal to R. When it is greater than or equal to R, obviously there is going to be
+
+721
+01:21:46,560 --> 01:21:52,880
+some spill that is going to be happening, right. So, in this case what we will do is that we will
+
+722
+01:21:52,880 --> 01:22:00,480
+first compute the right side first, generate code for that. Then we will pop the top of the stack,
+
+723
+01:22:01,279 --> 01:22:08,400
+okay. And then do this following operation where we will actually store that particular register
+
+724
+01:22:08,400 --> 01:22:13,119
+value in some temporary location. Remember both of them are greater than R. So,
+
+725
+01:22:13,119 --> 01:22:18,880
+they are going to involve spills. You have at most R registers here. I mean you have R
+
+726
+01:22:18,880 --> 01:22:25,359
+registers available to you, but this computation itself requires more than R registers. So,
+
+727
+01:22:25,359 --> 01:22:32,159
+if I reserve one more register for this, for the result value, then this will only have R minus
+
+728
+01:22:32,159 --> 01:22:37,840
+1 registers available, but it requires more than R registers. So, I will have more spills.
+
+729
+01:22:37,840 --> 01:22:43,279
+So, what I am going to do is this. I first compute this value or generate code for this part.
+
+730
+01:22:43,920 --> 01:22:50,479
+And then the result I am going to save it in some temporary location T1. That way I can release all
+
+731
+01:22:50,479 --> 01:22:58,399
+the R registers for computing the left side. Use all of those R registers to do the code generation
+
+732
+01:22:58,399 --> 01:23:06,159
+for the left subtree, right. And then see remember right hand side can be in memory,
+
+733
+01:23:06,719 --> 01:23:12,319
+left hand side has to be in a register. So, computing this first, I can store the value
+
+734
+01:23:12,319 --> 01:23:17,119
+into a temporary location and then use the temporary location as a part of
+
+735
+01:23:17,920 --> 01:23:23,199
+operand for this operation, correct. So, that is really what we do. So, after
+
+736
+01:23:24,239 --> 01:23:31,279
+you generate code for N1, generate code for N1 will have the value in the top of the stack register,
+
+737
+01:23:32,319 --> 01:23:41,599
+correct. So, that register along with this temporary on which you will perform the operation.
+
+738
+01:23:42,319 --> 01:23:46,639
+Again if you want to see an example, let me see if I get this correct,
+
+739
+01:23:47,759 --> 01:23:59,039
+okay. So, here is the case where we have, right. Let us say this is 5 and this is 7,
+
+740
+01:24:00,479 --> 01:24:08,239
+okay. I am specifically taking the example of the left side having more, requiring more registers
+
+741
+01:24:08,239 --> 01:24:15,840
+than the right side, okay. And I want to generate code for this, right. Let us assume that in my
+
+742
+01:24:15,840 --> 01:24:21,760
+architecture I have only 4 registers available. So, both of them are greater than or equal to
+
+743
+01:24:22,960 --> 01:24:32,159
+4, right. In this case what do I say? I first say generate code for, sorry, generate code for
+
+744
+01:24:32,800 --> 01:24:41,840
+right side, okay. And let us say that I have registers R1, R2, R3, R4 in the top of my stack
+
+745
+01:24:41,840 --> 01:24:49,279
+like this, okay. R1 is on the top. So, the result value is going to be on the top of the stack.
+
+746
+01:24:50,000 --> 01:24:58,399
+Then I generate code which says store R1 in a temporary location T, correct. Then I can also
+
+747
+01:24:58,399 --> 01:25:05,920
+release R1. Now, using those 4 registers I will generate code for the left-hand side,
+
+748
+01:25:07,759 --> 01:25:15,199
+right. Again the result will be on the top of the stack. So, I perform whatever is this op,
+
+749
+01:25:16,000 --> 01:25:29,279
+okay, op top of the stack which is R1, right and T. Why? Because my right operand can be in a
+
+750
+01:25:30,000 --> 01:25:36,559
+memory, right. If it says my left operand can be in a memory then I could have done it in either
+
+751
+01:25:36,559 --> 01:25:42,000
+order, right. It only says the right operand can be in the memory, left has to be in a register.
+
+752
+01:25:42,000 --> 01:25:48,000
+So, it is preferable that I generate code for the left-hand side with the result value in the top
+
+753
+01:25:48,000 --> 01:25:54,880
+of the stack so that that same register can be used in the operation. Otherwise, what would have
+
+754
+01:25:54,880 --> 01:26:01,680
+happened if this is in memory, if I have calculated this first, sorry, if I have calculated this first,
+
+755
+01:26:02,399 --> 01:26:11,119
+if I have done the following thing, let us see, code CL, correct. And then let us say store
+
+756
+01:26:12,960 --> 01:26:21,439
+result R1 into some temporary location, let us call it as TL, right. Then let us say code CR,
+
+757
+01:26:23,680 --> 01:26:27,439
+right. R will be in a register but that is not useful for me,
+
+758
+01:26:28,319 --> 01:26:31,439
+correct. Then I have to do one more load of this
+
+759
+01:26:33,600 --> 01:26:41,039
+TL to some register R2 and then I have to do this operation, right.
+
+760
+01:26:42,079 --> 01:26:49,920
+R1, R2 or whatever, correct. So, this generates this extra code which is not really good,
+
+761
+01:26:50,479 --> 01:26:58,239
+is not it? So, that is the reason why you do not do this and you do this. Even though the
+
+762
+01:26:59,119 --> 01:27:04,960
+right side requires fewer registers than the left side. So, typically in this code generation,
+
+763
+01:27:05,680 --> 01:27:12,960
+right, you follow that algorithm and if the, if one of the sub trees require fewer than
+
+764
+01:27:13,920 --> 01:27:19,760
+the available number of registers, then you go to the sub tree which has the maximum requirement.
+
+765
+01:27:19,760 --> 01:27:26,720
+You finish that computation first, leave the result in the register and then release all but
+
+766
+01:27:26,720 --> 01:27:31,279
+that register for the computation of the other side. The computation of the other side requires
+
+767
+01:27:31,279 --> 01:27:36,399
+fewer registers, therefore it could be computed without any spill, right. So,
+
+768
+01:27:36,399 --> 01:27:41,439
+that is the algorithm that we follow, okay. Let us see, we are about to finish, okay.
+
+769
+01:27:41,439 --> 01:27:46,960
+So, this is the last phase, okay. So, if you actually follow that algorithm,
+
+770
+01:27:47,759 --> 01:27:53,840
+right, I have not gone through this step by step, you will actually end up in this evaluation order.
+
+771
+01:27:53,840 --> 01:27:58,800
+You can verify that, right and this evaluation order is the
+
+772
+01:28:00,480 --> 01:28:06,800
+optimal order. You cannot have any other order which will generate fewer than eight instructions,
+
+773
+01:28:08,400 --> 01:28:13,360
+right. In this case, we have assumed two registers. If you have had only one register,
+
+774
+01:28:13,360 --> 01:28:18,400
+what would have happened, right? If you had only one register, you would have generated code for
+
+775
+01:28:18,399 --> 01:28:27,119
+this, spilled the value in memory, generated, means moved this into the register, computed this,
+
+776
+01:28:27,759 --> 01:28:35,119
+spilled this in memory, do this, it will be in register, this will be in memory,
+
+777
+01:28:35,759 --> 01:28:41,279
+generate code for this, right. Can you all do a homework, try to see whether
+
+778
+01:28:41,439 --> 01:28:50,639
+applying that algorithm works correctly on this or not, right. I will make all my slides available.
+
+779
+01:28:50,639 --> 01:28:55,199
+It is also going to be available from the NPTEL webpage, okay. We will make all of those things
+
+780
+01:28:55,199 --> 01:29:00,719
+available to you, but you can try to work this example out and then see whether it meets it.
+
+781
+01:29:04,399 --> 01:29:10,319
+So, I am going to stop with this slide. The next step is dynamic programming. How many of you know
+
+782
+01:29:10,319 --> 01:29:18,399
+about dynamic programming? Okay. Those of you who do not know have a quick, right, review of that.
+
+783
+01:29:18,399 --> 01:29:25,439
+What is dynamic programming? Not now, but tomorrow, right. So, we will see dynamic
+
+784
+01:29:25,439 --> 01:29:29,439
+programming tree pattern matching and then move on to register allocation.
+

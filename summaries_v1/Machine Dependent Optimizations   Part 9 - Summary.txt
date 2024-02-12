@@ -1,0 +1,183 @@
+ **Modulo Reservation Table:**
+	* A table used in software pipelining to model resource constraints.
+	* Has ii columns and f rows, where f is the number of resources.
+	* Records a sequence of reservations for each entry.
+
+**Scheduling Operations:**
+	* An operation is scheduled at time step t if t mod ii falls within the modulo reservation table.
+	* Satisfying resource constraints involves ensuring there are no conflicts in the modulo reservation table.
+
+**Heuristic Approach:**
+	* Uses earliest start time and latest start time to prioritize scheduling.
+	* Attempts to schedule nodes with less slack first.
+
+**Register Requirements in Modulo Scheduling:**
+	* Multiple live ranges can cause register allocation issues.
+	* Rotating registers or splitting live ranges can alleviate these issues.
+
+**Memory Hierarchy Optimizations:**
+	* Cache hierarchies consist of multiple levels, including L1, L2, and L3 caches.
+	* Memory access time is influenced by hit time, miss rate, and miss penalty.
+
+**Cache Organizations:**
+	* Direct mapped cache: each memory block maps to a unique cache location.
+	* Associative cache: each block can be placed in any cache location within a set.
+	* Set associative cache: each block maps to a unique set, with multiple possible locations within that set.
+
+**Types of Cache Misses:**
+	* Cold misses (compulsory): occur when accessing a block for the first time.
+	* Capacity misses: occur when the cache runs out of capacity.
+	* Conflict misses: occur due to insufficient associativity causing collisions.
+
+**Direct Mapped Cache Example:**
+	* Given a 16 KB cache with 32-byte blocks, there are 512 cache blocks and 9 index bits.
+	* Addresses are divided into offset bits, index bits, and tag bits.
+
+**Set Associative Cache Example:**
+	* Divides cache blocks into sets, with each memory block uniquely mapped to a set.
+	* Within a set, there are multiple possible locations for a block.
+
+**Programmer Perspective on Caches:**
+	* Understanding how caches affect program behavior.
+	* Direct mapped cache example illustrates cache behavior.
+
+**Three Types of Cache Misses:**
+	* Cold misses, capacity misses, and conflict misses explained.
+
+**Address Translation in Caches:**
+	* Using index bits to locate a cache block and comparing the tag to determine a hit or miss.
+
+**Cache Organization Comparison:**
+	* Direct mapped vs. associative vs. set associative caching.
+
+**Simple Cache Parameters:**
+	* Hit time, miss penalty, and miss rate impact average memory access time.
+
+**Improving Miss Rate:**
+	* Compiler's role in influencing the miss rate in a cache hierarchy.
+
+**Compile Time Analysis:**
+	* Identifying loop transformations and vectorization opportunities.
+
+**Vectorization Strategies:**
+	* Automatic vectorization, vector data types, and vector intrinsic functions.
+
+**Loop Vectorization Conditions:**
+	* Checking for uniformly strided access, independence, aligned access, and no bank conflicts.
+
+**Loop Vectorization Process:**
+	* Step-by-step guide to loop vectorization.
+
+**Loop Distribution:**
+	* Breaking a loop into smaller loops to expose parallelism.
+
+**Interleaved Access:**
+	* Handling interleaved access patterns in vectorization.
+
+**Masked Loads and Stores:**
+	* Implementing conditional statements using masked loads and stores.
+
+**Code Generation Challenges:**
+	* Balancing resource usage and meeting timing constraints.
+
+**Instruction Selection:**
+	* Choosing appropriate target instructions for input operations.
+
+**Register Pressure:**
+	* Managing register usage to avoid spilling.
+
+**Software Pipelining:**
+	* Scheduling loop bodies to reduce initiation interval.
+
+**Modulo Reservation Table:**
+	* Used to enforce resource constraints in software pipelining.
+
+**Initiation Interval:**
+	* Measures the throughput of a software pipeline schedule.
+
+**Recurrence Minimum Initiation Interval (RMII):**
+	* Calculated based on the longest chain of loop-carried dependencies.
+
+**Iterative Modulo Scheduler:**
+	* Starts with minimum II and attempts to create a schedule; increments II if unsuccessful.
+
+**Early Start Time and Latest Start Time:**
+	* Prioritizing nodes for scheduling based on their slack.
+
+**Conflicts in the Modulo Reservation Table:**
+	* Detecting and resolving conflicts to maintain resource constraints.
+
+**Backtracking:**
+	* Removing already scheduled operations to accommodate new ones.
+
+**Rotating Registers:**
+	* Hardware support for managing overlapping live ranges in software pipelining.
+
+**Register Classes:**
+	* Grouping registers based on supported operations to simplify register allocation.
+
+**Taxonomy of Software Pipeline Schedules:**
+	* Various categories of software pipeline schedules, including linear, cyclic, and chained schedules.
+
+**SIMD Machines and SIMD Operations:**
+	* Single Instruction Multiple Data architectures and operations.
+
+**AVX Instructions:**
+	* Advanced Vector Extensions providing wider vector registers and operations.
+
+**GPU Cores:**
+	* Graphics Processing Unit cores utilizing SIMD principles for massively parallel computation.
+
+**Automatic Vectorization:**
+	* Compiler-generated vector code for improved performance.
+
+**Vector Arrays and Data Types:**
+	* Declaring arrays or data types as vectors for improved performance.
+
+**Vector Intrinsic Functions:**
+	* Writing vectorizable code with explicit intrinsic functions.
+
+**Analyzing Code for Vectorizability:**
+	* Examining code to determine if it can be safely and effectively vectorized.
+
+**Loop Vectorization:**
+	* Techniques for converting loops into vectorized code.
+
+**Loop Distribution:**
+	* Breaking loops into smaller loops to expose parallelism.
+
+**Interleaved Access Patterns:**
+	* Dealing with interleaved access patterns in vectorized code.
+
+**Masked Loads and Stores:**
+	* Utilizing masked loads and stores for conditional statements.
+
+**Balancing Resource Usage:**
+	* Ensuring efficient use of computing resources while meeting timing constraints.
+
+**Instruction Selection:**
+	* Choosing appropriate target instructions for input operations.
+
+**Register Pressure Management:**
+	* Avoiding register spilling during code generation.
+
+**Software Pipelining Concepts:**
+	* Creating software pipelines using modulo reservation tables and initiating intervals.
+
+**Register Requirement Issues:**
+	* Overlapping live ranges leading to register allocation issues in software pipelining.
+
+**Hardware Support:**
+	* Rotating registers and register window mechanisms addressing register requirement issues in software pipelining.
+
+**Cache Considerations:**
+	* Impact of caches on program behavior and memory access time.
+
+**Cache Hierarchy Optimizations:**
+	* Opportunities for improving cache efficiency via compiler optimizations.
+
+**Parallelism Exploitation:**
+	* Leveraging modern processor features for improved performance.
+
+**Compiler Design Challenges:**
+	* Emerging challenges and opportunities in compiler design driven by advances in processor technology.

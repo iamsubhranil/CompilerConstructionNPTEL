@@ -1,0 +1,24 @@
+ **Exam Notes - Program Analysis**
+
+1. *Program Analysis*: Understanding interesting properties about a program to aid in tasks such as debugging, compiling, or optimizing.
+	* Debugging: Identifying causes of bugs in a program.
+	* Compilation: Improving compilation speed or accuracy.
+	* Optimization: Enhancing program performance.
+2. *Dynamic Analysis*: Performing analysis by introducing extra code (e.g., print statements) and observing program behavior on specific inputs.
+3. *Static Analysis*: Analyzing the program source code without executing it to extract meaningful insights.
+4. *Control Flow Analysis*: Determining how the program counter moves through the program, focusing on control structures (if-else, for loops).
+5. *Data Flow Analysis*: Tracking how data moves through the program, typically focused on variables and their values.
+6. *Alias Analysis*: Identifying relationships between pointer variables and the memory locations they point to.
+7. *CFG (Control Flow Graph)*: A graphical representation of the program, consisting of nodes (statements) and edges (control transitions), helping visualize control flow.
+	* Entry Block: Starting point of the graph.
+	* Exit Block(s): Ending points of the graph.
+8. *Basic Block*: Sequence of instructions with a single entry and a single exit.
+9. *Dominance Relationship*: Describes the relationship between blocks in a CFG regarding control flow.
+	* Dominant: Precedes the other block in all possible paths.
+	* Dominated: Follows the dominant block in all paths.
+	* Immediate Dominator: Direct preceding block that controls all paths leading to a specific block.
+10. *Reducible vs. Irreducible Flow Graph*: Reducible flow graphs can be divided into disjoint or nested loops, allowing for straightforward analysis. Irreducible flow graphs require specialized algorithms.
+11. *Natural Loop*: Maximal strongly connected subgraph in a reduced flow graph. Algorithm identifies the nodes belonging to the loop for a given back edge.
+12. Back Edge: Edges connecting a node to its dominator or one of its ancestors.
+
+These concepts provide the basis for performing static analyses on programs, enabling developers to gain insight into the control flow, data dependencies, and potential issues. By mastering these topics, you will be equipped to tackle complex programming challenges and develop robust, high-performance systems.

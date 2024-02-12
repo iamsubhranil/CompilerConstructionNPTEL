@@ -1,0 +1,46 @@
+ **Technical Terms:**
+
+* Basic Block
+* Control Flow Graph (CFG)
+* Dominators
+* Iterative Data Flow Analysis
+* Fixed Point Analysis
+* Top Down Analysis
+* Bottom Up Analysis
+* Natural Loops
+* Non-Natural Loops
+* Control Flow Optimizations
+* Loop Inversion
+* Constant Propagation
+* Copy Propagation
+* Loop Unrolling
+* Loop Invariant Code Motion
+* Strength Reduction
+* Unreachable Code Elimination
+* Code Straightening
+* Instruction Level Parallelism (ILP)
+* Pipelining
+
+**Explanation:**
+
+This lecture covers advanced topics in compiler optimizations, focusing on control flow analysis and optimizations. Key concepts include:
+
+1. **Basic Block**: A linear sequence of instructions without any jumps or jump targets.
+2. **Control Flow Graph (CFG)**: Representation of a program's control flow, where nodes correspond to basic blocks and edges represent control flow between blocks.
+3. **Dominators**: For a directed graph, a node `A` dominates node `B` if every path from the entry to `B` must go through `A`.
+4. **Iterative Data Flow Analysis**: Technique to solve data flow equations by repeatedly updating sets of facts until a fixpoint is reached.
+5. **Top Down Analysis**: Analysis performed from coarse-grained to fine-grained units, such as analyzing dominators for larger regions first and then narrowing down.
+6. **Bottom Up Analysis**: Opposite of top-down analysis, performing analysis from fine-grained to coarse-grained units, such as analyzing smaller units first and aggregating results.
+7. **Natural Loops**: Loops represented as a strongly connected component in the CFG with a unique header block and a single exit block.
+8. **Non-Natural Loops**: Complex control flows that aren't easily represented as natural loops.
+9. **Control Flow Optimizations**: Transformations aimed at producing longer basic blocks for improved local optimizations, instruction-level parallelism, and pipelining efficiency.
+10. **Loop Inversion**: Converting a while loop to a do-while loop to reduce the number of checks needed for the loop condition.
+11. **Constant Propagation**: Static analysis technique that replaces variables with constant values when possible.
+12. **Copy Propagation**: Optimization technique that replaces variables with their defining expressions when possible.
+13. **Loop Unrolling**: Expansion of a loop body by a constant factor to enable further optimizations.
+14. **Loop Invariant Code Motion**: Technique that moves code outside of a loop if the result doesn't change during loop iterations.
+15. **Strength Reduction**: Replacing costly operators with less expensive alternatives, such as multiplication with addition and shifts.
+16. **Unreachable Code Elimination**: Removal of code sections that cannot be executed due to control flow constraints.
+17. **Code Straightening**: Merging adjacent basic blocks when there is a single predecessor and successor, removing unnecessary jump instructions.
+18. **Instruction Level Parallelism (ILP)**: Exploiting concurrent execution of multiple instructions in modern CPUs to maximize processor utilization.
+19. **Pipelining**: Overlapping stages of instruction processing in CPUs to achieve higher throughput and reduce latency.

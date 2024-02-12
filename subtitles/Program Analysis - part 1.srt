@@ -1,0 +1,1944 @@
+1
+00:00:00,000 --> 00:00:10,620
+So, you have already seen some part of the compiler. So, you have looked at an interesting
+
+2
+00:00:10,620 --> 00:00:14,939
+data structure known as the abstract syntax tree and I hope you have done some exercises
+
+3
+00:00:14,939 --> 00:00:21,940
+using that and looked at like traverse state and see what it is look like and so on. So,
+
+4
+00:00:21,940 --> 00:00:26,859
+the AST is useful for a lot of optimizations, but then there are many other optimizations
+
+5
+00:00:26,859 --> 00:00:31,699
+for which it is useful to have a different intermediate representation and we will be
+
+6
+00:00:31,699 --> 00:00:38,939
+looking at a different intermediate representation of an LBM and the what we are doing with that
+
+7
+00:00:38,939 --> 00:00:44,960
+is that we will look at something called program analysis. So, let me just ask you because
+
+8
+00:00:44,960 --> 00:00:49,340
+you all know what is a program and you all understand what is analysis. So, let me ask
+
+9
+00:00:49,740 --> 00:00:56,740
+you what do you think is program analysis. So, what is what do you think we will be doing?
+
+10
+00:00:56,740 --> 00:01:05,580
+And interestingly we have all been doing program analysis it nothing something nothing very
+
+11
+00:01:05,580 --> 00:01:11,300
+new to any of us. The day you started doing programming you started doing program analysis
+
+12
+00:01:11,300 --> 00:01:14,939
+which means that we are trying to understand interesting properties about the program.
+
+13
+00:01:15,739 --> 00:01:20,980
+Excellent. So, you brought out a new term called debugging right. So, that is one thing
+
+14
+00:01:20,980 --> 00:01:25,140
+that you would like to do using program analysis you might want to debug a program may want
+
+15
+00:01:25,140 --> 00:01:28,859
+to understand what the program is doing and what is the cause for the bug I am seeing
+
+16
+00:01:28,859 --> 00:01:33,299
+at this point in time. Why else would I like to do this analysis? Why would I like to understand
+
+17
+00:01:33,299 --> 00:01:38,219
+my program? Other than making the program correct which is important, but other than
+
+18
+00:01:38,219 --> 00:01:44,060
+that. So, let us run this program compile this program with our favorite compiler GCC
+
+19
+00:01:44,060 --> 00:01:58,659
+and if I run it get answer 34. Maybe the compiler is buggy who knows right I mean compiler
+
+20
+00:01:58,659 --> 00:02:02,300
+is a piece of software it can have bugs. So, let us try to compile it with another
+
+21
+00:02:02,300 --> 00:02:06,900
+favorite another of our favorite software is Clang. You have seen this compiler right.
+
+22
+00:02:06,900 --> 00:02:18,180
+So, let us compile it with this let us see what happens. Some warnings I do not care
+
+23
+00:02:18,180 --> 00:02:30,700
+never care about warnings. It goes into infinite loop what is going on? It is the same program
+
+24
+00:02:31,579 --> 00:02:38,699
+should have been 44 one compiler says 34 the other compiler goes to infinite loop what
+
+25
+00:02:38,699 --> 00:02:49,979
+is going on with this program? So, how do you go about understanding what is wrong?
+
+26
+00:02:49,979 --> 00:02:54,259
+Like if you had to debug this program you have to analyze this program how would you
+
+27
+00:02:54,259 --> 00:03:03,340
+do it? I mean at a very high level do not get into details at a very high level what
+
+28
+00:03:03,340 --> 00:03:14,219
+are the different ways of debugging this program? I can run GDB or even simply I can just put
+
+29
+00:03:14,219 --> 00:03:19,340
+up printf in the program put a lot of printf just see what is going on at every point what
+
+30
+00:03:19,340 --> 00:03:25,900
+is I what you see at different places and then maybe try to make sense of it. So, then what will
+
+31
+00:03:25,900 --> 00:03:33,699
+I do? I will put a lot of printf's or on GDB and then run the program on some inputs and then see
+
+32
+00:03:33,699 --> 00:03:41,379
+how do these executions look like. So, this way of analyzing a program is referred to as a dynamic
+
+33
+00:03:41,379 --> 00:03:51,060
+analysis where the idea is exactly the same we put in extra code in your case printf's and then
+
+34
+00:03:51,060 --> 00:03:56,060
+execute the program on certain inputs and then we try to understand what is going on with the
+
+35
+00:03:56,060 --> 00:04:10,419
+program. What is some other way of analyzing this program? Yes excellent excellent.
+
+36
+00:04:11,099 --> 00:04:19,740
+Dry running the program or just simply staring at this program and then trying to say that what is
+
+37
+00:04:19,740 --> 00:04:22,939
+like somebody said that the program has error I mean somebody just stared at this program did
+
+38
+00:04:22,939 --> 00:04:28,939
+not even run the program and they said looks like something is wrong. So, this way of analyzing a
+
+39
+00:04:28,939 --> 00:04:36,219
+program which can simulate an execution like you said dry run a program or just try to just look
+
+40
+00:04:36,220 --> 00:04:41,220
+at the program text and try to get some meaning out of the program without really executing the
+
+41
+00:04:41,220 --> 00:04:46,260
+program. Those sort of ways of analyzing a program is referred to as static analysis.
+
+42
+00:04:46,260 --> 00:04:52,260
+Static because we are not really running anything dynamic because we are running the program and
+
+43
+00:04:52,260 --> 00:05:04,020
+then trying to figure out what is going on. So, the plan is so I do not have a very set agenda but
+
+44
+00:05:04,060 --> 00:05:09,419
+we will go with the flow. I will see how the class is able to cope up and accordingly I will probably
+
+45
+00:05:09,419 --> 00:05:17,219
+switch things. But the plan is that today I will start with static analysis. We will try to
+
+46
+00:05:17,219 --> 00:05:24,740
+understand how different static analysis work. Then rather it will be an introduction to static
+
+47
+00:05:24,740 --> 00:05:30,099
+analysis without much of formal foundation. I will sort of at a very high level throw things at you
+
+48
+00:05:30,100 --> 00:05:34,379
+and say what would you do looks like a good idea or not that is not a good idea. We will try to
+
+49
+00:05:34,379 --> 00:05:40,740
+form a common sense try to understand how can we write a static analyzer. In the next session
+
+50
+00:05:40,740 --> 00:05:46,740
+onwards I will try I will give you a hands on with the LLVM compiler. We will look at another
+
+51
+00:05:46,740 --> 00:05:52,180
+representation of the LLVM compiler known as LLVM IR which is a lower level intermediate
+
+52
+00:05:52,180 --> 00:05:59,860
+representation and we will try to implement our analysis on LLVM compiler. Tomorrow we will look
+
+53
+00:05:59,860 --> 00:06:06,180
+at the foundations of static analysis foundation of something referred to as data flow analysis
+
+54
+00:06:06,180 --> 00:06:11,980
+and see why does mathematically it works. Why does it work mathematically? So, it gives you
+
+55
+00:06:11,980 --> 00:06:18,100
+some very interesting guarantees that if you have analysis which looks like this it is surely going
+
+56
+00:06:18,100 --> 00:06:22,500
+to give you something like this. So, we will see why how does it even end up giving you those
+
+57
+00:06:22,500 --> 00:06:29,819
+guarantees and tomorrow we will try to finish off the analysis. So, the analysis target will
+
+58
+00:06:29,819 --> 00:06:37,160
+be this program. Eventually we would like to write a static analyzer which is able to tell
+
+59
+00:06:37,160 --> 00:06:43,139
+me something why this program might be broken and maybe catch such programs some other programs
+
+60
+00:06:43,139 --> 00:06:51,740
+like this. The last day we will try to look at again depends on what is the pace of the class.
+
+61
+00:06:51,780 --> 00:06:57,460
+The last day we will try to look at dynamic analysis. For the same program we will write
+
+62
+00:06:57,460 --> 00:07:03,340
+a dynamic analysis and we will try to understand if the dynamic analysis can trigger the bug and
+
+63
+00:07:03,340 --> 00:07:11,740
+show you that where the problem is. Looks good. So, the class is going to be very interactive.
+
+64
+00:07:11,740 --> 00:07:17,060
+I will throw a lot of questions at you. You have to throw a lot of questions at me otherwise it
+
+65
+00:07:17,060 --> 00:07:22,220
+will be one sided you will get bombarded with questions only. So, the attack is the best
+
+66
+00:07:22,220 --> 00:07:27,459
+defense. So, you should start asking questions otherwise then it is a one sided game. So,
+
+67
+00:07:27,459 --> 00:07:33,860
+the other thing is that if you do not keep it interactively interactive we will both bore
+
+68
+00:07:33,860 --> 00:07:39,899
+each other out. So, it should not happen. Wherever you do not understand something or
+
+69
+00:07:39,899 --> 00:07:44,939
+wherever you want something to be repeated please let me know and we will do it then and there.
+
+70
+00:07:44,939 --> 00:07:49,579
+We will not wait for some later doubt clearing session or anything like that. Then and there we
+
+71
+00:07:49,579 --> 00:07:53,420
+will try to clarify it. It is not important how much we cover it is important that whatever we
+
+72
+00:07:53,420 --> 00:07:59,139
+cover you understand it and are able to do it. So, this is a very hands on course. Unless you
+
+73
+00:07:59,139 --> 00:08:04,019
+are able to implement whatever we are talking about it does not help. You will not even be
+
+74
+00:08:04,019 --> 00:08:09,379
+able to carry this information for another week after this. You will forget completely everything.
+
+75
+00:08:09,379 --> 00:08:14,500
+So, it is very important that we finish our assignments and we have to work little slog
+
+76
+00:08:14,740 --> 00:08:18,980
+hard on this because I will try to cover a lot of things. Yeah.
+
+77
+00:08:18,980 --> 00:08:28,620
+Why do we need different presentations?
+
+78
+00:08:28,620 --> 00:08:40,740
+Okay that is a very good question. Maybe I will answer that question after the break.
+
+79
+00:08:40,740 --> 00:08:48,659
+I will show you something rather than tell you something. So, you will learn about optimization.
+
+80
+00:08:48,659 --> 00:08:52,740
+So, Krishna will come after me. So, Krishna and Professor Govind Rajan they will talk about
+
+81
+00:08:52,740 --> 00:08:58,940
+optimizations and then you will realize more that why these optimizations are required and so on.
+
+82
+00:08:58,940 --> 00:09:02,340
+But I will give you I will show you a small program maybe I will make it during the break
+
+83
+00:09:02,340 --> 00:09:08,060
+and I will show you how much effect an optimization can have on the programs performance. So, you will
+
+84
+00:09:08,059 --> 00:09:14,659
+really be interested to know how can we really make the program efficient. Excellent question.
+
+85
+00:09:14,659 --> 00:09:23,299
+So, in this at least in this session the analysis we are doing are can be used for optimization or
+
+86
+00:09:23,299 --> 00:09:28,619
+can be used for human consumption. Like for instance in this case casting a bug or understanding a
+
+87
+00:09:28,619 --> 00:09:34,459
+program. But you will see that Krishna will probably talk about that the information that
+
+88
+00:09:34,460 --> 00:09:38,620
+we get from static analysis how can he exploit those information for additional optimizations.
+
+89
+00:09:38,620 --> 00:09:50,379
+So, now let us come to static analysis. So, static analysis let me try to pull out my slides.
+
+90
+00:09:50,379 --> 00:10:03,379
+Looks like Murphy's law has stuck again. But anyway so, I am not going to pull out that set
+
+91
+00:10:03,379 --> 00:10:19,179
+of slides. I think they should do. So, any program there are two set of things that are
+
+92
+00:10:19,179 --> 00:10:30,820
+relevant. One is right. So, one is that how have you written your control flow statements.
+
+93
+00:10:30,820 --> 00:10:35,660
+Control flow statements are statements like if then else, for loops and so on. So, essentially
+
+94
+00:10:35,660 --> 00:10:41,140
+they dictate how does the program counter move through the program. The other part of the program
+
+95
+00:10:41,140 --> 00:10:46,620
+is about how do you manipulate your variables. Like what do you compute into a variable,
+
+96
+00:10:46,620 --> 00:10:53,940
+where does that value flow into right. So, exactly to analyze these two components of a
+
+97
+00:10:53,940 --> 00:10:59,420
+program we have a different set of analysis. We have something called control flow analysis
+
+98
+00:10:59,579 --> 00:11:04,939
+which essentially says that in a given program how does the program counter move or how does
+
+99
+00:11:04,939 --> 00:11:09,699
+the flow of the control move through the program. The other types of analysis are referred to
+
+100
+00:11:09,699 --> 00:11:13,699
+as data flow analysis which says how do values move through the program. Can you analyze
+
+101
+00:11:13,699 --> 00:11:20,139
+and tell us how values move through the program. So, we will start with control flow analysis
+
+102
+00:11:20,139 --> 00:11:27,059
+and so essentially it is a set of algorithms which analyze the program statically. Of course,
+
+103
+00:11:27,299 --> 00:11:32,979
+you can even have dynamic variants of these algorithms to determine the control flow behavior
+
+104
+00:11:32,979 --> 00:11:38,819
+of a program. So, the reference is here and you can read more. So, let us try to understand
+
+105
+00:11:38,819 --> 00:11:42,419
+what the difference between control flow analysis and data flow analysis.
+
+106
+00:11:42,419 --> 00:11:47,939
+So, let us say first example I pick is something called alias analysis. So, alias analysis what
+
+107
+00:11:47,939 --> 00:11:53,099
+it tries to answer is that let us say you have a lot of pointer variables in a program. I would
+
+108
+00:11:53,100 --> 00:11:59,659
+like to understand that which pointer variable is accessing or pointing to which variable which
+
+109
+00:11:59,659 --> 00:12:05,899
+other location memory location right. Do you understand what the analysis is. So, I will look
+
+110
+00:12:05,899 --> 00:12:11,220
+at all my pointers in my program and I will say that for each pointer I would like to figure out
+
+111
+00:12:11,220 --> 00:12:17,060
+which is the memory location that it is pointing to. What sort of analysis do you think it is? Is it
+
+112
+00:12:17,219 --> 00:12:25,939
+control flow analysis or is it a data flow analysis? Excellent. Why is that? Because for
+
+113
+00:12:25,939 --> 00:12:31,459
+the pointers the addresses is nothing but data right and essentially what we need to track is
+
+114
+00:12:31,459 --> 00:12:37,699
+how do they move through the program right. So, okay let us say I have this particular problem
+
+115
+00:12:37,699 --> 00:12:43,339
+which says that what are the nodes that must visit a node n along all paths from n to x.
+
+116
+00:12:43,340 --> 00:12:49,139
+Let me just define what a node is assume that every statement in your program is a node right.
+
+117
+00:12:49,139 --> 00:12:58,500
+So, now I can come up with something called I can come up with a graph for a program I
+
+118
+00:12:58,500 --> 00:13:03,180
+will actually properly define that but or let us say do not even bother about it. Let us say I
+
+119
+00:13:03,180 --> 00:13:10,700
+want to figure out that which is the instruction in my program which will surely be executed no
+
+120
+00:13:10,700 --> 00:13:16,900
+matter which execution I run no matter what inputs are on my program with which are the
+
+121
+00:13:16,900 --> 00:13:22,180
+instruction which will surely surely get executed. What is the type of analysis? Is it a control flow
+
+122
+00:13:22,180 --> 00:13:26,300
+analysis or is it a data flow analysis? Control flow. Control flow because I am just trying to
+
+123
+00:13:26,300 --> 00:13:31,580
+figure out does the control read that statement or not that is all I care about. I really don't
+
+124
+00:13:31,580 --> 00:13:38,700
+care about that how can it reach to the program or I don't care about the values of the variables.
+
+125
+00:13:38,700 --> 00:13:44,140
+Of course, there are certain scenarios where you have like okay we will talk about them later. So,
+
+126
+00:13:44,140 --> 00:13:50,580
+mostly it is control flow analysis. Liveness analysis. So, liveness analysis says that are
+
+127
+00:13:50,580 --> 00:13:57,379
+there variables in my program which are not going to be used ever again or are there variables in
+
+128
+00:13:57,379 --> 00:14:03,860
+my program which contain values which are never going to be consumed by any other statement later.
+
+129
+00:14:03,860 --> 00:14:09,820
+Why is that interesting? Why should I even care about something like this?
+
+130
+00:14:09,820 --> 00:14:21,300
+Not so much but you can for instance you can remove those statements. If they are computing
+
+131
+00:14:21,300 --> 00:14:27,860
+something which is not even going to be used then what is the point of computing that. So,
+
+132
+00:14:27,860 --> 00:14:34,139
+if I say x equals foo and foo is a very heavy function and after that function finishes and
+
+133
+00:14:34,139 --> 00:14:41,340
+the value gets into x I do not even use x ever again. So, why did I even compute x? So,
+
+134
+00:14:41,340 --> 00:14:47,139
+this liveness analysis is able to drive an optimization referred to as dead code elimination.
+
+135
+00:14:47,139 --> 00:14:55,340
+So, any statement which does not create an effect on the rest of the program does not have an impact
+
+136
+00:14:55,340 --> 00:14:59,820
+on the rest of the program is referred to as dead code. You run that statement or you do not run
+
+137
+00:14:59,820 --> 00:15:03,940
+that statement the behavior of the program is the same or that is the expected output of the program
+
+138
+00:15:03,940 --> 00:15:09,259
+is the same. So, then we do not really need to run those statements. So, that is one of the
+
+139
+00:15:09,259 --> 00:15:13,780
+optimizations. So, if your program has lot of dead code you can eliminate them and your program
+
+140
+00:15:13,780 --> 00:15:17,700
+can run faster because it is not running those statements. So, that is one of the optimizations.
+
+141
+00:15:17,700 --> 00:15:22,460
+In fact, it is one of the very important optimizations. That is again as we can understand
+
+142
+00:15:22,620 --> 00:15:27,420
+what does this analysis do? Is it a data flow analysis or is it a control flow analysis?
+
+143
+00:15:27,420 --> 00:15:29,139
+Data flow.
+
+144
+00:15:29,139 --> 00:15:33,540
+Data flow because I am talking about values in those variables. So, do these values get
+
+145
+00:15:33,540 --> 00:15:41,300
+used again or not? So, now I think you have got an idea of what is control flow analysis
+
+146
+00:15:41,300 --> 00:15:49,379
+and what is data flow analysis. So, do not get mixed up now. So, for control flow analysis the
+
+147
+00:15:49,379 --> 00:15:56,659
+most important data structure we will be using is referred to as a CFG or a control flow graph.
+
+148
+00:15:58,059 --> 00:16:04,179
+So, if it is a graph then I have to tell you couple of things. I have to tell you that what
+
+149
+00:16:04,179 --> 00:16:10,019
+is the start node of this graph? Where does the graph start from? I have to tell you what are the
+
+150
+00:16:10,019 --> 00:16:14,740
+nodes in this graph and I have to tell you what are the edges in this graph. If I have to tell
+
+151
+00:16:14,740 --> 00:16:24,419
+you these three things I have described this graph. So, the entry to this graph is the program
+
+152
+00:16:24,419 --> 00:16:29,139
+entry point. Let me just tell you what are the nodes in this graph. The nodes in this graph are
+
+153
+00:16:29,139 --> 00:16:35,259
+to begin with you can think of nodes in this graph as every instruction in the program being a node
+
+154
+00:16:35,259 --> 00:16:43,419
+in this graph. Every instruction in this program is a node in this graph and edge in this there is
+
+155
+00:16:43,419 --> 00:16:53,259
+an edge between two nodes n1 and n2. If after running statement at n1 I can immediately there
+
+156
+00:16:53,259 --> 00:16:59,379
+is some execution on which I can immediately run the statement in n2. Does it make sense?
+
+157
+00:16:59,379 --> 00:17:11,539
+Immediately after. So, if I have two statements somehow I do not know if I can use the board.
+
+158
+00:17:12,500 --> 00:17:29,940
+So, if you have two statements let me see if I can use this. So, for instance let us say this is a
+
+159
+00:17:29,940 --> 00:17:37,859
+node because it is some statement in the program and this is a node because that is a statement
+
+160
+00:17:37,859 --> 00:17:46,339
+in this program. So, what is the edge between what can you detect one edge in this program?
+
+161
+00:17:47,299 --> 00:17:58,099
+Tell me some edge in this program. Let me just switch my line numbers on. So, just 10 to 12
+
+162
+00:17:58,099 --> 00:18:07,579
+is 10 to 12 and edge in this graph. Line 10 to line 12 is line 7 to line 12 and edge in
+
+163
+00:18:07,579 --> 00:18:18,220
+this graph is line 7 to 10 and edge in this graph. Yes or no? I could hear some. Why is it that edge?
+
+164
+00:18:18,220 --> 00:18:27,099
+They are not even one after the other. Yes, whenever the statement the while condition
+
+165
+00:18:27,099 --> 00:18:39,099
+7 becomes false the control can immediately run 10. So, this statement at 7 how many edges does
+
+166
+00:18:39,099 --> 00:18:55,339
+it have starting from it? What are the two edges? 7 to 8 and 7 to 10. Can you detect an edge which
+
+167
+00:18:55,339 --> 00:19:04,459
+goes the other direction? 8 to 7. So, these edges which go in the other direction I will
+
+168
+00:19:04,459 --> 00:19:09,819
+define what is other properly but does not look to be towards direction of the flow of the program.
+
+169
+00:19:09,819 --> 00:19:16,059
+Those edges are referred to as a back edge. So, I can have forward edges or I can have back edges.
+
+170
+00:19:16,059 --> 00:19:25,019
+So, I can see a back edge from 8 to 7. So, now you understand what is a control flow graph. So,
+
+171
+00:19:25,019 --> 00:19:29,339
+this graph is a control flow graph and can you now tell me what is the entry to this graph?
+
+172
+00:19:32,139 --> 00:19:38,779
+The first statement in this particular function. So, the first statement would be assignment of
+
+173
+00:19:38,779 --> 00:19:47,420
+0 to i. Notice that these declarations are not statements. To some extent they are but we will
+
+174
+00:19:47,420 --> 00:19:54,460
+talk about them when we do the LLBM IR. But at this moment they are not doing any action as such.
+
+175
+00:19:54,460 --> 00:19:59,740
+They are simply just saying allocate some memory. But they also turn out to be statements in your
+
+176
+00:19:59,740 --> 00:20:05,420
+LLBM IR. You will see that. But as I can see an active statement here which is assignment of 0
+
+177
+00:20:05,420 --> 00:20:14,059
+to i. So, that would be the first node in this graph. The next thing is that this graph
+
+178
+00:20:14,940 --> 00:20:22,140
+can become really big. So, there are nodes which are equal to the number of statements in this
+
+179
+00:20:22,140 --> 00:20:27,180
+graph. Can you think of some idea to reduce this graph and still keep all the information intact?
+
+180
+00:20:35,580 --> 00:20:42,060
+Excellent. So, let me just not even care about statements where the control,
+
+181
+00:20:42,060 --> 00:20:49,500
+we know that the control must follow in that sequence. So, this set of statements where
+
+182
+00:20:50,299 --> 00:20:56,940
+if you enter the first statement in that sequence, you are surely going to reach the last statement
+
+183
+00:20:56,940 --> 00:21:02,700
+in the sequence. There is no way out. Such sequences of statements are referred to as a basic block.
+
+184
+00:21:05,579 --> 00:21:10,859
+It's a block of statements and you cannot divide it further. So, it's like basic block.
+
+185
+00:21:11,740 --> 00:21:14,379
+So, can you identify a basic block in this program?
+
+186
+00:21:18,059 --> 00:21:21,419
+4 to 7. Should I take 7 or should I not take 7?
+
+187
+00:21:23,659 --> 00:21:29,179
+Okay. So, what does this while statement entail? There are two things it does.
+
+188
+00:21:32,379 --> 00:21:36,139
+Okay. Let me just come to it a little later. Let me just ensure that everybody understands
+
+189
+00:21:36,140 --> 00:21:38,540
+what we are talking about. Okay. Some simpler example.
+
+190
+00:21:41,420 --> 00:21:46,700
+10 and 12. Because if you enter 10, we will surely reach 12. There is no way out. We cannot
+
+191
+00:21:46,700 --> 00:21:52,940
+do anything. Even including everything like you guys said like from 4 to 7 surely, including 7 or
+
+192
+00:21:52,940 --> 00:21:58,620
+not is a thing of a discussion still. But at least we know from 4 to 7 all these statements
+
+193
+00:22:00,300 --> 00:22:05,180
+should be in a basic block because if I start executing 4, it cannot happen that I can miss
+
+194
+00:22:05,180 --> 00:22:12,460
+any statement in between. What about 7? So, 7, the while loop does two things.
+
+195
+00:22:13,180 --> 00:22:15,340
+If you think about it, can you tell me what are these two things?
+
+196
+00:22:18,460 --> 00:22:23,980
+It evaluates this condition, this i is greater than 0 and transfers control.
+
+197
+00:22:26,700 --> 00:22:33,900
+So, evaluating this should be part of the basic block because it's a... So,
+
+198
+00:22:33,900 --> 00:22:36,940
+no matter what you do, you have to evaluate that statement.
+
+199
+00:22:39,740 --> 00:22:45,019
+And transferring control, which is a go to statement is also part of this because...
+
+200
+00:22:45,980 --> 00:22:50,860
+So, after the control is transferred, it goes somewhere else. But the jump statement should
+
+201
+00:22:50,860 --> 00:22:55,500
+be part of that basic block because you are going to hit that jump no matter what. So,
+
+202
+00:22:55,500 --> 00:23:00,380
+this is a conditional jump. It's like if something, then go to. So, this statement should be again
+
+203
+00:23:00,380 --> 00:23:06,140
+part of the basic block. What about the statement after it? Can I include this particular statement
+
+204
+00:23:06,140 --> 00:23:15,100
+in the basic block? Statement 8 in the basic block? Why not? Yeah, so it is not guaranteed
+
+205
+00:23:15,100 --> 00:23:21,100
+that I hit 7, I surely will hit 8. I can't guarantee that. Neither can I guarantee something about 10.
+
+206
+00:23:23,180 --> 00:23:26,460
+Because after I hit 7, maybe I execute 8. I don't know.
+
+207
+00:23:27,340 --> 00:23:32,299
+So, those cannot also be part of the same basic block which contains 7.
+
+208
+00:23:39,900 --> 00:23:48,700
+Okay, so now the while statement is a little tricky business. Let's revisit the while statement. So,
+
+209
+00:23:48,700 --> 00:23:53,100
+when I look at the forward execution, it looks like while statement.
+
+210
+00:23:56,860 --> 00:24:01,740
+But think about the case when I execute 8 and then jump back to 7.
+
+211
+00:24:05,340 --> 00:24:11,579
+So, if it is part of the... Now, what does my control flow graph look like? It looks like
+
+212
+00:24:12,460 --> 00:24:19,019
+a set of nodes where each node is no more a statement. It is now a basic block. And I know
+
+213
+00:24:19,019 --> 00:24:22,140
+everything in the basic block are going to execute in sequence. So, I don't have to care about the
+
+214
+00:24:22,140 --> 00:24:29,980
+control flow within them. It is obvious. And my edges are edges from a basic block to another
+
+215
+00:24:29,980 --> 00:24:36,540
+basic block if the first basic block can transfer control to the second basic block. Now, think
+
+216
+00:24:36,540 --> 00:24:43,500
+about 7. Now, this is a little sticky situation. Because now if I make it the part of the previous
+
+217
+00:24:43,500 --> 00:24:52,060
+basic block, then after executing 8, how do I transfer control to it? So, I cannot transfer
+
+218
+00:24:52,059 --> 00:24:55,419
+control to the middle of a basic block. I can only transfer control to the beginning of a basic
+
+219
+00:24:55,419 --> 00:24:59,259
+block. It doesn't make sense to transfer control middle of a basic block. Then what is the graph?
+
+220
+00:24:59,259 --> 00:25:08,619
+I mean, it is very confusing, right? So, the only option is to pull it out and make it part of
+
+221
+00:25:09,500 --> 00:25:21,659
+the next basic block, right? Now, okay, next basic block, that is fine. But can I now put 7 and 8 in
+
+222
+00:25:21,660 --> 00:25:27,340
+the same basic block? That is also problematic. So, 7 has to be a separate basic block, 8 has to
+
+223
+00:25:27,340 --> 00:25:31,980
+be a separate basic block, and 10 has to be a separate basic block. 10 can transfer control to 7.
+
+224
+00:25:35,660 --> 00:25:41,580
+Not 10, sorry, 8. 8 can transfer control to 7. 7 can transfer control to either 8 or 10.
+
+225
+00:25:44,060 --> 00:25:47,259
+Excellent. I mean, I am not even teaching anything. You guys are discovering everything.
+
+226
+00:25:48,059 --> 00:25:50,460
+Okay, so now we have understood what is a control flow graph.
+
+227
+00:25:53,579 --> 00:25:58,140
+Right, so essentially, so now let's just summarize whatever we have discussed. So,
+
+228
+00:25:58,140 --> 00:26:04,460
+the very data structure we will use and we will use it a lot is something called a control flow
+
+229
+00:26:04,460 --> 00:26:16,619
+graph or a CFG. Now onwards, the nodes in a CFG are known to have basic blocks. They have every
+
+230
+00:26:16,619 --> 00:26:21,339
+basic block has a single entry and a single exit, meaning that the control can only enter
+
+231
+00:26:21,339 --> 00:26:25,259
+from at the beginning of the basic block. It can exit only from the end of the basic block.
+
+232
+00:26:26,779 --> 00:26:32,939
+Any, if there is any possibility of control transfer between two basic blocks, we will have
+
+233
+00:26:32,939 --> 00:26:37,500
+an edge between these two basic blocks, right? And there are, we will always distinguish between
+
+234
+00:26:37,500 --> 00:26:42,859
+two very important basic blocks. One is referred to as the entry block and other is referred to as
+
+235
+00:26:42,859 --> 00:26:49,179
+the exit block. I can always make sure that I have a single entry. Of course, I have to have a
+
+236
+00:26:49,179 --> 00:26:55,339
+single entry. There is no function which enters in two different places, right? So, for every
+
+237
+00:26:55,339 --> 00:27:00,459
+function in my program, I will have a control flow graph, right? So, we will probably not be able to
+
+238
+00:27:00,459 --> 00:27:05,899
+touch analyzing programs which span multiple functions. So, we will only look at programs
+
+239
+00:27:05,899 --> 00:27:11,099
+which have only one function or every function in the program I can analyze in isolation,
+
+240
+00:27:11,099 --> 00:27:16,379
+right? I will not be able to say the effect of one function on another. That is something
+
+241
+00:27:16,379 --> 00:27:21,419
+referred to as an interprocedural analysis, right? So, because you want to figure out what
+
+242
+00:27:21,419 --> 00:27:29,099
+interaction between procedures, we will constrain ourselves to what is referred to as intra-procedural
+
+243
+00:27:29,099 --> 00:27:34,059
+analysis, right? So, these are the analysis only within a function, right? So, every function will
+
+244
+00:27:34,059 --> 00:27:39,500
+have a control flow graph and the control flow graph will look like this. There is going to be
+
+245
+00:27:40,460 --> 00:27:49,660
+a strict entry block and I can always transform my control flow graph so that it has an exit block.
+
+246
+00:27:51,259 --> 00:27:55,099
+So, what will an exit block have in a function?
+
+247
+00:27:58,299 --> 00:28:04,140
+Instruction will surely have written instruction, right? It's surely going to have a written
+
+248
+00:28:04,140 --> 00:28:08,619
+instruction, but then the program may not or a function may not have a single return.
+
+249
+00:28:09,500 --> 00:28:13,819
+I can say if something return, if something return, switch case return, right? I can have
+
+250
+00:28:13,819 --> 00:28:20,059
+multiple returns in my program. So, every return is going to create an exit node. How can I ensure
+
+251
+00:28:20,059 --> 00:28:26,940
+that my graph has a single exit node? Exactly that is the solution. I will ensure only that
+
+252
+00:28:26,940 --> 00:28:34,859
+guy has a return. For every statement which has a return, you put a store that return value and
+
+253
+00:28:34,859 --> 00:28:40,779
+transfer control to that block, right? So, I can ensure I can do a small simple transformation
+
+254
+00:28:40,779 --> 00:28:46,139
+to the program and understand see from the first day onwards, we have started looking at changing
+
+255
+00:28:46,139 --> 00:28:52,459
+the program to make our analysis easier, right? And that will be the trend all through. If you
+
+256
+00:28:52,459 --> 00:28:56,059
+can do any simplification which makes our analysis easier, we'll do it, right? So, this is a very
+
+257
+00:28:56,059 --> 00:28:59,419
+simple transformation, but you will see that when you're writing code, it will make your
+
+258
+00:28:59,419 --> 00:29:03,740
+implementation much simpler, right? So, we will have a single. So, we will assume from now onwards,
+
+259
+00:29:03,740 --> 00:29:07,740
+we'll assume that we have a single entry block and we have a single exit block. You can always
+
+260
+00:29:07,740 --> 00:29:16,059
+transform programs with multiple returns to a procedure with single return. Okay. So,
+
+261
+00:29:16,059 --> 00:29:21,420
+this is example of a control program. Big deal. It's a graph. There are, I can see two loops.
+
+262
+00:29:21,420 --> 00:29:26,539
+There is a loop from, loop containing two, three, four, five. There is a loop containing,
+
+263
+00:29:26,539 --> 00:29:31,019
+there is a, so this is a nested loop. So, there is another loop which is two, three, four, five,
+
+264
+00:29:31,019 --> 00:29:47,019
+and six, right? And so, can you identify that statement at four? What could be creating such
+
+265
+00:29:47,019 --> 00:29:56,460
+a weird jump? Actually, break will also not do because break will have just exit loop,
+
+266
+00:29:56,460 --> 00:30:03,819
+go to. So, you need a forward go to, but had it been a single loop, then it could have been a break.
+
+267
+00:30:05,740 --> 00:30:12,299
+So, looking at a control flow graph, you should be able to identify these control flow statements,
+
+268
+00:30:12,299 --> 00:30:21,100
+right? So, can you think of what statement does two have? Note two have? And if condition, right?
+
+269
+00:30:21,259 --> 00:30:25,099
+So, on a true, it goes to three and false goes to four or something like that. We don't distinguish
+
+270
+00:30:25,099 --> 00:30:29,419
+between the true side and the false side in a control flow graph unless really required. So,
+
+271
+00:30:29,419 --> 00:30:34,939
+in general control flow graph, we'll not annotate it. What if that node four wasn't there and the
+
+272
+00:30:34,939 --> 00:30:41,179
+control from two would have just gone to five? What would the statement at two look like?
+
+273
+00:30:42,060 --> 00:30:44,779
+What would the statement at two look like?
+
+274
+00:30:49,259 --> 00:30:52,860
+If then it will transfer control to three, otherwise it would have anyway gone to.
+
+275
+00:30:55,820 --> 00:31:01,500
+So, okay, excellent. So, you guys understand it and anything else?
+
+276
+00:31:02,140 --> 00:31:11,740
+And can you tell me the nature of these loops? The loop at two and like two to five and two to six,
+
+277
+00:31:12,779 --> 00:31:17,980
+they are variants of loop. They are for loop or while loop or do while loop, repeat until what
+
+278
+00:31:17,980 --> 00:31:31,099
+sort of loops they are. So, what would they do while, right? Why is that? Because the check
+
+279
+00:31:31,099 --> 00:31:39,819
+happens at the end. Had it been a while loop, how would it look like? Right, right, excellent.
+
+280
+00:31:41,899 --> 00:31:47,899
+So, the next step is that now the program, the first control for analysis we'll do is to construct
+
+281
+00:31:47,899 --> 00:31:52,139
+this nice data structure. This is a very interesting data structure. See, looking at the data structure,
+
+282
+00:31:52,139 --> 00:31:58,139
+I can say so much about the program. Like you could, you can say that there is a go to statement
+
+283
+00:31:58,140 --> 00:32:03,180
+sitting here. You can say, oh, there are two loops sitting here. Oh, these loops look like a
+
+284
+00:32:03,180 --> 00:32:07,020
+two while loop. Right? You can say so much, but just by looking at this particular graph.
+
+285
+00:32:07,820 --> 00:32:11,900
+Interestingly, I have not even told you what statements are there in these basic blocks.
+
+286
+00:32:11,900 --> 00:32:16,460
+Right? They are completely abstracted away. So, abstraction is the key to program analysis
+
+287
+00:32:17,020 --> 00:32:20,220
+because programs are very complicated. Unless you throw a lot of details,
+
+288
+00:32:20,780 --> 00:32:24,540
+they are very difficult to analyze. Right? So, you only have to throw a lot of details
+
+289
+00:32:24,539 --> 00:32:28,859
+and only look at things that really matter to you. Right? So, here I have thrown away all
+
+290
+00:32:28,859 --> 00:32:34,059
+statements. Right? But still the structure of this graph tells me a lot about what this program is
+
+291
+00:32:34,059 --> 00:32:41,659
+doing. Okay. So, the first control for analysis we'll do is we'll try to construct this control
+
+292
+00:32:41,659 --> 00:32:45,740
+for graph. Control for analysis we'll do is to construct control for graph. Okay.
+
+293
+00:32:45,900 --> 00:32:59,019
+Okay. So, have you guys seen some other intermediate representation other than
+
+294
+00:33:02,700 --> 00:33:13,099
+your AST? Even in your schools? Have you seen three address code? How many of you don't know
+
+295
+00:33:13,099 --> 00:33:18,939
+or how many of you know three address code? That's the easier answer. Mostly everybody.
+
+296
+00:33:21,019 --> 00:33:23,099
+So, why does it become a tree?
+
+297
+00:33:29,740 --> 00:33:35,500
+Yeah, but then it could have become a DAG. Even the cycle eliminated, this is a DAG.
+
+298
+00:33:43,099 --> 00:33:52,059
+Okay. So, somehow it becomes a tree. So, maybe you can discern more.
+
+299
+00:34:02,379 --> 00:34:03,179
+Okay. So,
+
+300
+00:34:03,180 --> 00:34:15,740
+so, no direction we have not extracted out. We created, we can create a directed graph.
+
+301
+00:34:22,539 --> 00:34:30,940
+You have a, the question was that you retain the same nodes as in the CFG
+
+302
+00:34:30,940 --> 00:34:40,780
+and between n1 to n2 you create an edge, you can create a directed edge if n1 is the dominator of n2.
+
+303
+00:34:40,780 --> 00:35:03,740
+So, why cannot, why can the idomb relation not be cardinality more than 1?
+
+304
+00:35:03,739 --> 00:35:17,019
+Why can it not have two closest predecessors? Because,
+
+305
+00:35:25,500 --> 00:35:29,979
+so, we said it is a poset. So, there may be no relation between certain nodes.
+
+306
+00:35:34,379 --> 00:35:38,779
+No, but if it is a poset, then it means there are nodes which,
+
+307
+00:35:38,779 --> 00:35:42,379
+for which there is no relation at all. So, there is nothing which is,
+
+308
+00:35:42,379 --> 00:35:43,819
+for them I cannot say which is closer.
+
+309
+00:35:43,820 --> 00:36:04,539
+Very good, very good, very, very good. Okay. So, so, this tree is referred to as the dominated tree,
+
+310
+00:36:04,539 --> 00:36:11,420
+right? Data structure number 2. Again, a very interesting data structure. So,
+
+311
+00:36:11,420 --> 00:36:15,579
+you can organize all your dominators into this beautiful data structure called the dominator
+
+312
+00:36:15,579 --> 00:36:20,139
+tree and looking at the dominator tree, you can figure out the set of dominators for every node.
+
+313
+00:36:20,700 --> 00:36:32,380
+How? How? Yeah, just look at its ancestors. Like from that node, just keep on looking at the
+
+314
+00:36:32,380 --> 00:36:37,820
+ancestor, you will get the, all the nodes that are there, all of them will be its dominators, right?
+
+315
+00:36:37,820 --> 00:36:47,580
+So, that is the next thing. I do not have a diagram of that, but you guys created some, I hope.
+
+316
+00:36:52,140 --> 00:36:57,820
+Okay. So, this is the algorithm to compute dominators. So, you need to initialize all
+
+317
+00:36:57,820 --> 00:37:03,580
+nodes to the set of the universal node, that set of all nodes. And then you say that domain is
+
+318
+00:37:03,579 --> 00:37:07,980
+nothing but put in that node and union it with the intersection of the predecessors of the node.
+
+319
+00:37:10,219 --> 00:37:16,460
+So, you could have also done with a different initialization. You could have also initialized
+
+320
+00:37:16,460 --> 00:37:28,219
+it to empty. Why did we decide to initialize it to N? So, try to reason on this.
+
+321
+00:37:34,380 --> 00:37:37,579
+Hey, easier kya hota hai? It will not give you the same result.
+
+322
+00:37:46,779 --> 00:37:52,539
+No, no, do you say that, that if I can it as the empty set, initialize it to the empty set,
+
+323
+00:37:52,539 --> 00:37:56,619
+I would have not got the, I would have got the same solution, but it is, would have been less
+
+324
+00:37:56,619 --> 00:38:03,980
+efficient or you would have not got the same solution. So, efficiency first is correctness.
+
+325
+00:38:03,980 --> 00:38:08,779
+Am I getting the, I mean what is correct is different, but here. But you will have to do it
+
+326
+00:38:08,779 --> 00:38:13,099
+here in this case also, because I have not given any ordering on the how the nodes have to be
+
+327
+00:38:13,099 --> 00:38:21,259
+computed. So, here I am assuming it to be a graph. I have not even removed my cycles and I am not
+
+328
+00:38:21,260 --> 00:38:27,980
+even assuming any ordering on the nodes. So, I am just saying just pick a node and apply this
+
+329
+00:38:27,980 --> 00:38:32,940
+and update the dominator set for it. Pick a node, apply this, apply the update dominator set.
+
+330
+00:38:32,940 --> 00:38:40,940
+Keep on doing it till there is one iteration when none of the nodes dominator changes. So,
+
+331
+00:38:41,820 --> 00:38:46,380
+that is the exercise. Do it, you will get a lot of intuition as to what is going on. Just work it
+
+332
+00:38:46,380 --> 00:38:51,500
+out. Just try to put it as empty set. Do it for a small graph. Maybe you can do it with lunch break
+
+333
+00:38:51,500 --> 00:38:58,059
+or drink the, this thing later. Initialize it to a, we will know the theoretical reasons behind it
+
+334
+00:38:58,059 --> 00:39:02,780
+tomorrow. We will actually look at fixed one theory and we will say that why is it interesting,
+
+335
+00:39:03,500 --> 00:39:08,460
+why we have to do it this way. But for now, just try to get an intuition as to why is it,
+
+336
+00:39:08,460 --> 00:39:15,740
+why do we have to initialize it to n. So, the next topic is I will come to,
+
+337
+00:39:17,980 --> 00:39:23,740
+so we will discuss about something called a reducible flow graph.
+
+338
+00:39:27,980 --> 00:39:35,179
+So, any graph you should be able to partition the edges into two categories. One is something
+
+339
+00:39:35,179 --> 00:39:47,099
+called forward edges where the, where with those edges the graph creates a dag. If you just keep
+
+340
+00:39:47,099 --> 00:39:54,139
+the forward edges, the graph would have created a dag. The other are back edges which prevent
+
+341
+00:39:54,139 --> 00:40:00,139
+it from becoming a dag. So, these are edges on top of the dag. So, these are, so one algorithm
+
+342
+00:40:01,099 --> 00:40:10,219
+to identify back edges is where the head dominates the tail. Can you see that? So,
+
+343
+00:40:10,219 --> 00:40:19,019
+see the dominators start becoming useful already. So, if you have a graph here for all the forward
+
+344
+00:40:19,019 --> 00:40:29,739
+edges, you would see that the tail dominates the head. But for back edges, it will be the other way
+
+345
+00:40:29,739 --> 00:40:52,219
+around. So, let me just see what I wanted to say here is, okay sorry. So, these are,
+
+346
+00:40:53,979 --> 00:40:58,699
+so any graph, so I should have said the other way. So, any graph where you can divide your set of
+
+347
+00:40:58,699 --> 00:41:05,259
+edges into these two categories is referred to as a reducible flow graph. There are other flow graphs
+
+348
+00:41:05,259 --> 00:41:11,419
+which have the something called cross edges which, so these are called tree edges. But
+
+349
+00:41:12,139 --> 00:41:15,659
+like for instance, this particular graph, let us not get too much into it. Like for instance,
+
+350
+00:41:15,659 --> 00:41:27,659
+this particular graph, look at this graph on the left. So, here for node 5,
+
+351
+00:41:28,699 --> 00:41:45,899
+this. The other thing is that this particular result that identifying back edges by identifying
+
+352
+00:41:45,899 --> 00:41:50,299
+nodes where the head dominates tails, it only works for these class of graphs which are called
+
+353
+00:41:50,299 --> 00:41:57,019
+reducible flow graphs. So, for this reducible flow graphs, so this is a graph, the graph on the left
+
+354
+00:41:57,019 --> 00:42:04,460
+side is a graph which is not a reducible flow graph. Okay, so very intuitively the way to think
+
+355
+00:42:04,460 --> 00:42:11,500
+about this is that in a reducible flow graph, it is easy to identify the loops. It is easy to say
+
+356
+00:42:11,500 --> 00:42:21,019
+that which set of nodes forms a loop. So, if you think about the graph in the left, can you say that
+
+357
+00:42:21,659 --> 00:42:28,539
+which are the nodes, which are the loops and what are the nodes in the loop? So, like 2, 3 and 2, 4,
+
+358
+00:42:29,340 --> 00:42:38,539
+they seem to be loops, but just think of a program. So, these two loops are neither disjoint loops,
+
+359
+00:42:38,539 --> 00:42:44,860
+you cannot say that they are two separate loops, nor they are nested loops, nor are they contained
+
+360
+00:42:44,860 --> 00:42:48,940
+within each other. Or you can actually say both of them are contained within each other. You can
+
+361
+00:42:48,940 --> 00:42:54,860
+think of 2, 3 as the main loop and this thing as something between that, but then it can switch
+
+362
+00:42:54,860 --> 00:43:02,700
+between these loops. It is very weird. So, for the arrow, the arrow head, we say arrow head.
+
+363
+00:43:03,579 --> 00:43:09,340
+So, wherever it is pointing is the head. So, whenever we say we draw an arrow, we say the
+
+364
+00:43:09,340 --> 00:43:14,380
+arrow head points here. So, the wherever it is pointing is the head and wherever it is starting
+
+365
+00:43:14,380 --> 00:43:26,860
+from is the tail. So, for graphs where you cannot partition the set of nodes into categories such
+
+366
+00:43:26,860 --> 00:43:36,619
+that the loops are either disjoint or nested, if you cannot partition your nodes into those
+
+367
+00:43:36,619 --> 00:43:45,420
+categories or loops into those categories, then we say the loop, the graph is a irreducible graph.
+
+368
+00:43:46,219 --> 00:43:53,259
+Otherwise, it is a reducible graph. So, if it is a nested loop, then all the nodes in the nested
+
+369
+00:43:53,259 --> 00:43:59,500
+loop will be contained into the outer loop. If it is a disjoint loop, they will not intersect at all.
+
+370
+00:44:02,779 --> 00:44:06,219
+Disjoint loops is one for loop followed by another for loop. There is nothing which is
+
+371
+00:44:07,179 --> 00:44:13,579
+intersecting with. In this case, this is neither. So, if you figure out 2, 3 is one loop, 2, 4 is
+
+372
+00:44:13,579 --> 00:44:18,299
+one loop. In that case, there is an intersection. So, they cannot be disjoint loops and they are not
+
+373
+00:44:18,299 --> 00:44:23,179
+nested because if they had been nested, then one loop should have completely contained the other.
+
+374
+00:44:23,819 --> 00:44:27,980
+The set of nodes in one loop should have been contained completely in the other set. So,
+
+375
+00:44:27,980 --> 00:44:35,179
+it is neither a full loop. So, the good news is, so in analysis, it is generally
+
+376
+00:44:36,139 --> 00:44:41,179
+much easier to analyze reducible flow graphs. Irreducible flow graphs create certain problems.
+
+377
+00:44:45,340 --> 00:44:54,940
+But the good news is that all graphs that you can construct using structured program statements,
+
+378
+00:44:54,940 --> 00:45:01,019
+like while statements, if statements, do while statements, you can only produce reducible flow
+
+379
+00:45:01,019 --> 00:45:06,539
+graphs. You can never never produce irreducible flow graphs. That is why there does not exist
+
+380
+00:45:06,539 --> 00:45:11,340
+anyway. You can produce this left graph using just structured statements. How can you produce
+
+381
+00:45:11,340 --> 00:45:17,260
+this left graph? You can still do it. Gotoes. Yeah. Yeah. So, if you use gotoes statements,
+
+382
+00:45:17,260 --> 00:45:20,220
+only then can you produce such statements. And that is why people could talk.
+
+383
+00:45:20,779 --> 00:45:28,219
+So, gotoes statements can create such weird graphs, but your structured statements will never do it.
+
+384
+00:45:29,099 --> 00:45:33,899
+And many a times, the good news is that you can actually rewrite a reducible flow graph,
+
+385
+00:45:33,899 --> 00:45:38,139
+irreducible flow graph into a reducible flow graph. So, generally it is by duplication of
+
+386
+00:45:38,139 --> 00:45:41,419
+nodes. So, duplication of, but anyway, let us not get too much into it.
+
+387
+00:45:43,659 --> 00:45:49,419
+So, the good news is that if your graphs are reducible, then I have a very simple algorithm
+
+388
+00:45:49,420 --> 00:45:57,980
+for identifying the back edges, the back edges. So, this result holds that the back edges are the
+
+389
+00:45:57,980 --> 00:46:05,420
+edges where the head dominates the tail. This only holds if you have a reducible flow graph.
+
+390
+00:46:10,139 --> 00:46:17,820
+So, this is good. So, we are done. The last thing is about natural loops. So, the next,
+
+391
+00:46:17,820 --> 00:46:24,460
+the last thing is we would like to find out that which statements in the program form a loop.
+
+392
+00:46:26,140 --> 00:46:31,100
+So, those are referred to as a natural loop. For example, in this particular graph, what are the
+
+393
+00:46:31,100 --> 00:46:40,860
+loops? We have two loops. One loop is from 5 to 2, the other loop is from 6 to 2. Each loop is
+
+394
+00:46:41,820 --> 00:46:43,980
+identified by a back edge. So,
+
+395
+00:46:49,900 --> 00:46:58,860
+so now our task is to find out the natural loops. How can we do it? Any ideas? How can we get the,
+
+396
+00:46:58,860 --> 00:47:01,820
+so I will be, so what is algorithm take? The algorithm takes a back edge
+
+397
+00:47:02,700 --> 00:47:08,620
+and it gives out the set of nodes which belong to that particular loop corresponding to that
+
+398
+00:47:08,619 --> 00:47:12,699
+particular back edge. So, any idea how can we do about doing that?
+
+399
+00:47:17,259 --> 00:47:22,139
+No, the back edges I can identify. Given a graph, I can exactly use this to identify my back edges.
+
+400
+00:47:24,619 --> 00:47:33,099
+Where is it? So, I can use this to identify my back edges. Now you are, now I have,
+
+401
+00:47:33,099 --> 00:47:36,219
+so see how the analysis is progressing. First from the linear set of statements,
+
+402
+00:47:36,219 --> 00:47:42,219
+I have constructed my control flow graph, my CFG. In my CFG, I apply and let us say I only
+
+403
+00:47:42,219 --> 00:47:46,779
+writing programs which does not allow good use. So, you are sure that this is going to be a
+
+404
+00:47:46,779 --> 00:47:52,219
+reducible graph. If it is a reducible graph, then I can apply this particular algorithm to identify
+
+405
+00:47:52,219 --> 00:47:57,500
+my back edges. So, on the control flow graph, I have already identified my back edges. Once I have
+
+406
+00:47:57,500 --> 00:48:02,699
+identified my back edges, now I can pick up one back edge at a time and I can start asking that
+
+407
+00:48:02,699 --> 00:48:10,460
+what is the loop under this back edge, for this back edge. So, this is the algorithm now we want
+
+408
+00:48:10,460 --> 00:48:15,259
+to come up with. We want to figure out that given the back edge, what is the loop that this back
+
+409
+00:48:15,259 --> 00:48:27,500
+edge consists of? How would you do that? Travels how?
+
+410
+00:48:32,699 --> 00:48:47,659
+They fall in the loop, but that is not, I do not want to detect loops. I want to find out that what
+
+411
+00:48:47,659 --> 00:48:55,019
+are the nodes in that loop? Like for instance, maybe I did not say it properly. So, in this case,
+
+412
+00:48:55,579 --> 00:49:01,259
+what are the nodes in the back edge from 5 to 2? What are the nodes this loop consists of?
+
+413
+00:49:03,019 --> 00:49:10,859
+2, 3, 4 and 5. That is the set of nodes. And 6 to 2 has 2, 3, 4, 5 and 6.
+
+414
+00:49:11,419 --> 00:49:15,579
+It completely contains the inner loop plus it has this extra node 6.
+
+415
+00:49:26,539 --> 00:49:31,659
+No, no, the dominator does not come into the picture because look at 5. 3 and 4 do not
+
+416
+00:49:31,659 --> 00:49:41,899
+dominate 5, but they are part of the loop very much. The dominator of 5 is 2. Yes.
+
+417
+00:49:43,980 --> 00:49:50,539
+That is also not necessary. Like look at 6. Forget that edge from 4 to 7, but had that not
+
+418
+00:49:50,539 --> 00:49:59,339
+been there, then 5 would have been the dominator of 6. 6 to 2 there is a loop.
+
+419
+00:50:01,659 --> 00:50:06,779
+That has dominator as 2. So, the dominator of dominator.
+
+420
+00:50:06,779 --> 00:50:10,779
+But, but even 8 has dominator as 2. Node 8 also has dominator 2.
+
+421
+00:50:10,779 --> 00:50:16,940
+Form nodes which have dominator 2, but not dominator 7, not 6.
+
+422
+00:50:16,940 --> 00:50:21,980
+Dominator 2, but how do you get 7 and 6? That is my other question.
+
+423
+00:50:21,980 --> 00:50:27,339
+No, for 6, nodes 3, 4 and 5 have dominator 2, but not 6.
+
+424
+00:50:31,659 --> 00:50:40,059
+Sorry, yeah what is it? For 4 node, we have dominator,
+
+425
+00:50:40,859 --> 00:50:46,859
+we have 2 in dominator side and not 6 and in dominator side. So, for 3, 4 and 5, we have
+
+426
+00:50:46,859 --> 00:50:51,099
+dominated 2, but not 6. So, there will be no loop.
+
+427
+00:50:51,099 --> 00:50:58,139
+For 3, 4, 5 have dominator dominated 2. Yeah, but not 6.
+
+428
+00:50:58,139 --> 00:51:11,259
+You are talking about this particular loop. No, but if 6 had 2 branches, let us say from 6,
+
+429
+00:51:11,259 --> 00:51:15,500
+I could have split into 2 branches, then even 7 would not have dominator as 2, but it would
+
+430
+00:51:15,500 --> 00:51:21,500
+have have 2 as a dominator. So, let us say from 6, I have a branch, I have 2 branches,
+
+431
+00:51:21,659 --> 00:51:30,059
+1 branch goes to 2, the other branch goes to 8, then 7 is not dominated by 6, but 7 is dominated
+
+432
+00:51:30,059 --> 00:51:44,059
+by 2, 4, 5 and 6, 2 and 5. So, you have to somehow distinguish the nodes which are outside
+
+433
+00:51:44,059 --> 00:51:46,860
+the loop from the nodes which are inside the loop. How do you do that?
+
+434
+00:51:47,500 --> 00:51:52,380
+There is a path from 2 to 5. There is a path from 2 to 5, yes.
+
+435
+00:51:55,180 --> 00:51:58,539
+Agreed, but how do you figure out in this automatically how do you figure that out?
+
+436
+00:51:59,579 --> 00:52:04,860
+Because I can also find a path somehow differently. I can also find a path from 7 to 3.
+
+437
+00:52:05,820 --> 00:52:10,140
+Right, I can say 2, 4, 7, no, not 3, but
+
+438
+00:52:15,500 --> 00:52:16,780
+okay, in this case it does not happen.
+
+439
+00:52:21,260 --> 00:52:25,260
+Yeah, sure.
+
+440
+00:52:34,860 --> 00:52:53,820
+You are almost there, very much almost there. So, let us, we got interested in time, let us go
+
+441
+00:52:53,820 --> 00:53:04,140
+there. So, essentially this is the idea. So, for a back edge end to D, the natural loop consists
+
+442
+00:53:04,139 --> 00:53:09,819
+of nodes that can reach N without visiting. So, I mean, you want to just similar on those lines.
+
+443
+00:53:09,819 --> 00:53:15,500
+So, now the algorithm looks very similar, looks like this. Essentially what you start is you have
+
+444
+00:53:15,500 --> 00:53:22,139
+this set which is the loop set which will contain all the nodes which will be the loop for that
+
+445
+00:53:22,139 --> 00:53:32,139
+particular back edge. And then you start, you have a stack which will be used to explore it basically.
+
+446
+00:53:32,139 --> 00:53:39,420
+Some sort of a DFS traversal if you will like. So, now for each element C popped from the stack,
+
+447
+00:53:40,699 --> 00:53:45,339
+for all predecessors in C, if P is not already in the loop, then you have to explore it further.
+
+448
+00:53:45,339 --> 00:53:50,699
+So, you have to just think of some are doing a DFS traversal only the loop. Right. So, as soon as
+
+449
+00:53:50,699 --> 00:53:55,179
+you try coming out of the loop, you will not explore further at all. So, you are using the
+
+450
+00:53:55,179 --> 00:54:02,779
+stack to do that. So, you add P into the loop and push P into the stack. And then again,
+
+451
+00:54:02,779 --> 00:54:11,419
+so you push P into the stack means what? You are trying to explore the children of P. Right.
+
+452
+00:54:11,419 --> 00:54:14,460
+We are going to forward and basically you want to expand the DFS traversal into P.
+
+453
+00:54:18,460 --> 00:54:23,500
+So, we are going the other way around. Sorry, sorry, sorry. Yeah, you are doing a backward
+
+454
+00:54:24,219 --> 00:54:29,739
+backward DFS basically backward DFS into it. So, you are, so for all predecessors in C, so you
+
+455
+00:54:30,380 --> 00:54:38,699
+push the parent till you reach the entry node. So, what we will do is we will try to implement
+
+456
+00:54:38,699 --> 00:54:50,860
+this algorithm into LLVM in LLVM. Right. So, what I will suggest you to do is you can quickly do a
+
+457
+00:54:51,579 --> 00:54:58,780
+a mock simulation of this on some graph. Try to see you understand this and then we will try to
+
+458
+00:54:58,780 --> 00:55:05,579
+implement it and see if it really works on on this algorithm really works on real programs.
+
+459
+00:55:08,780 --> 00:55:13,579
+Right. The idea is very simple. You just think about you start with the bottom of the loop like
+
+460
+00:55:13,579 --> 00:55:17,820
+where the loop ends and start going up. So, essentially start exploring it to the other
+
+461
+00:55:17,820 --> 00:55:21,580
+direction till you reach the head. Keep on collecting all of them in your loop. So,
+
+462
+00:55:21,580 --> 00:55:26,700
+the stack is only used to do this backward DFS and the loop is contains all the statements.
+
+463
+00:55:27,980 --> 00:55:31,500
+So, if you look at the loop it is just doing a DFS. There is nothing very simple. Why are
+
+464
+00:55:31,500 --> 00:55:35,260
+we doing a backward DFS and not a forward DFS? How do you know you have got outside the loop?
+
+465
+00:55:35,260 --> 00:55:41,420
+That is the main problem. That condition is hard to write. That this the head of this
+
+466
+00:55:41,420 --> 00:55:45,660
+node is not in the loop, but you do not know the loop. Right. That is the main problem.
+
+467
+00:55:46,539 --> 00:55:52,219
+Because you have a node and you start expanding during a DFS from that node. Right. So,
+
+468
+00:55:52,219 --> 00:55:56,619
+now the problem is that once you have the successor expanding on the successor,
+
+469
+00:55:56,619 --> 00:56:01,259
+if it goes out of the loop, what condition will you use to stop it? How will you know?
+
+470
+00:56:04,460 --> 00:56:06,779
+No, head until you have. You have the back edge. So, you have both the.
+
+471
+00:56:09,500 --> 00:56:11,500
+But how do you know that node will not reach the tail?
+
+472
+00:56:11,500 --> 00:56:17,019
+The node you are going to that will not eventually reach the tail. How do you know?
+
+473
+00:56:18,860 --> 00:56:23,739
+Right. In the backward DFS, you will not even get that problem because you will only go through
+
+474
+00:56:23,739 --> 00:56:28,139
+the it can only traverse because you started with 6, can only traverse things in the loop.
+
+475
+00:56:29,179 --> 00:56:35,340
+And once you reach the head, you stop. That is it. So, it looks little tricky. But if you
+
+476
+00:56:35,340 --> 00:56:39,579
+like understand it, it is just backward DFS and collecting all the nodes till you hit the head of
+
+477
+00:56:39,579 --> 00:56:46,699
+them for a back edge into D. So, that is it. So, I define the natural loop as the set of all nodes
+
+478
+00:56:46,699 --> 00:56:55,500
+that can reach N without visiting D. So, without visiting the tail of the loop.
+
+479
+00:56:56,619 --> 00:57:01,500
+So, one thing is that it is surely dominated by the head of the loop. Right. Because it is a
+
+480
+00:57:01,500 --> 00:57:06,460
+structured graph like a false statement or while statement. They have to start from the head of the
+
+481
+00:57:06,460 --> 00:57:14,300
+loop. Right. The beginning of the loop. Sorry. Right. And so, right. So, essentially what it
+
+482
+00:57:14,300 --> 00:57:18,300
+says is that we chart the graph. Let us try to again come back to the example. So, essentially
+
+483
+00:57:18,300 --> 00:57:25,500
+node 3 is a so, let us consider the back edge which is 5 to 2. Right. So, what about node 3?
+
+484
+00:57:26,380 --> 00:57:34,699
+So, essentially we want to visit all nodes that I can visit without reaching the tail. Because
+
+485
+00:57:34,699 --> 00:57:43,099
+once you reach the tail, reach the bottom of the loop which is 5, you are done. Right. So, what are
+
+486
+00:57:50,139 --> 00:57:56,059
+the entry point until you reach the tail, the dominating.
+

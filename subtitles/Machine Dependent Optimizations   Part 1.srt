@@ -1,0 +1,6388 @@
+1
+00:00:00,000 --> 00:00:09,839
+Okay, so let's see what we are going to do.
+
+2
+00:00:09,839 --> 00:00:10,839
+My name is Govind Rajan.
+
+3
+00:00:10,839 --> 00:00:14,160
+I am from Indian Institute of Science, Bangalore.
+
+4
+00:00:14,160 --> 00:00:18,760
+My research work is primarily in computer architecture and compilers.
+
+5
+00:00:18,760 --> 00:00:22,719
+And I do things which are pretty much in the backend of the compiler, what we call as the
+
+6
+00:00:22,719 --> 00:00:24,920
+backend of the compiler.
+
+7
+00:00:24,920 --> 00:00:29,920
+And you would have seen a lot of things about the front end of the compiler in the last
+
+8
+00:00:29,920 --> 00:00:32,320
+7, 8 days, correct?
+
+9
+00:00:32,320 --> 00:00:36,320
+So what all have been taught in the front end for you?
+
+10
+00:00:36,320 --> 00:00:40,640
+You have to keep this class interactive, right?
+
+11
+00:00:40,640 --> 00:00:45,000
+That way it will be useful and I get to know more from you and then you can also learn
+
+12
+00:00:45,000 --> 00:00:46,760
+something from me.
+
+13
+00:00:46,760 --> 00:00:51,640
+So you have been taught about the front end of the compiler like the lexical analysis
+
+14
+00:00:51,640 --> 00:00:53,840
+and the semantic analysis and so on.
+
+15
+00:00:53,840 --> 00:00:59,560
+Have you also been taught about data flow analysis, intermediate code representation?
+
+16
+00:00:59,560 --> 00:01:05,719
+Okay, so what we are going to see is probably more towards the backend of the compiler.
+
+17
+00:01:05,719 --> 00:01:07,159
+So let's see what we are going to see.
+
+18
+00:01:07,159 --> 00:01:12,040
+But before we see that backend of the compiler, so let me just tell you what is the overall
+
+19
+00:01:12,040 --> 00:01:18,560
+plan for the next 3 days, right?
+
+20
+00:01:19,320 --> 00:01:23,799
+So before we see many of the things which are relating to code generation and machine
+
+21
+00:01:23,799 --> 00:01:30,260
+dependent optimizations, I would give you a little bit background on machine architecture.
+
+22
+00:01:30,260 --> 00:01:34,079
+Most of you would have done a course on computer organization or computer architecture.
+
+23
+00:01:34,079 --> 00:01:40,120
+I will try to kind of revisit or review some of these concepts which are needed from the
+
+24
+00:01:40,120 --> 00:01:44,599
+purpose of the compiler because after all we are generating code for a specific machine
+
+25
+00:01:44,640 --> 00:01:50,399
+architecture and all the optimization that we are going to be talking about are optimizations
+
+26
+00:01:50,399 --> 00:01:52,599
+which are machine dependent.
+
+27
+00:01:52,599 --> 00:01:56,280
+So therefore we need to have a good idea of what this is.
+
+28
+00:01:56,280 --> 00:02:01,719
+So the first lecture is going to be more on the machine architecture.
+
+29
+00:02:01,719 --> 00:02:04,119
+Subsequently I will talk about code generation, right?
+
+30
+00:02:04,119 --> 00:02:07,399
+How to generate actually the machine code.
+
+31
+00:02:07,399 --> 00:02:10,000
+But we will not really talk about it as generating machine code.
+
+32
+00:02:10,400 --> 00:02:15,520
+We will talk about it as generating assembly instructions for a specific machine.
+
+33
+00:02:15,520 --> 00:02:20,240
+From assembly instructions to machine code, it would be done by the assembler, right?
+
+34
+00:02:20,240 --> 00:02:24,520
+How many of you have heard about an assembler?
+
+35
+00:02:24,520 --> 00:02:27,520
+Have you written a part of the assembler?
+
+36
+00:02:27,520 --> 00:02:28,520
+Have you people?
+
+37
+00:02:28,520 --> 00:02:29,520
+No.
+
+38
+00:02:29,520 --> 00:02:30,520
+No.
+
+39
+00:02:30,520 --> 00:02:31,520
+Okay.
+
+40
+00:02:31,520 --> 00:02:35,840
+That is actually a simpler task, much simpler task compared to writing a compiler, okay?
+
+41
+00:02:35,840 --> 00:02:40,520
+So we will not really see how to write an assembler or how to do that part.
+
+42
+00:02:40,520 --> 00:02:44,840
+But let us assume that that can be done in a easy manner, okay?
+
+43
+00:02:44,840 --> 00:02:50,920
+So what we are going to focus from the second lecture onwards, right, till about today evening
+
+44
+00:02:50,920 --> 00:02:56,280
+or maybe some part of it even tomorrow is all about code generation.
+
+45
+00:02:56,280 --> 00:03:01,280
+Then after that as a part of code generation in fact we will also talk about how to do
+
+46
+00:03:01,919 --> 00:03:07,159
+instruction selection because there are multiple ways in which a given intermediate code can
+
+47
+00:03:07,159 --> 00:03:11,920
+be, a code for an intermediate code can be generated.
+
+48
+00:03:11,920 --> 00:03:16,199
+So we will see what is the best way to do it, how to do instruction selection for that,
+
+49
+00:03:16,199 --> 00:03:21,240
+what instructions are more appropriate than what other instructions and so on.
+
+50
+00:03:21,240 --> 00:03:26,560
+Then we are going to spend again another two or three lectures on what is called register
+
+51
+00:03:26,560 --> 00:03:27,560
+allocation.
+
+52
+00:03:27,560 --> 00:03:32,319
+So this is an important phase in the later part of the compiler where in the machine
+
+53
+00:03:32,319 --> 00:03:35,479
+code some instructions would use registers.
+
+54
+00:03:35,479 --> 00:03:39,719
+If it is a RISC machine then all instructions would use registers.
+
+55
+00:03:39,719 --> 00:03:44,199
+But if it is a RISC machine then they can use registers or memory operands.
+
+56
+00:03:44,199 --> 00:03:50,159
+So we will have to see when they use register operands what registers are assigned to operands,
+
+57
+00:03:50,159 --> 00:03:54,480
+how are they assigned and what is the register allocation policy and so on.
+
+58
+00:03:54,480 --> 00:03:56,920
+So we will spend time on that.
+
+59
+00:03:56,919 --> 00:04:01,639
+Then subsequently we will also talk about instruction scheduling which is essentially
+
+60
+00:04:01,639 --> 00:04:04,519
+reordering of machine instructions.
+
+61
+00:04:04,519 --> 00:04:09,199
+In fact in the compiler this instruction scheduling and register allocation phase are done the
+
+62
+00:04:09,199 --> 00:04:10,199
+other way around.
+
+63
+00:04:10,199 --> 00:04:14,799
+First typically instruction scheduling is done then register allocation is done but
+
+64
+00:04:14,799 --> 00:04:18,079
+for the lectures we will actually see it the other way around.
+
+65
+00:04:18,079 --> 00:04:22,839
+Of course it is possible to do register allocation before instruction scheduling.
+
+66
+00:04:22,839 --> 00:04:25,000
+There are some pros and cons of that.
+
+67
+00:04:25,000 --> 00:04:29,879
+We will also talk about that and we also talk about what is the interaction between register
+
+68
+00:04:29,879 --> 00:04:32,079
+allocation and instruction scheduling.
+
+69
+00:04:32,079 --> 00:04:39,679
+Lastly we will talk about certain machine specific optimizations, right?
+
+70
+00:04:39,679 --> 00:04:45,799
+Something like optimizing for memory hierarchy or optimizing for vector parallelism that
+
+71
+00:04:45,799 --> 00:04:49,459
+is available in your architecture and so on, right?
+
+72
+00:04:49,459 --> 00:04:54,019
+This will be towards the end of this program, maybe towards the last one or one and half
+
+73
+00:04:54,019 --> 00:04:56,139
+lectures on that, okay.
+
+74
+00:04:56,139 --> 00:05:02,019
+So that is really the plan for the next three days, right?
+
+75
+00:05:02,019 --> 00:05:08,019
+And what I want to emphasize here is that please feel free to ask questions, right?
+
+76
+00:05:08,019 --> 00:05:13,620
+The idea is not so much to cover the material, it is more to make sure that you understand
+
+77
+00:05:13,620 --> 00:05:14,620
+some parts of it.
+
+78
+00:05:14,620 --> 00:05:16,459
+That is very important.
+
+79
+00:05:16,459 --> 00:05:21,899
+So if there is any difficulty or trouble please feel free to stop me and then ask questions.
+
+80
+00:05:21,899 --> 00:05:27,539
+I may not be able to answer all the questions but at least we can try to sort it out one
+
+81
+00:05:27,539 --> 00:05:29,620
+way or the other, okay.
+
+82
+00:05:29,620 --> 00:05:31,099
+So that is really the idea.
+
+83
+00:05:31,099 --> 00:05:33,099
+Are you all comfortable?
+
+84
+00:05:33,099 --> 00:05:37,099
+Okay, did you have a good sleep yesterday night?
+
+85
+00:05:37,099 --> 00:05:39,219
+Right, okay, good.
+
+86
+00:05:39,219 --> 00:05:44,740
+So feel free to interact with me and discuss.
+
+87
+00:05:44,740 --> 00:05:47,460
+So this is the overall plan for the three days.
+
+88
+00:05:47,460 --> 00:05:53,019
+What we are going to start off is start off with machine architecture, right?
+
+89
+00:05:53,019 --> 00:05:57,340
+As I mentioned earlier this is the part of the machine that we want to understand so
+
+90
+00:05:57,340 --> 00:05:59,420
+that we can generate code for that.
+
+91
+00:05:59,420 --> 00:06:03,620
+I am sure all of you would have done what I am going to teach in the next 45 minutes
+
+92
+00:06:03,620 --> 00:06:05,500
+to one hour, okay.
+
+93
+00:06:05,500 --> 00:06:11,060
+But I am going to reemphasize or go through that one more time so that the terminology
+
+94
+00:06:11,300 --> 00:06:14,740
+that we are using is kind of well understood, right?
+
+95
+00:06:14,740 --> 00:06:21,019
+And there is no confusion on what we are talking about, okay.
+
+96
+00:06:21,019 --> 00:06:26,139
+So as far as the machine architecture part is concerned I am going to do it in two modules,
+
+97
+00:06:26,139 --> 00:06:27,139
+right?
+
+98
+00:06:27,139 --> 00:06:31,779
+One module I will do it today but this is the overall overview of both the modules.
+
+99
+00:06:31,779 --> 00:06:33,699
+I start off with some simple introduction.
+
+100
+00:06:33,699 --> 00:06:39,420
+Then I will talk about instruction set architecture because for generating code you need to understand
+
+101
+00:06:39,420 --> 00:06:41,500
+what is the instruction set architecture.
+
+102
+00:06:41,500 --> 00:06:43,580
+That is your interface to the architecture.
+
+103
+00:06:43,580 --> 00:06:45,180
+So you need to understand that.
+
+104
+00:06:45,180 --> 00:06:47,420
+So let us talk about that.
+
+105
+00:06:47,420 --> 00:06:52,379
+Then subsequently we will very briefly talk about processor data path and pipelining because
+
+106
+00:06:52,379 --> 00:06:58,740
+I want to introduce the notion of hazards in a pipeline and how compiler can help to
+
+107
+00:06:58,740 --> 00:07:02,340
+overcome or reduce the impact of these hazards.
+
+108
+00:07:02,340 --> 00:07:08,180
+So we will talk about that briefly so that that concept is also understood, okay.
+
+109
+00:07:08,220 --> 00:07:12,300
+And then subsequently I will talk about instruction level parallelism because when you talk about
+
+110
+00:07:12,300 --> 00:07:17,620
+instruction scheduling, instruction scheduling is essentially a technique to expose instruction
+
+111
+00:07:17,620 --> 00:07:20,139
+level parallelism to the architecture.
+
+112
+00:07:20,139 --> 00:07:25,019
+So in order for us to understand that we will very briefly talk about instruction level
+
+113
+00:07:25,019 --> 00:07:28,819
+parallelism processors, right?
+
+114
+00:07:28,819 --> 00:07:34,300
+And I will stop with that for today, okay, as far as the machine architecture module
+
+115
+00:07:34,300 --> 00:07:35,460
+is concerned.
+
+116
+00:07:35,459 --> 00:07:41,139
+The next two topics I will probably take it up on Friday because they relate to optimization
+
+117
+00:07:41,139 --> 00:07:43,539
+that we are going to discuss on Friday.
+
+118
+00:07:43,539 --> 00:07:48,019
+So I will probably put a pause after we finish instruction level parallelism and then do
+
+119
+00:07:48,019 --> 00:07:51,699
+memory hierarchy, right, on Friday.
+
+120
+00:07:51,699 --> 00:07:57,459
+Again we want to understand how the cache architecture, right, works, how locality in
+
+121
+00:07:57,459 --> 00:08:02,939
+cache architecture helps you to improve performance because sometimes you need to generate efficient
+
+122
+00:08:02,939 --> 00:08:07,699
+code, not sometimes you need to generate efficient code from the compiler which understands
+
+123
+00:08:07,699 --> 00:08:10,500
+the cache architecture and generates appropriate code.
+
+124
+00:08:10,500 --> 00:08:12,939
+So what are the optimizations that are possible?
+
+125
+00:08:12,939 --> 00:08:16,699
+We will talk about that and in order for us to talk about that we need to understand the
+
+126
+00:08:16,699 --> 00:08:18,220
+memory hierarchy well.
+
+127
+00:08:18,220 --> 00:08:24,060
+So there is a very quick primer on memory hierarchy that we will do later on Friday
+
+128
+00:08:24,060 --> 00:08:29,180
+and we will also talk very briefly about data parallelism so that we can understand how
+
+129
+00:08:29,180 --> 00:08:33,299
+to generate code for exploiting data parallelism, right.
+
+130
+00:08:33,299 --> 00:08:38,060
+So this is the overall overview of this module on machine architecture.
+
+131
+00:08:38,060 --> 00:08:45,180
+We are going to cover the first five topics today and then put a pause on this, go to
+
+132
+00:08:45,180 --> 00:08:51,220
+code generation, register allocation and then instruction scheduling and then after that
+
+133
+00:08:51,220 --> 00:08:56,180
+we will talk about memory hierarchy and data parallelism and then come back to optimization
+
+134
+00:08:56,179 --> 00:08:59,419
+that the compiler can do for exploiting those things.
+
+135
+00:08:59,419 --> 00:09:02,019
+Is that plan okay with everybody?
+
+136
+00:09:02,019 --> 00:09:04,179
+All of you are fine with that?
+
+137
+00:09:04,179 --> 00:09:10,539
+Okay so the next 45 minutes or so we are going to go into the details of machine architecture.
+
+138
+00:09:10,539 --> 00:09:13,579
+Bear with me if you all understand this well.
+
+139
+00:09:13,579 --> 00:09:15,139
+I am sure that you all do that.
+
+140
+00:09:15,139 --> 00:09:21,219
+You are all, you must have all completed six semesters of your courses, right.
+
+141
+00:09:21,219 --> 00:09:22,939
+Everybody has completed six semesters.
+
+142
+00:09:22,940 --> 00:09:25,700
+Everybody has completed the BTEC?
+
+143
+00:09:25,700 --> 00:09:28,020
+No, right.
+
+144
+00:09:28,020 --> 00:09:35,100
+Everybody is in the third year, right.
+
+145
+00:09:35,100 --> 00:09:36,900
+Some people from Nvidia also, okay.
+
+146
+00:09:36,900 --> 00:09:37,900
+All right.
+
+147
+00:09:37,900 --> 00:09:39,220
+So how many of you are from Nvidia?
+
+148
+00:09:39,220 --> 00:09:42,220
+Be careful when I talk about Nvidia process.
+
+149
+00:09:42,220 --> 00:09:43,220
+Okay.
+
+150
+00:09:43,220 --> 00:09:44,220
+I am just kidding.
+
+151
+00:09:44,220 --> 00:09:45,220
+I am just kidding.
+
+152
+00:09:45,220 --> 00:09:46,220
+Okay.
+
+153
+00:09:46,220 --> 00:09:47,220
+So three of you are from Nvidia.
+
+154
+00:09:47,220 --> 00:09:50,220
+How many of you have completed your BTEC?
+
+155
+00:09:50,220 --> 00:09:51,220
+Oh, do not worry.
+
+156
+00:09:51,220 --> 00:09:54,899
+I mean, of course, you can go on to this module.
+
+157
+00:09:54,899 --> 00:09:55,899
+Okay.
+
+158
+00:09:55,899 --> 00:09:56,899
+So let us see.
+
+159
+00:09:56,899 --> 00:09:57,899
+Okay.
+
+160
+00:09:57,899 --> 00:09:59,899
+How many of you understand this diagram?
+
+161
+00:09:59,899 --> 00:10:02,500
+I am sure that all of you should, right.
+
+162
+00:10:02,500 --> 00:10:04,779
+You have no doubt on that, right.
+
+163
+00:10:04,779 --> 00:10:10,660
+But again, we will just quickly go through the various aspects of basic computer system.
+
+164
+00:10:10,660 --> 00:10:18,340
+What you see on the left-hand side here is what we call as the central processing unit,
+
+165
+00:10:18,340 --> 00:10:19,620
+right.
+
+166
+00:10:19,620 --> 00:10:25,539
+And the central processing unit has an arithmetic and logic unit which is responsible for doing
+
+167
+00:10:25,539 --> 00:10:29,340
+all the computation, right, arithmetic and logic operations.
+
+168
+00:10:29,340 --> 00:10:36,220
+The control unit is responsible for controlling all the parts of the central processing unit.
+
+169
+00:10:36,220 --> 00:10:38,500
+You also have something called registers.
+
+170
+00:10:38,500 --> 00:10:44,220
+Registers are temporary storage locations within the processor, right.
+
+171
+00:10:45,220 --> 00:10:49,660
+And of course, you have memory and the processor accesses the memory through this bus.
+
+172
+00:10:49,660 --> 00:10:54,860
+There are also input-output devices which we do not really worry about in this lecture
+
+173
+00:10:54,860 --> 00:10:55,860
+on compilers.
+
+174
+00:10:55,860 --> 00:11:01,180
+What else is there on the CPU which I have not listed here?
+
+175
+00:11:01,180 --> 00:11:02,180
+Yeah.
+
+176
+00:11:02,180 --> 00:11:07,180
+Feel free to talk loudly, right.
+
+177
+00:11:07,180 --> 00:11:09,779
+There is nothing right, nothing wrong about.
+
+178
+00:11:09,779 --> 00:11:10,779
+Sorry?
+
+179
+00:11:10,779 --> 00:11:11,779
+Power unit.
+
+180
+00:11:12,740 --> 00:11:13,740
+Power unit, okay.
+
+181
+00:11:13,740 --> 00:11:14,740
+Power is somewhere outside.
+
+182
+00:11:14,740 --> 00:11:19,100
+It is not as a part of the CPU, right.
+
+183
+00:11:19,100 --> 00:11:20,100
+Power comes into the CPU.
+
+184
+00:11:20,100 --> 00:11:21,100
+What is the CPU?
+
+185
+00:11:21,100 --> 00:11:24,100
+You are talking about the whole CPU.
+
+186
+00:11:24,100 --> 00:11:28,379
+Oh, no, within the CPU, within the CPU, central processing unit.
+
+187
+00:11:28,379 --> 00:11:31,459
+So the central processing unit is the processor, right.
+
+188
+00:11:31,459 --> 00:11:34,980
+So this is the x86 processor or whatever processor that you have.
+
+189
+00:11:34,980 --> 00:11:40,980
+That is the one that you are talking about, right.
+
+190
+00:11:41,980 --> 00:11:42,980
+What about caches?
+
+191
+00:11:42,980 --> 00:11:45,980
+Where are they?
+
+192
+00:11:45,980 --> 00:11:46,980
+Right.
+
+193
+00:11:46,980 --> 00:11:50,980
+They also have to be inside that, okay.
+
+194
+00:11:50,980 --> 00:11:53,980
+Yeah, sorry, one too many, okay.
+
+195
+00:11:53,980 --> 00:11:55,980
+So you see the caches there.
+
+196
+00:11:55,980 --> 00:11:59,980
+And what is this MMU which is the memory management unit?
+
+197
+00:11:59,980 --> 00:12:02,980
+What is the memory management unit used for?
+
+198
+00:12:02,980 --> 00:12:07,980
+Logical address to physical address, address translation purposes, right.
+
+199
+00:12:07,980 --> 00:12:11,980
+Again from a compiler perspective, this may not be very relevant, okay.
+
+200
+00:12:11,980 --> 00:12:18,980
+But these three components are very relevant, the arithmetic and logic unit, the registers
+
+201
+00:12:18,980 --> 00:12:20,980
+and the cache, okay.
+
+202
+00:12:20,980 --> 00:12:25,980
+Again, cache, we are going to see it as a part of the memory hierarchy because you typically
+
+203
+00:12:25,980 --> 00:12:30,980
+have an L1, L2 or L1, L2, L3 caches before you could go to the memory.
+
+204
+00:12:30,980 --> 00:12:36,980
+So the code that you generate should essentially make use of these L1, L2, L3 caches in a very
+
+205
+00:12:36,980 --> 00:12:39,980
+effective way, right.
+
+206
+00:12:39,980 --> 00:12:41,980
+And of course you see these registers.
+
+207
+00:12:41,980 --> 00:12:45,980
+Where are we going to talk about that in the compiler course?
+
+208
+00:12:45,980 --> 00:12:48,980
+Register allocation, right.
+
+209
+00:12:48,980 --> 00:12:52,980
+Okay, so many of you have done the computer organization course.
+
+210
+00:12:52,980 --> 00:12:58,980
+So you at least have a rough idea of how the caches work, correct.
+
+211
+00:12:58,980 --> 00:13:01,980
+Who manages the caches?
+
+212
+00:13:01,980 --> 00:13:08,980
+You as the programmer or compiler, operating system.
+
+213
+00:13:08,980 --> 00:13:13,980
+Somebody said hardware, yeah, right.
+
+214
+00:13:13,980 --> 00:13:16,980
+How many of you think it is operating system?
+
+215
+00:13:16,980 --> 00:13:19,980
+Okay, no, right.
+
+216
+00:13:19,980 --> 00:13:24,980
+The caches are not managed by the operating system in the sense that operating system
+
+217
+00:13:24,980 --> 00:13:29,980
+is not the one which intervenes and puts the data in the cache, right.
+
+218
+00:13:29,980 --> 00:13:35,980
+It is the hardware that given an address, it automatically fetches the data and puts
+
+219
+00:13:35,980 --> 00:13:38,980
+it into the cache, okay.
+
+220
+00:13:38,980 --> 00:13:42,980
+Again we will talk a little bit more about this when we talk about the memory hierarchy,
+
+221
+00:13:42,980 --> 00:13:43,980
+right.
+
+222
+00:13:43,980 --> 00:13:48,980
+The reason I ask this question and I am trying to go over this is essentially to make sure
+
+223
+00:13:48,980 --> 00:13:51,980
+that there is no misunderstanding of some of these things.
+
+224
+00:13:51,980 --> 00:13:52,980
+So do not feel bad, okay.
+
+225
+00:13:52,980 --> 00:13:57,980
+Those wrong answers in fact clear out the doubts of some of the other people also.
+
+226
+00:13:57,980 --> 00:13:59,980
+So nothing wrong about it, okay.
+
+227
+00:13:59,980 --> 00:14:02,980
+It is better that we clear our understanding, okay.
+
+228
+00:14:02,980 --> 00:14:10,980
+So this cache, essentially the data movement from memory to cache is controlled by the
+
+229
+00:14:10,980 --> 00:14:11,980
+hardware.
+
+230
+00:14:11,980 --> 00:14:12,980
+Yes sir.
+
+231
+00:14:12,980 --> 00:14:17,980
+Sir, how does some part of the area of cache and therefore the memory can be created for
+
+232
+00:14:17,980 --> 00:14:19,980
+the cache?
+
+233
+00:14:19,980 --> 00:14:21,980
+Sure, sure.
+
+234
+00:14:21,980 --> 00:14:25,980
+Sometimes when certain things are being flashed, it instructs the hardware to clear some parts
+
+235
+00:14:25,980 --> 00:14:26,980
+of the cache.
+
+236
+00:14:26,980 --> 00:14:33,980
+All I am talking about is that who manages the data transfer between the memory to the
+
+237
+00:14:33,980 --> 00:14:36,980
+cache, right, when a program is executing.
+
+238
+00:14:36,980 --> 00:14:40,980
+It is primarily the hardware, okay.
+
+239
+00:14:40,980 --> 00:14:46,980
+What about the data transfer from memory or cache to the registers?
+
+240
+00:14:46,980 --> 00:14:48,980
+Who manages it?
+
+241
+00:14:48,980 --> 00:14:51,980
+Is it explicit in your program?
+
+242
+00:14:51,980 --> 00:14:53,980
+Is it implicit in your program?
+
+243
+00:14:53,980 --> 00:14:59,980
+See for example, transfer from memory to cache is implicit in your program.
+
+244
+00:14:59,980 --> 00:15:04,980
+You as a programmer do not necessarily say this stays in the cache or this does not stay
+
+245
+00:15:04,980 --> 00:15:07,980
+in the cache to a large extent, correct.
+
+246
+00:15:07,980 --> 00:15:11,980
+You do not necessarily say move this data from the memory to the cache.
+
+247
+00:15:11,980 --> 00:15:13,980
+You do not do that, right.
+
+248
+00:15:13,980 --> 00:15:16,980
+Whereas what happens with regard to the registers?
+
+249
+00:15:16,980 --> 00:15:18,980
+It has to be explicit.
+
+250
+00:15:18,980 --> 00:15:20,980
+It has to be a part of your program.
+
+251
+00:15:20,980 --> 00:15:26,980
+Well, it is not a part of your high level program, but it is a part of your lower level
+
+252
+00:15:26,980 --> 00:15:29,980
+assembly level program or machine code, correct.
+
+253
+00:15:29,980 --> 00:15:36,980
+That means that the compiler is the one which is responsible for doing this data transfer.
+
+254
+00:15:36,980 --> 00:15:40,980
+So this part is going to be orchestrated by the compiler.
+
+255
+00:15:40,980 --> 00:15:47,980
+Movement of data from the memory or caches to the register is being orchestrated by the
+
+256
+00:15:47,980 --> 00:15:49,980
+compiler, okay.
+
+257
+00:15:49,980 --> 00:15:50,980
+All right.
+
+258
+00:15:50,980 --> 00:15:55,980
+So again when you talk about registers, there are two types of registers.
+
+259
+00:15:55,980 --> 00:16:00,980
+Integer registers for storing integer values, floating point registers for storing floating
+
+260
+00:16:00,980 --> 00:16:01,980
+point values.
+
+261
+00:16:01,980 --> 00:16:06,980
+In addition to that, there are also some special purpose registers, right.
+
+262
+00:16:06,980 --> 00:16:13,980
+And you as a programmer or a program may not have, may not use these things as general
+
+263
+00:16:13,980 --> 00:16:14,980
+purpose registers.
+
+264
+00:16:14,980 --> 00:16:17,980
+That is why these are called special purpose registers.
+
+265
+00:16:17,980 --> 00:16:22,980
+An example of this is the program counter, right.
+
+266
+00:16:22,980 --> 00:16:28,980
+Program counter is the one which points to the next instruction that has to be executed,
+
+267
+00:16:28,980 --> 00:16:29,980
+right.
+
+268
+00:16:29,980 --> 00:16:34,980
+And similarly instruction register is the one which holds the instruction which is being
+
+269
+00:16:34,980 --> 00:16:35,980
+executed.
+
+270
+00:16:35,980 --> 00:16:41,980
+There could also be other registers like stack point, frame point and so on and so forth.
+
+271
+00:16:41,980 --> 00:16:46,980
+Or those registers again depending on the architecture could take one of those general
+
+272
+00:16:46,980 --> 00:16:51,980
+purpose registers and specifically use it for that particular purpose, okay.
+
+273
+00:16:51,980 --> 00:16:57,980
+So essentially we have a set of registers, some of which may have a specific usage, some
+
+274
+00:16:57,980 --> 00:16:59,980
+of which is general purpose.
+
+275
+00:16:59,980 --> 00:17:04,980
+When you say it is general purpose, what it means is that you can load any temporary value
+
+276
+00:17:04,980 --> 00:17:07,980
+to one of those registers and you can access it from.
+
+277
+00:17:07,980 --> 00:17:09,980
+That is really what it is, right.
+
+278
+00:17:09,980 --> 00:17:12,980
+How is this loading going to be done?
+
+279
+00:17:12,980 --> 00:17:17,980
+Compiler will generate a code which will make sure that the data is being loaded into the
+
+280
+00:17:17,980 --> 00:17:19,980
+registers and is being accessed, okay.
+
+281
+00:17:19,980 --> 00:17:20,980
+All right.
+
+282
+00:17:20,980 --> 00:17:24,980
+So why do we talk about registers, caches and memory?
+
+283
+00:17:24,980 --> 00:17:27,980
+These are all storage places.
+
+284
+00:17:27,980 --> 00:17:30,980
+What is the difference between them?
+
+285
+00:17:30,980 --> 00:17:34,980
+Access, access time, correct, right.
+
+286
+00:17:34,980 --> 00:17:37,980
+So registers are very very fast, right.
+
+287
+00:17:37,980 --> 00:17:40,980
+They are sub cycle access time, right.
+
+288
+00:17:40,980 --> 00:17:44,980
+So the cache again depending on the level it could be from one cycle to ten cycles to
+
+289
+00:17:44,980 --> 00:17:47,980
+twenty cycles, processor cycles.
+
+290
+00:17:47,980 --> 00:17:50,980
+Memory could be hundreds of cycles, right.
+
+291
+00:17:50,980 --> 00:17:52,980
+So that is a memory hierarchy.
+
+292
+00:17:52,980 --> 00:17:57,980
+Again we will talk more about this when we talk about the memory hierarchy, okay.
+
+293
+00:17:57,980 --> 00:18:03,980
+So is this understanding of basic computer systems good enough for us?
+
+294
+00:18:03,980 --> 00:18:04,980
+Yeah.
+
+295
+00:18:04,980 --> 00:18:07,980
+What is the function of instruction register?
+
+296
+00:18:07,980 --> 00:18:11,980
+Instruction register I will explain to you in the next slide is the one which is going
+
+297
+00:18:11,980 --> 00:18:17,980
+to hold the instruction which is currently being executed, okay.
+
+298
+00:18:17,980 --> 00:18:22,980
+And you need to hold that instruction because you need to understand the different fields
+
+299
+00:18:22,980 --> 00:18:26,980
+of the instruction and accordingly perform the different operations or the processor
+
+300
+00:18:26,980 --> 00:18:29,980
+has to perform the different operations, right.
+
+301
+00:18:29,980 --> 00:18:34,980
+So it holds the current instruction, all right.
+
+302
+00:18:34,980 --> 00:18:35,980
+Okay.
+
+303
+00:18:35,980 --> 00:18:40,980
+So let us very briefly talk about main memory and there are certain concepts of main memory
+
+304
+00:18:40,980 --> 00:18:47,980
+that we want to understand so that when we talk about either the instruction set architecture
+
+305
+00:18:47,980 --> 00:18:53,980
+or generating code this understanding is very important or useful.
+
+306
+00:18:53,980 --> 00:18:57,980
+Main memory is the one which holds instruction and data, correct.
+
+307
+00:18:58,980 --> 00:19:06,980
+always access the main memory to access your instruction or data and this main memory is
+
+308
+00:19:06,980 --> 00:19:11,980
+actually is organized as a sequence of locations.
+
+309
+00:19:11,980 --> 00:19:15,980
+Each location is capable of storing some amount of information.
+
+310
+00:19:15,980 --> 00:19:24,980
+Typically each location is capable of storing one byte of information that is 8 bits, right.
+
+311
+00:19:24,980 --> 00:19:30,980
+And the memory itself can be accessed or referenced by an address which is what we
+
+312
+00:19:30,980 --> 00:19:33,980
+call as the memory address, right.
+
+313
+00:19:33,980 --> 00:19:37,980
+So when you talk about a physical address somebody talked about conversion from logical
+
+314
+00:19:37,980 --> 00:19:42,980
+address to physical address that address that you are talking about refers to a specific
+
+315
+00:19:42,980 --> 00:19:50,980
+location in memory and that location may contain one byte of information, right.
+
+316
+00:19:50,980 --> 00:19:57,980
+If each location contains one byte of information then we call this memory as byte addressable,
+
+317
+00:19:57,980 --> 00:19:58,980
+okay.
+
+318
+00:19:58,980 --> 00:20:03,980
+And this is the minimum amount of memory that you can access or modify, right.
+
+319
+00:20:03,980 --> 00:20:09,980
+So if a location consists of 8 bits, right, then you can take out all the 8 bits, put
+
+320
+00:20:09,980 --> 00:20:11,980
+back all the 8 bits.
+
+321
+00:20:11,980 --> 00:20:14,980
+You cannot just say, okay, I want to toggle one bit.
+
+322
+00:20:14,980 --> 00:20:18,980
+Well if you want to toggle one bit you take out the entire thing, toggle that one bit
+
+323
+00:20:18,980 --> 00:20:20,980
+and write back that entire 8 bits.
+
+324
+00:20:20,980 --> 00:20:23,980
+That is really how you have to do it, okay.
+
+325
+00:20:23,980 --> 00:20:26,980
+That is the minimum amount, that is the minimum value, right.
+
+326
+00:20:26,980 --> 00:20:30,980
+It is like what is the smallest change that you can get.
+
+327
+00:20:30,980 --> 00:20:35,980
+Today the smallest change you can get is probably what, 1 rupee, 2 rupees, right.
+
+328
+00:20:35,980 --> 00:20:38,980
+So that is the minimum denomination that you are talking about.
+
+329
+00:20:38,980 --> 00:20:45,980
+So you can think of byte as the minimum denomination, right, smallest amount of value that you can
+
+330
+00:20:45,980 --> 00:20:47,980
+fetch or write back, okay.
+
+331
+00:20:47,980 --> 00:20:54,980
+If your very location consists of only 1 byte, how do I talk about integers which are probably
+
+332
+00:20:54,980 --> 00:21:00,980
+4 bytes long or floating point numbers, right, single precision is 4 byte, double precision
+
+333
+00:21:00,980 --> 00:21:04,980
+is 8 byte and so on, right.
+
+334
+00:21:04,980 --> 00:21:11,980
+So that you can essentially talk about it as a sequence of location, right.
+
+335
+00:21:11,980 --> 00:21:18,980
+You can say a sequence of 4 locations is 1 word, right and that 1 word could be an integer.
+
+336
+00:21:18,980 --> 00:21:26,980
+A sequence of 8 locations is 2 words, right and that 2 words could be a float, sorry,
+
+337
+00:21:26,980 --> 00:21:33,980
+double precision floating point number, right or you can talk about a sequence of 2 locations,
+
+338
+00:21:33,980 --> 00:21:34,980
+2 bytes.
+
+339
+00:21:34,980 --> 00:21:35,980
+What is that?
+
+340
+00:21:35,980 --> 00:21:40,980
+You have come across that in C, short integer, short, right.
+
+341
+00:21:40,980 --> 00:21:46,980
+You have seen short, right and 1 byte is character, okay.
+
+342
+00:21:46,980 --> 00:21:48,980
+So, everything falls in place, right.
+
+343
+00:21:48,980 --> 00:21:51,980
+So, think about it that way, right.
+
+344
+00:21:51,980 --> 00:21:55,980
+So, the memory is organized as a byte addressable memory.
+
+345
+00:21:55,980 --> 00:22:01,980
+Each location of the memory has an address by which it is referenced to, correct and
+
+346
+00:22:01,980 --> 00:22:08,980
+every location has 8 bits, alright and a sequence of 2, 4 or 8 essentially is a byte addressable
+
+347
+00:22:08,980 --> 00:22:16,980
+memory or 8 essentially forms a short word, I mean 4 bytes is word and 8 bytes is double
+
+348
+00:22:16,980 --> 00:22:17,980
+word, okay.
+
+349
+00:22:17,980 --> 00:22:19,980
+That is really what it is.
+
+350
+00:22:19,980 --> 00:22:24,980
+Okay, let us see an example of this in the next slide, okay.
+
+351
+00:22:24,980 --> 00:22:28,980
+So, you can now think of this memory as this, okay.
+
+352
+00:22:28,980 --> 00:22:32,980
+Each location consists of 1 byte of information.
+
+353
+00:22:32,980 --> 00:22:35,980
+You can see 2 hexadecimal digits there, right.
+
+354
+00:22:35,980 --> 00:22:37,980
+That is 8 bits, okay.
+
+355
+00:22:37,980 --> 00:22:43,980
+And here I have taken some address starting from 400 onwards, right.
+
+356
+00:22:43,980 --> 00:22:47,980
+What is stored in the memory is only the data.
+
+357
+00:22:47,980 --> 00:22:50,980
+Address is never stored there, correct.
+
+358
+00:22:50,980 --> 00:22:52,980
+That is something that we have to be very clear about.
+
+359
+00:22:52,980 --> 00:22:54,980
+Address is not stored anywhere.
+
+360
+00:22:54,980 --> 00:22:59,980
+You use the address, you decode the address to go to that location, correct.
+
+361
+00:23:00,980 --> 00:23:05,980
+So, when I say 400, the byte in 400 is 1A.
+
+362
+00:23:05,980 --> 00:23:11,980
+The byte which is stored in 400, location 400 is 1A, right.
+
+363
+00:23:11,980 --> 00:23:21,980
+Okay, now if I want to access an integer at location 400, as I mentioned earlier it should
+
+364
+00:23:21,980 --> 00:23:26,980
+be a sequence of consecutive locations and by convention we will say consecutive means
+
+365
+00:23:26,980 --> 00:23:29,980
+increasing address, correct.
+
+366
+00:23:29,980 --> 00:23:34,980
+400, 401, 402 and 402, right.
+
+367
+00:23:34,980 --> 00:23:41,980
+That means we are talking about an integer which is this, correct.
+
+368
+00:23:41,980 --> 00:23:48,980
+Now, again we have to have one more convention to say of these 4 bytes, which one is the
+
+369
+00:23:48,980 --> 00:23:54,980
+most significant byte and which one is the least significant byte, right.
+
+370
+00:23:54,980 --> 00:23:58,980
+We are all used to reading from left to right.
+
+371
+00:23:58,980 --> 00:24:03,980
+So, we will say that I like this to be my most significant byte, okay.
+
+372
+00:24:03,980 --> 00:24:06,980
+But computers do not care, right.
+
+373
+00:24:06,980 --> 00:24:08,980
+They are both left handed and right handed.
+
+374
+00:24:08,980 --> 00:24:13,980
+I mean they can be both left handed and right handed if you want it to be, okay.
+
+375
+00:24:13,980 --> 00:24:21,980
+So, if you say it is a big ndn byte ordering convention, right, the end is at the higher
+
+376
+00:24:21,980 --> 00:24:22,980
+address, okay.
+
+377
+00:24:22,980 --> 00:24:31,980
+So, 1a is the most significant byte, okay, c8, b2 and then 46 is the least significant
+
+378
+00:24:31,980 --> 00:24:32,980
+byte, okay.
+
+379
+00:24:32,980 --> 00:24:37,980
+This is what we call as the big ndn convention.
+
+380
+00:24:37,980 --> 00:24:42,980
+The little ndn convention is the other way around, okay.
+
+381
+00:24:42,980 --> 00:24:50,980
+46 is the most significant byte and of course, b2, c8 and then 1a is the least significant
+
+382
+00:24:50,980 --> 00:24:52,980
+byte, okay.
+
+383
+00:24:52,980 --> 00:24:58,980
+So, each computer is going to follow one or the other, right.
+
+384
+00:24:58,980 --> 00:25:02,980
+Do you know which one your computer follows, big ndn?
+
+385
+00:25:02,980 --> 00:25:03,980
+Can you find that out?
+
+386
+00:25:03,980 --> 00:25:06,980
+Can you write a program, C program to find that out?
+
+387
+00:25:06,980 --> 00:25:07,980
+Just think of it.
+
+388
+00:25:07,980 --> 00:25:08,980
+Can I write a C program?
+
+389
+00:25:08,980 --> 00:25:09,980
+Do not write it, okay.
+
+390
+00:25:09,980 --> 00:25:14,980
+No, no, do not, not that fast, okay.
+
+391
+00:25:14,980 --> 00:25:18,980
+Is it possible to write it?
+
+392
+00:25:18,980 --> 00:25:21,980
+What is the idea?
+
+393
+00:25:21,980 --> 00:25:29,980
+Read the mass each one as a character and then do that.
+
+394
+00:25:29,980 --> 00:25:30,980
+C allows you to do that.
+
+395
+00:25:30,980 --> 00:25:36,980
+So, it should be possible to figure out whether your computer follows big ndn or little ndn.
+
+396
+00:25:36,980 --> 00:25:45,980
+Very simple, right, okay, fine.
+
+397
+00:25:45,980 --> 00:25:52,980
+You will not really see it.
+
+398
+00:25:52,980 --> 00:25:59,980
+The processor is going to give you in a way that it is from the, if it gives you as 1a,
+
+399
+00:25:59,980 --> 00:26:08,980
+correct, then 0001, the first 0 as the most significant bit in that particular byte, okay,
+
+400
+00:26:08,980 --> 00:26:13,980
+and then a which is 1010, the last 0 as the least significant bit.
+
+401
+00:26:13,980 --> 00:26:16,980
+How exactly it is stored in the memory you are not really going to see.
+
+402
+00:26:16,980 --> 00:26:17,980
+So, it does not really matter.
+
+403
+00:26:17,980 --> 00:26:23,980
+We will not talk about it, right, okay.
+
+404
+00:26:23,980 --> 00:26:24,980
+Convincing?
+
+405
+00:26:24,980 --> 00:26:25,980
+Okay.
+
+406
+00:26:25,980 --> 00:26:31,980
+We need to also see a little bit more details about words alignment and so on.
+
+407
+00:26:31,980 --> 00:26:34,980
+Let us talk about that, okay.
+
+408
+00:26:34,980 --> 00:26:42,980
+So, typically we access an integer or a float and things like that which are 4 bytes long,
+
+409
+00:26:42,980 --> 00:26:43,980
+right.
+
+410
+00:26:43,980 --> 00:26:47,980
+In the computer what we are going to say is that anything which is like 4 bytes long we
+
+411
+00:26:47,980 --> 00:26:52,980
+are going to call that as a word, right.
+
+412
+00:26:52,980 --> 00:27:02,980
+And, okay, did I talk about, let me just go back a couple of slides here, then see whether
+
+413
+00:27:02,980 --> 00:27:11,980
+I did talk about, yeah, okay, I did not talk about it, okay.
+
+414
+00:27:11,980 --> 00:27:21,980
+So, we talked about what is the minimum amount of data that you can access from the memory
+
+415
+00:27:21,980 --> 00:27:24,980
+which is what we call as byte addressable, okay.
+
+416
+00:27:24,980 --> 00:27:30,380
+Then, in a single fetch how much of data can you access?
+
+417
+00:27:30,380 --> 00:27:33,980
+That is what is called the word length, right.
+
+418
+00:27:33,980 --> 00:27:40,940
+So, even though each location may consist of only 1 byte, a computer in a single fetch
+
+419
+00:27:40,940 --> 00:27:44,900
+can possibly get up to 4 bytes together.
+
+420
+00:27:44,900 --> 00:27:49,940
+That is what is typically called the word length, right, the maximum amount of data
+
+421
+00:27:49,940 --> 00:27:54,700
+which can be fetched in a single location, right.
+
+422
+00:27:54,700 --> 00:28:00,340
+And then because of the way in which the memory is organized, right, and the accesses happen,
+
+423
+00:28:00,340 --> 00:28:06,700
+etcetera, etcetera, right, typically these 4 bytes that you try to access, right, will
+
+424
+00:28:07,700 --> 00:28:17,100
+as 4 consecutive bytes only if it is starting from an address which is divisible by 4, right.
+
+425
+00:28:17,100 --> 00:28:24,100
+By that what I mean is if you say fetch me 4 bytes starting from 400, right, it will
+
+426
+00:28:24,100 --> 00:28:28,340
+fetch these 4 bytes, okay.
+
+427
+00:28:28,340 --> 00:28:34,420
+But if you say fetch me 4 bytes starting from 402 which is an address which is not divisible
+
+428
+00:28:34,420 --> 00:28:41,420
+by 4, right, depending on how the processor is, most of the process today can actually
+
+429
+00:28:41,900 --> 00:28:47,660
+access this 4 bytes of information starting from 402.
+
+430
+00:28:47,660 --> 00:28:52,860
+But what it is going to do is that whenever it makes an access, the 4 bytes that come
+
+431
+00:28:52,860 --> 00:28:59,860
+together will always be these 4 bytes or those 4 bytes, okay, never these 4 bytes, can you
+
+432
+00:29:04,420 --> 00:29:05,420
+understand, correct.
+
+433
+00:29:05,420 --> 00:29:11,700
+That means that if you want to access 4 bytes of information from 402, the processor says
+
+434
+00:29:11,700 --> 00:29:18,420
+okay I want to access 4 bytes of information, but I will split this as 2 accesses, right,
+
+435
+00:29:18,420 --> 00:29:25,180
+one access with these 4 bytes and another access with those 4 bytes and then I rearrange
+
+436
+00:29:25,180 --> 00:29:28,700
+them to give you the 4 bytes that you want, okay.
+
+437
+00:29:29,340 --> 00:29:35,740
+So that is the importance of word alignment, right.
+
+438
+00:29:35,740 --> 00:29:40,740
+So that is captured in the next slide, let us talk about that, okay.
+
+439
+00:29:40,740 --> 00:29:47,740
+A variable, an integer variable which is 4 bytes long is said to be aligned, word aligned
+
+440
+00:29:48,840 --> 00:29:55,460
+if it starts from an address which is divisible by 4 because if it is divisible by 4 that
+
+441
+00:29:55,460 --> 00:29:58,500
+word can be accessed in a single fetch.
+
+442
+00:29:58,500 --> 00:30:03,819
+If it is not divisible by 4, it will still fetch it and give it to you, but it might
+
+443
+00:30:03,819 --> 00:30:06,180
+take multiple accesses.
+
+444
+00:30:06,180 --> 00:30:08,019
+What is the problem with multiple accesses?
+
+445
+00:30:08,019 --> 00:30:13,860
+More time, right, it is going to take more time to get that data.
+
+446
+00:30:13,860 --> 00:30:17,460
+Therefore, you want your data to be word aligned, okay.
+
+447
+00:30:17,460 --> 00:30:20,940
+Is there anything that the compiler needs to worry about word alignment?
+
+448
+00:30:21,900 --> 00:30:25,820
+Immediately that is what the question is, this entire lecture is on compilers.
+
+449
+00:30:25,820 --> 00:30:30,380
+So anything and everything that we talk about should be somewhat related to compiler.
+
+450
+00:30:30,380 --> 00:30:34,420
+Otherwise you can say that I am wasting my time doing something else.
+
+451
+00:30:34,420 --> 00:30:35,420
+Sorry?
+
+452
+00:30:35,420 --> 00:30:39,420
+It will require more registers.
+
+453
+00:30:39,420 --> 00:30:42,700
+No, we will come to that register part little later.
+
+454
+00:30:42,700 --> 00:30:45,299
+This is from an allocation point of view.
+
+455
+00:30:45,299 --> 00:30:50,860
+So whenever you allocate a word, right, the compiler has to make sure that this allocation
+
+456
+00:30:50,859 --> 00:30:57,779
+is in an address which starts from an address which is divisible by 4, okay.
+
+457
+00:30:57,779 --> 00:31:02,779
+We talked about allocation of variables, right.
+
+458
+00:31:02,779 --> 00:31:06,139
+So all of you are familiar with C program, correct.
+
+459
+00:31:06,139 --> 00:31:09,740
+So where are your local variables stored?
+
+460
+00:31:09,740 --> 00:31:15,859
+Stack, right, local variables.
+
+461
+00:31:15,859 --> 00:31:18,979
+What about your global variables?
+
+462
+00:31:18,980 --> 00:31:24,259
+Data, somebody said data, who said data?
+
+463
+00:31:24,259 --> 00:31:31,460
+Yeah, I said data segment, right, data segment, okay.
+
+464
+00:31:31,460 --> 00:31:35,620
+Heap, what is stored in the heap?
+
+465
+00:31:35,620 --> 00:31:39,140
+Dynamically allocated variables, okay, right.
+
+466
+00:31:39,140 --> 00:31:48,019
+So let us particularly look at the data segment and the stack, okay, and these two are largely
+
+467
+00:31:48,019 --> 00:31:50,299
+controlled by the compiler, right.
+
+468
+00:31:50,299 --> 00:31:56,660
+So when you declare, let us say, an array of integers, let us say, right, in an integer
+
+469
+00:31:56,660 --> 00:32:01,619
+array a 100, right, that means that there are 100 elements in the array, each element
+
+470
+00:32:01,619 --> 00:32:04,619
+is 4 byte long, correct.
+
+471
+00:32:04,619 --> 00:32:10,900
+If it starts this array in an address which is not divisible by 4, then every one of that
+
+472
+00:32:11,900 --> 00:32:18,500
+right, is going to be, when it is accessed, is going to incur additional cost.
+
+473
+00:32:18,500 --> 00:32:23,660
+So the compiler would be clever enough to start this array, right, from a location which
+
+474
+00:32:23,660 --> 00:32:28,380
+is an address which is divisible by 4, right.
+
+475
+00:32:28,380 --> 00:32:33,180
+But if I do everything divisible by 4, there should not be a problem at all, right.
+
+476
+00:32:33,180 --> 00:32:39,740
+But in between I could have a variable which is short or character, right, and that could
+
+477
+00:32:39,740 --> 00:32:44,279
+throw off what comes later, right.
+
+478
+00:32:44,279 --> 00:32:48,460
+So whenever it says, okay, I am going to declare a large array or I am going to declare a set
+
+479
+00:32:48,460 --> 00:32:54,059
+of integers, the compiler should necessarily make sure that they start from an address
+
+480
+00:32:54,059 --> 00:32:55,059
+which is aligned.
+
+481
+00:32:55,059 --> 00:32:59,539
+So it will actually do certain things so that it gets aligned, right.
+
+482
+00:32:59,539 --> 00:33:02,500
+So that is the importance of that, okay.
+
+483
+00:33:02,500 --> 00:33:07,620
+When you do dynamic allocation, you ask for certain amount of memory location and then
+
+484
+00:33:07,659 --> 00:33:12,579
+again depending on what it is, the compiler would say that, okay, ask this as 4 consecutive
+
+485
+00:33:12,579 --> 00:33:15,579
+bytes or whatever, okay.
+
+486
+00:33:15,579 --> 00:33:16,899
+All right.
+
+487
+00:33:16,899 --> 00:33:21,979
+So we talked about the word size which is the maximum amount of data, yes.
+
+488
+00:33:21,979 --> 00:33:28,979
+Sir, you mentioned that it would always try to find out addresses which are starting from
+
+489
+00:33:28,979 --> 00:33:29,979
+which are equal to the address.
+
+490
+00:33:29,979 --> 00:33:30,979
+So wouldn't there be memory which is the first?
+
+491
+00:33:30,979 --> 00:33:32,379
+Absolutely, okay.
+
+492
+00:33:32,379 --> 00:33:36,259
+So let us try that you try to do the following thing, right.
+
+493
+00:33:36,259 --> 00:33:42,339
+You write a program in which either in your local variable or in your global variable,
+
+494
+00:33:42,339 --> 00:33:49,059
+you declare one short integer followed by one array of integers, again a short integer
+
+495
+00:33:49,059 --> 00:33:54,259
+followed by an array of integers, short integer followed by an array of integers.
+
+496
+00:33:54,259 --> 00:34:00,220
+Between every short integer and the array of integers, it will waste 2 bytes, okay.
+
+497
+00:34:00,220 --> 00:34:03,099
+Do we really care about it?
+
+498
+00:34:03,099 --> 00:34:04,940
+Probably not, right.
+
+499
+00:34:04,940 --> 00:34:12,059
+Because you have 2 power 32 or 2 power 40 locations, right.
+
+500
+00:34:12,059 --> 00:34:13,659
+Two locations does not really matter.
+
+501
+00:34:13,659 --> 00:34:17,619
+Two locations in 2 billion locations does not really matter, right.
+
+502
+00:34:17,619 --> 00:34:20,500
+The efficiency of access is important, right.
+
+503
+00:34:20,500 --> 00:34:24,460
+Good, good, good question, right.
+
+504
+00:34:24,460 --> 00:34:25,460
+Okay.
+
+505
+00:34:25,460 --> 00:34:33,940
+So word alignment essentially refers to words which are aligned to the quad word boundaries,
+
+506
+00:34:34,539 --> 00:34:35,539
+okay.
+
+507
+00:34:35,539 --> 00:34:42,539
+That is very quickly what we want to talk about basic computer systems and organization
+
+508
+00:34:42,539 --> 00:34:46,340
+because this understanding is important for all of us.
+
+509
+00:34:46,340 --> 00:34:50,300
+Sometimes you know all of these things but would not have studied it in the formal course,
+
+510
+00:34:50,300 --> 00:34:51,300
+right.
+
+511
+00:34:51,300 --> 00:34:56,300
+So I thought that I would at least repeat some of those things, okay.
+
+512
+00:34:56,300 --> 00:34:59,059
+Let us see.
+
+513
+00:34:59,059 --> 00:35:05,940
+The next thing that we are going to talk about is instruction set architecture, okay.
+
+514
+00:35:05,940 --> 00:35:11,579
+So instruction set architecture is essentially the view of the computer to the programmer
+
+515
+00:35:11,579 --> 00:35:17,059
+or the view of the hardware to the programmer or the compiler, right.
+
+516
+00:35:17,059 --> 00:35:22,019
+And you can talk about two different kinds of instruction set architecture, one called
+
+517
+00:35:22,019 --> 00:35:26,619
+the CISC architecture and the other called the RISC architecture.
+
+518
+00:35:26,619 --> 00:35:32,579
+RISC stands for complex instruction set computer and RISC stands for reduced instruction set
+
+519
+00:35:32,579 --> 00:35:34,699
+computer, right.
+
+520
+00:35:34,699 --> 00:35:40,380
+In a complex instruction set computer as the name suggests, right, it can host complex
+
+521
+00:35:40,380 --> 00:35:41,380
+operations, right.
+
+522
+00:35:41,380 --> 00:35:47,500
+Typically it will host operations which will involve operands from memory and registers
+
+523
+00:35:47,500 --> 00:35:52,139
+or memory and memory depending on how complex the instruction is.
+
+524
+00:35:52,139 --> 00:35:57,139
+Whereas in a reduced instruction set architecture, all arithmetic operations, arithmetic and
+
+525
+00:35:57,139 --> 00:36:02,659
+logic operations can only have register operands, right.
+
+526
+00:36:02,659 --> 00:36:06,019
+Only load and store instructions can have memory operands.
+
+527
+00:36:06,019 --> 00:36:12,659
+There is certain advantage of designing a computer or designing a processor as a reduced
+
+528
+00:36:12,659 --> 00:36:15,940
+instruction set processor, right.
+
+529
+00:36:15,940 --> 00:36:22,019
+And in this reduced instruction set processor, instructions, okay, like add instruction or
+
+530
+00:36:22,019 --> 00:36:26,260
+subtract instruction, etcetera, would only use register operands.
+
+531
+00:36:26,260 --> 00:36:31,019
+That means it will only operate on values which are already available in the register.
+
+532
+00:36:31,019 --> 00:36:36,139
+And therefore in this architecture, it is again very important that the register allocation
+
+533
+00:36:36,139 --> 00:36:38,860
+is done very well, right.
+
+534
+00:36:38,860 --> 00:36:43,659
+In the reduced instruction set architecture, one operand can be memory.
+
+535
+00:36:43,659 --> 00:36:45,500
+This is typically what it is.
+
+536
+00:36:45,500 --> 00:36:50,179
+Although in olden day architecture, even both operands can be in memory.
+
+537
+00:36:50,179 --> 00:36:58,219
+These days complex instruction set architecture support only one instruction in memory, okay.
+
+538
+00:36:58,219 --> 00:37:04,259
+The other instruction can be in or should be in the register and you have fewer registers
+
+539
+00:37:04,259 --> 00:37:06,379
+in the complex instruction set architecture.
+
+540
+00:37:06,379 --> 00:37:10,739
+You have more registers in the reduced instruction set architecture but fewer instructions in
+
+541
+00:37:10,739 --> 00:37:13,619
+the complex instruction set architecture.
+
+542
+00:37:13,619 --> 00:37:18,979
+And therefore there also it is very important that the registers are judiciously used.
+
+543
+00:37:18,979 --> 00:37:25,459
+So register allocation is essential and important in both of these architectures, okay.
+
+544
+00:37:25,459 --> 00:37:30,139
+But here we are going to see more about the instruction set architecture and instruction
+
+545
+00:37:30,139 --> 00:37:32,699
+set architecture essentially deals with, right.
+
+546
+00:37:32,699 --> 00:37:37,619
+As I mentioned earlier, it is a description of the machine from the view of the programmer
+
+547
+00:37:37,619 --> 00:37:40,419
+or the compiler, right.
+
+548
+00:37:40,420 --> 00:37:46,019
+If I am a programmer and I do not want to know anything about the hardware, right and
+
+549
+00:37:46,019 --> 00:37:50,860
+if I have to program in assembly language, then minimally I need to know about the instruction
+
+550
+00:37:50,860 --> 00:37:51,860
+set architecture.
+
+551
+00:37:51,860 --> 00:37:57,740
+If I am a compiler writer, right but I do not want to really understand how the processor
+
+552
+00:37:57,740 --> 00:38:04,300
+works but still generate code, I still need to understand the instruction set architecture.
+
+553
+00:38:04,300 --> 00:38:10,260
+It essentially includes the set of all instructions which are supported in the processor, right.
+
+554
+00:38:10,900 --> 00:38:15,820
+And in each of these instructions, how the operands are being specified, that is another
+
+555
+00:38:15,820 --> 00:38:21,660
+important part which is what is called the addressing mode, okay.
+
+556
+00:38:21,660 --> 00:38:27,100
+And of course there is something called instruction encoding which is only required if you are
+
+557
+00:38:27,100 --> 00:38:32,820
+going to take these instructions in the assembly language and going to convert it into machine
+
+558
+00:38:32,820 --> 00:38:33,820
+code.
+
+559
+00:38:33,820 --> 00:38:38,660
+This instruction format also helps you to understand how instruction execution happens,
+
+560
+00:38:38,660 --> 00:38:39,660
+okay.
+
+561
+00:38:40,059 --> 00:38:41,420
+That is essentially what it is.
+
+562
+00:38:41,420 --> 00:38:46,460
+So instruction set architecture essentially comprises of the set of all instructions
+
+563
+00:38:46,460 --> 00:38:51,940
+that are supported by the processor, the addressing modes that are supported by the processor
+
+564
+00:38:51,940 --> 00:38:56,500
+and also how the instructions are being encoded, right.
+
+565
+00:38:56,500 --> 00:39:01,539
+So this is the separation or the so called interface between the hardware and the software
+
+566
+00:39:01,539 --> 00:39:04,259
+or the hardware and the compiler, right.
+
+567
+00:39:04,259 --> 00:39:09,579
+If the compiler does not want to know anything more about hardware, minimally it should know
+
+568
+00:39:09,579 --> 00:39:15,819
+about these things without which it cannot necessarily generate the instructions, okay,
+
+569
+00:39:15,819 --> 00:39:17,940
+generate the code, yeah.
+
+570
+00:39:17,940 --> 00:39:22,139
+Why there are less instructions?
+
+571
+00:39:22,139 --> 00:39:26,099
+Why there are less instructions?
+
+572
+00:39:26,099 --> 00:39:32,739
+Typically CISC instruction set architecture has a lot of complex control and other things.
+
+573
+00:39:32,739 --> 00:39:39,219
+So the space that is available and they want to utilize for registers is actually limited.
+
+574
+00:39:39,219 --> 00:39:46,059
+And second thing is that again when I say limited you do not think of one having tens
+
+575
+00:39:46,059 --> 00:39:50,059
+of registers and another having millions of registers, no, right.
+
+576
+00:39:50,059 --> 00:39:55,500
+In a CISC architecture you typically have anywhere between 8 to 16 registers or maybe
+
+577
+00:39:55,500 --> 00:39:57,279
+32 registers.
+
+578
+00:39:57,279 --> 00:40:01,379
+In a RISC architecture you will have 32 to 64 or maybe 128.
+
+579
+00:40:01,379 --> 00:40:05,379
+We are talking about a factor of 2 or 4.
+
+580
+00:40:05,420 --> 00:40:11,059
+But that is essentially the difference and this is again depending on the available silicon
+
+581
+00:40:11,059 --> 00:40:14,980
+space and also based on the requirement.
+
+582
+00:40:14,980 --> 00:40:22,579
+Okay, interestingly when we talk about code generation, right, many of the old books in
+
+583
+00:40:22,579 --> 00:40:26,220
+compilers do talk about code generation for CISC machines.
+
+584
+00:40:26,220 --> 00:40:29,860
+So we are going to talk about code generation really for CISC machines.
+
+585
+00:40:29,860 --> 00:40:31,480
+But the concept is general.
+
+586
+00:40:31,480 --> 00:40:34,960
+It can also be extended for RISC machines.
+
+587
+00:40:34,960 --> 00:40:40,519
+But all the examples that we are going to see are code generated for CISC machines,
+
+588
+00:40:40,519 --> 00:40:41,519
+okay.
+
+589
+00:40:41,519 --> 00:40:46,679
+But if you think that someday somebody is going to build a CISC machine with, today
+
+590
+00:40:46,679 --> 00:40:49,679
+actually CISC machines have up to 32 registers.
+
+591
+00:40:49,679 --> 00:40:53,840
+But if you want 64 or 128 registers, it is not that it is not doable, right.
+
+592
+00:40:53,840 --> 00:40:56,000
+It is not significantly difficult.
+
+593
+00:40:56,000 --> 00:40:59,800
+It is doable but maybe it does not have that much utility.
+
+594
+00:40:59,800 --> 00:41:04,800
+That is the reason why they do not do it, okay, right.
+
+595
+00:41:04,800 --> 00:41:09,280
+Okay, let us move forward.
+
+596
+00:41:09,280 --> 00:41:16,440
+Okay, so as far as the set of instructions are concerned, we can divide them in terms
+
+597
+00:41:16,440 --> 00:41:19,240
+of arithmetic and logic operations.
+
+598
+00:41:19,240 --> 00:41:24,120
+We can divide them in terms of data transfer operations where you try to move the data
+
+599
+00:41:24,120 --> 00:41:30,780
+from memory to register or from register to memory or you talk about control operations.
+
+600
+00:41:31,380 --> 00:41:36,740
+Control operations are essentially jump instructions, branch instructions, conditional branch instructions
+
+601
+00:41:36,740 --> 00:41:41,660
+or function call instructions and so on and so forth, right.
+
+602
+00:41:41,660 --> 00:41:47,180
+Of course you have other kinds of instructions like ALT ALT, right.
+
+603
+00:41:47,180 --> 00:41:53,420
+Okay, so let us see specifically an example of this instruction set little later when
+
+604
+00:41:53,420 --> 00:41:58,860
+we talk about the instruction set for the RISC-V architecture.
+
+605
+00:41:58,860 --> 00:42:03,539
+But before that let us just talk a little bit about operand addressing modes because
+
+606
+00:42:03,539 --> 00:42:06,180
+all instructions are going to have operands.
+
+607
+00:42:06,180 --> 00:42:09,500
+Operands are the ones in which these operations are going to be performed.
+
+608
+00:42:09,500 --> 00:42:14,380
+So how do you specify these operands as a part of your instruction, right.
+
+609
+00:42:14,380 --> 00:42:18,900
+So that is essentially what is addressing mode, okay, addressing mode specifies how
+
+610
+00:42:18,900 --> 00:42:20,820
+to specify these operands.
+
+611
+00:42:20,820 --> 00:42:24,900
+You have both source operands and destination operand, right.
+
+612
+00:42:25,340 --> 00:42:30,139
+There could be one or two source operands and typically there is a single destination
+
+613
+00:42:30,139 --> 00:42:33,420
+operand, okay.
+
+614
+00:42:33,420 --> 00:42:42,139
+So as I mentioned earlier addressing mode is essentially how do you specify the operand
+
+615
+00:42:42,139 --> 00:42:51,300
+and the operand itself can be in a register or it could be in the memory, right.
+
+616
+00:42:51,300 --> 00:42:56,180
+The first one is we are going to see little bit more detail of when it is in the memory
+
+617
+00:42:56,180 --> 00:42:59,100
+how do I specify the operand.
+
+618
+00:42:59,100 --> 00:43:04,220
+If it is in the register of course I can specify the register number that itself is in R. There
+
+619
+00:43:04,220 --> 00:43:08,180
+is something which is in between which actually typically falls in this in memory kind of
+
+620
+00:43:08,180 --> 00:43:09,180
+a thing.
+
+621
+00:43:09,180 --> 00:43:14,980
+For example you could have small constants as a part of your instruction, right.
+
+622
+00:43:14,980 --> 00:43:20,220
+Add R1 with 1, right or subtract 4 from R2.
+
+623
+00:43:20,219 --> 00:43:23,059
+Those are all small constants, right.
+
+624
+00:43:23,059 --> 00:43:27,379
+That constant is called immediate constant and that is a part of the instruction and
+
+625
+00:43:27,379 --> 00:43:31,819
+since it is a part of the instruction, instruction is in the memory, it is actually in memory.
+
+626
+00:43:31,819 --> 00:43:34,699
+It is a part of the instruction but it is in memory.
+
+627
+00:43:34,699 --> 00:43:39,859
+So we will also talk about those things as we talk about operands, okay.
+
+628
+00:43:39,859 --> 00:43:42,699
+Now the last thing is also very important.
+
+629
+00:43:42,699 --> 00:43:47,559
+We are also very important from the perspective of code generation, right.
+
+630
+00:43:47,559 --> 00:43:55,320
+Some machines use a 2 address format, some machines use a 3 address format, okay.
+
+631
+00:43:55,320 --> 00:43:58,799
+Typically RISC machines use what is called a 3 address format.
+
+632
+00:43:58,799 --> 00:44:01,440
+Here you can see examples, right.
+
+633
+00:44:01,440 --> 00:44:07,980
+For example when I say add R1, R2, R3, right again the meaning of this instruction is that
+
+634
+00:44:07,980 --> 00:44:13,159
+add the contents of R2 with R3 and put the result in R1.
+
+635
+00:44:13,159 --> 00:44:20,319
+So I specify the destination and the two source operands explicitly in my program or in my
+
+636
+00:44:20,319 --> 00:44:21,319
+instruction, okay.
+
+637
+00:44:21,319 --> 00:44:30,359
+Whereas in a 2 address format, okay, I only specify two operands, okay.
+
+638
+00:44:30,359 --> 00:44:33,719
+One of them is the source as well as the destination.
+
+639
+00:44:33,719 --> 00:44:37,759
+Which one is the source and destination is by convention.
+
+640
+00:44:37,760 --> 00:44:45,160
+Typically we will assume that when I specify subtract R2, R1 it is R2 minus R1 going back
+
+641
+00:44:45,160 --> 00:44:47,840
+into R2.
+
+642
+00:44:47,840 --> 00:44:50,880
+Sometimes you can also say R1 minus R2 going into R1.
+
+643
+00:44:50,880 --> 00:44:51,880
+It does not matter.
+
+644
+00:44:51,880 --> 00:44:58,120
+It is a convention and depends on the processor which way it is being written, right.
+
+645
+00:44:58,120 --> 00:45:02,820
+But the main difference here is that here you explicitly specify all the three operands
+
+646
+00:45:02,820 --> 00:45:06,960
+whereas here you specify only two operands.
+
+647
+00:45:06,960 --> 00:45:11,820
+One of them is the source as well as the destination, right.
+
+648
+00:45:11,820 --> 00:45:16,260
+Sys instructions are typically of this form.
+
+649
+00:45:16,260 --> 00:45:21,180
+Risk instructions are typically of this form, okay.
+
+650
+00:45:21,180 --> 00:45:27,140
+And in a Sys machine you could also have memory operands as a part of your instruction or
+
+651
+00:45:27,140 --> 00:45:29,460
+as a part of your arithmetic operation.
+
+652
+00:45:29,460 --> 00:45:36,420
+So for example here this says subtract the contents of the memory location A from R1
+
+653
+00:45:36,420 --> 00:45:40,980
+and then put the result back into R1, right.
+
+654
+00:45:40,980 --> 00:45:42,659
+That is what it says.
+
+655
+00:45:42,659 --> 00:45:47,740
+Again when you talk about a specific processor we will specify whether this is the destination
+
+656
+00:45:47,740 --> 00:45:50,019
+or this is the destination, okay.
+
+657
+00:45:50,019 --> 00:45:52,579
+That is a convention of that particular processor.
+
+658
+00:45:52,579 --> 00:45:53,579
+We can always follow that.
+
+659
+00:45:53,579 --> 00:45:57,699
+We have to follow that consistently, right.
+
+660
+00:45:57,699 --> 00:46:04,819
+And then when you have operands like subtract which are not commutative it is also important
+
+661
+00:46:04,819 --> 00:46:08,379
+which is the first operand and which is the second operand, right.
+
+662
+00:46:08,379 --> 00:46:14,939
+So when I talk about the instruction set architecture I will use the risk instruction set architecture.
+
+663
+00:46:14,939 --> 00:46:21,739
+I will typically talk about this and there we will say that R1 is my destination register,
+
+664
+00:46:21,739 --> 00:46:26,619
+R2 is my first source operand and R3 is my second source operand.
+
+665
+00:46:27,339 --> 00:46:33,420
+When I talk about this construction I will use either one of these formats, okay and
+
+666
+00:46:33,420 --> 00:46:42,420
+typically say that the register is my destination operand, okay.
+
+667
+00:46:42,420 --> 00:46:43,420
+Any questions?
+
+668
+00:46:43,420 --> 00:46:44,420
+Good so far.
+
+669
+00:46:44,420 --> 00:46:45,420
+Okay.
+
+670
+00:46:45,420 --> 00:46:51,819
+So let us talk about the addressing modes, right.
+
+671
+00:46:51,820 --> 00:46:53,380
+There are several addressing modes.
+
+672
+00:46:53,380 --> 00:47:00,340
+Again a processor may support a subset of these addressing modes, okay.
+
+673
+00:47:00,340 --> 00:47:02,220
+Now let us see some of these addressing modes.
+
+674
+00:47:02,220 --> 00:47:05,700
+The first one is the register direct addressing mode.
+
+675
+00:47:05,700 --> 00:47:11,300
+In the register direct addressing mode the operand is in the register, okay.
+
+676
+00:47:11,300 --> 00:47:12,920
+So here is the example.
+
+677
+00:47:12,920 --> 00:47:15,620
+You say add R1, R2, R3.
+
+678
+00:47:15,619 --> 00:47:26,460
+The contents of R2 is added with the contents of R3 and is being stored in R1, okay.
+
+679
+00:47:26,460 --> 00:47:31,299
+The two source operands and the destination operands, okay.
+
+680
+00:47:31,299 --> 00:47:33,659
+So here is an example.
+
+681
+00:47:33,659 --> 00:47:37,259
+It actually goes through.
+
+682
+00:47:37,259 --> 00:47:40,579
+So what should go into R1?
+
+683
+00:47:40,579 --> 00:47:47,819
+So if you assume that these are decimal numbers then it should be 59.
+
+684
+00:47:47,819 --> 00:47:49,860
+I hope it goes there, okay.
+
+685
+00:47:49,860 --> 00:47:50,860
+Sounds good, right.
+
+686
+00:47:50,860 --> 00:47:57,860
+But of course all of this is going to be stored in hexadecimal, okay or binary.
+
+687
+00:47:57,860 --> 00:47:58,860
+Okay.
+
+688
+00:47:58,860 --> 00:48:04,099
+Let us talk about the next addressing mode which is what is called the immediate addressing
+
+689
+00:48:04,099 --> 00:48:05,099
+mode.
+
+690
+00:48:05,099 --> 00:48:11,739
+In the immediate addressing mode the operand is a small constant and is typically available
+
+691
+00:48:11,739 --> 00:48:13,219
+as a part of the instruction.
+
+692
+00:48:13,219 --> 00:48:17,900
+Either you write it just like a number like this or you put a hash sign and then write
+
+693
+00:48:17,900 --> 00:48:18,900
+the number.
+
+694
+00:48:18,900 --> 00:48:23,139
+Again depending on the convention that is followed in the particular assembly language,
+
+695
+00:48:23,139 --> 00:48:24,139
+right.
+
+696
+00:48:24,139 --> 00:48:29,500
+And the idea here is that you add the contents of R2 with the value 1 and put the result
+
+697
+00:48:29,500 --> 00:48:32,179
+back in R1, okay.
+
+698
+00:48:32,179 --> 00:48:37,059
+Let us look at the register indirect addressing mode.
+
+699
+00:48:37,059 --> 00:48:42,940
+In the register indirect addressing mode the operand is in the memory and the address of
+
+700
+00:48:42,940 --> 00:48:47,239
+the operand is in the register, correct, okay.
+
+701
+00:48:47,239 --> 00:48:52,219
+So here is an example, right.
+
+702
+00:48:52,219 --> 00:48:57,019
+So we say R1 hash 32, R2 hash 100, okay.
+
+703
+00:48:57,019 --> 00:49:04,340
+And you have the values in various memory locations starting from 196 onwards, okay.
+
+704
+00:49:04,340 --> 00:49:06,579
+Here you are performing an operation.
+
+705
+00:49:06,579 --> 00:49:11,480
+Of course this is not typically what you see in a RISC machine because RISC machine cannot
+
+706
+00:49:11,480 --> 00:49:14,780
+have arithmetic instructions with memory operands.
+
+707
+00:49:14,780 --> 00:49:18,679
+But just for the sake of example let us see what this means.
+
+708
+00:49:18,679 --> 00:49:23,460
+This essentially means taking the, oh it already went, okay.
+
+709
+00:49:23,460 --> 00:49:30,980
+So taking the contents pointed by R2 which is here, okay.
+
+710
+00:49:30,980 --> 00:49:36,659
+Let us say that in the 4 bytes you have a value 10 and you want to add it with R1 which
+
+711
+00:49:36,659 --> 00:49:39,940
+is 32 and put the result back in R1.
+
+712
+00:49:39,940 --> 00:49:43,740
+So 32 plus 10 which is 42, correct.
+
+713
+00:49:43,740 --> 00:49:49,220
+So the location that is being accessed is 100 which is pointed by R2.
+
+714
+00:49:49,980 --> 00:49:53,819
+Where is this addressing mode useful in C programming?
+
+715
+00:49:53,819 --> 00:49:57,899
+Typically pointers but all memory locations are going to be accessed in this mode in some
+
+716
+00:49:57,899 --> 00:50:01,179
+sense or the other, right, okay.
+
+717
+00:50:01,179 --> 00:50:05,299
+Let us talk about another addressing mode which is a slight variant of the register
+
+718
+00:50:05,299 --> 00:50:09,819
+indirect addressing mode which is what is called the displacement addressing mode or
+
+719
+00:50:09,819 --> 00:50:12,659
+the base displacement addressing mode.
+
+720
+00:50:12,659 --> 00:50:18,339
+This mode is very similar to the register indirect addressing mode except that you also
+
+721
+00:50:18,460 --> 00:50:27,340
+have, let us see, my animation is slightly out of phase, okay, there you go, right.
+
+722
+00:50:27,340 --> 00:50:32,900
+So except that it is an indirect addressing mode but there is a small offset which is
+
+723
+00:50:32,900 --> 00:50:34,340
+also there.
+
+724
+00:50:34,340 --> 00:50:40,380
+So in this case the memory location which is being accessed is the one which is pointed
+
+725
+00:50:40,380 --> 00:50:43,019
+by this but offset by the thumb out.
+
+726
+00:50:43,699 --> 00:50:48,539
+That means that you have to add the contents of R2 with this offset value and whatever
+
+727
+00:50:48,539 --> 00:50:52,219
+is the location that is the location from which you will fetch.
+
+728
+00:50:52,219 --> 00:50:58,980
+So if R2 is 100 and the offset is 4, 100 plus 4 is 104 and the contents of that location
+
+729
+00:50:58,980 --> 00:51:05,059
+is 35, that value is going to be taken with whatever value that was there previously which
+
+730
+00:51:05,059 --> 00:51:10,139
+is 32, right, 32 plus 35 is 67, okay.
+
+731
+00:51:10,139 --> 00:51:12,980
+That is really what is being put there, okay.
+
+732
+00:51:13,940 --> 00:51:17,900
+So what is that this offset value can be both positive or negative.
+
+733
+00:51:17,900 --> 00:51:24,260
+It could be or it need not have to be.
+
+734
+00:51:24,260 --> 00:51:28,900
+If I am accessing a character, if I am accessing something else, right, depending on that it
+
+735
+00:51:28,900 --> 00:51:31,780
+could be anywhere, right.
+
+736
+00:51:31,780 --> 00:51:37,260
+Do not always assume that you are going to access integers all the time.
+
+737
+00:51:37,260 --> 00:51:41,860
+You have characters, strings and may various other things in your program.
+
+738
+00:51:41,860 --> 00:51:47,099
+String is basically array of characters but yes, right, short integers which are two bytes
+
+739
+00:51:47,099 --> 00:51:48,700
+long so.
+
+740
+00:51:48,700 --> 00:51:54,700
+So the offset can be any value positive or negative but it is typically a small constant.
+
+741
+00:51:54,700 --> 00:52:00,260
+In some machines like the MIPS architecture it is 16 bits long, 16 bits to complement
+
+742
+00:52:00,260 --> 00:52:01,620
+representation.
+
+743
+00:52:01,620 --> 00:52:04,019
+In the RISC it is actually a little less than that.
+
+744
+00:52:04,019 --> 00:52:07,940
+You will see what it, RISC 5, okay.
+
+745
+00:52:08,900 --> 00:52:14,460
+Before I move forward, can anybody recognize where this will be useful, offset plus register
+
+746
+00:52:14,460 --> 00:52:15,940
+in your C program?
+
+747
+00:52:15,940 --> 00:52:21,940
+Array, array is one but there is something else also, structures, right.
+
+748
+00:52:21,940 --> 00:52:25,179
+Structures of various fields, right.
+
+749
+00:52:25,179 --> 00:52:28,139
+Each field can be offset by certain amount.
+
+750
+00:52:28,139 --> 00:52:31,340
+That is the place where this would be more useful.
+
+751
+00:52:31,340 --> 00:52:37,860
+Arrays typically you do this register indirect and then keep incrementing it, okay.
+
+752
+00:52:38,019 --> 00:52:42,019
+There is a special addressing mode which is called the auto increment addressing mode
+
+753
+00:52:42,019 --> 00:52:48,460
+which yes over here which is typically used for accessing arrays if that addressing mode
+
+754
+00:52:48,460 --> 00:52:49,460
+is supported.
+
+755
+00:52:49,460 --> 00:52:55,780
+Otherwise it is the indirect mode and then you increment it or you decrement it, okay.
+
+756
+00:52:55,780 --> 00:53:01,099
+The other addressing modes are something like absolute addressing mode in which the address
+
+757
+00:53:01,099 --> 00:53:05,180
+of that location is actually specified as a part of the instruction.
+
+758
+00:53:05,179 --> 00:53:08,419
+This typically happens only in CISC architecture.
+
+759
+00:53:08,419 --> 00:53:13,980
+In CISC architecture you can actually have instructions whose length is variable.
+
+760
+00:53:13,980 --> 00:53:19,179
+So some instructions are 2 bytes long, some instructions are 4 bytes long, some are 8
+
+761
+00:53:19,179 --> 00:53:24,259
+bytes long, some are 12 bytes long and so on and so forth and they can afford to have
+
+762
+00:53:24,259 --> 00:53:28,579
+even the address of the memory location as a part of the instruction.
+
+763
+00:53:28,579 --> 00:53:33,699
+So this is called absolute addressing mode, right.
+
+764
+00:53:33,699 --> 00:53:39,980
+Then you could actually have a combination of registers, right, R3 plus R4.
+
+765
+00:53:39,980 --> 00:53:44,059
+That is also possible that stores the address of the location.
+
+766
+00:53:44,059 --> 00:53:48,460
+The added value, right, is the address of the location from where the operand is going
+
+767
+00:53:48,460 --> 00:53:49,460
+to be fetched.
+
+768
+00:53:49,460 --> 00:53:53,619
+These are all more and more complex addressing modes.
+
+769
+00:53:53,619 --> 00:54:01,579
+Typically a CISC machine would support, right, the register direct addressing mode, the immediate
+
+770
+00:54:02,219 --> 00:54:08,259
+addressing mode and the base displacement addressing mode, only 3 addressing modes.
+
+771
+00:54:08,259 --> 00:54:15,259
+Whereas a CISC architecture might support this, this and maybe all of this, okay.
+
+772
+00:54:16,900 --> 00:54:20,579
+That is what a CISC architecture may support, right.
+
+773
+00:54:20,579 --> 00:54:25,059
+And if these modes are supported then when you are doing code generation you have to
+
+774
+00:54:25,059 --> 00:54:29,179
+be aware of this and you have to generate an appropriate code.
+
+775
+00:54:29,179 --> 00:54:33,579
+And when I say appropriate code I mean efficient code, right.
+
+776
+00:54:33,579 --> 00:54:34,940
+That is important, okay.
+
+777
+00:54:34,940 --> 00:54:37,019
+We will see what efficiency is.
+
+778
+00:54:37,019 --> 00:54:43,019
+Efficiency is in terms of the generated code being able to execute in fewer number of cycles,
+
+779
+00:54:43,019 --> 00:54:44,019
+okay.
+
+780
+00:54:44,019 --> 00:54:46,339
+That is really what we want to look at.
+
+781
+00:54:46,339 --> 00:54:51,019
+Any questions on the addressing modes?
+
+782
+00:54:51,019 --> 00:54:52,980
+What are all supported by risk?
+
+783
+00:54:52,980 --> 00:54:55,379
+Risk is a generic category, right.
+
+784
+00:54:55,380 --> 00:54:57,180
+So you should not be asking the question.
+
+785
+00:54:57,180 --> 00:55:03,420
+In that way you should ask what are the instructions supported by let us say my power 9 processor
+
+786
+00:55:03,420 --> 00:55:08,900
+or what are the instruction sets that are supported by let us say the MIPS or 10,000
+
+787
+00:55:08,900 --> 00:55:09,900
+processor, okay.
+
+788
+00:55:09,900 --> 00:55:11,539
+Answer is very simple.
+
+789
+00:55:11,539 --> 00:55:12,539
+Go and check in the website.
+
+790
+00:55:12,539 --> 00:55:17,460
+Go and check in the internet you will be able to figure that out.
+
+791
+00:55:17,460 --> 00:55:23,579
+Typically all risk architecture support register direct displacement, base displacement addressing
+
+792
+00:55:23,579 --> 00:55:27,420
+mode and immediate addressing only three, okay.
+
+793
+00:55:27,420 --> 00:55:29,539
+That is what MIPS support.
+
+794
+00:55:29,539 --> 00:55:32,900
+Risk five you will see what it supports, okay.
+
+795
+00:55:32,900 --> 00:55:39,819
+But in general if you want to know for a processor like power 9 processor you should go and check
+
+796
+00:55:39,819 --> 00:55:41,259
+the manual of power 9.
+
+797
+00:55:41,259 --> 00:55:42,259
+That will tell you, right.
+
+798
+00:55:42,259 --> 00:55:47,500
+Say if tomorrow you have to generate code for power 9 all you need to do is to go and
+
+799
+00:55:47,500 --> 00:55:50,460
+then get the instruction manual for power 9.
+
+800
+00:55:50,460 --> 00:55:51,940
+Look at what are the addressing modes?
+
+801
+00:55:51,940 --> 00:55:53,420
+What are the instruction sets?
+
+802
+00:55:54,260 --> 00:55:58,940
+Blah blah blah and then understand that generate code for that architecture.
+
+803
+00:55:58,940 --> 00:56:09,500
+What about x86 architecture, right, which is what we are all familiar with, right.
+
+804
+00:56:09,500 --> 00:56:13,980
+It will support it is a complex instruction set architecture, right.
+
+805
+00:56:13,980 --> 00:56:16,340
+It will support some of these addressing modes as well.
+
+806
+00:56:16,340 --> 00:56:20,460
+You should again look into the instruction manual and then figure out what all it supports,
+
+807
+00:56:20,460 --> 00:56:21,460
+right.
+
+808
+00:56:21,500 --> 00:56:27,659
+It is fairly complicated and hopefully we do not have to look at that but let us see.
+
+809
+00:56:27,659 --> 00:56:29,019
+But nothing scary about it.
+
+810
+00:56:29,019 --> 00:56:32,659
+Okay there is also another interesting addressing mode called PC relative.
+
+811
+00:56:32,659 --> 00:56:37,139
+Can anybody tell me what this PC relative is?
+
+812
+00:56:37,139 --> 00:56:39,500
+Absolute.
+
+813
+00:56:39,500 --> 00:56:48,019
+It is a part of the program or code where the data is available preferably following
+
+814
+00:56:48,019 --> 00:56:53,900
+the instruction, okay, right.
+
+815
+00:56:53,900 --> 00:57:00,820
+An immediate constant the data is available as a part of the instruction, correct.
+
+816
+00:57:00,820 --> 00:57:07,699
+So some 16 bits of the instruction is the operand, right.
+
+817
+00:57:07,699 --> 00:57:12,380
+The case of a PC relative addressing mode I can say that the operand is in the next
+
+818
+00:57:12,380 --> 00:57:16,659
+four locations that is PC plus 4, right.
+
+819
+00:57:17,299 --> 00:57:20,219
+That is possible.
+
+820
+00:57:20,219 --> 00:57:25,379
+Again only CISC machine support these kinds of addressing modes.
+
+821
+00:57:25,379 --> 00:57:30,779
+Now let us look at the RISC-V instruction set architecture, okay.
+
+822
+00:57:30,779 --> 00:57:35,819
+RISC-V instruction set architecture first of all it has 32, there are multiple versions
+
+823
+00:57:35,819 --> 00:57:37,779
+of the RISC-V instruction set architecture.
+
+824
+00:57:37,779 --> 00:57:42,579
+We are going to talk about the integer instruction set version of that, okay.
+
+825
+00:57:43,059 --> 00:57:47,739
+It is what is called 32I or something like that.
+
+826
+00:57:47,739 --> 00:57:57,380
+So this has 32, 32 bit general purpose registers R0 to R31 and R0 always has a value 0.
+
+827
+00:57:57,380 --> 00:58:01,039
+It means that no value can be written into it.
+
+828
+00:58:01,039 --> 00:58:04,739
+If you want to get 0 as a value then you can read R0.
+
+829
+00:58:04,739 --> 00:58:07,940
+It will give you the value 0, right.
+
+830
+00:58:07,940 --> 00:58:15,460
+Many of the RISC architectures have a hardwired 0 register for various purposes, okay.
+
+831
+00:58:15,460 --> 00:58:20,500
+They may not have a MOV instruction, MOV from one register to another but then if you do
+
+832
+00:58:20,500 --> 00:58:26,740
+ADD with this R0 register that is like a MOV, right.
+
+833
+00:58:26,740 --> 00:58:32,460
+ADD R3, R2, R1, R2 is being copied into R2, right.
+
+834
+00:58:33,460 --> 00:58:38,820
+That is the reason that is one way by which this 0 register is being used, okay.
+
+835
+00:58:38,820 --> 00:58:41,699
+Also for comparison purposes and so on.
+
+836
+00:58:41,699 --> 00:58:48,059
+The addressing mode supported by it are only these three, this PC relative is only for
+
+837
+00:58:48,059 --> 00:58:50,380
+branches, okay.
+
+838
+00:58:50,380 --> 00:58:56,059
+So immediate, register direct and base displacement, okay.
+
+839
+00:58:56,059 --> 00:58:57,900
+This is a RISC instruction set.
+
+840
+00:58:57,900 --> 00:59:02,579
+So all arithmetic instruction should only have register operands or immediate operands,
+
+841
+00:59:02,579 --> 00:59:05,180
+R register and immediate operands.
+
+842
+00:59:05,180 --> 00:59:08,619
+And load store instruction should have the base displacement.
+
+843
+00:59:08,619 --> 00:59:12,860
+We will see examples of these instructions as we go by.
+
+844
+00:59:12,860 --> 00:59:16,579
+Then for branches it is PC relative, okay.
+
+845
+00:59:16,579 --> 00:59:21,460
+That is whenever I do a jump or a branch or conditional branch it is with respect to the
+
+846
+00:59:21,460 --> 00:59:23,840
+current program counter wire.
+
+847
+00:59:23,840 --> 00:59:28,640
+So what we are going to see is what is called the RV32I instruction set.
+
+848
+00:59:28,640 --> 00:59:30,120
+There are different versions of this.
+
+849
+00:59:30,120 --> 00:59:31,559
+By the way what is RISC-Pi?
+
+850
+00:59:31,559 --> 00:59:34,480
+How many of you know about RISC-Pi?
+
+851
+00:59:34,480 --> 00:59:36,440
+One.
+
+852
+00:59:36,440 --> 00:59:37,440
+What is it?
+
+853
+00:59:37,440 --> 00:59:46,200
+It is a open architecture, right, okay.
+
+854
+00:59:46,200 --> 00:59:49,600
+And it has multiple versions that are defined, okay.
+
+855
+00:59:49,599 --> 00:59:54,599
+So we will talk about the R32I version, okay.
+
+856
+00:59:54,599 --> 00:59:56,319
+Of course this is the 32-bit version.
+
+857
+00:59:56,319 --> 00:59:59,719
+The corresponding 64-bit version is also there.
+
+858
+00:59:59,719 --> 01:00:05,599
+And there are also many other variants as well, okay.
+
+859
+01:00:05,599 --> 01:00:10,079
+So in RV32I each register is 32 bits long.
+
+860
+01:00:10,079 --> 01:00:11,079
+That is what we saw.
+
+861
+01:00:11,079 --> 01:00:12,819
+It is a load store architecture.
+
+862
+01:00:12,819 --> 01:00:18,360
+That means only, I mean load and store are the only instructions which can have memory
+
+863
+01:00:18,360 --> 01:00:22,240
+operands, okay.
+
+864
+01:00:22,240 --> 01:00:23,960
+And again we use the same terminology.
+
+865
+01:00:23,960 --> 01:00:25,960
+32-bit means a word.
+
+866
+01:00:25,960 --> 01:00:28,760
+16 bits is a half word or a short.
+
+867
+01:00:28,760 --> 01:00:32,000
+8 bits is a byte, okay.
+
+868
+01:00:32,000 --> 01:00:33,440
+Because why do we need these things?
+
+869
+01:00:33,440 --> 01:00:37,760
+Because your instructions when they are moving data you have to specify on how much of data
+
+870
+01:00:37,760 --> 01:00:41,360
+it is getting operated on, okay.
+
+871
+01:00:41,360 --> 01:00:42,360
+That is the reason.
+
+872
+01:00:42,360 --> 01:00:46,320
+We will see examples of this as we go by, okay.
+
+873
+01:00:46,320 --> 01:00:52,280
+As I mentioned earlier displacement and immediate, okay, in this architecture can have varying
+
+874
+01:00:52,280 --> 01:00:53,280
+size.
+
+875
+01:00:53,280 --> 01:00:58,080
+That means depending on the instruction format it can have a 10-bit or 12-bits or whatever
+
+876
+01:00:58,080 --> 01:00:59,080
+it is.
+
+877
+01:00:59,080 --> 01:01:01,600
+You will see examples of this as we go, okay.
+
+878
+01:01:01,600 --> 01:01:07,200
+So the load and store instructions which are what we call as the data transfer instructions,
+
+879
+01:01:07,200 --> 01:01:09,080
+okay.
+
+880
+01:01:09,080 --> 01:01:14,080
+They typically, sorry, they typically have a format something like this.
+
+881
+01:01:14,719 --> 01:01:21,719
+It is either a load byte or a load byte unsigned, load half word, load half word unsigned or
+
+882
+01:01:22,519 --> 01:01:26,719
+load unsigned immediate or a load word, one of this.
+
+883
+01:01:26,719 --> 01:01:28,920
+So when you say a load word it is typically 4 bytes.
+
+884
+01:01:28,920 --> 01:01:29,920
+It is always 4 bytes.
+
+885
+01:01:29,920 --> 01:01:34,039
+If you say a load half word it is 2 bytes.
+
+886
+01:01:34,039 --> 01:01:35,920
+And the instruction has a format.
+
+887
+01:01:35,920 --> 01:01:38,319
+This x2 is a register.
+
+888
+01:01:38,319 --> 01:01:40,319
+x3 is also a register.
+
+889
+01:01:40,320 --> 01:01:44,680
+The address is available in x3 with an offset of 4.
+
+890
+01:01:44,680 --> 01:01:50,480
+So x3 plus 4 is the address of the memory location that is being accessed and put into
+
+891
+01:01:50,480 --> 01:01:52,480
+x2, okay.
+
+892
+01:01:52,480 --> 01:01:59,360
+Similarly for the store instructions, right, in this case x4 minus 8 is the address of
+
+893
+01:01:59,360 --> 01:02:06,840
+the location to which the value available in x2 is being copied into, okay.
+
+894
+01:02:06,840 --> 01:02:12,360
+Similarly you can think of what the load byte or load half byte, half word would be,
+
+895
+01:02:12,360 --> 01:02:13,360
+okay.
+
+896
+01:02:13,360 --> 01:02:18,200
+It is either 2 bytes, 1 byte or 2 bytes, okay.
+
+897
+01:02:18,200 --> 01:02:20,360
+Arithmetic instructions, okay.
+
+898
+01:02:20,360 --> 01:02:22,320
+These are the arithmetic instructions.
+
+899
+01:02:22,320 --> 01:02:24,880
+Arithmetic instructions operate on register.
+
+900
+01:02:24,880 --> 01:02:28,840
+That means the entire 32 bits, okay.
+
+901
+01:02:28,840 --> 01:02:35,640
+And you can have add, add unsigned, add immediate, add immediate with unsigned and so on.
+
+902
+01:02:35,639 --> 01:02:38,719
+Similarly for subtract logical operations and so on and so forth.
+
+903
+01:02:38,719 --> 01:02:42,279
+I will not go into all of these operations, okay.
+
+904
+01:02:42,279 --> 01:02:48,119
+But again you can see that when you write add x1, x2, x3, contents of x2 and x3 are
+
+905
+01:02:48,119 --> 01:02:51,079
+added and put into x1.
+
+906
+01:02:51,079 --> 01:02:56,359
+Similarly if you can do a logical ORing or you can do a shift, okay, and you can specify
+
+907
+01:02:56,359 --> 01:03:02,599
+the shift amount and which register is being shifted and where is the destination register,
+
+908
+01:03:02,599 --> 01:03:03,599
+right.
+
+909
+01:03:03,880 --> 01:03:08,719
+These are comparison operations, comparison operations compared to operands, okay.
+
+910
+01:03:08,719 --> 01:03:15,880
+And then depending on that set the destination register either to 1 or a 0, right.
+
+911
+01:03:15,880 --> 01:03:16,880
+Any questions?
+
+912
+01:03:16,880 --> 01:03:25,719
+What is the difference between unsigned and normal, okay.
+
+913
+01:03:25,719 --> 01:03:26,719
+Very good.
+
+914
+01:03:26,719 --> 01:03:29,960
+So you are a C programmer, right.
+
+915
+01:03:29,960 --> 01:03:31,319
+Do you use unsigned anywhere?
+
+916
+01:03:31,440 --> 01:03:35,680
+Certain variables can only have positive values, right.
+
+917
+01:03:35,680 --> 01:03:40,920
+They are declared as unsigned and they are unsigned, right.
+
+918
+01:03:40,920 --> 01:03:48,200
+And when you do arithmetic in unsigned, there are certain things that you follow, right.
+
+919
+01:03:48,200 --> 01:03:50,360
+As simple as that.
+
+920
+01:03:50,360 --> 01:03:51,519
+You need to support unsigned.
+
+921
+01:03:51,519 --> 01:03:56,440
+All addresses are unsigned, correct.
+
+922
+01:03:56,440 --> 01:03:58,360
+All addresses have to be unsigned.
+
+923
+01:03:58,360 --> 01:03:59,360
+Oh, okay.
+
+924
+01:03:59,360 --> 01:04:06,400
+Let us say that, yeah, let us look at.
+
+925
+01:04:06,400 --> 01:04:11,640
+See you see this unsigned only for bytes and half words, right.
+
+926
+01:04:11,640 --> 01:04:16,240
+There is no unsigned for this fellow, right.
+
+927
+01:04:16,240 --> 01:04:24,360
+So when you take a byte and then load it into a register, right.
+
+928
+01:04:24,360 --> 01:04:30,079
+So 1 byte 8 bit of information is being loaded in, right.
+
+929
+01:04:30,079 --> 01:04:39,920
+And if you say it is an ordinary load, then that most significant bit in that byte represents
+
+930
+01:04:39,920 --> 01:04:47,760
+a sign and the number is sign extended to your 32 bit register, right.
+
+931
+01:04:47,760 --> 01:04:55,560
+If it is an unsigned, then it is 0 extended in your register, got it.
+
+932
+01:04:55,560 --> 01:04:59,040
+How many of you understood that?
+
+933
+01:04:59,040 --> 01:05:00,040
+Yeah.
+
+934
+01:05:00,040 --> 01:05:03,400
+Any trouble in that?
+
+935
+01:05:03,400 --> 01:05:05,520
+Okay.
+
+936
+01:05:05,520 --> 01:05:12,240
+So the thing is that when you load a value, let us say an 8 bit value into a 32 bit register,
+
+937
+01:05:12,240 --> 01:05:13,880
+the 8 bits are copied as it is.
+
+938
+01:05:13,880 --> 01:05:14,880
+There is no problem.
+
+939
+01:05:14,880 --> 01:05:17,560
+Is this number positive or negative?
+
+940
+01:05:17,559 --> 01:05:23,519
+Because you are talking about an 8 bit quantity to define whether the number is positive or
+
+941
+01:05:23,519 --> 01:05:28,159
+negative, you should look at the most significant bit in that 8 bits, correct.
+
+942
+01:05:28,159 --> 01:05:33,279
+If that is 1, right, then it is a negative number.
+
+943
+01:05:33,279 --> 01:05:38,440
+Now if you copy it into a 32 bit register, only copying those 8 bits and keeping the
+
+944
+01:05:38,440 --> 01:05:44,759
+remaining 24 bits as 0, then what happens to the number?
+
+945
+01:05:44,759 --> 01:05:45,759
+It has become positive.
+
+946
+01:05:45,759 --> 01:05:46,759
+Is that what you wanted?
+
+947
+01:05:46,760 --> 01:05:49,840
+Probably not, right.
+
+948
+01:05:49,840 --> 01:05:57,620
+So if you want all of the leading bits to be 0s, then you should load it as unsigned.
+
+949
+01:05:57,620 --> 01:06:01,560
+If you want all of those things to be 0 or 1 depending on whether the original number
+
+950
+01:06:01,560 --> 01:06:07,680
+was positive or negative, then you should load it as byte, okay.
+
+951
+01:06:07,680 --> 01:06:10,680
+That is the difference, right.
+
+952
+01:06:10,680 --> 01:06:11,680
+Comfortable?
+
+953
+01:06:11,680 --> 01:06:12,680
+Move forward.
+
+954
+01:06:12,680 --> 01:06:13,680
+Okay.
+
+955
+01:06:14,639 --> 01:06:18,799
+Again, I have listed some of them and I have given some examples, but if you go through
+
+956
+01:06:18,799 --> 01:06:19,799
+that you will find out.
+
+957
+01:06:19,799 --> 01:06:22,960
+For example, this is a shift write instruction.
+
+958
+01:06:22,960 --> 01:06:28,679
+So the contents of x2 is being shifted right, okay, sorry, I am sorry, right is that way,
+
+959
+01:06:28,679 --> 01:06:35,719
+shifted right, okay, and 4 bits are thrown out and in that place, 0s are being introduced,
+
+960
+01:06:35,719 --> 01:06:36,719
+okay.
+
+961
+01:06:36,719 --> 01:06:39,659
+That is essentially what is being specified in here.
+
+962
+01:06:39,659 --> 01:06:48,899
+You can see that you know bit 4 to 31 are kept, right, and 4 bits are being added, blah,
+
+963
+01:06:48,899 --> 01:06:49,899
+blah, blah.
+
+964
+01:06:49,899 --> 01:06:57,219
+Right, that this is a shift, right, okay, fine.
+
+965
+01:06:57,219 --> 01:07:02,219
+Let us move on to the next set of instructions which are the control transfer instructions,
+
+966
+01:07:02,219 --> 01:07:03,219
+right.
+
+967
+01:07:03,219 --> 01:07:08,659
+Control transfer instructions are required to implement jumps, okay, conditional jumps,
+
+968
+01:07:08,659 --> 01:07:12,699
+error jumps, okay, procedure calls and so on, okay.
+
+969
+01:07:12,699 --> 01:07:17,799
+So typically these are branch equal, branch not equal, branch less than, greater than,
+
+970
+01:07:17,799 --> 01:07:23,139
+blah, blah, blah, and the meaning of this is that for example, if I write branch less
+
+971
+01:07:23,139 --> 01:07:30,739
+than x2, x3 immediate, then if x2 is less than x3, then I have to branch.
+
+972
+01:07:30,739 --> 01:07:35,579
+At that point in time, a program counter has to be my program counter value plus this immediate
+
+973
+01:07:35,579 --> 01:07:36,579
+value.
+
+974
+01:07:36,579 --> 01:07:40,940
+But typically this program counter value plus 4 plus immediate value.
+
+975
+01:07:40,940 --> 01:07:42,699
+Why is it?
+
+976
+01:07:42,699 --> 01:07:46,980
+Because every time as soon as the instruction is fetched, the program counter is going to
+
+977
+01:07:46,980 --> 01:07:49,500
+be incremented to the next instruction.
+
+978
+01:07:49,500 --> 01:07:53,340
+The next instruction is always 4 by, each instruction is 4 by its long.
+
+979
+01:07:53,340 --> 01:07:57,739
+So the next instruction will be 4 locations away from the current location.
+
+980
+01:07:57,739 --> 01:08:02,420
+Therefore it is PC plus 4 which is the next instruction plus that immediate constant value
+
+981
+01:08:02,500 --> 01:08:06,780
+which is being added that tells you the new program counter value.
+
+982
+01:08:06,780 --> 01:08:09,619
+And that value is taken only if this condition is true.
+
+983
+01:08:09,619 --> 01:08:14,099
+If the condition is not true, it will only be PC plus 4.
+
+984
+01:08:14,099 --> 01:08:16,500
+That is a conditional branch instruction.
+
+985
+01:08:16,500 --> 01:08:19,560
+This instruction is a jump and link instruction.
+
+986
+01:08:19,560 --> 01:08:26,319
+This is meant for, sorry somebody said something, yeah, function calls, right.
+
+987
+01:08:26,319 --> 01:08:33,639
+So RISC-V supports two jump and link instruction, one called jump and link, other one called
+
+988
+01:08:33,639 --> 01:08:34,880
+jump and link register.
+
+989
+01:08:34,880 --> 01:08:37,920
+They have slightly different semantics.
+
+990
+01:08:37,920 --> 01:08:39,799
+So look at them carefully.
+
+991
+01:08:39,799 --> 01:08:45,719
+If you are using the jump and link instruction, you are going to jump to the location which
+
+992
+01:08:45,719 --> 01:08:47,439
+is PC plus immediate.
+
+993
+01:08:47,439 --> 01:08:50,960
+That is where the called function is, right.
+
+994
+01:08:50,960 --> 01:08:54,079
+The called function is in PC plus immediate location.
+
+995
+01:08:54,079 --> 01:08:55,899
+That is where you are going to jump to.
+
+996
+01:08:55,899 --> 01:09:03,079
+But before you jump, you save the address of the next instruction.
+
+997
+01:09:03,079 --> 01:09:04,079
+What is that address?
+
+998
+01:09:04,079 --> 01:09:07,579
+It is a return address, right.
+
+999
+01:09:07,579 --> 01:09:10,619
+After the function call, you are supposed to come back there.
+
+1000
+01:09:10,619 --> 01:09:14,639
+That you save it in this register, okay.
+
+1001
+01:09:14,639 --> 01:09:21,659
+So you save the return address in this particular register and you jump to PC plus 4 plus immediate.
+
+1002
+01:09:21,659 --> 01:09:26,340
+Sorry, actually here it says PC plus immediate to that location, right.
+
+1003
+01:09:26,340 --> 01:09:28,460
+That is really very good.
+
+1004
+01:09:28,460 --> 01:09:36,139
+If it is a jump and link register instruction, right, then it is actually X3 plus immediate,
+
+1005
+01:09:36,139 --> 01:09:40,760
+okay, where X3 is one of your registers.
+
+1006
+01:09:40,760 --> 01:09:43,300
+That is your location to which you are going to jump to.
+
+1007
+01:09:43,300 --> 01:09:48,220
+That means that the function which is being called could be far away and its address is
+
+1008
+01:09:48,220 --> 01:09:54,060
+available in X3 register, okay, plus an offset which is an immediate constant, okay.
+
+1009
+01:09:54,060 --> 01:09:57,460
+That is really what it is.
+
+1010
+01:09:57,460 --> 01:10:04,260
+And of course, as before PC plus 4 is which is the return address is saved in X2 register,
+
+1011
+01:10:04,260 --> 01:10:05,260
+okay.
+
+1012
+01:10:05,260 --> 01:10:13,780
+This part of it is essentially to say that the least significant bit is reset to 0, okay.
+
+1013
+01:10:13,779 --> 01:10:20,779
+It is because in RISC-V, each instruction can be minimally 2 bytes, but most of the
+
+1014
+01:10:20,779 --> 01:10:23,059
+time it is 4 bytes, okay.
+
+1015
+01:10:23,059 --> 01:10:26,300
+So it always sets the least significant bit to 0.
+
+1016
+01:10:26,300 --> 01:10:30,979
+Does that make sense?
+
+1017
+01:10:30,979 --> 01:10:32,779
+Why?
+
+1018
+01:10:32,779 --> 01:10:41,899
+If each instruction is 4 bytes long, what do you expect the last 2 bits to be?
+
+1019
+01:10:41,899 --> 01:10:44,519
+Each instruction is 4 bytes long.
+
+1020
+01:10:44,519 --> 01:10:48,219
+Each instruction is a word, right.
+
+1021
+01:10:48,219 --> 01:10:56,219
+So what would be PC, PC plus 4, PC plus 8, PC plus 16, etc.
+
+1022
+01:10:56,219 --> 01:11:00,339
+What would the last 2 bits of that address be?
+
+1023
+01:11:00,339 --> 01:11:02,539
+It is word aligned.
+
+1024
+01:11:02,539 --> 01:11:11,619
+Word aligned means divisible by 4, which means last 2 bits should be 0, 0, correct.
+
+1025
+01:11:11,619 --> 01:11:21,340
+Yes, you can quickly write down what is the binary representation for 4, 8, 12, 16, 20
+
+1026
+01:11:21,340 --> 01:11:23,460
+and so on, right.
+
+1027
+01:11:23,460 --> 01:11:24,460
+What would they be?
+
+1028
+01:11:24,460 --> 01:11:30,500
+The last 2 bits will always be 0, 0, correct.
+
+1029
+01:11:30,500 --> 01:11:36,899
+Similarly if it is 16 bytes, sorry 2 bytes or 16 bits long, the last bit alone has to
+
+1030
+01:11:36,899 --> 01:11:41,380
+be 0 and that is why essentially it is resetting the last bit.
+
+1031
+01:11:42,140 --> 01:11:43,140
+Okay, yeah.
+
+1032
+01:11:43,140 --> 01:11:44,140
+Sorry.
+
+1033
+01:11:44,140 --> 01:11:58,940
+PC plus 4 has the address of the next instruction to be executed, right.
+
+1034
+01:11:58,940 --> 01:12:08,539
+PC plus 4, I am not able to hear you, could you talk louder?
+
+1035
+01:12:08,539 --> 01:12:19,180
+Okay, PC stores the address of the next instruction to be fetched, okay.
+
+1036
+01:12:19,180 --> 01:12:26,859
+So as soon as it fetches, it will get incremented.
+
+1037
+01:12:26,859 --> 01:12:29,939
+The return address should be PC plus 4, okay.
+
+1038
+01:12:29,939 --> 01:12:35,539
+Well, actually this happens in the sense that after this happens only the PC value is getting
+
+1039
+01:12:35,539 --> 01:12:38,420
+modified, that is the reason, okay.
+
+1040
+01:12:38,420 --> 01:12:43,819
+So, the idea is the same, okay.
+
+1041
+01:12:43,819 --> 01:12:49,380
+Now we talked about these instructions having these operands and other things.
+
+1042
+01:12:49,380 --> 01:12:54,340
+When you write it as an assembly instruction, you write something like this, right.
+
+1043
+01:12:54,340 --> 01:12:59,739
+But when this goes as a machine code and how the machine understands this instruction,
+
+1044
+01:12:59,739 --> 01:13:05,020
+that essentially is what we call as the instruction formatting, right.
+
+1045
+01:13:05,020 --> 01:13:09,340
+So, RISC-V for example supports these various formats.
+
+1046
+01:13:09,340 --> 01:13:14,180
+We will not spend time trying to understand each of these formats, but let us just quickly
+
+1047
+01:13:14,180 --> 01:13:17,300
+look at in the R type format, okay.
+
+1048
+01:13:17,300 --> 01:13:22,820
+There are three registers, RS1 is the first source, RS2 which is the second source and
+
+1049
+01:13:22,820 --> 01:13:25,540
+RD which is the third source.
+
+1050
+01:13:25,540 --> 01:13:30,380
+Each source or each register operand is 5 bits long.
+
+1051
+01:13:30,380 --> 01:13:34,300
+Why because?
+
+1052
+01:13:34,300 --> 01:13:36,699
+Because it has 32 registers.
+
+1053
+01:13:36,699 --> 01:13:42,460
+So you have to specify each one of those registers, you need 32, okay.
+
+1054
+01:13:42,460 --> 01:13:47,579
+So everywhere where you have a register operand, it is 5 bits long, okay.
+
+1055
+01:13:47,579 --> 01:13:53,539
+In the I type, I stands for immediate, you can see that there is one source operand,
+
+1056
+01:13:53,539 --> 01:13:59,180
+one destination operand and 12 bits of immediate constant, right.
+
+1057
+01:13:59,180 --> 01:14:01,380
+This is the small offset that we talked about.
+
+1058
+01:14:02,020 --> 01:14:08,300
+12 bits is 4 kilobytes, 4k locations, right.
+
+1059
+01:14:08,300 --> 01:14:14,220
+Again in the case of S type, there is an immediate operand which is again 12 bits, but only thing
+
+1060
+01:14:14,220 --> 01:14:19,220
+is it is stored in two places, split, okay, for whatever reason.
+
+1061
+01:14:19,220 --> 01:14:25,819
+Here you can see that the immediate is 13 bits in the B type operation, right.
+
+1062
+01:14:25,819 --> 01:14:30,739
+And again you can see that some parts of the bits 1 to 4 is stored here, blah blah is stored
+
+1063
+01:14:31,699 --> 01:14:33,979
+here and blah blah is stored there.
+
+1064
+01:14:33,979 --> 01:14:37,500
+You can see that immediate 0 is not there anywhere, right.
+
+1065
+01:14:37,500 --> 01:14:38,500
+So what is it going to be?
+
+1066
+01:14:38,500 --> 01:14:42,579
+When it is not there, it is implicitly 0.
+
+1067
+01:14:42,579 --> 01:14:46,019
+So it will add that 0 to it, okay.
+
+1068
+01:14:46,019 --> 01:14:51,099
+Here in this case, U type instruction has, right, you can see that it has 20 bits of
+
+1069
+01:14:51,099 --> 01:14:56,739
+immediate constant and it does not specify the first 11 bits or first 12 bits rather,
+
+1070
+01:14:56,739 --> 01:14:57,739
+right.
+
+1071
+01:14:57,739 --> 01:14:59,619
+0 to 11, it does not specify.
+
+1072
+01:14:59,619 --> 01:15:03,979
+That will be taken from the current program counter or that will be taken from some place.
+
+1073
+01:15:03,979 --> 01:15:08,479
+Again it depends on which instruction uses and what exactly is being done.
+
+1074
+01:15:08,479 --> 01:15:12,059
+So this is how the instructions are encoded, right.
+
+1075
+01:15:12,059 --> 01:15:17,659
+And the assembly language instruction when it is converted into machine code, it is going
+
+1076
+01:15:17,659 --> 01:15:22,579
+to be converted using one of these types depending on what that instruction is and each one of
+
+1077
+01:15:22,579 --> 01:15:25,260
+those fields are going to be appropriately specified, right.
+
+1078
+01:15:26,260 --> 01:15:32,420
+So we do not worry about this part in our code generation because we assume that the
+
+1079
+01:15:32,420 --> 01:15:36,020
+assembler is going to take care of, right.
+
+1080
+01:15:36,020 --> 01:15:43,140
+But still kind of quickly we call this structure in order for us to understand how instruction
+
+1081
+01:15:43,140 --> 01:15:44,140
+execution happens, okay.
+
+1082
+01:15:44,140 --> 01:15:48,340
+That is the next thing that we are going to see, okay.
+
+1083
+01:15:48,340 --> 01:15:57,180
+I have a very quick example of a C code and a corresponding assembly code for that, okay.
+
+1084
+01:15:57,180 --> 01:16:02,680
+Just to say that it is not very difficult to read the assembly code, right.
+
+1085
+01:16:02,680 --> 01:16:04,500
+So what does this code do?
+
+1086
+01:16:04,500 --> 01:16:06,920
+GCD, right.
+
+1087
+01:16:06,920 --> 01:16:12,619
+So essentially finds a bigger number, subtracts the smaller number from it, okay and keeps
+
+1088
+01:16:12,619 --> 01:16:14,500
+doing that, right.
+
+1089
+01:16:14,500 --> 01:16:19,779
+And in the end whatever is the remaining thing, non-zero number that is CGCD, correct.
+
+1090
+01:16:19,779 --> 01:16:22,020
+So let us look at the code, assembly code.
+
+1091
+01:16:22,020 --> 01:16:26,020
+It is only as big as the C code in this particular case.
+
+1092
+01:16:26,020 --> 01:16:30,220
+In other cases of course it could be much bigger but at least this one is something
+
+1093
+01:16:30,220 --> 01:16:31,939
+that we can easily understand.
+
+1094
+01:16:31,939 --> 01:16:33,500
+Let us look at what happens.
+
+1095
+01:16:33,500 --> 01:16:41,140
+Let us assume that initially A is in register X1, B is in register X2 and T is in register
+
+1096
+01:16:41,140 --> 01:16:42,960
+X3.
+
+1097
+01:16:42,960 --> 01:16:47,600
+That means that you must have done some instructions to move the contents of A into X1, contents
+
+1098
+01:16:47,600 --> 01:16:49,279
+of B into X2 and so on, right.
+
+1099
+01:16:49,279 --> 01:16:51,000
+Let us not worry about that.
+
+1100
+01:16:51,000 --> 01:16:54,319
+Let us look at the interesting part, right.
+
+1101
+01:16:54,319 --> 01:17:01,480
+You look at if X1 is 0 that means that you are done, right.
+
+1102
+01:17:01,480 --> 01:17:08,399
+One of the two operands is 0, the other one has the GCD, greatest common divisor, right.
+
+1103
+01:17:08,399 --> 01:17:11,099
+So this is the branch instruction which essentially does that.
+
+1104
+01:17:11,099 --> 01:17:14,059
+If X1 is 0, you go to done.
+
+1105
+01:17:14,059 --> 01:17:17,819
+Otherwise you come here, right.
+
+1106
+01:17:17,819 --> 01:17:22,119
+You find out which of these two numbers is bigger, right.
+
+1107
+01:17:22,119 --> 01:17:25,460
+If A is bigger, you continue in this stream.
+
+1108
+01:17:25,460 --> 01:17:28,219
+If B is bigger, you jump here, okay.
+
+1109
+01:17:28,219 --> 01:17:31,139
+So you are essentially comparing X1, X2.
+
+1110
+01:17:31,139 --> 01:17:36,460
+If X1 is greater than X2, right, sorry, it is less than, sorry.
+
+1111
+01:17:36,460 --> 01:17:42,079
+If X1 is less than X2, then you go to this label, okay.
+
+1112
+01:17:42,079 --> 01:17:47,500
+So when this code is being assembled, right, this label part is going to be replaced by
+
+1113
+01:17:47,500 --> 01:17:53,319
+an offset which corresponds to the distance between these two instructions, right.
+
+1114
+01:17:53,319 --> 01:17:57,180
+So typically there are two instructions in between, right.
+
+1115
+01:17:57,180 --> 01:18:01,180
+So it is PC plus 4 plus, sorry, PC plus 8.
+
+1116
+01:18:01,180 --> 01:18:05,480
+So we already know that the offset is added to PC plus 4.
+
+1117
+01:18:05,479 --> 01:18:08,719
+So this offset has to be only 4 if you want to get PC plus 8.
+
+1118
+01:18:08,719 --> 01:18:11,259
+So the offset is being computed, correct.
+
+1119
+01:18:11,259 --> 01:18:15,219
+So if X1 is less than X2, then you have to jump.
+
+1120
+01:18:15,219 --> 01:18:19,839
+That means that you have to add this offset to the current PC plus 4 value and that means
+
+1121
+01:18:19,839 --> 01:18:21,479
+that new PC will be here.
+
+1122
+01:18:21,479 --> 01:18:27,000
+If X1 is greater than or equal to X2, then you perform this step, right.
+
+1123
+01:18:27,000 --> 01:18:31,759
+Subtract X1 from X2 and put the value back in X1 and then you go back.
+
+1124
+01:18:31,759 --> 01:18:33,119
+You continue like that.
+
+1125
+01:18:33,119 --> 01:18:39,479
+If X1 is less than X2, you jump here and then this essentially, right, and we do not have
+
+1126
+01:18:39,479 --> 01:18:40,920
+a move instruction.
+
+1127
+01:18:40,920 --> 01:18:42,559
+Instead what we do?
+
+1128
+01:18:42,559 --> 01:18:45,439
+You add X2 to X0 and put it in X1.
+
+1129
+01:18:45,439 --> 01:18:48,880
+That is essentially moving X2 to X1.
+
+1130
+01:18:48,880 --> 01:18:52,840
+Remember that X0 is a hardwired 0 register, right.
+
+1131
+01:18:52,840 --> 01:18:57,559
+If you write something to X1, that is equivalent to doing nothing, right.
+
+1132
+01:18:57,559 --> 01:19:02,559
+Even if you write a value 20 to X1, it will still remain as 0, right.
+
+1133
+01:19:02,560 --> 01:19:06,360
+So that is a dummy operation, okay.
+
+1134
+01:19:06,360 --> 01:19:10,120
+After this, we jump, okay.
+
+1135
+01:19:10,120 --> 01:19:14,640
+So is this code easy enough to understand, right?
+
+1136
+01:19:14,640 --> 01:19:16,640
+Not very difficult, right.
+
+1137
+01:19:16,640 --> 01:19:17,640
+Not scary.
+
+1138
+01:19:17,640 --> 01:19:23,880
+Well, you will see scary assembly code as you go by, but if you take one step at a time,
+
+1139
+01:19:23,880 --> 01:19:26,120
+you can actually understand things, okay.
+
+1140
+01:19:26,120 --> 01:19:29,000
+Let us move forward.
+
+1141
+01:19:29,000 --> 01:19:33,159
+The next thing that we want to see is processor data path and pipelining.
+
+1142
+01:19:33,159 --> 01:19:36,520
+How many of the things that we have discussed so far, you have already seen and you would
+
+1143
+01:19:36,520 --> 01:19:39,239
+have preferred me not doing it here.
+
+1144
+01:19:39,239 --> 01:19:43,960
+How many of you have seen whatever we have discussed so far in some form or the other?
+
+1145
+01:19:43,960 --> 01:19:45,359
+All of you have.
+
+1146
+01:19:45,359 --> 01:19:48,720
+How many of you are very clear about it even before this class?
+
+1147
+01:19:48,720 --> 01:19:49,720
+Okay.
+
+1148
+01:19:49,720 --> 01:19:52,479
+You people are being very nice, extremely nice to me.
+
+1149
+01:19:52,479 --> 01:19:54,479
+Thank you, okay.
+
+1150
+01:19:54,479 --> 01:19:59,599
+So if that has kind of cleared your understanding, I am happy about it, okay.
+
+1151
+01:19:59,599 --> 01:20:04,599
+But if you think that I have wasted your time, please do let me know so that at least tomorrow
+
+1152
+01:20:04,599 --> 01:20:07,839
+I can, you know, skip certain slides and then move forward.
+
+1153
+01:20:07,839 --> 01:20:10,779
+That is the reason why I keep asking that question.
+
+1154
+01:20:10,779 --> 01:20:13,719
+Not that I want to see you to be very nice to me, okay.
+
+1155
+01:20:13,719 --> 01:20:16,159
+That is really not the purpose, right.
+
+1156
+01:20:16,159 --> 01:20:18,519
+It is for your benefit.
+
+1157
+01:20:18,519 --> 01:20:23,679
+So I should deliver what you need, not what I know, right.
+
+1158
+01:20:23,680 --> 01:20:25,119
+Okay, all right.
+
+1159
+01:20:25,119 --> 01:20:30,360
+Let us quickly see what about processor, data path and other things.
+
+1160
+01:20:30,360 --> 01:20:35,039
+So we are going to talk about pipelined execution and in pipelined execution, you will see that
+
+1161
+01:20:35,039 --> 01:20:42,079
+the instruction execution is divided into five phases, instruction fetch, decode, right,
+
+1162
+01:20:42,079 --> 01:20:44,720
+execute memory and write back.
+
+1163
+01:20:44,720 --> 01:20:46,480
+Why do we do pipelined execution?
+
+1164
+01:20:46,480 --> 01:20:52,079
+It is because we want to improve the throughput and the stages which can do while one stage
+
+1165
+01:20:52,079 --> 01:20:57,559
+is doing decode, the other stage can do instruction fetch of the next instruction and another
+
+1166
+01:20:57,559 --> 01:21:02,800
+stage can do the execute of the previous instruction and so on and so forth, okay.
+
+1167
+01:21:02,800 --> 01:21:08,000
+Let us just quickly look at how the processor pipeline would look like and what it does
+
+1168
+01:21:08,000 --> 01:21:12,479
+in each one of these stages, right.
+
+1169
+01:21:12,479 --> 01:21:17,680
+In the instruction fetch phase, right, you are essentially fetching the instruction.
+
+1170
+01:21:17,680 --> 01:21:23,240
+As we mentioned earlier, PC cast the next instruction which has to be fetched.
+
+1171
+01:21:23,240 --> 01:21:30,079
+So use the contents of PC, access the memory and fetch the instruction.
+
+1172
+01:21:30,079 --> 01:21:34,520
+The instruction that is going to be fetched is going to be put into one of these buffers
+
+1173
+01:21:34,520 --> 01:21:40,520
+which is there in this set of buffers which is called the instruction register, right.
+
+1174
+01:21:40,520 --> 01:21:45,440
+So if you fetch the memory location pointed by the program counter, that is actually the
+
+1175
+01:21:45,440 --> 01:21:46,920
+next instruction to be executed.
+
+1176
+01:21:47,480 --> 01:21:52,840
+It could be an add instruction or it could be a jump instruction or it could be a subtract
+
+1177
+01:21:52,840 --> 01:21:57,880
+instruction or whatever it is, that instruction that you have fetched is being put into the
+
+1178
+01:21:57,880 --> 01:22:01,600
+instruction register and you are going to execute that instruction.
+
+1179
+01:22:01,600 --> 01:22:09,039
+But at the same time, you take the program counter value incremented by 4, right, and
+
+1180
+01:22:09,039 --> 01:22:15,319
+this might eventually go back into the program counter or something else can go into the
+
+1181
+01:22:15,319 --> 01:22:17,840
+program counter, right.
+
+1182
+01:22:17,840 --> 01:22:19,880
+So this is a multiplexer.
+
+1183
+01:22:19,880 --> 01:22:25,759
+The multiplexer is either going to take PC plus 4 or something else and then put that
+
+1184
+01:22:25,759 --> 01:22:29,559
+value back into the program counter, right.
+
+1185
+01:22:29,559 --> 01:22:36,559
+That something plus, sorry, that something could be for branch instructions or control
+
+1186
+01:22:36,559 --> 01:22:41,619
+transfer instructions where the program counter is getting affected, right.
+
+1187
+01:22:41,619 --> 01:22:47,340
+So we saw that in the case of a branch instruction, PC plus 4 is added with something, right.
+
+1188
+01:22:47,340 --> 01:22:51,460
+So that might happen, okay.
+
+1189
+01:22:51,460 --> 01:22:52,460
+Let us skip that.
+
+1190
+01:22:52,460 --> 01:22:54,300
+Let us go to this side.
+
+1191
+01:22:54,300 --> 01:22:57,939
+So typically in an instruction fetch, these two activities happen.
+
+1192
+01:22:57,939 --> 01:23:03,300
+That means that you fetch the instruction, you increment the program counter, right.
+
+1193
+01:23:03,300 --> 01:23:07,859
+That incremented value of program counter is also available in a small register over
+
+1194
+01:23:08,099 --> 01:23:13,899
+here, internal register over here in the buffer and we will call that as the next program
+
+1195
+01:23:13,899 --> 01:23:16,899
+counter, NPC, okay.
+
+1196
+01:23:16,899 --> 01:23:19,899
+All right, okay.
+
+1197
+01:23:19,899 --> 01:23:22,899
+Let us see.
+
+1198
+01:23:22,899 --> 01:23:29,420
+Then depending on what your instruction is, you use certain fields of that instruction
+
+1199
+01:23:29,420 --> 01:23:35,500
+and then use them to read your first source operand, second source operand and so on,
+
+1200
+01:23:35,500 --> 01:23:36,500
+right.
+
+1201
+01:23:37,140 --> 01:23:43,699
+And thus source operands are going to be read and put it into some buffer over there.
+
+1202
+01:23:43,699 --> 01:23:49,300
+If your instruction has an immediate constant, that immediate constant, some fields of your
+
+1203
+01:23:49,300 --> 01:23:54,819
+instruction, which is again taken from your instruction register is going to be taken
+
+1204
+01:23:54,819 --> 01:23:57,859
+and then sign extended, okay.
+
+1205
+01:23:57,859 --> 01:24:02,859
+Now during the execution phase, you are going to take these as operands and perform the
+
+1206
+01:24:02,859 --> 01:24:03,859
+operation.
+
+1207
+01:24:04,219 --> 01:24:09,380
+So if it is an arithmetic and logic instruction, then you perform either register 1 plus register
+
+1208
+01:24:09,380 --> 01:24:16,019
+2 or you perform register 1 plus immediate constant, that kind of an operation.
+
+1209
+01:24:16,019 --> 01:24:21,739
+So depending on what your instruction is, you perform that operation with the appropriate
+
+1210
+01:24:21,739 --> 01:24:28,859
+operands which are available as small registers, internal registers in these buffers, right.
+
+1211
+01:24:28,859 --> 01:24:30,539
+So once again let me repeat.
+
+1212
+01:24:30,539 --> 01:24:35,739
+In the instruction decode and operand fetch phase, the instruction is already available
+
+1213
+01:24:35,739 --> 01:24:37,619
+in the instruction register.
+
+1214
+01:24:37,619 --> 01:24:40,539
+From there you find out what is the first source operand.
+
+1215
+01:24:40,539 --> 01:24:44,939
+You can actually fetch the contents of the first source operand, right, that particular
+
+1216
+01:24:44,939 --> 01:24:48,539
+register, put it into another internal register over here.
+
+1217
+01:24:48,539 --> 01:24:53,460
+If you have a second register, second source operand, you can fetch that register, put
+
+1218
+01:24:53,460 --> 01:24:55,339
+it as an internal operand here.
+
+1219
+01:24:55,340 --> 01:25:00,060
+If you do not have a second source operand but an immediate constant that is sign extended,
+
+1220
+01:25:00,060 --> 01:25:03,159
+put as a register over here, internal register over here.
+
+1221
+01:25:03,159 --> 01:25:09,539
+So the operands for your operation are now available in these internal registers in this
+
+1222
+01:25:09,539 --> 01:25:11,500
+buffer, correct.
+
+1223
+01:25:11,500 --> 01:25:16,140
+And those operands are going to be used and you perform the necessary operations over
+
+1224
+01:25:16,140 --> 01:25:17,140
+there.
+
+1225
+01:25:17,140 --> 01:25:19,739
+This is in case of arithmetic and logic operations.
+
+1226
+01:25:19,739 --> 01:25:25,220
+If you have a load store instruction, for example, in a load store instruction, remember
+
+1227
+01:25:25,220 --> 01:25:29,420
+that your operand is in memory.
+
+1228
+01:25:29,420 --> 01:25:33,140
+And for that you need to compute the address of that memory location.
+
+1229
+01:25:33,140 --> 01:25:38,860
+Address of that memory location is specified in the displacement addressing mode.
+
+1230
+01:25:38,860 --> 01:25:44,180
+And in the displacement addressing mode you need to take the value of a register and add
+
+1231
+01:25:44,180 --> 01:25:46,699
+the offset value to it.
+
+1232
+01:25:46,699 --> 01:25:50,140
+The value of the register is available as one of the source operand.
+
+1233
+01:25:50,140 --> 01:25:53,940
+The offset is available as a constant here.
+
+1234
+01:25:53,939 --> 01:25:58,500
+You add them up, that gives you the contents, the address of the memory location, not the
+
+1235
+01:25:58,500 --> 01:26:02,139
+content, the address of that memory location, right.
+
+1236
+01:26:02,139 --> 01:26:07,059
+If it is a branch instruction, conditional branch instruction, correct, you are going
+
+1237
+01:26:07,059 --> 01:26:11,899
+to check whether a is greater than b or a is less than b, okay.
+
+1238
+01:26:11,899 --> 01:26:15,739
+That needs to be done in arithmetic and logic unit but for the time being let us not worry
+
+1239
+01:26:15,739 --> 01:26:18,460
+how exactly it is being done.
+
+1240
+01:26:18,460 --> 01:26:23,179
+Additionally if it is a conditional branch instruction, you need to calculate what should
+
+1241
+01:26:23,180 --> 01:26:29,020
+be the target location to which you have to jump to, that is PC plus immediate constant.
+
+1242
+01:26:29,020 --> 01:26:35,460
+So the value of PC, next PC which is available over here and the value of the immediate constant
+
+1243
+01:26:35,460 --> 01:26:42,980
+which is available over there can be added and that value can be passed on over there
+
+1244
+01:26:42,980 --> 01:26:48,020
+and that can again be stored into your PC if the condition is true, correct.
+
+1245
+01:26:48,020 --> 01:26:52,580
+So now you see how that PC plus 4 plus that immediate constant thing is working.
+
+1246
+01:26:52,580 --> 01:26:59,060
+PC plus 4 is computed here, that immediate constant is being added over here and that
+
+1247
+01:26:59,060 --> 01:27:01,420
+value is being put back in there, right.
+
+1248
+01:27:01,420 --> 01:27:06,200
+That is why we always say it is PC plus 4 plus immediate constant, right.
+
+1249
+01:27:06,200 --> 01:27:12,240
+So in the case of a branch instruction, this is where the target location is being computed.
+
+1250
+01:27:12,240 --> 01:27:16,980
+In the case of a load store instruction, this is where the address of that memory location
+
+1251
+01:27:16,979 --> 01:27:18,419
+is being computed.
+
+1252
+01:27:18,419 --> 01:27:22,099
+In the case of an arithmetic instruction, this is where the arithmetic operation is
+
+1253
+01:27:22,099 --> 01:27:23,439
+being performed.
+
+1254
+01:27:23,439 --> 01:27:27,500
+That is why this is called the execute state, correct.
+
+1255
+01:27:27,500 --> 01:27:32,459
+If it is an arithmetic operation, then at the end of this stage you have the value which
+
+1256
+01:27:32,459 --> 01:27:34,379
+is available.
+
+1257
+01:27:34,379 --> 01:27:39,899
+That value is actually going to be written into the destination location.
+
+1258
+01:27:39,899 --> 01:27:43,979
+The destination register you know what it is from the instruction register.
+
+1259
+01:27:43,979 --> 01:27:48,159
+So you know the place where you have to write and you know the value that you want to write,
+
+1260
+01:27:48,159 --> 01:27:49,159
+you can write it down, right.
+
+1261
+01:27:49,159 --> 01:27:54,619
+So if it is an arithmetic instruction add R1, R2, R3, I have fetched the contents of
+
+1262
+01:27:54,619 --> 01:27:59,959
+R2, R3 here, I have added them up and that value is coming, I want to go and write it
+
+1263
+01:27:59,959 --> 01:28:00,959
+back into R1.
+
+1264
+01:28:00,959 --> 01:28:05,979
+That is how instruction execution takes place, right.
+
+1265
+01:28:05,979 --> 01:28:10,919
+If it is a load instruction, I have calculated the address of the memory location that can
+
+1266
+01:28:10,919 --> 01:28:13,419
+now be given to the memory.
+
+1267
+01:28:13,420 --> 01:28:20,500
+I can fetch the contents of that memory location that has to go into the destination register.
+
+1268
+01:28:20,500 --> 01:28:26,300
+So fetching the memory happens in the memory stage, writing that value into the destination
+
+1269
+01:28:26,300 --> 01:28:30,539
+register happens in the write back page, okay.
+
+1270
+01:28:30,539 --> 01:28:31,539
+Question yeah.
+
+1271
+01:28:31,539 --> 01:28:37,859
+Can you, people have to talk a little louder, sorry.
+
+1272
+01:28:37,859 --> 01:28:41,980
+Opcode, where does the opcode go, right.
+
+1273
+01:28:41,979 --> 01:28:42,979
+That is a very good question.
+
+1274
+01:28:42,979 --> 01:28:47,979
+So let us see, what does this say?
+
+1275
+01:28:47,979 --> 01:28:57,099
+Decode, what do we understand by decode?
+
+1276
+01:28:57,099 --> 01:29:03,459
+One is identifying the different parts of that instruction and doing whatever that is
+
+1277
+01:29:03,459 --> 01:29:07,500
+necessary but then what do you do with the opcode part?
+
+1278
+01:29:07,500 --> 01:29:10,739
+Opcode part essentially tells you what operation to be performed.
+
+1279
+01:29:10,739 --> 01:29:21,859
+Actually the control unit takes that and then figures out what needs to be done in each
+
+1280
+01:29:21,859 --> 01:29:23,340
+one of these stages.
+
+1281
+01:29:23,340 --> 01:29:30,099
+Remember everywhere you could see this kind of multiplexers, correct.
+
+1282
+01:29:30,099 --> 01:29:34,819
+You need to know whether you should take this operand or this operand, right.
+
+1283
+01:29:34,819 --> 01:29:39,880
+That depends on whether it is an R instruction or an I instruction, right.
+
+1284
+01:29:39,880 --> 01:29:44,359
+You need to know whether you need to perform an add or subtract or multiply or whatever.
+
+1285
+01:29:44,359 --> 01:29:47,440
+That depends on your opcode, correct.
+
+1286
+01:29:47,440 --> 01:29:52,279
+And if it is a branch instruction then this has to be an add because you want to compute
+
+1287
+01:29:52,279 --> 01:29:53,279
+the target location.
+
+1288
+01:29:53,279 --> 01:29:57,480
+If it is a load instruction you want to compute the effective address.
+
+1289
+01:29:57,480 --> 01:29:59,520
+So you want to again do an add.
+
+1290
+01:29:59,520 --> 01:30:06,440
+So in other words that opcode is taken by the control unit and that control unit sends
+
+1291
+01:30:06,439 --> 01:30:11,639
+the necessary signals to all of these things at the appropriate point in time so that the
+
+1292
+01:30:11,639 --> 01:30:13,879
+appropriate action can take place.
+
+1293
+01:30:13,879 --> 01:30:17,599
+That is why we did not talk about the opcode part, right.
+
+1294
+01:30:17,599 --> 01:30:23,279
+But now you see that the RS1 part, the RS2 part, the RD part, the immediate part, everything
+
+1295
+01:30:23,279 --> 01:30:26,179
+is being taken at some place or the other, right.
+
+1296
+01:30:26,179 --> 01:30:27,179
+Everything is being used, right.
+
+1297
+01:30:27,179 --> 01:30:28,179
+Good, we have almost covered.
+
+1298
+01:30:28,179 --> 01:30:35,399
+So if it is a branch instruction this computes the target location where it has to go.
+
+1299
+01:30:35,399 --> 01:30:39,559
+This part of it computes whether the branch condition is true or false.
+
+1300
+01:30:39,559 --> 01:30:44,759
+If it is true then you will take the target location and that is what you are going to
+
+1301
+01:30:44,759 --> 01:30:46,899
+set it into the program counter.
+
+1302
+01:30:46,899 --> 01:30:52,479
+If it is false you are going to take PC plus 4 and you are going to set that into the target,
+
+1303
+01:30:52,479 --> 01:30:53,479
+okay.
+
+1304
+01:30:53,479 --> 01:30:59,079
+So roughly this is what that happens during instruction execution or this is how instruction
+
+1305
+01:30:59,079 --> 01:31:03,159
+execution takes place in this processor.
+
+1306
+01:31:03,159 --> 01:31:08,039
+Each stage of the processor is pipelined that means that when the ith instruction is in
+
+1307
+01:31:08,039 --> 01:31:12,439
+this stage, i plus 1th instruction will be in this stage, i plus second instruction will
+
+1308
+01:31:12,439 --> 01:31:17,159
+be in this stage, i minus 1th instruction will be in this stage and i minus second instruction
+
+1309
+01:31:17,159 --> 01:31:20,079
+will be in that stage and so on, okay.
+
+1310
+01:31:20,079 --> 01:31:21,079
+That is really what happened.
+
+1311
+01:31:21,079 --> 01:31:22,439
+There are a lot of complications.
+
+1312
+01:31:22,439 --> 01:31:24,720
+I have not gone into the details of this.
+
+1313
+01:31:24,720 --> 01:31:31,199
+In fact processor data path and pipelined execution we take about 3 to 4 classes to
+
+1314
+01:31:31,239 --> 01:31:36,960
+complete the discussion whereas we are describing it in less than 15 minutes, okay.
+
+1315
+01:31:36,960 --> 01:31:41,559
+So obviously we have not talked about all the complications but this gives you an idea
+
+1316
+01:31:41,559 --> 01:31:45,920
+of how exactly instruction execution is taking, okay.
+
+1317
+01:31:45,920 --> 01:31:50,739
+So next thing we are going to talk about is pipelined execution, right.
+
+1318
+01:31:50,739 --> 01:31:56,939
+In pipelined execution as I mentioned earlier each phase, right, is going to operate on
+
+1319
+01:31:56,939 --> 01:32:00,599
+a different instruction in a given point in time, right.
+
+1320
+01:32:00,600 --> 01:32:06,840
+For example when the ith instruction, i1th instruction is going there, this next instruction,
+
+1321
+01:32:06,840 --> 01:32:13,320
+instruction, right, is going to do the fetch when this instruction is doing the decode,
+
+1322
+01:32:13,320 --> 01:32:14,320
+right.
+
+1323
+01:32:14,320 --> 01:32:19,000
+And then in the next cycle you take the next instruction, third instruction and that is
+
+1324
+01:32:19,000 --> 01:32:24,000
+going to go into the fetch phase and so on and so forth, right.
+
+1325
+01:32:24,000 --> 01:32:30,039
+So at a given point in time when the ith instruction is in the write back phase, i plus 1th instruction
+
+1326
+01:32:30,039 --> 01:32:34,399
+would be in the memory phase, i plus second instruction will be in the execute phase and
+
+1327
+01:32:34,399 --> 01:32:35,399
+so on and so forth.
+
+1328
+01:32:35,399 --> 01:32:37,439
+This is a very idealistic view, right.
+
+1329
+01:32:37,439 --> 01:32:44,720
+This may not be exactly how it happens in practice but this is something that happens
+
+1330
+01:32:44,720 --> 01:32:46,960
+in a very ideal situation.
+
+1331
+01:32:46,960 --> 01:32:50,760
+So now if you observe in the end what do you see?
+
+1332
+01:32:50,760 --> 01:32:56,479
+At the end of each cycle you see one instruction complete, right.
+
+1333
+01:32:56,479 --> 01:33:03,719
+If you did not have the pipelined execution, right, where will the next instruction start?
+
+1334
+01:33:03,719 --> 01:33:08,759
+The next instruction can only start here after 5 cycles and then the next instruction can
+
+1335
+01:33:08,759 --> 01:33:11,159
+only start after 5 cycles.
+
+1336
+01:33:11,159 --> 01:33:17,479
+So in a non-pipelined execution you take 5 cycles because of the 5 stages to complete
+
+1337
+01:33:17,479 --> 01:33:18,479
+this instruction.
+
+1338
+01:33:18,479 --> 01:33:25,959
+Whereas in the pipelined execution you still take 5 cycles to execute but your throughput
+
+1339
+01:33:26,439 --> 01:33:30,640
+in such a way that every cycle you get a new instruction, right.
+
+1340
+01:33:30,640 --> 01:33:34,000
+That is really the advantage that you have.
+
+1341
+01:33:34,000 --> 01:33:39,880
+Okay, execution time is still 5 cycles but throughput is improved to 1 instruction per
+
+1342
+01:33:39,880 --> 01:33:40,880
+cycle.
+
+1343
+01:33:40,880 --> 01:33:41,880
+Yeah.
+
+1344
+01:33:41,880 --> 01:33:50,760
+So can you elaborate that question?
+
+1345
+01:33:50,760 --> 01:33:59,280
+Maybe you will give me the answer also.
+
+1346
+01:33:59,280 --> 01:34:05,800
+All instruction, the entire instruction execution for all instructions are pipelined, okay.
+
+1347
+01:34:05,800 --> 01:34:10,480
+So if your question is that if I am doing a load instruction and then I am doing an
+
+1348
+01:34:10,480 --> 01:34:15,680
+add instruction and I am doing let us say a conditional branch instruction, do all of
+
+1349
+01:34:15,680 --> 01:34:19,720
+them go through all of these stages, right.
+
+1350
+01:34:19,720 --> 01:34:23,920
+They all go through all of these stages, some instructions will have some activities
+
+1351
+01:34:23,920 --> 01:34:27,760
+to perform in some stage, some instructions may not have.
+
+1352
+01:34:27,760 --> 01:34:30,680
+For example, you take the memory stage.
+
+1353
+01:34:30,680 --> 01:34:34,840
+The memory stage is useful only for load and store instruction because it is accessing
+
+1354
+01:34:34,840 --> 01:34:38,240
+the memory, right.
+
+1355
+01:34:38,240 --> 01:34:44,240
+All other instructions and all other instruction types do nothing during the memory stage.
+
+1356
+01:34:44,240 --> 01:34:48,440
+That means that they simply wait for one cycle, go to the next stage.
+
+1357
+01:34:48,439 --> 01:34:50,799
+I mean, is not it a waste of time?
+
+1358
+01:34:50,799 --> 01:34:51,799
+Yes.
+
+1359
+01:34:51,799 --> 01:34:56,199
+But then I have simplified my logic so that everybody follows the same path, right.
+
+1360
+01:34:56,199 --> 01:35:01,439
+Let us say you walk through a food counter, right, the different kinds of foods that are
+
+1361
+01:35:01,439 --> 01:35:03,239
+being kept there.
+
+1362
+01:35:03,239 --> 01:35:08,099
+You follow the previous person, who follows the previous person and so on and so forth.
+
+1363
+01:35:08,099 --> 01:35:10,439
+Everybody goes through each one of these stages.
+
+1364
+01:35:10,439 --> 01:35:12,559
+You may not like all the items that are there.
+
+1365
+01:35:12,559 --> 01:35:14,379
+You may skip some.
+
+1366
+01:35:15,380 --> 01:35:17,539
+pipeline to it, correct.
+
+1367
+01:35:17,539 --> 01:35:21,020
+Because after each step, one person comes out of the queue.
+
+1368
+01:35:21,020 --> 01:35:24,900
+If I hold everybody in the queue and then say until the first person finishes taking
+
+1369
+01:35:24,900 --> 01:35:29,420
+all the food items, the next person cannot go, then you are going to wait for a very
+
+1370
+01:35:29,420 --> 01:35:32,500
+long time and you are going to be hungry, correct.
+
+1371
+01:35:32,500 --> 01:35:34,900
+So I allow you to go in a pipeline way.
+
+1372
+01:35:34,900 --> 01:35:38,300
+Each step one person goes through one of those items.
+
+1373
+01:35:38,300 --> 01:35:41,980
+Whether he takes it or not or whether she takes it or not, does not matter.
+
+1374
+01:35:41,980 --> 01:35:42,980
+They go through that.
+
+1375
+01:35:42,980 --> 01:35:43,980
+They go through that.
+
+1376
+01:35:43,979 --> 01:35:48,659
+Like that every instruction goes through all the stages, right.
+
+1377
+01:35:48,659 --> 01:35:51,899
+I think that is probably what you wanted to ask, right.
+
+1378
+01:35:51,899 --> 01:35:53,139
+That is exactly what happened.
+
+1379
+01:35:53,139 --> 01:35:54,139
+Okay.
+
+1380
+01:35:54,139 --> 01:35:59,899
+There are lots of things that I have simplified and I have not really talked about because
+
+1381
+01:35:59,899 --> 01:36:04,579
+they may not be directly relevant for our discussion, right.
+
+1382
+01:36:04,579 --> 01:36:07,899
+I can talk about it for, believe me, I can talk about it for two weeks.
+
+1383
+01:36:07,899 --> 01:36:10,899
+Let us not do that over here.
+
+1384
+01:36:10,899 --> 01:36:11,899
+Okay.
+
+1385
+01:36:11,899 --> 01:36:19,659
+Now, given that all processors today pipeline their execution, right, what are the problems
+
+1386
+01:36:19,659 --> 01:36:21,819
+that come up with and how do we handle that.
+
+1387
+01:36:21,819 --> 01:36:23,460
+That is really what we want to do.
+
+1388
+01:36:23,460 --> 01:36:25,420
+We are going to take a break at 11, right.
+
+1389
+01:36:25,420 --> 01:36:26,420
+Okay.
+
+1390
+01:36:26,420 --> 01:36:28,420
+So we have another 15 minutes or so.
+
+1391
+01:36:28,420 --> 01:36:30,699
+Let us see what this is.
+
+1392
+01:36:30,699 --> 01:36:34,699
+So the picture that I have projected in the earlier slide that everybody goes through
+
+1393
+01:36:34,699 --> 01:36:38,619
+each stage and things move very smoothly is a very ideal situation.
+
+1394
+01:36:39,340 --> 01:36:42,380
+There are several reasons why this may not always happen.
+
+1395
+01:36:42,380 --> 01:36:48,859
+It is because of things like structural hazard or things because of dependencies, data and
+
+1396
+01:36:48,859 --> 01:36:49,859
+control dependencies.
+
+1397
+01:36:49,859 --> 01:36:51,819
+So let us see those examples.
+
+1398
+01:36:51,819 --> 01:36:57,460
+The case of a structural hazard, it happens because more than one unit want to access
+
+1399
+01:36:57,460 --> 01:37:02,460
+the same resource at the same time, more than one instruction want to have access to the
+
+1400
+01:37:02,460 --> 01:37:08,460
+same resource at the same time and that resource can only service one person at a given time.
+
+1401
+01:37:09,300 --> 01:37:10,300
+In which case you will have a hazard.
+
+1402
+01:37:10,300 --> 01:37:13,300
+I will give you examples of that.
+
+1403
+01:37:13,300 --> 01:37:17,300
+The other one is that whenever you have a dependency between two instructions, this
+
+1404
+01:37:17,300 --> 01:37:18,859
+is more important for us.
+
+1405
+01:37:18,859 --> 01:37:22,899
+Whenever you have a dependency between two instructions, the second instruction cannot
+
+1406
+01:37:22,899 --> 01:37:28,460
+be executed until the first instruction has finished producing that value.
+
+1407
+01:37:28,460 --> 01:37:33,819
+So this is an important one and if this happens then we have to stall the pipeline.
+
+1408
+01:37:34,179 --> 01:37:35,739
+The third thing is control hazards.
+
+1409
+01:37:35,739 --> 01:37:40,619
+When you have branch instructions, you have to jump to a different location and then start
+
+1410
+01:37:40,619 --> 01:37:41,619
+fetching from that.
+
+1411
+01:37:41,619 --> 01:37:45,859
+Typically, you will fetch instruction, the next instruction, the next instruction and
+
+1412
+01:37:45,859 --> 01:37:46,899
+so on.
+
+1413
+01:37:46,899 --> 01:37:51,659
+But then if I have a branch less than or branch greater than instruction, the next instruction
+
+1414
+01:37:51,659 --> 01:37:56,059
+I have to fetch might be at a far off place and I do not even know where that far off
+
+1415
+01:37:56,059 --> 01:37:57,059
+place is.
+
+1416
+01:37:57,059 --> 01:37:58,939
+Need not have to be very very far off.
+
+1417
+01:37:59,059 --> 01:38:03,939
+Even if it is few instructions away, I still do not know what that address is.
+
+1418
+01:38:03,939 --> 01:38:08,379
+So I cannot do instruction fetch until I figure out whether the branch has to be taken or
+
+1419
+01:38:08,379 --> 01:38:10,259
+not taken.
+
+1420
+01:38:10,259 --> 01:38:15,179
+So these are the situations which cause hazards and because of these hazards what happened
+
+1421
+01:38:15,179 --> 01:38:17,739
+is that you will have stalls in the pipeline.
+
+1422
+01:38:17,739 --> 01:38:19,899
+We will explain that in the next few slides.
+
+1423
+01:38:19,899 --> 01:38:26,899
+Structural hazard, let us look at a specific instruction, a specific example.
+
+1424
+01:38:27,859 --> 01:38:29,739
+Let us say the ith instruction is a load word instruction.
+
+1425
+01:38:29,739 --> 01:38:31,779
+So what is it going to do?
+
+1426
+01:38:31,779 --> 01:38:40,259
+It is going to fetch the contents of R2 plus 8 and load it into R3.
+
+1427
+01:38:40,259 --> 01:38:48,939
+When is it going to actually do the computation of R2 plus 8 in the execution stage?
+
+1428
+01:38:48,939 --> 01:38:53,019
+When is it going to fetch the memory location?
+
+1429
+01:38:53,019 --> 01:38:54,019
+In the memory.
+
+1430
+01:38:54,140 --> 01:39:00,300
+For now we are making a very simplified assumption that any operation that we specify in any
+
+1431
+01:39:00,300 --> 01:39:03,300
+of these phases can be completed in one cycle.
+
+1432
+01:39:03,300 --> 01:39:08,860
+Particularly when I say that the contents of the memory location R2 plus 8 has to be
+
+1433
+01:39:08,860 --> 01:39:13,860
+fetched from memory, I am saying that it is going to be done in one cycle.
+
+1434
+01:39:13,860 --> 01:39:20,900
+It may be an unreasonable expectation because I said memory is several hundred cycles access
+
+1435
+01:39:20,900 --> 01:39:21,900
+time.
+
+1436
+01:39:22,779 --> 01:39:26,699
+So how is it going to be accessed in one cycle?
+
+1437
+01:39:26,699 --> 01:39:27,699
+We do not know.
+
+1438
+01:39:27,699 --> 01:39:31,379
+But for the time being let us assume that it is going to be accessed in one cycle.
+
+1439
+01:39:31,379 --> 01:39:34,219
+Maybe the value is available in your cache.
+
+1440
+01:39:34,219 --> 01:39:40,019
+Therefore you can access it in one cycle.
+
+1441
+01:39:40,019 --> 01:39:44,819
+So we are going to assume that memory access is going to take place and is going to take
+
+1442
+01:39:44,819 --> 01:39:46,619
+one cycle.
+
+1443
+01:39:46,619 --> 01:39:50,920
+What did we say about instruction fetch?
+
+1444
+01:39:50,940 --> 01:39:58,600
+The memory location pointed by the PC program counter is fetched and that is the instruction
+
+1445
+01:39:58,600 --> 01:40:00,640
+that you want to execute.
+
+1446
+01:40:00,640 --> 01:40:04,079
+Again we said that that is going to happen in the instruction fetch phase.
+
+1447
+01:40:04,079 --> 01:40:05,560
+We are fetching a memory location.
+
+1448
+01:40:05,560 --> 01:40:09,039
+We are saying that it is going to take one cycle.
+
+1449
+01:40:09,039 --> 01:40:13,199
+Again maybe we will assume that it is in the instruction cache and we are able to access
+
+1450
+01:40:13,199 --> 01:40:15,239
+it in one cycle.
+
+1451
+01:40:15,239 --> 01:40:16,239
+No problem.
+
+1452
+01:40:16,239 --> 01:40:17,239
+Right?
+
+1453
+01:40:17,479 --> 01:40:22,199
+But even if I assume all of these things, what is going to happen?
+
+1454
+01:40:22,199 --> 01:40:25,279
+Let us see.
+
+1455
+01:40:25,279 --> 01:40:30,939
+So I have instruction i, i plus 1, i plus 2 and when instruction i plus 3 has to be
+
+1456
+01:40:30,939 --> 01:40:37,000
+fetched, it has to be fetched from the memory.
+
+1457
+01:40:37,000 --> 01:40:44,439
+At the same time my ith instruction which is a load instruction is also trying to fetch
+
+1458
+01:40:44,439 --> 01:40:45,439
+something from the memory.
+
+1459
+01:40:45,639 --> 01:40:48,319
+Here you are trying to fetch some data value from the memory.
+
+1460
+01:40:48,319 --> 01:40:52,119
+Here you are trying to fetch a instruction from the memory.
+
+1461
+01:40:52,119 --> 01:41:00,339
+But if the memory has only one port and can only service one request, then what happens?
+
+1462
+01:41:00,339 --> 01:41:01,719
+Then you have a problem.
+
+1463
+01:41:01,719 --> 01:41:03,199
+One of them have to wait.
+
+1464
+01:41:03,199 --> 01:41:06,119
+Always the later person has to wait.
+
+1465
+01:41:06,119 --> 01:41:07,119
+Right?
+
+1466
+01:41:07,119 --> 01:41:11,799
+So this kind of a problem is what is called the structural hazard.
+
+1467
+01:41:11,800 --> 01:41:17,119
+So if there is a structural hazard, then you say okay you wait for a second, let that person
+
+1468
+01:41:17,119 --> 01:41:19,320
+finish and then go.
+
+1469
+01:41:19,320 --> 01:41:20,960
+And then what happens?
+
+1470
+01:41:20,960 --> 01:41:26,400
+This instruction is going to start in the next cycle.
+
+1471
+01:41:26,400 --> 01:41:32,360
+So if you see the completion, if this completes at time t, at time t plus 1 nothing comes
+
+1472
+01:41:32,360 --> 01:41:33,360
+out.
+
+1473
+01:41:33,360 --> 01:41:38,039
+Whereas at time t plus 2, the next instruction comes out.
+
+1474
+01:41:38,039 --> 01:41:41,760
+So this is what we are going to call as a stall or a bubble.
+
+1475
+01:41:41,760 --> 01:41:47,640
+So when you open the tap, water comes, sometimes air comes in between.
+
+1476
+01:41:47,640 --> 01:41:48,640
+That is the bubble.
+
+1477
+01:41:48,640 --> 01:41:49,640
+Right?
+
+1478
+01:41:49,640 --> 01:41:50,920
+That is exactly what it is.
+
+1479
+01:41:50,920 --> 01:41:52,800
+The pipeline is executing.
+
+1480
+01:41:52,800 --> 01:41:57,439
+In the ideal situation it would have got one instruction coming out every cycle.
+
+1481
+01:41:57,439 --> 01:42:02,680
+But because of the structural hazard, you now have a bubble.
+
+1482
+01:42:02,680 --> 01:42:05,800
+That means that nothing is coming out during that cycle.
+
+1483
+01:42:05,800 --> 01:42:06,800
+Right?
+
+1484
+01:42:07,480 --> 01:42:13,000
+This instruction comes out at t, at t plus 1 nothing comes out, at t plus 2 this instruction
+
+1485
+01:42:13,000 --> 01:42:14,000
+comes out.
+
+1486
+01:42:14,000 --> 01:42:15,000
+Okay?
+
+1487
+01:42:15,000 --> 01:42:16,000
+That is structural hazard.
+
+1488
+01:42:16,000 --> 01:42:17,000
+Okay?
+
+1489
+01:42:17,000 --> 01:42:21,560
+There are architectural solutions or hardware solutions for taking care of structural hazards.
+
+1490
+01:42:21,560 --> 01:42:23,039
+We will not worry about it.
+
+1491
+01:42:23,039 --> 01:42:24,680
+This is not an architecture lecture.
+
+1492
+01:42:24,680 --> 01:42:26,039
+So we can move forward.
+
+1493
+01:42:26,039 --> 01:42:27,960
+Let us talk about data hazard.
+
+1494
+01:42:27,960 --> 01:42:29,600
+This is very important for us.
+
+1495
+01:42:29,600 --> 01:42:30,600
+Okay?
+
+1496
+01:42:30,600 --> 01:42:32,800
+Let us say my ith instruction is this.
+
+1497
+01:42:32,800 --> 01:42:35,840
+Add the contents of r1 and r2.
+
+1498
+01:42:35,840 --> 01:42:38,000
+Put it in r3.
+
+1499
+01:42:38,000 --> 01:42:48,279
+My i plus 1th instruction is subtract r8 from r3 and put the result in r4.
+
+1500
+01:42:48,279 --> 01:42:50,720
+Now let us see what happens.
+
+1501
+01:42:50,720 --> 01:42:52,520
+Right?
+
+1502
+01:42:52,520 --> 01:42:55,300
+Interesting?
+
+1503
+01:42:55,300 --> 01:43:03,159
+This instruction produces a value which is going to be consumed by this instruction.
+
+1504
+01:43:03,159 --> 01:43:05,319
+And these people are executing in a pipelined fashion.
+
+1505
+01:43:05,319 --> 01:43:09,359
+If they are not executing in a pipelined fashion there is no problem because at the end of
+
+1506
+01:43:09,359 --> 01:43:11,479
+this I allow this instruction to go.
+
+1507
+01:43:11,479 --> 01:43:14,559
+The value will be available in r3 and I can take that.
+
+1508
+01:43:14,559 --> 01:43:15,559
+No problem.
+
+1509
+01:43:15,559 --> 01:43:18,519
+Non-pipelined executions there is no issue.
+
+1510
+01:43:18,519 --> 01:43:19,519
+Right?
+
+1511
+01:43:19,519 --> 01:43:22,279
+But in a pipelined execution.
+
+1512
+01:43:22,279 --> 01:43:23,960
+Right?
+
+1513
+01:43:23,960 --> 01:43:26,479
+This instruction goes through the execute stage.
+
+1514
+01:43:26,479 --> 01:43:30,079
+Memory stage where it does not probably do anything.
+
+1515
+01:43:31,079 --> 01:43:36,880
+it is going to write the result value in the r3 register.
+
+1516
+01:43:36,880 --> 01:43:37,880
+That is what we saw.
+
+1517
+01:43:37,880 --> 01:43:38,880
+Correct?
+
+1518
+01:43:38,880 --> 01:43:41,039
+Only in the write back stage.
+
+1519
+01:43:41,039 --> 01:43:43,840
+And let us say that is going to happen in time t equal to 5.
+
+1520
+01:43:43,840 --> 01:43:48,559
+Whereas this instruction which is the next instruction would have started instruction
+
+1521
+01:43:48,559 --> 01:43:54,159
+fetch in time 2 and would have done decode and operand fetch in time 3.
+
+1522
+01:43:54,159 --> 01:43:59,680
+And if it goes and looks in register r3 would that value be available?
+
+1523
+01:43:59,680 --> 01:44:01,279
+Right?
+
+1524
+01:44:01,279 --> 01:44:05,840
+Because the value is going to be written in r3 only during this cycle.
+
+1525
+01:44:05,840 --> 01:44:06,840
+Only at cycle 5.
+
+1526
+01:44:06,840 --> 01:44:13,559
+If you try to read it in cycle 3 some previous value is what you will get.
+
+1527
+01:44:13,559 --> 01:44:18,639
+This is a true dependency what is called read after write dependency.
+
+1528
+01:44:18,639 --> 01:44:19,639
+Okay?
+
+1529
+01:44:19,639 --> 01:44:21,039
+Read after write.
+
+1530
+01:44:21,039 --> 01:44:22,039
+Right?
+
+1531
+01:44:22,039 --> 01:44:25,680
+Read has to happen after this write has happened.
+
+1532
+01:44:25,680 --> 01:44:26,680
+Okay?
+
+1533
+01:44:26,680 --> 01:44:28,199
+Read after write.
+
+1534
+01:44:28,199 --> 01:44:33,960
+And because of this read after write dependency can we proceed with this instruction?
+
+1535
+01:44:33,960 --> 01:44:34,960
+No.
+
+1536
+01:44:34,960 --> 01:44:37,079
+If you proceed with this instruction we will produce garbage.
+
+1537
+01:44:37,079 --> 01:44:38,079
+Right?
+
+1538
+01:44:38,079 --> 01:44:43,479
+So, at this stage when you figure out that this is going to read r3 which is actually
+
+1539
+01:44:43,479 --> 01:44:47,239
+the destination register for the previous instruction.
+
+1540
+01:44:47,239 --> 01:44:50,840
+You have to put a hold stop on this instruction.
+
+1541
+01:44:50,840 --> 01:44:51,840
+Right?
+
+1542
+01:44:51,840 --> 01:44:53,560
+So, this instruction is going to be stalled.
+
+1543
+01:44:53,560 --> 01:44:57,640
+It is going to be stalled from the id stage onwards.
+
+1544
+01:44:57,640 --> 01:44:58,640
+Right?
+
+1545
+01:44:58,640 --> 01:45:04,640
+So, again all I said have been written over there.
+
+1546
+01:45:04,640 --> 01:45:07,680
+I did not do the animation but you can see that.
+
+1547
+01:45:07,680 --> 01:45:13,440
+So, when this instruction is stopped okay at cycle 3 in the id stage.
+
+1548
+01:45:13,440 --> 01:45:14,440
+Right?
+
+1549
+01:45:14,440 --> 01:45:16,000
+It is going to create a bubble.
+
+1550
+01:45:16,000 --> 01:45:18,440
+Let us look at the animation.
+
+1551
+01:45:19,359 --> 01:45:24,879
+So here what you need to do is that you need to wait until this value is being written
+
+1552
+01:45:24,879 --> 01:45:25,879
+in this location.
+
+1553
+01:45:25,879 --> 01:45:32,679
+So, I will stall this instruction even in the next cycle and if my hardware is intelligent
+
+1554
+01:45:32,679 --> 01:45:38,679
+enough that this writing value takes place during the first half of this stage and I
+
+1555
+01:45:38,679 --> 01:45:43,399
+can possibly read it in the second half of the stage then this instruction can do the
+
+1556
+01:45:43,399 --> 01:45:45,519
+read in cycle 5.
+
+1557
+01:45:46,160 --> 01:45:48,560
+If that is not the case I can do it in cycle 6.
+
+1558
+01:45:48,560 --> 01:45:54,600
+So, it is either 2 stall cycles or 3 stall cycles depending on how aggressive my hardware
+
+1559
+01:45:54,600 --> 01:45:55,600
+is.
+
+1560
+01:45:55,600 --> 01:45:57,800
+But essentially there is a stall.
+
+1561
+01:45:57,800 --> 01:45:58,800
+Right?
+
+1562
+01:45:58,800 --> 01:46:04,400
+Because of the dependency there is a stall and that stall causes these bubbles.
+
+1563
+01:46:04,400 --> 01:46:05,400
+Understand?
+
+1564
+01:46:05,400 --> 01:46:06,400
+Okay.
+
+1565
+01:46:06,400 --> 01:46:13,400
+That is something that we are going to talk about subsequently.
+
+1566
+01:46:13,399 --> 01:46:16,799
+So the time being what we will do is that I have to service these people as and when
+
+1567
+01:46:16,799 --> 01:46:19,960
+they come in the order in which they come.
+
+1568
+01:46:19,960 --> 01:46:25,359
+Then if this instruction stalls all previous instructions also sorry all subsequent instructions
+
+1569
+01:46:25,359 --> 01:46:30,239
+also stop because somebody is in front of the queue he is not moving.
+
+1570
+01:46:30,239 --> 01:46:33,599
+You cannot knock him out and then move forward.
+
+1571
+01:46:33,599 --> 01:46:34,599
+Correct?
+
+1572
+01:46:34,599 --> 01:46:36,359
+So, everybody kind of stops.
+
+1573
+01:46:36,359 --> 01:46:40,960
+That is the assumption that we are going to make.
+
+1574
+01:46:40,960 --> 01:46:41,960
+Okay?
+
+1575
+01:46:41,960 --> 01:46:47,960
+So, if you see here so if there is a subtract instruction that gets stalled by 2 cycles
+
+1576
+01:46:47,960 --> 01:46:50,199
+that subtract instruction is dependent on that.
+
+1577
+01:46:50,199 --> 01:46:55,000
+If there are subsequent instruction they also get stalled whether they are dependent on
+
+1578
+01:46:55,000 --> 01:46:58,920
+this or not they get stalled because this previous instruction has stalled.
+
+1579
+01:46:58,920 --> 01:46:59,920
+Right?
+
+1580
+01:46:59,920 --> 01:47:04,680
+So, in all of these situations what happens is that whenever you have these bubbles or
+
+1581
+01:47:04,680 --> 01:47:05,680
+stalls.
+
+1582
+01:47:05,680 --> 01:47:06,680
+Right?
+
+1583
+01:47:06,680 --> 01:47:09,000
+They cause your throughput to go down.
+
+1584
+01:47:09,000 --> 01:47:12,640
+From the ideal one instruction per cycle you will go down.
+
+1585
+01:47:12,640 --> 01:47:17,640
+That is the way by which you can calculate if every 5th instruction has one stall cycle.
+
+1586
+01:47:17,640 --> 01:47:18,640
+Right?
+
+1587
+01:47:18,640 --> 01:47:25,359
+Instead of getting a throughput of one instruction every cycle you will only have 4 instructions
+
+1588
+01:47:25,359 --> 01:47:26,960
+in 5 cycles.
+
+1589
+01:47:26,960 --> 01:47:27,960
+That is 0.8.
+
+1590
+01:47:27,960 --> 01:47:28,960
+Right?
+
+1591
+01:47:28,960 --> 01:47:33,039
+Your IPC comes down instructions per cycle comes down.
+
+1592
+01:47:33,039 --> 01:47:34,039
+Okay?
+
+1593
+01:47:34,039 --> 01:47:36,279
+Let us look at what is control has.
+
+1594
+01:47:36,279 --> 01:47:37,279
+Okay?
+
+1595
+01:47:37,279 --> 01:47:41,439
+So, maybe this is so maybe it is a good time to take a break because there are more things
+
+1596
+01:47:41,439 --> 01:47:42,719
+that we need to see here.
+
+1597
+01:47:42,719 --> 01:47:45,239
+So, let us stop here.
+

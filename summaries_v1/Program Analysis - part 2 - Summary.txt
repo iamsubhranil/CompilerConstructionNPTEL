@@ -1,0 +1,16 @@
+ **Technical Terms & Key Points:**
+
+1. *LLVM*: A collection of modular and reusable compiler and toolchain technologies. Contains several components: Clang, OPT, etc.
+2. *Clang*: Frontend compiler for C family languages that converts source code into LLVM IR.
+3. *OPT*: Pass manager for applying optimizations to LLVM IR in a specified order.
+4. *LLVM IR*: Low-Level Virtual Machine Intermediate Representation, a platform-independent assembly-like language.
+5. *Bytecode*: Lower-level binary representation of LLVM IR suitable for further processing and optimization.
+6. *Pass*: Modules responsible for performing specific operations on LLVM IR, e.g., optimization, analysis, or translation.
+7. *Shared Library*: Reusable dynamically linked library that can be loaded at runtime.
+8. *LD\_LIBRARY\_PATH*: Environment variable specifying paths for searching shared libraries.
+9. *Module Pass*: Type of pass capable of analyzing the entire module (all functions) in a given IR.
+10. *Function Pass*: Type of pass operating on individual functions in a given IR.
+11. *runOnFunction():* Method of Function Pass that processes each function individually.
+12. *Register Pass*: Registering custom passes with LLVM to utilize them in the pipeline.
+
+In summary, the lecture covers the basics of using LLVM and its associated tools, such as Clang and OPT. Additionally, it explains how to compile and load custom passes as shared objects, configure LD\_LIBRARY\_PATH, and register passes for usage within the framework. Furthermore, essential components like Module Pass, Function Pass, and the `runOnFunction()` method were introduced. Mastering these concepts enables users to create powerful custom analyses and optimizations utilizing the extensible capabilities of LLVM.

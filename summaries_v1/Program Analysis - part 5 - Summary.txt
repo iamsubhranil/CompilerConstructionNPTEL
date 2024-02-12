@@ -1,0 +1,13 @@
+ Technical Terms:
+
+* Gen and Kill Sets: These are sets used in data flow analysis to track definitions and uses of variables. The "gen" set contains definitions that are generated in a basic block, and the "kill" set contains definitions that are killed (overwritten) in a basic block.
+* Reaching Definitions Analysis: A data flow analysis that determines which definitions reach a specific point in a program. It is a forward analysis that uses the gen and kill sets to calculate the incoming definitions at each point.
+* Available Expressions Analysis: A data flow analysis that determines which expressions are available at a specific point in a program. It is a forward analysis that uses the gen and kill sets to calculate the outgoing expressions at each point.
+* Transfer Function: A function that maps the incoming values of a data flow analysis to the outgoing values based on the statements in a basic block.
+* Meet Operation: An operation that combines the results of two analyses to produce a combined result. In data flow analysis, the meet operation is typically the union or intersection of two sets.
+* Soundness: A property of an analysis that ensures that the analysis produces correct results. If an analysis is sound, any optimization performed based on the analysis will not introduce incorrect behavior.
+* Over Approximation: A technique used in data flow analysis to ensure soundness by producing an analysis result that includes all possible behaviors, even if some of those behaviors are impossible in practice. This can lead to missed optimization opportunities, but ensures that the program behaves correctly.
+* Separability: A property of an analysis that allows it to analyze independent components of a program separately without affecting the accuracy of the analysis.
+* Constant Propagation Analysis: A data flow analysis that tracks the values of variables throughout a program and attempts to determine when a variable is guaranteed to have a constant value.
+* Faint Variables: A concept in data flow analysis that refers to variables that are rarely used or have limited scope.
+* Lattice Theory: A mathematical theory used to formalize data flow analysis and provide a solid foundation for proving the properties of analyses.

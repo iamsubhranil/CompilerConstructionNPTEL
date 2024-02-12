@@ -1,0 +1,2628 @@
+1
+00:00:00,000 --> 00:00:07,040
+It is essentially data types ok.
+
+2
+00:00:07,040 --> 00:00:09,599
+Now, I do not have slides for this.
+
+3
+00:00:09,599 --> 00:00:14,720
+So, we will try to code up things and try to look at it ok, but everyone understands
+
+4
+00:00:14,720 --> 00:00:17,080
+what is a data type in a language right.
+
+5
+00:00:17,080 --> 00:00:23,839
+So, every variable which you declare has some type int float char right.
+
+6
+00:00:23,839 --> 00:00:27,920
+So, how do compilers implement these things?
+
+7
+00:00:27,920 --> 00:00:35,320
+Now, one of the things you have to realize is languages like C do not really specify
+
+8
+00:00:35,320 --> 00:00:37,840
+all the details for a data type ok.
+
+9
+00:00:37,840 --> 00:00:45,120
+For example, when we say int is a data type in C, int C language standard does not say
+
+10
+00:00:45,120 --> 00:00:47,760
+what is the size of int ok.
+
+11
+00:00:47,760 --> 00:00:52,880
+It does not specify all the characteristics of it and some of these things are deferred
+
+12
+00:00:52,880 --> 00:00:54,719
+to be specified by ABI ok.
+
+13
+00:00:55,439 --> 00:00:59,039
+That is why size of int is actually dependent on ABI ok.
+
+14
+00:00:59,039 --> 00:01:03,200
+So, that is some aspect which we kind of already talked briefly about.
+
+15
+00:01:03,200 --> 00:01:12,120
+Now, let us look at some of the other aspects where we have say a structure right.
+
+16
+00:01:12,120 --> 00:01:21,640
+So, how does how is a structure implemented can does anyone have any idea?
+
+17
+00:01:21,640 --> 00:01:25,280
+What all needs to happen for implementing a struct?
+
+18
+00:01:25,280 --> 00:01:26,280
+Correct.
+
+19
+00:01:26,280 --> 00:01:38,560
+So, we need to have storage for the structure which again will be to some way dependent
+
+20
+00:01:38,560 --> 00:01:45,000
+on ABI right because size of integer is 4 bytes is stated by ABI ok.
+
+21
+00:01:45,000 --> 00:01:50,640
+But one other thing which C says in terms of structures it just like array all the members
+
+22
+00:01:50,640 --> 00:01:52,840
+will be contiguous ok.
+
+23
+00:01:52,840 --> 00:01:57,239
+So, but there might be padding in between ok.
+
+24
+00:01:57,239 --> 00:02:05,079
+So, if I take a char pointer to a structure I should be able to traverse it ok and get
+
+25
+00:02:05,079 --> 00:02:06,560
+to the next data elements.
+
+26
+00:02:06,560 --> 00:02:11,960
+Now, in context of this structure what is the size of this structure?
+
+27
+00:02:11,960 --> 00:02:15,560
+5 bytes.
+
+28
+00:02:16,159 --> 00:02:26,640
+5 bytes ok.
+
+29
+00:02:26,640 --> 00:02:28,439
+Let me make the question simpler.
+
+30
+00:02:28,439 --> 00:02:36,920
+So, what is size of this struct?
+
+31
+00:02:36,920 --> 00:02:41,879
+How many of you think this structure has size 8?
+
+32
+00:02:41,879 --> 00:02:42,879
+Almost everyone.
+
+33
+00:02:43,199 --> 00:02:48,919
+Let us verify it once ok.
+
+34
+00:02:48,919 --> 00:02:55,759
+So, we got 8 ok.
+
+35
+00:02:55,759 --> 00:02:57,319
+Why is it 8?
+
+36
+00:02:57,319 --> 00:03:04,159
+So, character took 1 byte, but since integer had to be aligned to 4 bytes we had to leave
+
+37
+00:03:04,159 --> 00:03:07,199
+bytes 1 to 3 right.
+
+38
+00:03:07,519 --> 00:03:11,079
+Now, in this case what happens?
+
+39
+00:03:25,079 --> 00:03:27,919
+So, this is going to take 4 bytes.
+
+40
+00:03:27,919 --> 00:03:34,839
+Character does not have any requirement for padding or alignment.
+
+41
+00:03:35,479 --> 00:03:38,759
+So, it can be actually at byte 5 right.
+
+42
+00:03:38,759 --> 00:03:44,719
+So, should the size of this structure be 5?
+
+43
+00:03:44,719 --> 00:03:45,719
+What will be the size?
+
+44
+00:03:45,719 --> 00:03:54,719
+It has to be because it has to make an array of this particular then that array must also
+
+45
+00:03:54,719 --> 00:03:58,120
+be made a byte of your.
+
+46
+00:03:58,120 --> 00:04:00,360
+Let us test that hypothesis.
+
+47
+00:04:00,880 --> 00:04:07,960
+This structure also actually has size of 8 and the reason is what he was saying.
+
+48
+00:04:07,960 --> 00:04:14,440
+It is not because the standalone object of this structure needs standalone object should
+
+49
+00:04:14,440 --> 00:04:21,560
+be able to fit in 5 bytes without any problem, but when we create an array of structures
+
+50
+00:04:21,560 --> 00:04:26,360
+the next element of the structure must be again 4 byte aligned.
+
+51
+00:04:26,360 --> 00:04:28,759
+So, there must be some padding in between.
+
+52
+00:04:29,159 --> 00:04:32,240
+Now, where should this padding be accounted for?
+
+53
+00:04:32,240 --> 00:04:34,959
+Should it really be accounted for in the object?
+
+54
+00:04:34,959 --> 00:04:37,959
+So, let us say I created a structure.
+
+55
+00:04:37,959 --> 00:04:50,319
+So, let us say I created my struct S of 100 is size of S 0 8 bytes or can we have a scheme
+
+56
+00:04:50,319 --> 00:04:59,839
+where we have size of S 0 is 5 bytes, size of S 1 is 5 bytes and there is a padding in
+
+57
+00:04:59,839 --> 00:05:00,839
+between.
+
+58
+00:05:00,839 --> 00:05:07,839
+Each of them have to be created because if you write them to a file, it will be your
+
+59
+00:05:07,839 --> 00:05:10,519
+struct and if you write it in the back, they all need to be.
+
+60
+00:05:10,519 --> 00:05:11,519
+Correct.
+
+61
+00:05:11,519 --> 00:05:13,279
+So, you have to make it a part of the object.
+
+62
+00:05:13,279 --> 00:05:19,719
+It cannot be something hidden outside the object.
+
+63
+00:05:19,720 --> 00:05:22,200
+Does that make sense?
+
+64
+00:05:22,200 --> 00:05:26,760
+Now, what is the alignment requirement?
+
+65
+00:05:26,760 --> 00:05:28,880
+Itself is again specified by the ABI.
+
+66
+00:05:28,880 --> 00:05:36,360
+It is not that everything has to have the alignment of that much size.
+
+67
+00:05:36,360 --> 00:05:41,840
+For example, if I create array of 100 elements, it does not mean I need to have alignment
+
+68
+00:05:41,840 --> 00:05:43,840
+of 100 into 4.
+
+69
+00:05:44,839 --> 00:05:50,519
+It is the alignment of the individual element that matters.
+
+70
+00:05:50,519 --> 00:05:51,919
+Is that clear?
+
+71
+00:05:51,919 --> 00:06:09,039
+Now switching back gears to C plus plus.
+
+72
+00:06:09,039 --> 00:06:10,039
+What do you think?
+
+73
+00:06:10,040 --> 00:06:11,040
+Correct.
+
+74
+00:06:11,040 --> 00:06:16,040
+Let us try that.
+
+75
+00:06:16,040 --> 00:06:25,040
+So, let us say I make this car.
+
+76
+00:06:25,040 --> 00:06:31,800
+So, it is 2.
+
+77
+00:06:31,800 --> 00:06:36,439
+So, there is no unnecessary thing that everything has to be 4 byte.
+
+78
+00:06:36,439 --> 00:06:39,680
+It can be smaller than that.
+
+79
+00:06:39,680 --> 00:06:46,279
+So, the structs, it will be essentially decided by what is the largest size member in your
+
+80
+00:06:46,279 --> 00:06:47,279
+structure.
+
+81
+00:06:47,279 --> 00:06:53,959
+So, if your largest size member is double or 8 bytes, then it needs to be 8 byte.
+
+82
+00:06:53,959 --> 00:06:56,639
+Now, let us look at C plus plus.
+
+83
+00:06:56,639 --> 00:07:02,000
+Now, C plus plus supports things like classes.
+
+84
+00:07:02,000 --> 00:07:03,399
+Everyone knows a class.
+
+85
+00:07:03,879 --> 00:07:13,159
+So, you have a class which has some private members and then I can have some public members
+
+86
+00:07:13,159 --> 00:07:16,159
+which can take some parameters.
+
+87
+00:07:34,399 --> 00:07:35,759
+This could have been a constructor.
+
+88
+00:07:35,759 --> 00:07:50,839
+I am just writing some code for understanding.
+
+89
+00:07:50,839 --> 00:07:53,839
+What will be the size of this?
+
+90
+00:08:03,839 --> 00:08:06,839
+So, this is the size of the class.
+
+91
+00:08:06,839 --> 00:08:09,839
+So, this is the size of the class.
+
+92
+00:08:09,839 --> 00:08:12,839
+So, this is the size of the class.
+
+93
+00:08:12,839 --> 00:08:15,839
+So, this is the size of the class.
+
+94
+00:08:15,839 --> 00:08:18,839
+So, this is the size of the class.
+
+95
+00:08:18,839 --> 00:08:21,839
+So, this is the size of the class.
+
+96
+00:08:21,839 --> 00:08:24,839
+So, this is the size of the class.
+
+97
+00:08:24,839 --> 00:08:27,839
+So, this is the size of the class.
+
+98
+00:08:27,839 --> 00:08:30,839
+So, this is the size of the class.
+
+99
+00:08:31,279 --> 00:08:34,279
+So, this is the size of the class.
+
+100
+00:08:34,279 --> 00:08:37,279
+So, this is the size of the class.
+
+101
+00:08:37,279 --> 00:08:40,279
+So, this is the size of the class.
+
+102
+00:08:40,279 --> 00:08:43,279
+So, this is the size of the class.
+
+103
+00:08:43,279 --> 00:08:46,279
+So, this is the size of the class.
+
+104
+00:08:46,279 --> 00:08:49,279
+So, this is the size of the class.
+
+105
+00:08:49,279 --> 00:08:52,279
+So, this is the size of the class.
+
+106
+00:08:52,279 --> 00:08:55,279
+So, this is the size of the class.
+
+107
+00:08:55,279 --> 00:08:58,279
+So, this is the size of the class.
+
+108
+00:08:58,279 --> 00:09:01,279
+So, this is the size of the class.
+
+109
+00:09:01,279 --> 00:09:04,279
+So, this is the size of the class.
+
+110
+00:09:04,279 --> 00:09:07,279
+So, this is the size of the class.
+
+111
+00:09:07,279 --> 00:09:10,279
+So, this is the size of the class.
+
+112
+00:09:10,279 --> 00:09:13,279
+So, this is the size of the class.
+
+113
+00:09:13,279 --> 00:09:16,279
+So, this is the size of the class.
+
+114
+00:09:16,279 --> 00:09:19,279
+So, this is the size of the class.
+
+115
+00:09:19,279 --> 00:09:22,279
+So, this is the size of the class.
+
+116
+00:09:22,279 --> 00:09:25,279
+So, this is the size of the class.
+
+117
+00:09:25,279 --> 00:09:28,279
+What will be the size of this?
+
+118
+00:09:35,279 --> 00:09:38,279
+So, classes have data as well as functions.
+
+119
+00:09:45,279 --> 00:09:48,279
+8 bytes.
+
+120
+00:09:51,279 --> 00:09:54,279
+So, it is 8 bytes.
+
+121
+00:09:54,279 --> 00:10:07,279
+The reason is as he said, functions are simply not going to occupy any memory in the object, because every object will not have different function.
+
+122
+00:10:07,279 --> 00:10:10,279
+The functions are kind of shared by all the objects.
+
+123
+00:10:10,279 --> 00:10:23,279
+So, it does not make sense to store functions as part of the objects, plus that will complicate other things, because you will have text section within the data segment, which is going to be another weird thing.
+
+124
+00:10:23,279 --> 00:10:26,279
+If you make it part of the object.
+
+125
+00:10:26,279 --> 00:10:35,279
+Now, when we say something is private versus public, what does it really mean?
+
+126
+00:10:35,279 --> 00:10:40,279
+Is there going to be some sort of a memory protection?
+
+127
+00:10:44,279 --> 00:10:46,279
+So, can I modify?
+
+128
+00:10:46,279 --> 00:10:48,279
+So, let me do this.
+
+129
+00:10:48,279 --> 00:10:50,279
+So, let me call.
+
+130
+00:10:50,279 --> 00:10:55,279
+So, I do s dot foo 4 comma 5.
+
+131
+00:10:55,279 --> 00:11:09,279
+So, let me print s dot get x, get a.
+
+132
+00:11:09,279 --> 00:11:16,279
+So, let me write a method called get a.
+
+133
+00:11:35,279 --> 00:11:37,279
+And I got the value of a.
+
+134
+00:11:37,279 --> 00:11:44,279
+Now, if I wanted to modify a in main, is there a way to do that?
+
+135
+00:11:49,279 --> 00:11:59,279
+So, one option is if I want to modify main in main, I can call a function called set a or change a or update a whatever.
+
+136
+00:11:59,279 --> 00:12:02,279
+But that is standard thing.
+
+137
+00:12:02,279 --> 00:12:07,279
+Is there something more evil I can do to actually change value of a?
+
+138
+00:12:11,279 --> 00:12:21,279
+So, I could create a pointer p, which will hold, which will point to s.
+
+139
+00:12:23,279 --> 00:12:27,279
+And I do star s is equal to 10.
+
+140
+00:12:32,279 --> 00:12:34,279
+Sorry, star p.
+
+141
+00:12:55,279 --> 00:12:57,279
+And it actually printed 10.
+
+142
+00:12:57,279 --> 00:13:09,279
+So, what happened is essentially since I know s only holds data and it is going to hold in these specific order, I could actually change it.
+
+143
+00:13:09,279 --> 00:13:14,279
+So, there is no private public whatever you have is not giving you any runtime protection.
+
+144
+00:13:14,279 --> 00:13:20,279
+It is merely a compile time protection where the at compile time you cannot say s dot a outside the class.
+
+145
+00:13:20,279 --> 00:13:22,279
+Does that make sense?
+
+146
+00:13:22,279 --> 00:13:26,279
+Now, what I did here, does anyone know what is this called?
+
+147
+00:13:26,279 --> 00:13:30,279
+There is a term for these kind of things.
+
+148
+00:13:30,279 --> 00:13:38,279
+Has anyone heard of something called as type punning as a term?
+
+149
+00:13:38,279 --> 00:13:40,279
+No.
+
+150
+00:13:40,279 --> 00:13:43,279
+Has anyone heard of this?
+
+151
+00:13:43,279 --> 00:13:53,279
+So, one of the things which data types allow to languages is you know all these things, but you also now know compilers.
+
+152
+00:13:53,279 --> 00:13:57,279
+So, let me just say that I have a data type.
+
+153
+00:13:57,279 --> 00:13:59,279
+So, I have a data type.
+
+154
+00:13:59,279 --> 00:14:01,279
+So, I have a data type.
+
+155
+00:14:01,279 --> 00:14:03,279
+So, I have a data type.
+
+156
+00:14:03,279 --> 00:14:05,279
+So, I have a data type.
+
+157
+00:14:06,279 --> 00:14:10,279
+And the company does not want to differently add working class code.
+
+158
+00:14:10,279 --> 00:14:13,279
+So, this must also have a different configuration.
+
+159
+00:14:13,279 --> 00:14:15,279
+How do we do this?
+
+160
+00:14:15,279 --> 00:14:18,279
+To show that everyone published a webappropriation code.
+
+161
+00:14:18,279 --> 00:14:22,279
+So, a 구 Hypered ci is not able to do it.
+
+162
+00:14:22,279 --> 00:14:41,079
+pointer. And let us say I do PTR, let us say I read something from PTR, then I read, then
+
+163
+00:14:41,080 --> 00:14:52,120
+I write something to PTR 2 and then I read again from PTR. So, here I let us say read
+
+164
+00:14:52,120 --> 00:15:07,240
+A is equal to star PTR, star PTR is equal to 5.0 and I read again B is equal to star
+
+165
+00:15:07,240 --> 00:15:19,560
+PTR for some reason this, something like this. Now, can compiler translate this to A is equal
+
+166
+00:15:19,559 --> 00:15:42,679
+to star PTR, star PTR is equal to 5.0, B is equal to A. Can compiler do this? Correct.
+
+167
+00:15:42,679 --> 00:15:53,639
+So, the problem is if I call this function as something like this and A comma and A where
+
+168
+00:15:53,639 --> 00:15:59,839
+both these pointers were pointing to the same location, then this optimization is illegal,
+
+169
+00:16:01,039 --> 00:16:07,519
+because it would accidentally end up have different effect than what programmer wanted.
+
+170
+00:16:08,519 --> 00:16:16,519
+But actually it is legal for compiler to do this. Compiler can do this optimization,
+
+171
+00:16:16,519 --> 00:16:33,240
+because of a rule in language called as strict aliasing. What languages like CC++ say is,
+
+172
+00:16:33,360 --> 00:16:43,720
+if you have a location, you can have a pointer to it of the data type of that location. So,
+
+173
+00:16:43,720 --> 00:16:50,320
+if I have a integer stored in memory, I could have a integer pointer to it, I could have a
+
+174
+00:16:50,320 --> 00:16:57,519
+character pointer to it, but I cannot have any other pointer to it. So, I cannot have a float
+
+175
+00:16:57,600 --> 00:17:08,440
+pointer pointing to an integer or a int pointer pointing to a float or a struct pointer pointing
+
+176
+00:17:08,440 --> 00:17:20,720
+to a int and so on. This allows compiler to say that since integer PTR is a int pointer
+
+177
+00:17:20,720 --> 00:17:27,000
+and PTR 2 is a float pointer, they should not be pointing to the same location.
+
+178
+00:17:27,000 --> 00:17:34,079
+This is called type based alias analysis, where languages say that two pointers of
+
+179
+00:17:34,079 --> 00:17:42,880
+different types must point to different locations. But you know that you can still write code like
+
+180
+00:17:42,880 --> 00:17:50,700
+this which I wrote to modify. What I did here, I said address of S is actually an integer pointer,
+
+181
+00:17:50,700 --> 00:18:00,620
+and I modified it. Here, I broke the rules of strict aliasing and it results in undefined
+
+182
+00:18:00,620 --> 00:18:09,779
+behavior. So, types allow you to do, compilers are free to rely on this and if you are doing
+
+183
+00:18:09,779 --> 00:18:16,380
+a trick like this which I did, then it is undefined and your program may not work as expected. So,
+
+184
+00:18:16,380 --> 00:18:22,860
+although it works in this particular instance, compiler is free to make assumption that S and
+
+185
+00:18:22,860 --> 00:18:30,540
+pointer are pointing to different locations. So, data types in languages like C also have
+
+186
+00:18:30,540 --> 00:18:36,740
+some aid for pointer analysis because what they allow you to do is they allow compiler
+
+187
+00:18:36,740 --> 00:18:46,060
+to distinguish two pointers are not strictly pointing to the same location. Now, why char star
+
+188
+00:18:46,059 --> 00:18:53,019
+is allowed any idea? So, what I said is to any location you can have a pointer of that type or
+
+189
+00:18:53,019 --> 00:19:05,579
+a char star pointer. So, if this was instead of float star, if it was char star, then this
+
+190
+00:19:05,579 --> 00:19:12,259
+optimization cannot be done by compiler because compiler cannot prove or assume that PTR and PTR
+
+191
+00:19:12,259 --> 00:19:20,700
+point PTR to point to two different locations. Any idea why special treatment for char star?
+
+192
+00:19:20,700 --> 00:19:34,859
+Correct. So, if char star was not allowed, then there is no legal way for you to implement
+
+193
+00:19:35,099 --> 00:19:42,819
+functions like mem copy. You cannot implement mem copy in C complying to the standard because
+
+194
+00:19:42,819 --> 00:19:48,299
+you have to assume the data is byte by byte and you are copying it to some different. So,
+
+195
+00:19:48,299 --> 00:19:55,859
+if you did not allow char star an exception, the problem would be that you cannot implement
+
+196
+00:19:55,859 --> 00:20:00,979
+mem copy which is complying to the standard. So, standard cannot say that mem copy is not
+
+197
+00:20:00,980 --> 00:20:08,420
+possible. So, they had to allow char star an exception, but every other things standard says
+
+198
+00:20:08,420 --> 00:20:15,140
+that two pointers must be pointing to their own data types and cannot point to. So, int and
+
+199
+00:20:15,140 --> 00:20:20,900
+correct float cannot point to the same location. If you write that code, you might see some warning
+
+200
+00:20:20,900 --> 00:20:27,019
+saying strict aliasing rules are being violated or type burning is being done both of which are
+
+201
+00:20:27,019 --> 00:20:38,539
+undefined for the language. Yeah, void is just like void. So, compiler cannot make out of what
+
+202
+00:20:38,539 --> 00:20:46,460
+it is pointing to. Now, there is also something called as restrict. I do not know how many of
+
+203
+00:20:46,460 --> 00:20:53,460
+you have. So, there is I forgot the syntax, but it is something like this where you can say it
+
+204
+00:20:53,460 --> 00:21:01,140
+is a restrict pointer. So, by declaring something as restrict, you are giving this guarantee to the
+
+205
+00:21:01,140 --> 00:21:09,740
+compiler that the location pointed by ptr2 is not pointed by any other pointer. So, these kind of
+
+206
+00:21:09,740 --> 00:21:22,180
+things you can do in your program to help compiler solve pointer analysis to some extent. Does that
+
+207
+00:21:22,180 --> 00:21:28,860
+make sense? So, in data types we just saw, I mean we kind of digressed a bit, but we saw that data
+
+208
+00:21:28,860 --> 00:21:38,820
+types help layout the data within the any structure or aggregate and data types can also be used by
+
+209
+00:21:38,820 --> 00:21:44,860
+pointer analysis in the compiler. Any other questions which you have on data types which
+
+210
+00:21:44,859 --> 00:21:54,779
+may have heard and do not know or what is confusing. I think we can. Yes.
+
+211
+00:22:14,859 --> 00:22:22,779
+Because they simply store in higher format. For example, the example which you gave,
+
+212
+00:22:22,779 --> 00:22:35,419
+let us try that. So, 0.7 is not representable. So, let us say when I do float f is equal to 0.7 and
+
+213
+00:22:35,420 --> 00:22:43,539
+I do print f percent f slash n f, I do not really get 0.7.
+
+214
+00:23:05,420 --> 00:23:21,259
+Actually, it did print. Let us try some other number.
+
+215
+00:23:36,180 --> 00:23:41,660
+So, these two were kind of gone, because it could not represent this number. Now,
+
+216
+00:23:41,660 --> 00:23:57,900
+if we simply change this to double. Actually, no it is not representable.
+
+217
+00:24:11,660 --> 00:24:29,340
+Do you know a number which is not precisely representable? Kind of trying to. No.
+
+218
+00:25:11,660 --> 00:25:21,740
+I will need to work out, but we need a number which is not precisely representable in float.
+
+219
+00:25:21,740 --> 00:25:27,980
+And what needs to happen is for languages like Python, etc. they will actually support higher
+
+220
+00:25:27,980 --> 00:25:32,580
+precision. So, they will start storing everything in higher precision to get that accuracy.
+
+221
+00:25:32,579 --> 00:25:44,740
+I do not know actually. But they have to, I do not see any reason how can they not do
+
+222
+00:25:44,740 --> 00:25:52,379
+arithmetic in IEEE 754. Yes.
+
+223
+00:25:52,380 --> 00:26:03,300
+I will need to check. I do not know any other things.
+
+224
+00:26:03,299 --> 00:26:27,700
+Correct, it does. And that is why, but information hiding was more of a logical thing that did not
+
+225
+00:26:28,700 --> 00:26:35,539
+something at runtime which changed it. So, a strict implementation would say that somehow
+
+226
+00:26:35,539 --> 00:26:42,299
+you need to ensure that it is not modifiable even at runtime. But that you can imagine is very hard
+
+227
+00:26:42,299 --> 00:26:49,420
+to implement scheme. Because what will happen is for every object, you will somehow need to say
+
+228
+00:26:49,420 --> 00:26:55,539
+that this region of code is allowed to access this memory, but this other region of code is not allowed
+
+229
+00:26:55,539 --> 00:27:00,819
+to access this memory. And that itself could be very hard to implement. Because there are,
+
+230
+00:27:00,819 --> 00:27:05,740
+at least if you look at the current processors, they do not have a way to say that it is accessible
+
+231
+00:27:05,740 --> 00:27:15,420
+only for this, but not for that. Even in Java, I do not see how that would work. Because if you get.
+
+232
+00:27:15,420 --> 00:27:31,539
+Correct. Allow you to do this. So, there are couple of things. One is your type checking must
+
+233
+00:27:31,539 --> 00:27:37,019
+be very strict where you are simply not allowed to compile such code. And one other thing is
+
+234
+00:27:37,019 --> 00:27:41,820
+Java actually can do this because it is running in a managed environment. So, runtime can actually
+
+235
+00:27:42,019 --> 00:27:48,099
+keep track of multiple things and do it. It may not be doing it by default, but it is at least in
+
+236
+00:27:48,099 --> 00:27:55,299
+theory possible for runtime to manage it. In raw processor level, there is no such protection which
+
+237
+00:27:55,299 --> 00:28:04,619
+exists. So, if you get some raw access, you can do anything. Next is function overloading. Everyone
+
+238
+00:28:04,619 --> 00:28:15,819
+understands C++ supports something called as function overloading. So, essentially function
+
+239
+00:28:15,819 --> 00:28:24,779
+overloading is nothing but have ability to define a same function multiple times with
+
+240
+00:28:24,779 --> 00:28:37,139
+different parameters. So, I have int foo, I have void foo which takes int x.
+
+241
+00:28:54,779 --> 00:29:18,460
+So, if you look at this code, essentially I have function foo which does not take parameter. And
+
+242
+00:29:19,460 --> 00:29:28,940
+I have function foo which does take parameter and I call them. How does this work? Any idea?
+
+243
+00:29:28,940 --> 00:29:36,180
+How does compiler know that this foo is actually calling the first foo and this second foo is
+
+244
+00:29:36,180 --> 00:29:47,620
+actually calling the second foo? So, from signature it will try to figure out. And what
+
+245
+00:29:47,779 --> 00:30:04,139
+is part of the signature? Is a return value part of it? So, let us do it this way. So,
+
+246
+00:30:04,139 --> 00:30:13,439
+I have two foo, one which returns a value. So, let me say return 4 and one which does not return
+
+247
+00:30:13,440 --> 00:30:26,720
+a value. Is this allowed? Is this allowed? So, I have two foos. So, let me collect the return
+
+248
+00:30:26,720 --> 00:30:53,920
+value here int x. So, do you think this will work as expected? Say it is error, new declaration
+
+249
+00:30:53,920 --> 00:31:01,279
+of void foo, ambiguous old declaration of int foo. So, it is not allowed. So, you cannot have
+
+250
+00:31:01,279 --> 00:31:07,960
+two overloaded functions differ on the return value. And the reason being return value is
+
+251
+00:31:07,960 --> 00:31:13,480
+something which you may or may not get. For example, here when foo is called, how do I know
+
+252
+00:31:13,480 --> 00:31:19,080
+I do not want I want a version which did not return a value versus I want a version which
+
+253
+00:31:19,079 --> 00:31:24,720
+returned a value which I am not trying to collect. So, there is some ambiguity here.
+
+254
+00:31:24,720 --> 00:31:34,119
+That is why this is not allowed. But when I have parameters, then I know what I am trying to do.
+
+255
+00:31:38,240 --> 00:31:46,319
+And then it will work. Is this clear to everyone? Now, let us try something more interesting. So,
+
+256
+00:31:46,319 --> 00:32:03,279
+I have say function overloading 2 dot CPP where I say I want extern int foo. And I have here
+
+257
+00:32:03,279 --> 00:32:27,399
+function say void bar which calls foo. And here let me call bar. Now, let me try to compile this
+
+258
+00:32:27,400 --> 00:32:42,120
+program. This also worked. And it correctly worked. So, when I called foo from bar,
+
+259
+00:32:42,120 --> 00:32:54,600
+it also worked. So, how did this work? How did bar know which foo to call? Because at compile time,
+
+260
+00:32:54,599 --> 00:33:02,919
+compiler can say this foo is calling one with the parameter. So, I must call the second foo.
+
+261
+00:33:02,919 --> 00:33:09,439
+And in this case, I am calling the foo which does not take parameter. So, here how did it work?
+
+262
+00:33:09,440 --> 00:33:26,640
+Correct. Now, in the elf symbol table, if there are two symbols with name foo,
+
+263
+00:33:26,640 --> 00:33:37,080
+what will happen? How does linker know that foo taking parameter is different from foo
+
+264
+00:33:37,119 --> 00:33:44,359
+taking no parameter? Remember, we were seeing in elf symbol table everything had an entry.
+
+265
+00:33:44,359 --> 00:33:50,439
+Now, if there are two symbols which had same name foo, one which took parameter,
+
+266
+00:33:50,439 --> 00:34:05,119
+one which did not took parameter. Correct. So, that is where name mangling comes into
+
+267
+00:34:05,119 --> 00:34:13,359
+picture. So, let us look at the object file for this. So, when I do func overloading.cpp,
+
+268
+00:34:13,359 --> 00:34:28,759
+if I read the symbol table, I do not see foo. I see something called as underscore z3 foo,
+
+269
+00:34:29,720 --> 00:34:40,240
+then I see something called as underscore z3 foo i. So, this compiler is not actually putting
+
+270
+00:34:40,240 --> 00:34:46,360
+foo as it is into the object file. It is actually changing name of it and the name it changed this
+
+271
+00:34:46,360 --> 00:34:56,760
+way. So, we have underscore z which is actually the prefix. This is the string length of the
+
+272
+00:34:56,760 --> 00:35:03,560
+function name. How big is the function name? Then we have foo, then v is indicating it does
+
+273
+00:35:03,560 --> 00:35:14,640
+not take any parameter void. Here it takes integer as the parameter. Is it clear? So,
+
+274
+00:35:14,640 --> 00:35:22,760
+linker is doing. So, compiler whenever it is compiling any program, it does this mangling
+
+275
+00:35:22,760 --> 00:35:29,600
+for functions. Now, tell me can it do mangling only when the function is overloaded or it should
+
+276
+00:35:29,600 --> 00:35:37,000
+do always. So, should the mangling happen only for function which is overloaded or should it
+
+277
+00:35:37,000 --> 00:35:54,920
+happen irrespective of anything? Correct. So, when you are reading elf or any consumer is
+
+278
+00:35:54,920 --> 00:36:02,199
+reading elf, it will not know foo means underscore z3 foo v or whatever. So, it cannot happen
+
+279
+00:36:02,359 --> 00:36:10,759
+unconditionally. Does everyone agree with that? Now, tell me when this file is there,
+
+280
+00:36:10,759 --> 00:36:21,960
+how does compiler know that foo which is extern would have been mangled? So, if you now compile
+
+281
+00:36:21,960 --> 00:36:48,199
+this second file and if you look at read elf, it actually says foo which is undefined is also
+
+282
+00:36:48,199 --> 00:36:57,319
+mangled because you have no idea to know whether a function will be overloaded or not overloaded.
+
+283
+00:36:57,319 --> 00:37:11,279
+So, you have to unconditionally mangle. Is this clear to everyone? Every function in C plus plus
+
+284
+00:37:11,280 --> 00:37:19,960
+gets mangled irrespective of whether there is function overloading or not. Now, one of the
+
+285
+00:37:19,960 --> 00:37:27,000
+interesting things is function overloading is not the only reason why mangling needs to be done.
+
+286
+00:37:28,040 --> 00:37:34,519
+There are other features in C plus plus language which force mangling to be done. Have you heard
+
+287
+00:37:34,519 --> 00:37:44,519
+of something called as namespaces? So, namespace allow you to define your own namespaces in which
+
+288
+00:37:44,519 --> 00:37:51,639
+you may have functions. So, foo function may be present with the same signature in one namespace
+
+289
+00:37:51,639 --> 00:37:58,679
+and with the same signature in other namespace. So, it needs to be mangled. When you have different
+
+290
+00:37:58,679 --> 00:38:08,359
+classes which overwrite the methods, there needs to be mangling. So, mangling is kind of a fundamental
+
+291
+00:38:08,359 --> 00:38:16,719
+thing which is present everywhere in C plus plus. So, does that make sense? Now, tell me let us say
+
+292
+00:38:16,719 --> 00:38:30,719
+I have some program which I have written in C plus plus and I want to call it from C. Is that possible?
+
+293
+00:38:30,719 --> 00:38:47,639
+Now, the question is how will C know what is the mangling? Because when C compiler is compiling
+
+294
+00:38:47,639 --> 00:38:55,480
+your C code and when it sees extern void bar, it is going to assume it is called bar. It is not
+
+295
+00:38:55,480 --> 00:39:03,920
+going to assume it is going to be called underscore Z3 bar V. Is the problem clear to everyone? If I
+
+296
+00:39:03,920 --> 00:39:10,440
+have a C plus plus code which I want to call from C, the C compiler when it compiles anything,
+
+297
+00:39:10,440 --> 00:39:17,480
+we saw when we called printf in the object file it came as printf. It did not came as underscores
+
+298
+00:39:17,480 --> 00:39:24,840
+Z3 printf something something. So, when I call bar, it is also going to come as bar only,
+
+299
+00:39:24,840 --> 00:39:36,880
+but what is the actual definition is different. We can try that. So, let us say funk o dot C
+
+300
+00:39:36,880 --> 00:39:55,000
+and let us say I say extern int of 4. Sorry. Correct. So, in that case you cannot have two
+
+301
+00:39:55,000 --> 00:40:02,039
+fun overloaded instances which take variable number of arguments. So, you just there is a
+
+302
+00:40:02,039 --> 00:40:09,719
+mangling. I will come to that, but his question let us keep printf aside for a moment, but the
+
+303
+00:40:09,719 --> 00:40:15,440
+question is if my function is var arc function, I do not know all the parameters of it. So,
+
+304
+00:40:15,440 --> 00:40:22,039
+how will I mangle it? So, the mangling scheme itself will be simply that you say somehow that
+
+305
+00:40:22,039 --> 00:40:27,599
+this is a var arc function and you cannot have another instance of the same thing which is
+
+306
+00:40:27,599 --> 00:40:31,799
+overloaded differently. So, you can have only one instance of a var arc function.
+
+307
+00:40:31,799 --> 00:40:43,759
+C does not mangle. C does not have overloading support function overloading support only exist
+
+308
+00:40:43,759 --> 00:40:56,679
+in C plus plus. So, I have extern int foo which I am declaring in my C program and I have bar
+
+309
+00:40:56,679 --> 00:41:21,159
+in which I call foo. So, couple of things. So, now we have this CPP file which says there is
+
+310
+00:41:21,199 --> 00:41:27,519
+something external called bar which I am calling and it is defining foo and I have another file
+
+311
+00:41:27,519 --> 00:41:42,079
+which is defining bar and as extern of foo. Now, let us try this. So, I do GCC. So,
+
+312
+00:41:42,079 --> 00:42:01,880
+I compiled my C code. Now, I am going to link it.
+
+313
+00:42:12,079 --> 00:42:18,039
+So, it says there is some undefined reference to foo and it says some undefined reference to bar
+
+314
+00:42:19,559 --> 00:42:25,319
+and if you look at the elf you will actually see why that is coming. So, read elf dash s.
+
+315
+00:42:25,319 --> 00:42:35,679
+So, funk over which was trying to look at a C plus plus symbol is simply saying there is something
+
+316
+00:42:35,679 --> 00:42:40,599
+called foo which is undefined. So, it did not do any mangling because C does not have mangling
+
+317
+00:42:40,599 --> 00:42:53,599
+and the bar was also defined to be just bar underscore plain bar. Now, if I look at the
+
+318
+00:42:53,599 --> 00:43:08,480
+other object file it says look for I am defining something called underscore z 3 foo v and this
+
+319
+00:43:08,480 --> 00:43:20,280
+is saying look for a function underscore z 3 bar v. So, there is some issue. Does everyone
+
+320
+00:43:20,280 --> 00:43:26,240
+understand the problem? So, you cannot call a C function directly from a C plus plus code
+
+321
+00:43:26,240 --> 00:43:35,240
+and C plus plus function directly from C code. There is a way for calling a C function from
+
+322
+00:43:35,239 --> 00:43:45,479
+C plus plus directly. So, whenever you have to call a C function from C plus plus you have to
+
+323
+00:43:45,479 --> 00:44:02,799
+declare it as extern C. Now, if I try to compile this code I only get undefined reference to foo.
+
+324
+00:44:02,800 --> 00:44:11,440
+I do not get undefined reference to bar because when I said extern C this is an indication to
+
+325
+00:44:11,440 --> 00:44:30,039
+the C plus plus compiler to say please do not mangle this. Now, can I do this? So,
+
+326
+00:44:30,079 --> 00:44:40,199
+if I overload functions and I try to mark them extern C that will not work because then the
+
+327
+00:44:40,199 --> 00:44:48,840
+names have to be unique. So, I cannot have extern C functions with same name multiple times. So,
+
+328
+00:44:48,840 --> 00:44:54,239
+if I want to use C plus plus style feature like namespaces etcetera etcetera then all of those
+
+329
+00:44:54,239 --> 00:45:01,519
+will be mangled. That means I cannot interface that code with C directly. The only way you can
+
+330
+00:45:01,519 --> 00:45:07,599
+do this is by creating additional wrappers. So, what you can do is you can create if you wanted
+
+331
+00:45:07,599 --> 00:45:14,759
+to expose foo. So, you can create say foo 1 which calls this foo internally and foo 1 is declared
+
+332
+00:45:14,759 --> 00:45:21,159
+as extern C and then you say foo 2 that is declared as extern C and so on. Is it clear?
+
+333
+00:45:21,159 --> 00:45:31,359
+So, all these features end up requiring mangling of some sort. The next thing we are going to look
+
+334
+00:45:31,359 --> 00:45:40,719
+at is inline functions. Everyone understood the you must have learned function inlining as an
+
+335
+00:45:40,719 --> 00:45:48,440
+optimization in your earlier classes. So, you saw that compiler is capable of removing the
+
+336
+00:45:48,440 --> 00:45:58,200
+function call completely. Now, can someone tell me why function calls are costly? Why are function
+
+337
+00:45:58,200 --> 00:46:12,480
+calls costly? So, one aspect is the aspect of branch itself because you were executing this
+
+338
+00:46:12,480 --> 00:46:19,860
+path then you suddenly started executing this path. What are the problems with that? No,
+
+339
+00:46:19,860 --> 00:46:28,159
+just the transfer of the control. Correct. So, what happens is once you are executing something,
+
+340
+00:46:28,159 --> 00:46:34,079
+you have instruction cache which is fetching data back to back. As soon as you need to transfer
+
+341
+00:46:34,079 --> 00:46:40,440
+control to somewhere else, your iCache needs to be flushed because now you are executing something
+
+342
+00:46:40,599 --> 00:46:47,039
+else. When we looked at the function calls in details, we saw that it is just not simply
+
+343
+00:46:47,039 --> 00:46:54,639
+jumping to some program point and executing it. Around function calls, you have lot of other
+
+344
+00:46:54,639 --> 00:47:00,559
+overheads because you had to do all the caller save register saving and once you jump into the
+
+345
+00:47:00,559 --> 00:47:05,679
+function, you have to do callee save register handling and so on. So, the function calls are
+
+346
+00:47:05,679 --> 00:47:12,359
+costly not just because of the branch but the associated operations which need to happen to
+
+347
+00:47:12,359 --> 00:47:20,079
+make function call work. That is why C++ has a way to say please inline this function. Compiler
+
+348
+00:47:20,079 --> 00:47:28,960
+will do it by default, but you also have a choice of marking something as inline. Now,
+
+349
+00:47:28,960 --> 00:47:39,199
+I have code which is declaring a function called max as inline because it is a very small routing.
+
+350
+00:47:39,199 --> 00:47:46,880
+It is just computing max between two integers. Now, I have this in dot h file. Then I have inline
+
+351
+00:47:46,880 --> 00:47:54,920
+1 dot cpp which calls this function and calls some other external function foo and it includes
+
+352
+00:47:54,920 --> 00:48:04,280
+inline dot h and then I have inline 2 which also includes inline dot h and calls max function.
+
+353
+00:48:04,280 --> 00:48:16,519
+Will this work? So, I have two programs both of which are including inline dot h which defined
+
+354
+00:48:16,519 --> 00:48:32,360
+the function max. Let us try that. So, I do g c i dot h saying please look for all the header files
+
+355
+00:48:32,360 --> 00:48:50,320
+in this folder. So, it worked and it did print whatever it wanted to print. Why did it work?
+
+356
+00:49:02,360 --> 00:49:07,120
+So, what did we learn yesterday that there are all the functions are strong symbols.
+
+357
+00:49:07,120 --> 00:49:20,680
+So, this is let me just recap. So, yesterday what we saw was there if you have a function
+
+358
+00:49:20,680 --> 00:49:28,079
+which is defined multiple times, then it is a problem because linker considers them as
+
+359
+00:49:28,920 --> 00:49:36,360
+symbols. When we were looking at d s o, I kind of invalidated that statement because
+
+360
+00:49:36,360 --> 00:49:46,119
+you were able to override it, but that happened only in d s o. Let us try this. So, let me
+
+361
+00:49:46,119 --> 00:49:57,840
+try to make this as non inline function. It actually gave multiple definitions. So, multiple
+
+362
+00:49:57,840 --> 00:50:06,720
+functions with same name is not allowed unless they are overloaded. Why did inline allow it then?
+
+363
+00:50:06,720 --> 00:50:19,700
+So, why am I allowed to have two functions with same name which are inline?
+
+364
+00:50:19,699 --> 00:50:34,980
+Correct. So, the reasoning is when we look at inline 1 dot c p p when the call to this is done,
+
+365
+00:50:34,980 --> 00:50:46,059
+the function is already inline. So, there is no max for the linker to c. Does that make sense?
+
+366
+00:50:46,059 --> 00:50:57,860
+Now, this is bit weird because inlining is an optimization. What if I compile this program
+
+367
+00:50:57,860 --> 00:51:14,559
+with dash o 0? Dash o 0 means please do not optimize anything. How many of you think it
+
+368
+00:51:14,559 --> 00:51:28,320
+will be an error now because compiler did not inline it? Now, let us look at let us try to.
+
+369
+00:51:35,119 --> 00:51:41,960
+So, let me simply compile it with dash o 0. So, what we are saying is we should not see max in
+
+370
+00:51:42,000 --> 00:51:52,280
+inline 1 dot o. Everyone agrees with that. We should not have max as a function in inline 1 dot o.
+
+371
+00:51:52,280 --> 00:52:20,800
+There is max z 3 max i. Now, let us look at inline 2. Welcome to. So, even this has max. Now,
+
+372
+00:52:20,800 --> 00:52:33,400
+the interesting part to look at is it is weak. It is not global. So, if this was not inline
+
+373
+00:52:33,400 --> 00:52:48,600
+function. Now, let us try it again. Now, max is actually global. So, when we had inline,
+
+374
+00:52:48,639 --> 00:52:55,799
+when we marked it inline, linker as in the compiler actually made it a weak symbol.
+
+375
+00:52:55,799 --> 00:53:01,759
+And remember what was the semantic of weak symbol? If there are multiple weak symbols,
+
+376
+00:53:01,759 --> 00:53:10,880
+anyone it chose and that is why this works. So, you can actually have multiple max functions
+
+377
+00:53:10,880 --> 00:53:16,880
+in object files coming together. But in the final executable which you will have,
+
+378
+00:53:16,880 --> 00:53:29,640
+there is only one copy of max. Does it make sense? Now, tell me in what cases compiler may
+
+379
+00:53:29,640 --> 00:53:36,200
+not be able to inline the max function. One is o 0 which we saw in o 0 compiler should not inline.
+
+380
+00:53:36,200 --> 00:53:43,599
+Are there any other cases where compiler may not inline it? That is a heuristic. So,
+
+381
+00:53:43,599 --> 00:53:48,440
+if you have very large function, it may not get inline. Any other cases?
+
+382
+00:53:48,440 --> 00:53:54,779
+. Correct. So, if you have a recursive function,
+
+383
+00:53:54,779 --> 00:54:00,440
+which you have marked as inline, then there is no way to inline it. So,
+
+384
+00:54:00,440 --> 00:54:08,400
+recursive is 1, large could be 1. I mean compiler may still try to inline it. Any other case?
+
+385
+00:54:13,960 --> 00:54:15,159
+. Pointers.
+
+386
+00:54:15,159 --> 00:54:22,360
+. Correct. So, if you take address of an inline function, compiler has to keep it. Compiler
+
+387
+00:54:22,360 --> 00:54:28,920
+cannot inline it. I mean it can inline it, but it also has to keep a copy of that function,
+
+388
+00:54:28,920 --> 00:54:36,519
+because someone may call that function through function pointer. So, far what we have seen is
+
+389
+00:54:36,519 --> 00:54:43,400
+there is some mechanism to mark some symbols as weak. Remember yesterday I told you that
+
+390
+00:54:43,400 --> 00:54:51,039
+uninitialized global is one of the cases of weak. There are other cases. This is one case,
+
+391
+00:54:51,960 --> 00:55:00,160
+where you have inline functions, they need to be weak. And this is one case where one definition
+
+392
+00:55:00,160 --> 00:55:06,519
+rule of C plus plus is violated, because at link time you actually had two copy of max and
+
+393
+00:55:06,840 --> 00:55:13,800
+two definitions, but since they were weak that was ok. So, ODR has exception for weak symbols.
+
+394
+00:55:16,920 --> 00:55:24,199
+Clear? Next things, templates. How many of you know what is a template?
+
+395
+00:55:24,199 --> 00:55:38,759
+. So, templates are essentially a flavor of generic programming, where you can have some
+
+396
+00:55:38,759 --> 00:55:45,799
+function which works on generic type. So, let us say I do something like this. So, I have some
+
+397
+00:55:45,800 --> 00:56:00,160
+header file template dot h, where I define a template with some type name t and I define
+
+398
+00:56:00,160 --> 00:56:11,800
+the same function max which takes t a, t b and it is going to return if a is greater than b,
+
+399
+00:56:11,800 --> 00:56:26,680
+then return a else return b. Does everyone get this? Now, actually sorry I should just
+
+400
+00:56:26,679 --> 00:56:49,960
+put declaration here. So, let me move this to here. So, I have a max function which is template
+
+401
+00:56:50,119 --> 00:57:01,639
+and I define its body in template dot cpp. Now, I have some client dot cpp which is going to
+
+402
+00:57:01,639 --> 00:57:18,279
+include template dot h and stdio dot h. Then I am going to call max, max of 5 comma 4.
+
+403
+00:57:31,639 --> 00:57:43,079
+Yeah, I mean actually it should not matter in this case because. So, now let us try this. So,
+
+404
+00:57:43,079 --> 00:57:55,000
+I do g plus plus first I will compile template dot cpp, template dot cpp dash c. So, I can later
+
+405
+00:57:55,000 --> 00:58:09,400
+link it against my client program and then I do client dot sorry what was that client dot cpp.
+
+406
+00:58:25,559 --> 00:58:37,400
+So, it says undefined reference to int max int int int something. Any idea what happened?
+
+407
+00:58:38,280 --> 00:58:55,480
+So, in client when I call main it is not able to find it. So, here I am calling max which is
+
+408
+00:58:55,480 --> 00:59:02,920
+declared in template dot h and defined in template dot cpp. That is the traditional way of how you
+
+409
+00:59:02,920 --> 00:59:08,760
+write your things. You have a dot h which has declaration and you have dot c or dot cpp which
+
+410
+00:59:08,760 --> 00:59:15,079
+has implementation and the client code simply includes the header file. Why does this not work?
+
+411
+00:59:15,079 --> 00:59:33,000
+No. So, let us look at how templates work right. For template to work
+
+412
+00:59:33,000 --> 00:59:45,559
+when compiler looks at template dot cpp does it know what its t going to be?
+
+413
+00:59:46,920 --> 00:59:49,960
+How does it going to figure out where is t coming from?
+
+414
+00:59:49,960 --> 01:00:05,960
+As in how does it know that there is some code which is going to call max with int as t.
+
+415
+01:00:09,720 --> 01:00:17,559
+So, there is a version of max function with t as integer right. Then there is a version of max
+
+416
+01:00:18,279 --> 01:00:27,079
+with t as float. Then there is a version of max with t as xyz. So, when compiler compiles template
+
+417
+01:00:27,079 --> 01:00:37,960
+dot cpp can it generate all the combinations? It cannot because it does not even know what
+
+418
+01:00:37,960 --> 01:00:44,840
+combinations to generate. Like for example, if it generates int float char, but this might also
+
+419
+01:00:44,840 --> 01:00:50,360
+be called with some class object with overloaded less than greater than and other things.
+
+420
+01:00:52,120 --> 01:01:00,120
+So, compiler has no way of knowing when compiling template dot cpp what code to generate.
+
+421
+01:01:01,720 --> 01:01:11,800
+When client includes max there is no information of how information flowing from here into template
+
+422
+01:01:11,800 --> 01:01:23,240
+dot cpp of how to create a version of max with integer right. Let us try something different now.
+
+423
+01:01:23,240 --> 01:01:38,680
+Let us take all of this and put this in header file. Now let us try compiling this code and I
+
+424
+01:01:38,679 --> 01:01:48,679
+do not need template dot o and now it works. Because in header file the template was included
+
+425
+01:01:48,679 --> 01:01:53,960
+here and when compiler saw there is something called as max as the template and it is being
+
+426
+01:01:53,960 --> 01:02:05,399
+called from here. Then it created an instance of max with int and int. Does that make sense?
+
+427
+01:02:05,400 --> 01:02:12,200
+I simply copied the definition of the template from cpp to dot h.
+
+428
+01:02:15,639 --> 01:02:23,720
+Without this there is no way compiler can generate code for max just by looking at template dot cpp.
+
+429
+01:02:25,079 --> 01:02:29,800
+Now let us try something different. So, let us say I have client 2 dot cpp
+
+430
+01:02:29,800 --> 01:02:36,120
+which also has essentially the same code.
+
+431
+01:02:36,119 --> 01:02:58,440
+So, in client I also call foo.
+
+432
+01:03:06,119 --> 01:03:25,159
+So, what I have done is the template dot h is also included in client 2 dot cpp and I
+
+433
+01:03:25,159 --> 01:03:33,000
+have a function foo which also calls max and I have a client dot cpp which calls foo. Now
+
+434
+01:03:33,000 --> 01:03:53,000
+let us try to compile them and it works. Now how many definitions of max are present in the object
+
+435
+01:03:53,000 --> 01:04:08,280
+file at link time? So, once max was instantiated when client called it. So, there is a copy of
+
+436
+01:04:08,280 --> 01:04:26,040
+max present in client dot o that we can verify.
+
+437
+01:04:26,039 --> 01:04:44,599
+So, it has max and similarly client 2 is also going to instantiate it.
+
+438
+01:04:56,599 --> 01:05:03,880
+So, client 2 also has max. So, essentially at link time there are two copies of max which are coming.
+
+439
+01:05:04,519 --> 01:05:14,440
+How do you solve that problem? So, there is one max definition which is coming from client 2
+
+440
+01:05:15,000 --> 01:05:19,559
+and one max definition coming from client. How do you solve that?
+
+441
+01:05:19,559 --> 01:05:33,639
+I did not get that. Actually the object file has that definition already.
+
+442
+01:05:34,599 --> 01:05:53,079
+So, all the template instantiations are again weak symbols. So, if you look at redels,
+
+443
+01:05:53,079 --> 01:06:09,880
+it is marked as weak. So, just like inline functions template instantiations are also
+
+444
+01:06:09,880 --> 01:06:18,920
+marked as weak. Now just to kind of give a complete picture there are some compilers
+
+445
+01:06:18,920 --> 01:06:26,920
+called max which allow template instantiation at link time. So, they do not generate code
+
+446
+01:06:27,960 --> 01:06:33,960
+at compile time. They will defer everything to the linker. So, what will happen is when max comes
+
+447
+01:06:34,760 --> 01:06:42,119
+with integer integer there is no code generation done for that and at link time you do the code
+
+448
+01:06:42,119 --> 01:06:49,239
+generation of max with int and int and then it works. So, this is typically done on Solaris
+
+449
+01:06:49,239 --> 01:06:54,199
+operating systems, but that kind of puts lot of burden on linker because linker has to figure out
+
+450
+01:06:54,199 --> 01:06:59,880
+all the instantiations which are needed. So, in most common cases your header file
+
+451
+01:07:01,799 --> 01:07:07,480
+contains the implementation. That is why if you open any STL header file you will actually see
+
+452
+01:07:07,480 --> 01:07:14,039
+the entire implementation of vector or anything because there is no other way that once you hash
+
+453
+01:07:14,039 --> 01:07:20,199
+include it to instantiate it separately. So, templates do not go very well with separate
+
+454
+01:07:20,199 --> 01:07:26,760
+compilation because compiler needs to know the definition to be able to compile things.
+
+455
+01:07:31,800 --> 01:07:32,599
+Initializers.
+
+456
+01:07:37,559 --> 01:07:48,360
+No, actually that is static because what happens is compiler know what is the return value of
+
+457
+01:07:48,360 --> 01:07:57,159
+whatever function. So, if you do auto i is equal to foo and this compiler knows that foo is going
+
+458
+01:07:57,159 --> 01:08:03,639
+to return 8. So, it is just a substitutable thing. Now initializers we already kind of saw to some
+
+459
+01:08:03,639 --> 01:08:11,879
+extent. So, we saw if I have int gbl is equal to 0 how does it work. It works by putting this 0
+
+460
+01:08:11,879 --> 01:08:18,840
+into the data segment in the object file. We also saw something along this lines where we say int ptr
+
+461
+01:08:18,840 --> 01:08:28,519
+is equal to and of gbl. This was supported by creating the relocation. You still remember that?
+
+462
+01:08:29,480 --> 01:08:33,320
+Now, let us say I have something like this. So, let us say I have int foo
+
+463
+01:08:36,680 --> 01:08:53,400
+which returns 4 and I have a global variable which I initialize with foo.
+
+464
+01:08:59,480 --> 01:09:09,800
+Will this code work? Will this code work? So, I have a variable gbl
+
+465
+01:09:09,800 --> 01:09:14,040
+which I am initializing with the value returned by function foo.
+
+466
+01:09:20,360 --> 01:09:25,720
+How many of you think this will work? Couple of people.
+
+467
+01:09:28,520 --> 01:09:37,000
+How many of you think this will not work? One person. Now the reason is very logical that
+
+468
+01:09:37,560 --> 01:09:46,360
+it should not work because initializing a global variable has to be done prior to linking.
+
+469
+01:09:49,320 --> 01:09:55,000
+Because if I initialize it with a constant value then compiler itself can put it in the data
+
+470
+01:09:55,000 --> 01:10:01,399
+section and it works. And if it was some address or something like we saw earlier where int star
+
+471
+01:10:01,399 --> 01:10:07,880
+ptr is equal to and I was done, linker was able to handle that via a relocation.
+
+472
+01:10:08,600 --> 01:10:12,039
+For this scheme to work what needs to actually happen?
+
+473
+01:10:17,720 --> 01:10:24,600
+Correct. So, somehow foo has to be executed and by at what point in time it has to be executed.
+
+474
+01:10:25,479 --> 01:10:26,680
+Before main.
+
+475
+01:10:26,680 --> 01:10:32,039
+Before main. So, if I have a printf here saying in foo
+
+476
+01:10:34,920 --> 01:10:43,159
+and if I have printf here in main then if this scheme was supposed to work then ideally I should
+
+477
+01:10:43,159 --> 01:10:53,079
+get in foo in main and then gbl is still initialized. Now is there a way by which you can say before
+
+478
+01:10:53,079 --> 01:11:01,880
+running main run this bunch of other things? How? Underscore start. So, underscore start
+
+479
+01:11:01,880 --> 01:11:06,439
+is going to call main but do you have interface to underscore start to do something?
+
+480
+01:11:12,680 --> 01:11:19,479
+Okay. So, there are some pragmas but that is all compiler magic. Is this going to work as it is?
+
+481
+01:11:19,479 --> 01:11:27,479
+Yes. Without any additional magic. How many of you think this will work without any magic?
+
+482
+01:11:28,759 --> 01:11:34,679
+I mean I will literally compile this code and it should work without any additional flags.
+
+483
+01:11:37,159 --> 01:11:39,799
+Any additional flags. How many of you think that will happen?
+
+484
+01:11:39,800 --> 01:11:49,159
+Okay. Let us try that. Keep your fingers crossed.
+
+485
+01:11:51,560 --> 01:11:58,199
+Okay. It compiled. Okay. It compiled. Hold on. It worked.
+
+486
+01:12:02,279 --> 01:12:04,119
+It worked.
+
+487
+01:12:09,960 --> 01:12:18,360
+Okay. So, no additional stuff. It worked. Now, why did it work? Okay. So, this is called as
+
+488
+01:12:18,360 --> 01:12:25,480
+dynamic initialization. Okay. In fact, this is no different. I just showed you a cryptic version of
+
+489
+01:12:25,480 --> 01:12:30,440
+this code which was more surprising. What if something like this was present? Let us ignore
+
+490
+01:12:30,440 --> 01:12:37,159
+this for a moment what I showed you. What if this was the case? So, I had my struct which had say
+
+491
+01:12:37,159 --> 01:12:51,479
+int a int b and then I had a constructor of my struct. Okay. So, I had constructor of my struct
+
+492
+01:12:52,519 --> 01:13:01,639
+which initializes a to 5 and b to 10 and I create an object of this struct called x, y, z.
+
+493
+01:13:02,520 --> 01:13:08,520
+When does the constructor get called? When does the constructor get called?
+
+494
+01:13:10,600 --> 01:13:17,560
+When the object x, y, z is created. When is object x, y, z created? Before main.
+
+495
+01:13:18,360 --> 01:13:23,880
+Right. So, the feature which I showed you is not just for doing these kind of funky things,
+
+496
+01:13:24,440 --> 01:13:33,159
+but even to be able to call constructors before actual main. Okay. Does that make sense?
+
+497
+01:13:34,279 --> 01:13:40,840
+So, going back to some magic which I did not show earlier.
+
+498
+01:13:44,600 --> 01:13:52,440
+You remember I showed you a complex diagram of what happens in CRT. So, this was the diagram
+
+499
+01:13:52,439 --> 01:14:01,159
+which I showed you earlier. Okay. So, what I told you back then is loader is going to call underscore
+
+500
+01:14:01,159 --> 01:14:08,519
+start and then it will ultimately reach main, but there is this something called as pre-init array
+
+501
+01:14:08,519 --> 01:14:16,759
+1 dot dot n. Okay. This is the magic which is making the other things work. So, pre-init array
+
+502
+01:14:17,640 --> 01:14:24,039
+is actually holding some function pointers which it is going to call as part of the
+
+503
+01:14:24,039 --> 01:14:30,199
+initialization of the program. Okay. Now, you can see this here.
+
+504
+01:14:34,119 --> 01:14:41,239
+So, if you look at the object file for this. Okay.
+
+505
+01:14:46,760 --> 01:14:54,119
+So, you see something called as init array here. Okay. Which I was just mentioning.
+
+506
+01:14:55,079 --> 01:15:01,239
+There are some relocations on the init array. Is this still readable?
+
+507
+01:15:01,319 --> 01:15:23,559
+So, init array has a relocation which says change something with this and init array.
+
+508
+01:15:24,039 --> 01:15:32,360
+Actually, let us show it in debugger. I think that might be easiest.
+
+509
+01:15:44,760 --> 01:15:48,360
+Okay. So, let me put a breakpoint on foo. Okay.
+
+510
+01:15:48,519 --> 01:15:55,960
+So, if I look at it, the breakpoint is actually hit and if I go up, it is actually being hit from
+
+511
+01:15:55,960 --> 01:16:05,639
+here and if I do backtrace, I do see some startup code before actually calling main which is somehow
+
+512
+01:16:05,639 --> 01:16:15,159
+calling into this foo. Okay. So, there is some scheme by which dynamic initialization is actually
+
+513
+01:16:15,159 --> 01:16:24,599
+supported. Okay. This actually is not supported in C. It is a feature in C++. C++ requires it
+
+514
+01:16:25,319 --> 01:16:29,000
+because the constructors need to be supported. Okay.
+
+515
+01:16:31,319 --> 01:16:37,559
+Now, I would actually go past virtual functions. Okay.
+
+516
+01:16:39,960 --> 01:16:41,960
+How many of you know what is a virtual function?
+
+517
+01:16:42,920 --> 01:16:49,640
+How many of you know what is a virtual function? Okay. Can someone explain me what is it?
+
+518
+01:16:57,880 --> 01:17:03,399
+Okay. What is the use of virtual function? Let us forget what they are, but why do you write
+
+519
+01:17:03,399 --> 01:17:08,600
+virtual functions? What is possible with them which is not in general possible otherwise?
+
+520
+01:17:11,960 --> 01:17:15,480
+Virtual function is a base class pointer. But why do you need that?
+
+521
+01:17:15,480 --> 01:17:19,399
+Because you can do all the functions from the base class. Okay.
+
+522
+01:17:19,399 --> 01:17:22,840
+You tend to access them using the base class pointer.
+
+523
+01:17:22,840 --> 01:17:25,560
+Why do you want to access them using base class pointer?
+
+524
+01:17:25,560 --> 01:17:30,520
+Because let us say I have some base class manual and I make 10 types of manual and I have all
+
+525
+01:17:30,520 --> 01:17:35,560
+these animals that I want to call one function all of them. That would not be possible if I have
+
+526
+01:17:35,560 --> 01:17:41,159
+one class pointer which can point to all these objects. Okay. That is why I want something.
+
+527
+01:17:41,159 --> 01:17:47,239
+Does everyone understand what he is trying to say? So, the essential idea is if you have bunch of
+
+528
+01:17:48,840 --> 01:17:56,119
+instances of some classes and you want some one common thing which can refer to all of them,
+
+529
+01:17:57,239 --> 01:18:01,479
+then you can write it using virtual functions and that is useful.
+
+530
+01:18:01,479 --> 01:18:09,319
+Because otherwise you would have to create a class an object of dog, an object of bull,
+
+531
+01:18:09,319 --> 01:18:17,479
+an object of donkey and so on and keep track of it yourself. So, whenever you want to call donkey's
+
+532
+01:18:17,479 --> 01:18:24,199
+function you have to use the object d and call it. Whereas, if you had virtual functions it would
+
+533
+01:18:24,199 --> 01:18:30,920
+actually work. So, how do virtual functions work? Right. So, I have some base class
+
+534
+01:18:31,640 --> 01:18:38,760
+okay in which I declare let us say I have some public function
+
+535
+01:18:40,359 --> 01:18:50,440
+virtual my virtual wide my func right and I make it a pure virtual function. So,
+
+536
+01:18:50,440 --> 01:18:56,920
+base class will not provide the implementation. Now, let us say I have child one okay.
+
+537
+01:18:56,920 --> 01:19:04,920
+So, child one will implement this okay. So,
+
+538
+01:19:04,920 --> 01:19:10,920
+so
+
+539
+01:19:24,760 --> 01:19:31,399
+okay and then I have say. So, I create a
+
+540
+01:19:31,399 --> 01:19:40,839
+base star ptr is equal to nu of child one and call
+
+541
+01:19:50,679 --> 01:19:55,479
+will this work sorry sorry
+
+542
+01:20:01,399 --> 01:20:03,479
+okay.
+
+543
+01:20:11,479 --> 01:20:17,479
+Okay. So, it works as expected sorry this should have been child one right.
+
+544
+01:20:18,519 --> 01:20:24,039
+So, everyone understands how this works right. So, what happened here is an object of child was
+
+545
+01:20:24,039 --> 01:20:31,880
+created address of that was put into this. Now, when I called ptr arrow my func it actually
+
+546
+01:20:31,880 --> 01:20:39,319
+looked at what is the address which is present in ptr and called my function of that okay.
+
+547
+01:20:39,319 --> 01:20:41,880
+If this was not marked virtual what would happen?
+
+548
+01:20:44,840 --> 01:20:48,920
+So, if this was not marked virtual and I had
+
+549
+01:20:48,920 --> 01:21:05,720
+parent then parent will get popped. Now, as soon as I mark it virtual it starts working.
+
+550
+01:21:05,720 --> 01:21:14,199
+So, something happened when this function was marked virtual okay. Now, let us look at
+
+551
+01:21:19,399 --> 01:21:33,880
+the size of base. So, let us say I create an object of base class okay. What will be size of b?
+
+552
+01:21:37,480 --> 01:21:43,720
+There are earlier remember data types what we saw is functions do not occupy space only data
+
+553
+01:21:43,800 --> 01:21:55,079
+occupy space. There is no data here size should be 0. Size is 8.
+
+554
+01:21:59,320 --> 01:22:01,079
+Anyone knows why the size is 8?
+
+555
+01:22:03,960 --> 01:22:07,960
+What pointer? What sort of function pointer?
+
+556
+01:22:08,119 --> 01:22:12,439
+Now, that can point to the most derived of that function.
+
+557
+01:22:12,439 --> 01:22:20,840
+Correct. So, essentially what needs to happen behind the scenes is when I did ptr arrow my func
+
+558
+01:22:23,079 --> 01:22:28,279
+compiler cannot statically determine that this needs to call this version of the function or
+
+559
+01:22:28,279 --> 01:22:36,119
+this version of the function. So, compiler has to wait to figure out at runtime what is ptr pointing
+
+560
+01:22:36,119 --> 01:22:44,840
+to and that is when it will actually be able to call this function. So, what happens is silently
+
+561
+01:22:45,479 --> 01:22:51,720
+there is a pointer which is inserted here which is called as vptr into every object.
+
+562
+01:22:52,359 --> 01:23:00,039
+So, every object has a pointer called vptr and it points to a table called as vtable.
+
+563
+01:23:00,039 --> 01:23:08,439
+So, you can think of it like this that every virtual function has a table here. So, if there
+
+564
+01:23:08,439 --> 01:23:17,960
+were say my func my func 2 my func 3 and so on. So, vtable essentially has addresses for all these
+
+565
+01:23:17,960 --> 01:23:28,439
+functions and vptr essentially points to this table and from this table you actually get to the
+
+566
+01:23:28,439 --> 01:23:39,719
+actual thing. So, what happens is the vtable is created by the compiler such that all the virtual
+
+567
+01:23:39,719 --> 01:23:48,839
+functions are put into the table and their addresses. So, for example, the base class will
+
+568
+01:23:48,839 --> 01:23:54,839
+have one vtable which will hold all the addresses of all the virtual functions in the base class.
+
+569
+01:23:54,840 --> 01:24:02,199
+First child 1 will have a vtable which has all the addresses and child 2 will have all the addresses.
+
+570
+01:24:02,199 --> 01:24:09,319
+Now, whenever you create a object you create a pointer called as vptr which points to the correct
+
+571
+01:24:09,319 --> 01:24:19,319
+table. So, this call is actually getting translated to something like so ptr my func is essentially
+
+572
+01:24:19,319 --> 01:24:31,719
+same as look up vptr first access ptr arrow vptr. So, we get the vptr and then whatever its function
+
+573
+01:24:33,159 --> 01:24:40,920
+will have some index which will be similar to what we saw in got. Every function or every
+
+574
+01:24:41,480 --> 01:24:54,119
+variable has some slot into the got similar to that we have this and then you load from vptr
+
+575
+01:24:55,399 --> 01:25:02,680
+of my func index and jump to that address and call that address.
+
+576
+01:25:03,640 --> 01:25:13,800
+This is yet another problem which gets solved by additional level of indirection. Virtual functions
+
+577
+01:25:13,800 --> 01:25:19,880
+are just creating additional level of indirection and solves this problem is this clear?
+
+578
+01:25:19,880 --> 01:25:35,720
+No, every class has a vtable and every object has a vptr. So, every class has vtable which
+
+579
+01:25:35,720 --> 01:25:44,199
+holds address of all the virtual functions and vptr when the object is constructed depending on
+
+580
+01:25:44,199 --> 01:25:51,319
+if you are creating an object of child 1 then you will point to the child 1's vtable
+
+581
+01:25:52,359 --> 01:25:56,359
+and you will if it was child 2 then you will point to vtable of child 2. So,
+
+582
+01:25:56,359 --> 01:26:02,199
+there is only one vtable per class, but vptr is duplicated in every object.
+
+583
+01:26:03,079 --> 01:26:17,319
+Now, some of the this is actually my last slide and I had if I had more time I could talk about
+
+584
+01:26:17,319 --> 01:26:24,279
+more things which I could not cover. So, the first thing is common linker optimizations or
+
+585
+01:26:24,279 --> 01:26:31,239
+and link time optimizations. So, one of the things which linker could do. So, for example,
+
+586
+01:26:31,239 --> 01:26:36,760
+you have all the things together at link time. So, one of the most common optimizations which
+
+587
+01:26:36,760 --> 01:26:44,119
+linker can do is it can figure out that there is no one calling function foo. No one is calling
+
+588
+01:26:44,119 --> 01:26:49,960
+foo. So, actually linker can eliminate it from the object file. So, linker can remove foo from
+
+589
+01:26:49,960 --> 01:26:55,800
+the object file. So, there is more visibility at link time. So, linker can do some of these things.
+
+590
+01:26:56,600 --> 01:27:02,360
+Link time optimizations are actually slightly different. What link time optimizations do?
+
+591
+01:27:02,360 --> 01:27:08,680
+It is typically they will store the object file with more additional information.
+
+592
+01:27:10,520 --> 01:27:16,840
+Remember we had this example where we had this code where I had client 1 dot
+
+593
+01:27:17,239 --> 01:27:33,720
+sorry. So, I have client 1 dot c which said external int, external int var and I have int main
+
+594
+01:27:33,800 --> 01:27:45,159
+void and this printed var and I had client 2 dot c which defined
+
+595
+01:27:50,119 --> 01:28:01,079
+var as float. Remember this code which we had seen earlier and what we did was client 1 dot c and
+
+596
+01:28:01,079 --> 01:28:17,000
+client 2 dot c. So, linker did not detect this error because there was not sufficient information
+
+597
+01:28:17,000 --> 01:28:22,039
+present. Now, to be able to do link time optimizations, linker actually needs more
+
+598
+01:28:22,039 --> 01:28:30,199
+information because without more information it cannot do more optimizations. So, with LTO,
+
+599
+01:28:30,199 --> 01:28:38,279
+linker actually puts more information into the object file and actually this error does get detected.
+
+600
+01:28:44,279 --> 01:28:51,000
+So, LTO does detect these kinds of errors which so far I was teasing you with that are not
+
+601
+01:28:51,000 --> 01:28:56,439
+possible to detect. So, it might be a good practice to simply compile your code with
+
+602
+01:28:56,439 --> 01:29:03,000
+FLTO just to see if linker catches something. But typically the way linker, link time optimizations
+
+603
+01:29:03,000 --> 01:29:10,359
+are implemented is they will actually store some sort of an IR. So, if you are using LLVM toolchain
+
+604
+01:29:10,359 --> 01:29:18,199
+for example, and if you ask client to do link time optimization, client in object file will not
+
+605
+01:29:18,199 --> 01:29:25,960
+really store the machine code. It will actually store the LLVM IR and then it will do a full
+
+606
+01:29:25,960 --> 01:29:32,279
+fledged optimization at link time. So, link time optimizations can get heavy depending on
+
+607
+01:29:32,279 --> 01:29:38,199
+how aggressive linker wants to do them. But it could duplicate the entire compiler for example.
+
+608
+01:29:39,720 --> 01:29:45,640
+One other thing which we did not talk about is debug information. One of the most interesting things
+
+609
+01:29:45,640 --> 01:30:04,280
+is how does. So, for example, I have this code.
+
+610
+01:30:15,640 --> 01:30:28,280
+So,
+
+611
+01:30:28,280 --> 01:30:37,000
+one of the things is when I do gcc-sample.c and when I am debugging my code and let us say I put
+
+612
+01:30:37,000 --> 01:30:45,079
+breakpoint. How does debugger know when I say break on main, the breakpoint needs to be set on
+
+613
+01:30:45,079 --> 01:30:59,079
+line 5. How does it know that? Let us start executing the program. When I do n which is next,
+
+614
+01:30:59,800 --> 01:31:06,920
+how does it know that the control jumps from here to here? How does it know how many assembly
+
+615
+01:31:06,920 --> 01:31:12,600
+instructions were generated for int x equal to 5 because it had to execute all of them and then
+
+616
+01:31:12,600 --> 01:31:24,840
+only stop. Correct. So, that is breakpoint insertion. But how do you know when I say
+
+617
+01:31:24,840 --> 01:31:34,920
+break on function main, main is on line number 5 in source code. Does everyone understand the type
+
+618
+01:31:34,920 --> 01:31:41,480
+of thing debugger needs to do? All of this is actually supported by compiler. So, debuggers
+
+619
+01:31:41,479 --> 01:31:47,559
+do not work standalone. For source level debugging, you need lot of support from compiler.
+
+620
+01:31:48,119 --> 01:31:55,079
+So, if you look at redelf-s of a.out, you will actually see lot of sections called.
+
+621
+01:31:55,079 --> 01:32:21,159
+It has stripped away those sections, but I will show you a compiled code.
+
+622
+01:32:25,800 --> 01:32:35,000
+So, if you look at this, so there are bunch of these sections which you are seeing in
+
+623
+01:32:35,000 --> 01:32:40,119
+elf. There is something called as debug line. There is something called as debug info,
+
+624
+01:32:40,119 --> 01:32:47,159
+debug range and blah blah blah. So, if you actually decode them,
+
+625
+01:32:55,559 --> 01:33:03,159
+so
+
+626
+01:33:15,720 --> 01:33:20,199
+if you look at this, this section actually has some interesting information.
+
+627
+01:33:20,439 --> 01:33:27,720
+So, this section is present in a form called as dwarf. How many of you have heard of dwarf?
+
+628
+01:33:29,639 --> 01:33:37,399
+So, dwarf just like elf is another format in which actually the debug information is stored.
+
+629
+01:33:38,519 --> 01:33:44,920
+So, this information is actually generated by compiler. So, what this is saying is something
+
+630
+01:33:44,920 --> 01:33:52,840
+like this. So, advance address by 0 to this, advance line by 3 to 4 and blah blah blah.
+
+631
+01:33:53,399 --> 01:33:59,720
+So, it has some encoded information which says if you move address from 0 to this,
+
+632
+01:33:59,720 --> 01:34:05,239
+you also have to move the line number from 3 to 4 and so on. And if you look at actually the
+
+633
+01:34:05,239 --> 01:34:15,079
+decoded line table, that is much more. So, what this is saying is in sample.c,
+
+634
+01:34:16,279 --> 01:34:25,399
+line 4 maps to address this. So, it is a mapping of how assembly code maps to the source code.
+
+635
+01:34:25,960 --> 01:34:32,599
+So, what it is saying is assembly instruction at this address is corresponding to line 4.
+
+636
+01:34:36,199 --> 01:34:40,039
+Assembly code at this line number corresponds to line number 5.
+
+637
+01:34:41,000 --> 01:34:46,599
+And if you look with obj dump, it gives some more things. So,
+
+638
+01:34:50,199 --> 01:34:59,880
+if you look at now main, so it is actually able to associate this. So, it says that this instruction
+
+639
+01:35:00,520 --> 01:35:05,560
+was generated for this code and you can correlate it because this is trying to
+
+640
+01:35:05,560 --> 01:35:13,960
+move value 5 into something in the stack. Printf, this code, this line generated this code.
+
+641
+01:35:14,680 --> 01:35:19,720
+So, if you want to understand how your C code got converted to assembly, this is a much better way
+
+642
+01:35:20,440 --> 01:35:25,319
+because you could actually see that this was C code and this is how it looked in assembly.
+
+643
+01:35:26,119 --> 01:35:32,840
+And all of this compiler has to generate. Now, it is a nightmare for generating this information
+
+644
+01:35:33,399 --> 01:35:38,679
+when compiler is doing optimizations because this information is very hard to preserve
+
+645
+01:35:38,679 --> 01:35:44,359
+as compiler keeps modifying the code. So, that becomes yet another set of
+
+646
+01:35:45,159 --> 01:35:51,479
+problem in compiler which is very hard to solve. The other interesting thing is stack unwinding
+
+647
+01:35:51,479 --> 01:35:59,159
+is stack unwinding and exceptions. Remember we talked about the stack frames were linked
+
+648
+01:35:59,159 --> 01:36:10,119
+list together and in x86-64 ABI, I said frame pointer is optional. And that is optional because
+
+649
+01:36:10,119 --> 01:36:16,119
+compiler can actually generate something called as eh frame in the debug section which gives
+
+650
+01:36:16,119 --> 01:36:22,519
+information to the debugger on how to unwind stack, how to go from one function to its parent
+
+651
+01:36:22,519 --> 01:36:27,960
+function to its parent function to its parent function. Then we obviously did not talk about
+
+652
+01:36:27,960 --> 01:36:32,840
+things on how malloc actually works. I briefly talked what it does, but we did not get into
+
+653
+01:36:32,840 --> 01:36:38,519
+details. We did not talk about details of threads and how threads work and how context switching
+
+654
+01:36:38,519 --> 01:36:45,000
+between threads happen and synchronization between them. And we did not talk about virtual machines
+
+655
+01:36:45,000 --> 01:36:51,960
+which is essentially environment like python and java which have managed environment to run the
+
+656
+01:36:51,960 --> 01:36:59,239
+things. But what we have seen is just scratch of the overall topic, but I hope you found it
+
+657
+01:36:59,239 --> 01:37:02,600
+interesting and you learned something out of it.
+

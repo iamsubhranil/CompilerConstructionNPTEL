@@ -1,0 +1,2828 @@
+1
+00:00:00,000 --> 00:00:14,480
+right. So we are saying if you look at this code here m was m as x and y top top on the
+
+2
+00:00:14,480 --> 00:00:25,960
+left branch x is 2 y is 3 right branch x is 3 y is 2 what is the meet bottom bottom 2
+
+3
+00:00:26,960 --> 00:00:39,240
+meet 3 is bottom 3 meet 2 is bottom. So here z will be bottom right if I had not eagerly
+
+4
+00:00:39,240 --> 00:00:49,040
+done the meet here and come like this what would have been z 5 and if I come this way
+
+5
+00:00:49,039 --> 00:00:59,560
+what would have been z 5. So what happened I mean even though it is a constant even though
+
+6
+00:00:59,560 --> 00:01:08,239
+it is a the value of z is a constant we could not identify using our technique and the reason
+
+7
+00:01:08,239 --> 00:01:16,280
+being and the reason being that the constant propagation the way we are doing is not distributive
+
+8
+00:01:16,400 --> 00:01:30,040
+that is if we take the flow function here take the flow function here take a meet is
+
+9
+00:01:30,040 --> 00:01:43,920
+not same as is not same as doing this one first and then this one and taking a meet.
+
+10
+00:01:43,960 --> 00:02:05,359
+What we are saying if I take this is f1 this is f2 right if I do f1 first then f2 and then
+
+11
+00:02:05,359 --> 00:02:24,400
+take a meet and then do f3 that is not same as f3 on f1 meet f3 on f2 take a minute to chew
+
+12
+00:02:24,400 --> 00:02:35,680
+over it if this is f1 if the flow function is f1 f2 f3 I am doing f1 f2 take a meet and then
+
+13
+00:02:35,680 --> 00:02:49,599
+f3 that is f3 on I am invoking f3 on meet of f1 and f2 we are saying that is not same as f3 of f1
+
+14
+00:02:49,599 --> 00:03:06,519
+f3 of f1 meet f3 of f2 both all of them start with the same m0 some initial map right so that
+
+15
+00:03:06,519 --> 00:03:14,539
+way what we are saying this constant propagation the way we are doing is not distributive over the
+
+16
+00:03:14,539 --> 00:03:21,979
+meet right so we will lose a few constants here we are not losing constants because we are
+
+17
+00:03:21,979 --> 00:03:27,579
+impregnated I mean one of the condition is never taken or anything here the conditions
+
+18
+00:03:27,579 --> 00:03:37,579
+can be taken even then the value of Z should have been I mean we know it is 5 but the way
+
+19
+00:03:37,580 --> 00:03:54,980
+we are doing is bottom right oh yeah okay okay okay okay okay yeah good reminder so during the
+
+20
+00:03:54,979 --> 00:04:09,419
+in the lab yeah our friend asks that I have Z equal to 1 here I do constant propagation I get
+
+21
+00:04:09,419 --> 00:04:18,899
+1 here then I can do loop invariant code motion this can go out and then I can throw away the
+
+22
+00:04:18,899 --> 00:04:28,620
+one of the Z's because the outer Z this Z equal to 1 this definition reaches nowhere right then
+
+23
+00:04:28,620 --> 00:04:34,779
+she says so this is the order we follow constant propagation then loop invariant code motion then
+
+24
+00:04:34,779 --> 00:04:49,899
+do reaching definition it so turns out this is not necessarily the best order among all the
+
+25
+00:04:49,899 --> 00:04:59,699
+optimizations we study you will see the ordering is a big pain is a big problem if you do a followed
+
+26
+00:04:59,699 --> 00:05:05,579
+by B sometimes it is good sometimes it is good if you do B followed by A there are times there
+
+27
+00:05:05,579 --> 00:05:12,779
+are some optimizations where it is well understood that whether you do a followed by B or B followed
+
+28
+00:05:12,779 --> 00:05:24,899
+by A it is going to be suboptimal unless you do them together okay so such problems such
+
+29
+00:05:24,899 --> 00:05:31,539
+optimizations where there is a dependent cyclic dependency or like a a depends on B B depends
+
+30
+00:05:31,539 --> 00:05:37,219
+on A this called as a phase ordering problem so there are some optimizations which have a
+
+31
+00:05:37,219 --> 00:05:46,899
+phase ordering relation between themselves okay so in this case we said hey this is good to do
+
+32
+00:05:46,899 --> 00:05:52,779
+maybe sometimes you may want to do some reaching definition so that you can throw away some
+
+33
+00:05:52,779 --> 00:06:01,899
+unnecessary definitions and then that may lead to some optimization so the there are some optimizations
+
+34
+00:06:01,899 --> 00:06:07,939
+which are invoked many times because you do not want to do all of them together proceed writing
+
+35
+00:06:07,939 --> 00:06:13,099
+each optimization first pass itself is complicated now writing something together is much more
+
+36
+00:06:13,099 --> 00:06:18,819
+complicated so compiler writers in what they do they write individual optimizations they just
+
+37
+00:06:18,819 --> 00:06:29,500
+invoke it few more bunch of times so how many times so I mean this is kind of now lot of
+
+38
+00:06:29,500 --> 00:06:38,300
+engineering expertise gets into so those of you care there is a book called much Nick compiler
+
+39
+00:06:38,300 --> 00:06:44,860
+design modern compiler design if I'm not wrong the first page it shows the the flow chart of
+
+40
+00:06:44,860 --> 00:06:51,819
+the different optimizations that are that are followed in the HP compiler GCC follows a slightly
+
+41
+00:06:51,819 --> 00:06:58,660
+different structure but it's pretty hairy lot of so yeah so in this case we did in this order
+
+42
+00:06:58,660 --> 00:07:06,420
+but you cannot keep on applying them forever right for example in the first example we looked
+
+43
+00:07:06,420 --> 00:07:23,100
+at we kept doing again and again and again so when do you stop yeah so then it will take yeah so
+
+44
+00:07:23,100 --> 00:07:30,620
+why author way author way saying why don't we do one thing let us try to reach a fixed point here
+
+45
+00:07:30,620 --> 00:07:39,340
+let me take one do to do do do do till the end something changed again take this keep on
+
+46
+00:07:39,340 --> 00:07:45,100
+feeding it to the same thing that's also not there are two challenges there number one the
+
+47
+00:07:45,100 --> 00:07:52,899
+time how much time are you ready to give for compilation right and then there are optimization
+
+48
+00:07:52,899 --> 00:08:01,060
+phases where one does X the other does X prime so it may keep changing some some bit then let's
+
+49
+00:08:01,060 --> 00:08:05,620
+say you say no no let me not let me drop those things which are kind of going against each other
+
+50
+00:08:05,620 --> 00:08:12,620
+but only focus on that yes as long as it's changing I'll keep on doing the time takes a
+
+51
+00:08:12,620 --> 00:08:35,580
+lot of time okay yeah okay any questions on the distributive nature of this all right correct
+
+52
+00:08:35,580 --> 00:08:44,139
+it doesn't matter right okay let's say let's take a guess let's say we are building some
+
+53
+00:08:44,139 --> 00:08:55,379
+database software say Oracle right take a guess how much time it may take to compile that huh I
+
+54
+00:08:56,379 --> 00:09:09,059
+couldn't hear you I heard some one I didn't hear the unit I'm sorry no no let's say we
+
+55
+00:09:09,059 --> 00:09:12,740
+have a powerful computer pick you tell me what are the server class machine on which they will
+
+56
+00:09:12,740 --> 00:09:19,860
+compile it's the order of days if it is in the order of days your comp if it takes to compile
+
+57
+00:09:19,860 --> 00:09:26,500
+just one round now you want to do multiple rounds it's kind of pretty we are talking about a
+
+58
+00:09:26,500 --> 00:09:37,259
+tough thing and the worst part is when I start compiling in the compilation phase you have seen
+
+59
+00:09:37,259 --> 00:09:43,379
+right I start with high level code then one IR then lower level then lower level then I reached
+
+60
+00:09:43,379 --> 00:09:49,420
+a very low level IR and finally machine code and there some more optimizations are done now if you
+
+61
+00:09:49,419 --> 00:09:56,779
+want me to again optimize that then I have to again get back the structure which is which may
+
+62
+00:09:56,779 --> 00:10:01,139
+not be I'm not be able to do all the high-level optimizations all the high-level IR I may not
+
+63
+00:10:01,139 --> 00:10:06,139
+be able to reach there at all I'm saying assuming you reach it takes a lot of time but reaching
+
+64
+00:10:06,139 --> 00:10:14,099
+there itself is hard so pretty much no compiler does this forever because I mean practically
+
+65
+00:10:14,100 --> 00:10:29,940
+it's much harder I do not know yeah it depends on the optimizations I do not have a reason to say
+
+66
+00:10:29,940 --> 00:10:34,259
+it will not terminate I do not have a reason to say reason to say it will terminate depends on
+
+67
+00:10:34,259 --> 00:10:42,340
+the optimizations involved so I do not have enough information to make a comment on that right
+
+68
+00:10:44,500 --> 00:10:53,860
+so what we are seeing the constant propagation is not distributed an interesting property to
+
+69
+00:10:53,860 --> 00:11:20,539
+note okay let's look at a piece of code we said as part of optimizing an if condition we said if
+
+70
+00:11:20,539 --> 00:11:25,219
+we have code like this if I know the condition is true I can throw in the then or the else part
+
+71
+00:11:25,219 --> 00:11:34,740
+but that is another optimization constant propagation is another optimization during
+
+72
+00:11:34,740 --> 00:11:42,500
+constant propagation let us say I had some I here not necessarily one some value during constant
+
+73
+00:11:42,500 --> 00:11:54,500
+propagation I found that at this point value of I is going to be one now I need to do something
+
+74
+00:11:54,500 --> 00:11:59,059
+otherwise during constant if I do constant propagation like this let's say it's I equal
+
+75
+00:11:59,059 --> 00:12:04,740
+to some case some computation and I found I equal to one and then if I do not deal with the then
+
+76
+00:12:04,740 --> 00:12:11,460
+and else part I will say J is not a constant here right why because J is one year J is two
+
+77
+00:12:11,460 --> 00:12:19,620
+year meet is bottom correct now you may say look let me do one pass of constant propagation
+
+78
+00:12:19,620 --> 00:12:28,460
+where here till here I will get I equal to one right so I have a statement I equal to one then
+
+79
+00:12:28,460 --> 00:12:41,300
+invoke if simplification come back do constant propagation again good so I did this then let
+
+80
+00:12:41,339 --> 00:12:47,219
+us say there is some more if part inside then here then again do constant propagation again
+
+81
+00:12:47,219 --> 00:12:54,500
+do if switching if simplification keep on doing it will take lot of time right so what we will do
+
+82
+00:12:54,500 --> 00:13:02,059
+we will do something called conditional constant propagation as an extension to the basic Kildar's
+
+83
+00:13:02,059 --> 00:13:17,099
+algorithm that we talked about so this is this is the 1975 paper and an extension that we may if
+
+84
+00:13:17,099 --> 00:13:27,619
+we have time we will go over an extension of this 91 paper this 91 paper we are talking about
+
+85
+00:13:27,620 --> 00:13:35,980
+Wegman and Jadak paper we will go over this work and if possible an extension to that if time permits
+
+86
+00:13:35,980 --> 00:13:51,500
+okay so what's the idea during the constant propagation algorithm execution if I find that
+
+87
+00:13:51,620 --> 00:14:07,419
+branch is see at this moment I may say that hey only the then branch can be taken right then why
+
+88
+00:14:07,419 --> 00:14:15,860
+should I process the else branch see the J became a bottom here because both the L then and else
+
+89
+00:14:15,899 --> 00:14:25,180
+branches were both processed at this point I know that only if I know that only the then branch
+
+90
+00:14:25,180 --> 00:14:32,700
+will be taken why should I add the else branch to my work list that's the basic intuition let
+
+91
+00:14:32,700 --> 00:14:43,700
+me add only those branches which are which I know will be taken right if I know that only one branch
+
+92
+00:14:43,740 --> 00:14:50,300
+will be taken then let me add that branch during processing if I find that no no the else branch
+
+93
+00:14:50,300 --> 00:14:58,540
+will also be taken then I will add that but let me not add them eagerly let me evaluate the condition
+
+94
+00:14:58,540 --> 00:15:06,980
+depending on the condition add either the then branch or the else branch or both depending upon
+
+95
+00:15:06,980 --> 00:15:16,820
+the value of the condition the intuition is clear so I see all types of head shakes some
+
+96
+00:15:16,820 --> 00:15:25,860
+like this some like this some like this some like this so that that's pretty confusing do we have
+
+97
+00:15:25,860 --> 00:15:35,019
+a yes good so this is something that you have seen right I mean the head shakes the traditional
+
+98
+00:15:35,059 --> 00:15:42,539
+understanding is this is yes this is no we also have this and sometimes we have I mean an eight
+
+99
+00:15:42,539 --> 00:15:57,899
+type of I know so what does it mean maybe or don't care how it's a bottom I have no clue what's happening
+
+100
+00:15:57,899 --> 00:16:17,620
+bottom would be okay okay okay we will try to take this intuition that we had so far and now
+
+101
+00:16:17,620 --> 00:16:30,620
+we will design an algorithm so what's the main idea with each block I will have a Boolean flag
+
+102
+00:16:30,620 --> 00:16:37,700
+that says is the block executable or not I will process only executable blocks if they are in
+
+103
+00:16:37,700 --> 00:16:51,940
+my work list if a block is not executable I will not process it okay so to start I again I am saying
+
+104
+00:16:51,940 --> 00:16:59,460
+I'll only process the blocks which are marked executable to start I will only process the entry
+
+105
+00:16:59,460 --> 00:17:12,779
+node so let me be kind and mark it as executable okay if I processed one node you have processed
+
+106
+00:17:12,779 --> 00:17:23,579
+one node that means it is executable after processing this node what should I do let yeah
+
+107
+00:17:23,579 --> 00:17:28,620
+so one point so either there is a condition at the end of it that means it will have multiple
+
+108
+00:17:28,939 --> 00:17:36,419
+successors or there is only one successors both are possible so if I am if I am processing a node
+
+109
+00:17:36,419 --> 00:17:43,819
+and this node has only one successor that means if I am executed executable my successor will also
+
+110
+00:17:43,819 --> 00:17:59,819
+be executable right so if the current node has only one successor that means if I am executed
+
+111
+00:17:59,819 --> 00:18:05,339
+my successor will definitely be executed so let me after my after finishing my execution I will
+
+112
+00:18:05,339 --> 00:18:14,099
+also mark my successor as executable right if I have multiple successors then what that means
+
+113
+00:18:14,099 --> 00:18:25,319
+I may if my basic block ends with a condition the condition can be true or false let me do
+
+114
+00:18:25,319 --> 00:18:35,139
+one thing like I did here this condition is always of the form either y of z or some Boolean right
+
+115
+00:18:35,140 --> 00:18:44,780
+so let me look up this Boolean value in my constant propagation map constant map in the
+
+116
+00:18:44,780 --> 00:18:54,620
+map if it is true I will mark the then branch as executable if it is false I will mark the
+
+117
+00:18:54,620 --> 00:19:04,300
+else branch as executable if it is bottom both as executable if it is stop I will mark none as
+
+118
+00:19:04,460 --> 00:19:17,740
+I will not touch them right what I am saying I will evaluate the condition during the constant
+
+119
+00:19:17,740 --> 00:19:27,220
+propagation using the current constants map if the constants map tells me that can we close
+
+120
+00:19:27,220 --> 00:19:41,620
+the laptop if you are not using it to take notes if my constant in my constant map tell
+
+121
+00:19:41,620 --> 00:19:51,940
+me that the condition will evaluate to a constant then I will take either the then branch if it is
+
+122
+00:19:51,940 --> 00:20:00,299
+true and if it is false I will take the else branch rather I will mark them as executable once
+
+123
+00:20:00,299 --> 00:20:09,140
+they mark them then they will be processed in the and remember I am not changing once I mark it
+
+124
+00:20:09,140 --> 00:20:15,660
+executable later I am not coming and saying oh hey I will make it non executable once I mark it
+
+125
+00:20:15,660 --> 00:20:23,500
+executable it remains executable and this is consistent with our idea of monotonic progress
+
+126
+00:20:23,500 --> 00:20:35,340
+where if I have true now in future it will not become false now it is true in future it can remain
+
+127
+00:20:35,340 --> 00:20:43,660
+true or become bottom similarly now if we now if it is false in future it can be false or bottom
+
+128
+00:20:43,660 --> 00:20:51,940
+but it will never become only true correct okay and we will iterate till there is no change I
+
+129
+00:20:51,940 --> 00:21:09,420
+have now two lists one sorry I have two things to keep in mind has my because of my basic block
+
+130
+00:21:09,420 --> 00:21:20,500
+did the constant map change or did any new block became executable even if my constant map has
+
+131
+00:21:20,500 --> 00:21:28,500
+not changed if some exit new block has become executable then also I want to continue processing
+
+132
+00:21:28,500 --> 00:21:37,940
+okay what we will do we will take the previous example for this and one more on the board and
+
+133
+00:21:38,460 --> 00:21:51,460
+try to do it okay so in this case what is my M here let us say I am J I is top J is top after
+
+134
+00:21:51,460 --> 00:22:00,700
+this statement 1 comma top so now this was executable right after this is processed I
+
+135
+00:22:00,819 --> 00:22:13,500
+will mark just the this block the header I will evaluate the header because this so let us draw
+
+136
+00:22:13,500 --> 00:22:24,620
+the CFG for that rate the CFG would be oh I am asked to write only on one side so my CFG would
+
+137
+00:22:24,619 --> 00:22:54,179
+be right so now I I mark this one as executable process this right what is
+
+138
+00:22:54,180 --> 00:23:07,820
+the end of processing this my M will be 1 comma top I J and now since it has two successors I
+
+139
+00:23:07,820 --> 00:23:18,539
+will check the condition is a condition true the answer is yes then I will mark this as executable
+
+140
+00:23:18,539 --> 00:23:36,619
+okay and then I will process this so after processing this it will be 1 comma 1 right
+
+141
+00:23:36,619 --> 00:23:47,220
+after processing this it has only one successor so I will mark this guy as executable so here
+
+142
+00:23:47,220 --> 00:23:59,940
+it will be it came as 1 comma 1 it goes out as 1 comma 1 it has no successor so I will stop and
+
+143
+00:23:59,940 --> 00:24:06,980
+now I will do so my constant identification is done I will make one more pass and wherever
+
+144
+00:24:06,980 --> 00:24:10,819
+the constants are there I just replace so the here this is a constant I will replace it with
+
+145
+00:24:10,819 --> 00:24:20,379
+1 here I will replace it with 1 comma 1 I have not removed this part now you can do a so the
+
+146
+00:24:20,379 --> 00:24:27,419
+constant application 1 equal to 1 will become 0 sorry it will become true right so now I have
+
+147
+00:24:27,419 --> 00:24:33,960
+a code that looks like this I equal to 1 if true do this false do that now I can do if
+
+148
+00:24:33,960 --> 00:24:42,240
+simplification well if simplification job is to only remove the just look at the condition and
+
+149
+00:24:42,240 --> 00:24:50,319
+throw away unreachable code right trivially unreachable code so now this can go away make
+
+150
+00:24:50,319 --> 00:24:57,559
+sense if you are fine we will take an example and want you to let me see if I can write the
+
+151
+00:24:57,559 --> 00:25:13,279
+example here itself oh this guy doesn't like to add blank pages is it now this is not going to
+
+152
+00:25:13,279 --> 00:25:31,879
+let me write I am bad at doing that this is going to be fun you will see some interesting
+
+153
+00:25:31,880 --> 00:25:53,760
+aspects
+
+154
+00:25:53,759 --> 00:26:02,519
+we will do in steps in the same we will just take the same code and write
+
+155
+00:26:23,759 --> 00:26:51,519
+yeah some minor addition to that code so do this until some condition and then print ij
+
+156
+00:26:52,480 --> 00:26:55,279
+let's let's see what constants do we get
+
+157
+00:26:55,279 --> 00:27:06,920
+keep an eye on your what is executable okay okay for each statement keep marking
+
+158
+00:27:06,920 --> 00:27:29,480
+okay okay so okay you know fault here
+
+159
+00:27:36,920 --> 00:27:53,039
+good question so she says all these optimations we are talking about it just because the programmer
+
+160
+00:27:53,039 --> 00:28:00,880
+has been extremely lacks in writing the program if he had done his job well then probably it
+
+161
+00:28:00,880 --> 00:28:15,680
+wouldn't have happened the answer is yes and no I think it's worth telling a story here in
+
+162
+00:28:15,680 --> 00:28:23,760
+1950s when the first compilers came into existence people started pushing for using compilers
+
+163
+00:28:23,759 --> 00:28:31,079
+programmers hated it programmers said no we will not use the compiler I can write better code than
+
+164
+00:28:31,079 --> 00:28:40,319
+the compiler okay okay so as the program became bigger and bigger it was becoming very challenging
+
+165
+00:28:40,319 --> 00:28:45,119
+for the programmer to write very efficient code but in those days programs weren't as big and
+
+166
+00:28:45,119 --> 00:28:50,559
+the program and the compiler was not getting getting as optimized code for those small codes
+
+167
+00:28:50,559 --> 00:28:57,639
+but slowly the compiler optimization became more and more powerful the program became bigger so
+
+168
+00:28:57,639 --> 00:29:04,079
+the programmer just couldn't manage like keeping it modular you can optimize individual functions
+
+169
+00:29:04,079 --> 00:29:08,720
+but what about across functions maybe you are causing a library you have no clue what the library does
+
+170
+00:29:08,720 --> 00:29:13,599
+the program the compiler knows what the library does what you do you didn't write the library
+
+171
+00:29:13,599 --> 00:29:19,359
+you didn't write the third party software in industry those who are in industry they
+
+172
+00:29:19,359 --> 00:29:25,719
+are 15 member team each person is writing different code right and all of these is compiled together
+
+173
+00:29:25,720 --> 00:29:42,440
+right so yes if the optimizer will have no work to do right because they got a library code whatever is done is already done it
+
+174
+00:29:42,440 --> 00:29:51,600
+there examples we are giving on the other hand are deliberately toy examples right because
+
+175
+00:29:51,599 --> 00:30:01,039
+because I am putting them up on the fly and but if you look at the real world programs you will see tons of these things
+
+176
+00:30:01,039 --> 00:30:09,839
+yeah yeah yeah yeah yeah done done so what is it?
+
+177
+00:30:09,839 --> 00:30:15,759
+I will be constant is it?
+
+178
+00:30:15,759 --> 00:30:31,119
+true true so you mark this as executable when you do I equal to I plus 1 what is the value of I?
+
+179
+00:30:31,119 --> 00:30:41,919
+2 good good no no if it is true what is the value of I?
+
+180
+00:30:41,919 --> 00:30:43,839
+it will be 2 how?
+
+181
+00:30:43,839 --> 00:30:53,559
+because of I plus 1 no you will do a meet here and that will be?
+
+182
+00:30:53,559 --> 00:30:57,639
+bottom bottom and then which one will be executable?
+
+183
+00:30:57,639 --> 00:30:59,719
+this will be executable no no
+
+184
+00:30:59,720 --> 00:31:07,400
+so if it is bottom both are executable if it is bottom both are executable
+
+185
+00:31:07,400 --> 00:31:10,039
+so mark both of them as executable and then?
+
+186
+00:31:40,039 --> 00:31:42,039
+are we done?
+
+187
+00:31:42,039 --> 00:31:47,879
+yes sir bottom bottom how are we?
+
+188
+00:31:47,879 --> 00:31:59,000
+sir I am confused like when I am taking the plan I will definitely mark this as executable
+
+189
+00:31:59,000 --> 00:32:02,000
+and next round the value of the data is going to follow
+
+190
+00:32:02,599 --> 00:32:17,680
+you got I equal to 1 you missed the I plus plus
+
+191
+00:32:17,680 --> 00:32:18,680
+so now what will happen?
+
+192
+00:32:18,680 --> 00:32:19,680
+value of I will be?
+
+193
+00:32:19,680 --> 00:32:22,680
+it will remain it will be?
+
+194
+00:32:22,680 --> 00:32:23,680
+it will be what?
+
+195
+00:32:23,680 --> 00:32:24,680
+it will become 2 and then?
+
+196
+00:32:24,680 --> 00:32:40,480
+no from here you will come to the while condition and while condition you can go either here
+
+197
+00:32:40,480 --> 00:32:43,480
+or here which is executable?
+
+198
+00:32:43,480 --> 00:32:46,480
+it will consider both of them as?
+
+199
+00:32:47,279 --> 00:33:06,279
+no what is the value of I?
+
+200
+00:33:07,079 --> 00:33:11,079
+I equal to 1 and now I have to mark both the parts
+
+201
+00:33:11,079 --> 00:33:12,079
+make sense?
+
+202
+00:33:12,079 --> 00:33:15,079
+make sense and once you take both the parts what will happen?
+
+203
+00:33:15,079 --> 00:33:18,079
+how are we doing?
+
+204
+00:33:18,079 --> 00:33:29,079
+how did you mark both as executable?
+
+205
+00:33:29,879 --> 00:33:36,879
+I is 1 so J equal to 1 therefore I mark this
+
+206
+00:33:36,879 --> 00:33:39,879
+I becomes 2 here and then?
+
+207
+00:33:39,879 --> 00:33:43,879
+condition and then you are going back to beginning
+
+208
+00:33:43,879 --> 00:33:46,879
+so what is the value of I at the beginning?
+
+209
+00:33:46,879 --> 00:33:47,879
+sir you go here
+
+210
+00:33:47,879 --> 00:33:49,879
+yeah what is the value of I?
+
+211
+00:33:49,879 --> 00:33:50,879
+2
+
+212
+00:33:50,879 --> 00:33:51,879
+no
+
+213
+00:33:51,879 --> 00:33:53,879
+sir you are making I equal to
+
+214
+00:33:53,879 --> 00:33:58,879
+you made I equal to but at this block how many predecessors does this block have?
+
+215
+00:33:59,680 --> 00:34:01,680
+no this block has 2 predecessors
+
+216
+00:34:01,680 --> 00:34:04,680
+coming from top and coming from here
+
+217
+00:34:04,680 --> 00:34:07,680
+so you are taking meet of?
+
+218
+00:34:07,680 --> 00:34:12,680
+1 and 2
+
+219
+00:34:12,680 --> 00:34:15,680
+meet of 1 and 2 will be?
+
+220
+00:34:15,680 --> 00:34:17,680
+no
+
+221
+00:34:17,680 --> 00:34:20,680
+meet of 1 and 2 will be?
+
+222
+00:34:20,680 --> 00:34:23,680
+the constant of the relation I have any two constants
+
+223
+00:34:23,680 --> 00:34:28,680
+they are different depending on the meet they will become bottom
+
+224
+00:34:29,480 --> 00:34:34,480
+so I will become bottom
+
+225
+00:34:34,480 --> 00:34:37,480
+if I become bottom what will happen?
+
+226
+00:34:37,480 --> 00:34:52,480
+if I become bottom it will take the value which is recent
+
+227
+00:34:52,480 --> 00:34:55,480
+no it will take bottom because we cannot keep only the rate
+
+228
+00:34:56,280 --> 00:35:01,280
+see when I have to start processing a block
+
+229
+00:35:01,280 --> 00:35:04,280
+I have to compute it in M
+
+230
+00:35:04,280 --> 00:35:07,280
+what is the in M in this statement?
+
+231
+00:35:07,280 --> 00:35:12,280
+whatever is coming in it has two predecessors
+
+232
+00:35:12,280 --> 00:35:15,280
+sir you are taking meet
+
+233
+00:35:15,280 --> 00:35:18,280
+right?
+
+234
+00:35:18,280 --> 00:35:19,280
+make sense?
+
+235
+00:35:19,280 --> 00:35:20,280
+yeah
+
+236
+00:35:20,280 --> 00:35:23,280
+so if it is bottom what will you do?
+
+237
+00:35:24,080 --> 00:35:27,080
+take the meet of 1 and 2
+
+238
+00:35:27,080 --> 00:35:28,080
+see right?
+
+239
+00:35:28,080 --> 00:35:31,080
+so I is bottom then what will you do after that?
+
+240
+00:35:34,080 --> 00:35:39,080
+so at this point value of I is bottom
+
+241
+00:35:39,080 --> 00:35:41,080
+value of J is 1
+
+242
+00:35:41,080 --> 00:35:44,080
+what will you do then?
+
+243
+00:35:54,080 --> 00:35:57,080
+continue processing
+
+244
+00:35:57,080 --> 00:36:00,080
+may I?
+
+245
+00:36:00,080 --> 00:36:03,080
+value of I is bottom and J is 1
+
+246
+00:36:03,080 --> 00:36:06,080
+because that is what has come
+
+247
+00:36:06,080 --> 00:36:11,080
+so from here I equal to 2 and J equal to 1 came
+
+248
+00:36:11,080 --> 00:36:14,080
+and you take a meet with
+
+249
+00:36:14,080 --> 00:36:17,080
+I equal to 2 J equal to 1
+
+250
+00:36:17,080 --> 00:36:20,080
+this is coming from one branch
+
+251
+00:36:20,080 --> 00:36:23,080
+from the top branch what am I getting?
+
+252
+00:36:23,880 --> 00:36:26,880
+1 and J equal to top
+
+253
+00:36:26,880 --> 00:36:29,880
+what do I get?
+
+254
+00:36:29,880 --> 00:36:32,880
+meet
+
+255
+00:36:32,880 --> 00:36:35,880
+I equal to bottom J equal to 1
+
+256
+00:36:35,880 --> 00:36:38,880
+one meet top is 1
+
+257
+00:36:38,880 --> 00:36:41,880
+so now you take this and process this statement
+
+258
+00:36:41,880 --> 00:36:44,880
+process this condition
+
+259
+00:36:44,880 --> 00:36:47,880
+is the condition true or false here?
+
+260
+00:36:47,880 --> 00:36:50,880
+should be false
+
+261
+00:36:51,680 --> 00:36:53,680
+no we do not know
+
+262
+00:36:53,680 --> 00:36:55,680
+what is the value of I?
+
+263
+00:36:55,680 --> 00:36:56,680
+I is bottom
+
+264
+00:36:56,680 --> 00:36:59,680
+so is it true or false?
+
+265
+00:36:59,680 --> 00:37:02,680
+no no no
+
+266
+00:37:02,680 --> 00:37:05,680
+we do not know that
+
+267
+00:37:05,680 --> 00:37:08,680
+if we know it
+
+268
+00:37:08,680 --> 00:37:11,680
+so in round 1
+
+269
+00:37:11,680 --> 00:37:14,680
+it was top top
+
+270
+00:37:14,680 --> 00:37:17,680
+after I equal to 1 it became
+
+271
+00:37:17,680 --> 00:37:20,680
+one top
+
+272
+00:37:21,480 --> 00:37:23,480
+I will evaluate this condition
+
+273
+00:37:23,480 --> 00:37:25,480
+so this was executable
+
+274
+00:37:25,480 --> 00:37:27,480
+I marked this as executable
+
+275
+00:37:27,480 --> 00:37:29,480
+then this is marked as executable
+
+276
+00:37:29,480 --> 00:37:31,480
+this is marked as executable
+
+277
+00:37:31,480 --> 00:37:34,480
+and I equal to 1
+
+278
+00:37:34,480 --> 00:37:36,480
+true or false? true
+
+279
+00:37:36,480 --> 00:37:38,480
+which one will I mark as executable?
+
+280
+00:37:38,480 --> 00:37:40,480
+I will mark this as executable
+
+281
+00:37:40,480 --> 00:37:43,480
+so here it was 1 comma top
+
+282
+00:37:43,480 --> 00:37:45,480
+so after executing
+
+283
+00:37:45,480 --> 00:37:47,480
+so here also it was 1 comma top
+
+284
+00:37:47,480 --> 00:37:49,480
+after executing this it became?
+
+285
+00:37:50,280 --> 00:37:53,280
+I am just marking it here in and this is out was?
+
+286
+00:37:53,280 --> 00:37:56,280
+1 comma 1
+
+287
+00:37:56,280 --> 00:37:58,280
+okay
+
+288
+00:37:58,280 --> 00:38:01,280
+after executing this
+
+289
+00:38:01,280 --> 00:38:03,280
+how many success this guy has?
+
+290
+00:38:03,280 --> 00:38:05,280
+1 so it will mark
+
+291
+00:38:05,280 --> 00:38:07,280
+its successor as
+
+292
+00:38:07,280 --> 00:38:09,280
+who is its successor?
+
+293
+00:38:09,280 --> 00:38:11,280
+I plus plus this guy so this is marked as executable
+
+294
+00:38:11,280 --> 00:38:14,280
+these two are not marked executable yet
+
+295
+00:38:14,280 --> 00:38:16,280
+then what is the in for this?
+
+296
+00:38:16,280 --> 00:38:18,280
+1 comma 1
+
+297
+00:38:19,080 --> 00:38:21,080
+after executing it
+
+298
+00:38:21,080 --> 00:38:23,080
+so 1 comma sorry
+
+299
+00:38:23,080 --> 00:38:25,080
+it was 1 comma 1
+
+300
+00:38:25,080 --> 00:38:27,080
+and after executing it became?
+
+301
+00:38:27,080 --> 00:38:29,080
+2 comma 1
+
+302
+00:38:29,080 --> 00:38:31,080
+okay how many success it has?
+
+303
+00:38:31,080 --> 00:38:35,080
+1 it will mark the condition as true
+
+304
+00:38:35,080 --> 00:38:37,080
+I mean executable
+
+305
+00:38:37,080 --> 00:38:39,080
+and then I do not know the value of condition it is
+
+306
+00:38:39,080 --> 00:38:41,080
+some bottom
+
+307
+00:38:41,080 --> 00:38:43,080
+so I will mark both its successors as?
+
+308
+00:38:43,080 --> 00:38:45,080
+executable
+
+309
+00:38:45,080 --> 00:38:47,080
+executable how many successors it has?
+
+310
+00:38:47,880 --> 00:38:49,880
+the print and
+
+311
+00:38:49,880 --> 00:38:51,880
+the do
+
+312
+00:38:51,880 --> 00:38:53,880
+so mark this
+
+313
+00:38:53,880 --> 00:38:55,880
+now I have to process
+
+314
+00:38:55,880 --> 00:38:57,880
+see the out of this guy it was initially
+
+315
+00:38:57,880 --> 00:38:59,880
+top top it became 2 1
+
+316
+00:38:59,880 --> 00:39:01,880
+right
+
+317
+00:39:01,880 --> 00:39:03,880
+so when I add these two
+
+318
+00:39:03,880 --> 00:39:05,880
+they are not only marked executable
+
+319
+00:39:05,880 --> 00:39:07,880
+but their in has changed
+
+320
+00:39:07,880 --> 00:39:09,880
+so I will look at its previous in
+
+321
+00:39:09,880 --> 00:39:11,880
+okay previous in was
+
+322
+00:39:11,880 --> 00:39:13,880
+something now it is changed
+
+323
+00:39:13,880 --> 00:39:15,880
+now it will
+
+324
+00:39:16,680 --> 00:39:18,680
+again I have to compute its new in anyway
+
+325
+00:39:18,680 --> 00:39:20,680
+how do I compute its new in?
+
+326
+00:39:22,680 --> 00:39:24,680
+how many predecessors this guy has?
+
+327
+00:39:24,680 --> 00:39:26,680
+2
+
+328
+00:39:26,680 --> 00:39:28,680
+I will take a meet of its
+
+329
+00:39:28,680 --> 00:39:30,680
+in
+
+330
+00:39:30,680 --> 00:39:32,680
+from left side
+
+331
+00:39:32,680 --> 00:39:34,680
+in from both the branches
+
+332
+00:39:34,680 --> 00:39:36,680
+so I will take a meet of 1 comma top
+
+333
+00:39:36,680 --> 00:39:38,680
+and 2 comma 1
+
+334
+00:39:38,680 --> 00:39:40,680
+which will be meet of 1 and 2 is?
+
+335
+00:39:40,680 --> 00:39:42,680
+bottom
+
+336
+00:39:42,680 --> 00:39:44,680
+and top and 1 is?
+
+337
+00:39:45,480 --> 00:39:47,480
+1
+
+338
+00:39:47,480 --> 00:39:49,480
+now I will process
+
+339
+00:39:49,480 --> 00:39:51,480
+if i equal to equal to 1
+
+340
+00:39:51,480 --> 00:39:53,480
+so incoming is bottom comma 1
+
+341
+00:39:53,480 --> 00:39:55,480
+what is the value of i?
+
+342
+00:39:55,480 --> 00:39:57,480
+bottom is the value of i is bottom
+
+343
+00:39:57,480 --> 00:39:59,480
+what is the value of this expression?
+
+344
+00:40:01,480 --> 00:40:03,480
+bottom
+
+345
+00:40:03,480 --> 00:40:05,480
+there is nothing called
+
+346
+00:40:05,480 --> 00:40:07,480
+don't know there is nothing called
+
+347
+00:40:07,480 --> 00:40:09,480
+there is
+
+348
+00:40:09,480 --> 00:40:11,480
+I only all my expressions take
+
+349
+00:40:11,480 --> 00:40:13,480
+values of constants
+
+350
+00:40:14,280 --> 00:40:16,280
+top or bottom
+
+351
+00:40:16,280 --> 00:40:18,280
+that is the only values I can have
+
+352
+00:40:18,280 --> 00:40:20,280
+right
+
+353
+00:40:20,280 --> 00:40:22,280
+so if i is bottom this expression is
+
+354
+00:40:22,280 --> 00:40:24,280
+value is bottom
+
+355
+00:40:24,280 --> 00:40:26,280
+which one will I mark as executable?
+
+356
+00:40:26,280 --> 00:40:28,280
+both
+
+357
+00:40:28,280 --> 00:40:30,280
+both
+
+358
+00:40:30,280 --> 00:40:32,280
+okay
+
+359
+00:40:32,280 --> 00:40:34,280
+so I will take j equal to 1
+
+360
+00:40:34,280 --> 00:40:36,280
+something as j
+
+361
+00:40:36,280 --> 00:40:38,280
+since it was
+
+362
+00:40:38,280 --> 00:40:40,280
+different from what I had before
+
+363
+00:40:40,280 --> 00:40:42,280
+so after executing this
+
+364
+00:40:42,280 --> 00:40:44,280
+it was it took bottom comma 1
+
+365
+00:40:44,280 --> 00:40:46,280
+and output will be
+
+366
+00:40:46,280 --> 00:40:48,280
+bottom comma 1
+
+367
+00:40:48,280 --> 00:40:50,280
+here the input was bottom comma 1
+
+368
+00:40:50,280 --> 00:40:52,280
+output will be?
+
+369
+00:40:52,280 --> 00:40:54,280
+no
+
+370
+00:40:54,280 --> 00:40:56,280
+no output of j equal to
+
+371
+00:40:56,280 --> 00:40:58,280
+after j processing j equal to
+
+372
+00:40:58,280 --> 00:41:00,280
+bottom bottom
+
+373
+00:41:00,280 --> 00:41:02,280
+no
+
+374
+00:41:02,280 --> 00:41:04,280
+bottom 2
+
+375
+00:41:04,280 --> 00:41:06,280
+right side is 2 here
+
+376
+00:41:06,280 --> 00:41:08,280
+right side is 2
+
+377
+00:41:08,280 --> 00:41:10,280
+so if initially j could be bottom
+
+378
+00:41:10,280 --> 00:41:12,280
+but after processing j equal to 2 it is
+
+379
+00:41:12,280 --> 00:41:14,280
+2
+
+380
+00:41:14,280 --> 00:41:16,280
+so it is bottom 2
+
+381
+00:41:16,280 --> 00:41:18,280
+now there is a join point here
+
+382
+00:41:18,280 --> 00:41:20,280
+so processing i plus plus
+
+383
+00:41:20,280 --> 00:41:22,280
+it has two predecessors
+
+384
+00:41:22,280 --> 00:41:24,280
+in the previous case the predecessor was giving
+
+385
+00:41:24,280 --> 00:41:26,280
+only bottom because I was not processing it
+
+386
+00:41:26,280 --> 00:41:28,280
+it was only giving me top for
+
+387
+00:41:28,280 --> 00:41:30,280
+from its side
+
+388
+00:41:30,280 --> 00:41:32,280
+but now I have one side bottom 1
+
+389
+00:41:32,280 --> 00:41:34,280
+the other side bottom 2
+
+390
+00:41:34,280 --> 00:41:36,280
+so the in for this i plus plus is
+
+391
+00:41:36,280 --> 00:41:38,280
+bottom bottom
+
+392
+00:41:38,280 --> 00:41:40,280
+bottom
+
+393
+00:41:40,280 --> 00:41:42,280
+in comes bottom bottom
+
+394
+00:41:42,280 --> 00:41:44,280
+if I do i plus plus
+
+395
+00:41:44,280 --> 00:41:46,280
+what is the value of i when the old value was
+
+396
+00:41:46,280 --> 00:41:48,280
+bottom bottom
+
+397
+00:41:48,280 --> 00:41:50,280
+so the output is bottom comma bottom
+
+398
+00:41:50,280 --> 00:41:52,280
+after this I come to while
+
+399
+00:41:52,280 --> 00:41:54,280
+so now that all are marked
+
+400
+00:41:54,280 --> 00:41:56,280
+executable I won't talk about
+
+401
+00:41:56,280 --> 00:41:58,280
+what is being marked as executable
+
+402
+00:41:58,280 --> 00:42:00,280
+I will only see is there any change
+
+403
+00:42:00,280 --> 00:42:02,280
+so previously
+
+404
+00:42:02,280 --> 00:42:04,280
+it was 2 comma 1 now it is bottom bottom
+
+405
+00:42:04,280 --> 00:42:06,280
+right
+
+406
+00:42:06,280 --> 00:42:08,280
+so I come here
+
+407
+00:42:08,280 --> 00:42:10,280
+something has changed
+
+408
+00:42:10,280 --> 00:42:12,280
+I will say okay
+
+409
+00:42:12,280 --> 00:42:14,280
+hey add this guy and this guy
+
+410
+00:42:14,280 --> 00:42:16,280
+to my work list this is already there in my work list
+
+411
+00:42:16,280 --> 00:42:18,280
+let me add the do
+
+412
+00:42:18,280 --> 00:42:20,280
+let me take now a meet
+
+413
+00:42:20,280 --> 00:42:22,280
+to process this do statement
+
+414
+00:42:22,280 --> 00:42:24,280
+I have to take a meet of
+
+415
+00:42:24,280 --> 00:42:26,280
+its predecessors so what is the meet
+
+416
+00:42:26,280 --> 00:42:28,280
+of the what are the predecessors from here
+
+417
+00:42:28,280 --> 00:42:30,280
+it is going bottom bottom from top I am
+
+418
+00:42:30,280 --> 00:42:32,280
+getting 1 comma
+
+419
+00:42:32,280 --> 00:42:34,280
+1 comma top
+
+420
+00:42:34,280 --> 00:42:36,280
+1 comma top
+
+421
+00:42:36,280 --> 00:42:38,280
+so what is the meet of bottom comma
+
+422
+00:42:38,280 --> 00:42:40,280
+1 comma top
+
+423
+00:42:40,280 --> 00:42:42,280
+bottom bottom
+
+424
+00:42:42,280 --> 00:42:44,280
+in is bottom bottom
+
+425
+00:42:44,280 --> 00:42:46,280
+out is also bottom bottom
+
+426
+00:42:46,280 --> 00:42:48,280
+and now
+
+427
+00:42:48,280 --> 00:42:50,280
+is it different
+
+428
+00:42:50,280 --> 00:42:52,280
+from what was there before
+
+429
+00:42:52,280 --> 00:42:54,280
+yes
+
+430
+00:42:54,280 --> 00:42:56,280
+it was this was before this is new
+
+431
+00:42:56,280 --> 00:42:58,280
+so something has changed
+
+432
+00:42:58,280 --> 00:43:00,280
+so I will process this
+
+433
+00:43:00,280 --> 00:43:02,280
+and I will its output
+
+434
+00:43:02,280 --> 00:43:04,280
+output is also changed bottom bottom
+
+435
+00:43:04,280 --> 00:43:06,280
+so I will process this
+
+436
+00:43:06,280 --> 00:43:08,280
+if I process this
+
+437
+00:43:08,280 --> 00:43:10,280
+in comes
+
+438
+00:43:10,280 --> 00:43:12,280
+sorry in comes bottom bottom
+
+439
+00:43:14,280 --> 00:43:16,280
+out is
+
+440
+00:43:16,280 --> 00:43:18,280
+bottom one
+
+441
+00:43:18,280 --> 00:43:20,280
+bottom one good
+
+442
+00:43:20,280 --> 00:43:22,280
+this same as this
+
+443
+00:43:22,280 --> 00:43:24,280
+bottom one and bottom one
+
+444
+00:43:24,280 --> 00:43:26,280
+nothing has changed
+
+445
+00:43:26,280 --> 00:43:28,280
+so this guy says I do not need
+
+446
+00:43:28,280 --> 00:43:30,280
+to add my successor because
+
+447
+00:43:30,280 --> 00:43:32,280
+I mean nothing has changed
+
+448
+00:43:32,280 --> 00:43:34,280
+I mean nothing has changed
+
+449
+00:43:36,280 --> 00:43:38,280
+but the way we have done
+
+450
+00:43:38,280 --> 00:43:40,280
+we are saying if my
+
+451
+00:43:40,280 --> 00:43:42,280
+in has changed add
+
+452
+00:43:42,280 --> 00:43:44,280
+my successor
+
+453
+00:43:44,280 --> 00:43:46,280
+my successor will decide whether to proceed further
+
+454
+00:43:46,280 --> 00:43:48,280
+or not so what I will do I will
+
+455
+00:43:48,280 --> 00:43:50,280
+mark I will say hey do process this
+
+456
+00:43:50,280 --> 00:43:52,280
+we will hold on to that
+
+457
+00:43:52,280 --> 00:43:54,280
+and similarly j comma 2 this j2
+
+458
+00:43:54,280 --> 00:43:56,280
+in comes bottom bottom
+
+459
+00:43:56,280 --> 00:43:58,280
+out goes
+
+460
+00:43:58,280 --> 00:44:00,280
+bottom two and at the meet
+
+461
+00:44:00,280 --> 00:44:02,280
+it becomes bottom bottom
+
+462
+00:44:02,280 --> 00:44:04,280
+now this i plus plus
+
+463
+00:44:04,280 --> 00:44:06,280
+will say hey my in previously was
+
+464
+00:44:06,280 --> 00:44:08,280
+bottom bottom now is also
+
+465
+00:44:08,280 --> 00:44:10,280
+bottom bottom nothing has changed
+
+466
+00:44:10,280 --> 00:44:12,280
+so it will not add anymore
+
+467
+00:44:12,280 --> 00:44:14,280
+what is there in my work list only this print
+
+468
+00:44:14,280 --> 00:44:16,280
+so print the in
+
+469
+00:44:16,280 --> 00:44:18,280
+comes bottom bottom
+
+470
+00:44:18,280 --> 00:44:20,280
+it is not
+
+471
+00:44:20,280 --> 00:44:22,280
+assignment statement so nothing changes
+
+472
+00:44:24,280 --> 00:44:26,280
+second iteration
+
+473
+00:44:26,280 --> 00:44:28,280
+second iteration here
+
+474
+00:44:30,280 --> 00:44:32,280
+one two three four
+
+475
+00:44:38,280 --> 00:44:40,280
+bottom one in came bottom
+
+476
+00:44:40,280 --> 00:44:42,280
+comma one out was bottom
+
+477
+00:44:42,280 --> 00:44:44,280
+comma two
+
+478
+00:44:46,280 --> 00:44:48,280
+yes see if I do not know what
+
+479
+00:44:48,280 --> 00:44:50,280
+it can be let us say it is a function that
+
+480
+00:44:50,280 --> 00:44:52,280
+I library code or some function
+
+481
+00:44:52,280 --> 00:44:54,280
+call or something that I do not know
+
+482
+00:44:54,280 --> 00:44:56,280
+then what will I assume
+
+483
+00:44:56,280 --> 00:44:58,280
+it could be true or false
+
+484
+00:44:58,280 --> 00:45:00,280
+right
+
+485
+00:45:00,280 --> 00:45:02,280
+bottom everyone
+
+486
+00:45:02,280 --> 00:45:04,280
+on the same page
+
+487
+00:45:04,280 --> 00:45:06,280
+if you look at it
+
+488
+00:45:06,280 --> 00:45:08,280
+even though during the
+
+489
+00:45:08,280 --> 00:45:10,280
+analysis the middle of it
+
+490
+00:45:10,280 --> 00:45:12,280
+it you had
+
+491
+00:45:12,280 --> 00:45:14,280
+a case of hey something becoming true
+
+492
+00:45:14,280 --> 00:45:16,280
+only the
+
+493
+00:45:16,280 --> 00:45:18,280
+then branch was becoming true
+
+494
+00:45:18,280 --> 00:45:20,280
+later
+
+495
+00:45:20,280 --> 00:45:22,280
+both became true
+
+496
+00:45:22,280 --> 00:45:24,280
+some of you said
+
+497
+00:45:24,280 --> 00:45:26,280
+no no no
+
+498
+00:45:26,280 --> 00:45:28,280
+where is the code
+
+499
+00:45:28,280 --> 00:45:30,280
+yeah some of you said
+
+500
+00:45:30,280 --> 00:45:32,280
+erase that code is it fine
+
+501
+00:45:32,280 --> 00:45:34,280
+code is here code is here some of you said
+
+502
+00:45:34,280 --> 00:45:36,280
+in the second iteration
+
+503
+00:45:36,280 --> 00:45:38,280
+value of i will be two
+
+504
+00:45:38,280 --> 00:45:40,280
+at the beginning no
+
+505
+00:45:40,280 --> 00:45:42,280
+value of i will not be two
+
+506
+00:45:42,280 --> 00:45:44,280
+after meet it will become bottom
+
+507
+00:45:44,280 --> 00:45:46,280
+value of i is two here
+
+508
+00:45:46,280 --> 00:45:48,280
+but after meet it became
+
+509
+00:45:48,280 --> 00:45:50,280
+bottom otherwise think about
+
+510
+00:45:50,280 --> 00:45:52,280
+this way if you keep if you do not take
+
+511
+00:45:52,280 --> 00:45:54,280
+the meet the value of i will keep on
+
+512
+00:45:54,280 --> 00:45:56,280
+increasing
+
+513
+00:45:56,280 --> 00:45:58,280
+right one question
+
+514
+00:45:58,280 --> 00:46:00,280
+that might come to your mind
+
+515
+00:46:00,280 --> 00:46:02,280
+what if the loop never terminates
+
+516
+00:46:02,280 --> 00:46:04,280
+in practice in
+
+517
+00:46:04,280 --> 00:46:06,280
+what if the loop is such that
+
+518
+00:46:06,280 --> 00:46:08,280
+this is here
+
+519
+00:46:08,280 --> 00:46:10,280
+what if it is this
+
+520
+00:46:10,280 --> 00:46:12,280
+this is the
+
+521
+00:46:12,280 --> 00:46:14,280
+code while true
+
+522
+00:46:14,280 --> 00:46:16,280
+you know it to be true
+
+523
+00:46:16,280 --> 00:46:18,280
+what will you do
+
+524
+00:46:18,280 --> 00:46:20,280
+the execute will not become executable
+
+525
+00:46:22,280 --> 00:46:24,280
+okay that is fine
+
+526
+00:46:24,280 --> 00:46:26,280
+so what you are saying the print will not become executable
+
+527
+00:46:26,280 --> 00:46:28,280
+okay
+
+528
+00:46:28,280 --> 00:46:30,280
+but the question is will you terminate
+
+529
+00:46:30,280 --> 00:46:32,280
+no i will terminate
+
+530
+00:46:32,280 --> 00:46:34,280
+yeah terminate
+
+531
+00:46:34,280 --> 00:46:36,280
+so the question is
+
+532
+00:46:36,280 --> 00:46:38,280
+in the modified example
+
+533
+00:46:38,280 --> 00:46:40,280
+my while
+
+534
+00:46:40,280 --> 00:46:42,280
+has only true
+
+535
+00:46:42,280 --> 00:46:44,280
+has its condition
+
+536
+00:46:44,280 --> 00:46:46,280
+so will i terminate
+
+537
+00:46:46,280 --> 00:46:48,280
+so will i terminate
+
+538
+00:46:52,280 --> 00:46:54,280
+the yeses are still murmurs
+
+539
+00:46:54,280 --> 00:46:56,280
+here few murmuring
+
+540
+00:46:56,280 --> 00:46:58,280
+no's as well
+
+541
+00:46:58,280 --> 00:47:00,280
+i want a firm
+
+542
+00:47:00,280 --> 00:47:02,280
+yes or a firm
+
+543
+00:47:02,280 --> 00:47:04,280
+no
+
+544
+00:47:04,280 --> 00:47:06,280
+i still hear both
+
+545
+00:47:06,280 --> 00:47:08,280
+so those
+
+546
+00:47:08,280 --> 00:47:10,280
+who are saying yes
+
+547
+00:47:10,280 --> 00:47:12,280
+can you give a reason why it is yes
+
+548
+00:47:12,280 --> 00:47:14,280
+or rather let me do the other way around
+
+549
+00:47:14,280 --> 00:47:16,280
+those who are saying no
+
+550
+00:47:16,280 --> 00:47:18,280
+can you say why it say no
+
+551
+00:47:18,280 --> 00:47:20,280
+why it won't terminate
+
+552
+00:47:20,280 --> 00:47:22,280
+why you fear that it won't terminate
+
+553
+00:47:24,280 --> 00:47:26,280
+i is constantly
+
+554
+00:47:26,280 --> 00:47:28,280
+changing
+
+555
+00:47:28,280 --> 00:47:30,280
+let us see what will happen
+
+556
+00:47:30,280 --> 00:47:32,280
+i start i equal to 1
+
+557
+00:47:32,280 --> 00:47:34,280
+right
+
+558
+00:47:34,280 --> 00:47:36,280
+after it became i plus plus it became
+
+559
+00:47:36,280 --> 00:47:38,280
+i equal to 2
+
+560
+00:47:38,280 --> 00:47:40,280
+and then i come back here
+
+561
+00:47:40,280 --> 00:47:42,280
+because it is true i don't mark this as executable
+
+562
+00:47:42,280 --> 00:47:44,280
+i come back here
+
+563
+00:47:44,280 --> 00:47:46,280
+what is the value of i
+
+564
+00:47:48,280 --> 00:47:50,280
+what is the value of i
+
+565
+00:47:50,280 --> 00:47:52,280
+bottom
+
+566
+00:47:52,280 --> 00:47:54,280
+because i took a meet of
+
+567
+00:47:54,280 --> 00:47:56,280
+1 and 2
+
+568
+00:47:56,280 --> 00:47:58,280
+once it became a bottom
+
+569
+00:47:58,280 --> 00:48:00,280
+i will
+
+570
+00:48:04,280 --> 00:48:06,280
+see i did not add this do
+
+571
+00:48:06,280 --> 00:48:08,280
+this statement back
+
+572
+00:48:08,280 --> 00:48:10,280
+only because
+
+573
+00:48:10,280 --> 00:48:12,280
+this was true
+
+574
+00:48:12,280 --> 00:48:14,280
+i added because
+
+575
+00:48:14,280 --> 00:48:16,280
+look
+
+576
+00:48:16,280 --> 00:48:18,280
+something has changed
+
+577
+00:48:18,280 --> 00:48:20,280
+something has not
+
+578
+00:48:20,280 --> 00:48:22,280
+changed and i don't care
+
+579
+00:48:22,280 --> 00:48:24,280
+right
+
+580
+00:48:24,280 --> 00:48:26,280
+we said
+
+581
+00:48:26,280 --> 00:48:28,280
+we will keep on iterating till
+
+582
+00:48:28,280 --> 00:48:30,280
+either a new executable block is added
+
+583
+00:48:30,280 --> 00:48:32,280
+or something has changed
+
+584
+00:48:32,280 --> 00:48:34,280
+this is already executable
+
+585
+00:48:34,280 --> 00:48:36,280
+it is marked executable even before
+
+586
+00:48:36,280 --> 00:48:38,280
+i am not resetting its executable
+
+587
+00:48:38,280 --> 00:48:40,280
+it is a mutable bit
+
+588
+00:48:40,280 --> 00:48:42,280
+right
+
+589
+00:48:42,280 --> 00:48:44,280
+those who are saying
+
+590
+00:48:44,280 --> 00:48:46,280
+yes it will definitely terminate
+
+591
+00:48:46,280 --> 00:48:48,280
+not just in this example but any example
+
+592
+00:48:48,280 --> 00:48:50,280
+what is the argument
+
+593
+00:48:54,280 --> 00:48:56,280
+we will draw everything will
+
+594
+00:48:56,280 --> 00:48:58,280
+is it gapped
+
+595
+00:48:58,280 --> 00:49:00,280
+let's start it would change
+
+596
+00:49:00,280 --> 00:49:02,280
+if it doesn't change then it would terminate
+
+597
+00:49:02,280 --> 00:49:04,280
+good
+
+598
+00:49:04,280 --> 00:49:06,280
+the key is let us say some variables values
+
+599
+00:49:06,280 --> 00:49:08,280
+do not change
+
+600
+00:49:08,280 --> 00:49:10,280
+for example let's say there is no i++
+
+601
+00:49:10,280 --> 00:49:12,280
+the value of i is
+
+602
+00:49:12,280 --> 00:49:14,280
+not changing what will happen
+
+603
+00:49:14,280 --> 00:49:16,280
+it will remain 1
+
+604
+00:49:16,280 --> 00:49:18,280
+value of j
+
+605
+00:49:18,280 --> 00:49:20,280
+will in this case remain 1
+
+606
+00:49:20,280 --> 00:49:22,280
+but will we terminate
+
+607
+00:49:22,280 --> 00:49:24,280
+will we terminate
+
+608
+00:49:24,280 --> 00:49:26,280
+why will we terminate
+
+609
+00:49:26,280 --> 00:49:28,280
+no change
+
+610
+00:49:28,280 --> 00:49:30,280
+why will we terminate
+
+611
+00:49:30,280 --> 00:49:32,280
+because there is no change
+
+612
+00:49:32,280 --> 00:49:34,280
+make sense
+
+613
+00:49:34,280 --> 00:49:36,280
+yes good
+
+614
+00:49:36,280 --> 00:49:38,280
+if value of i keeps on changing
+
+615
+00:49:38,280 --> 00:49:40,280
+then
+
+616
+00:49:40,280 --> 00:49:42,280
+exactly
+
+617
+00:49:42,280 --> 00:49:44,280
+after some
+
+618
+00:49:44,280 --> 00:49:46,280
+after few steps of our analysis
+
+619
+00:49:46,280 --> 00:49:48,280
+we have finite values
+
+620
+00:49:48,280 --> 00:49:50,280
+that i can take
+
+621
+00:49:50,280 --> 00:49:52,280
+we cannot take infinite values
+
+622
+00:49:52,280 --> 00:49:54,280
+for the variables
+
+623
+00:49:54,280 --> 00:49:56,280
+since it will take finite number of variables
+
+624
+00:49:56,280 --> 00:49:58,280
+we can take infinite number of variables
+
+625
+00:49:58,280 --> 00:50:00,280
+we can take infinite number of variables
+
+626
+00:50:00,280 --> 00:50:02,280
+we can take infinite number of variables
+
+627
+00:50:02,280 --> 00:50:04,280
+since it will take finite number of values
+
+628
+00:50:04,280 --> 00:50:06,280
+we will terminate
+
+629
+00:50:06,280 --> 00:50:08,280
+make sense
+
+630
+00:50:08,280 --> 00:50:10,280
+so it doesn't matter whether user program is an infinite loop or not
+
+631
+00:50:10,280 --> 00:50:12,280
+we are not an infinite loop
+
+632
+00:50:18,280 --> 00:50:20,280
+that's a good point
+
+633
+00:50:20,280 --> 00:50:22,280
+i like this
+
+634
+00:50:22,280 --> 00:50:24,280
+let's do this
+
+635
+00:50:26,280 --> 00:50:28,280
+i will make some minor modifications
+
+636
+00:50:32,280 --> 00:50:34,280
+under some conditions
+
+637
+00:50:34,280 --> 00:50:36,280
+i will make
+
+638
+00:50:36,280 --> 00:50:38,280
+aha
+
+639
+00:50:38,280 --> 00:50:40,280
+aha
+
+640
+00:50:40,280 --> 00:50:42,280
+i am just being evil
+
+641
+00:50:42,280 --> 00:50:44,280
+i like it
+
+642
+00:50:44,280 --> 00:50:46,280
+so value of j
+
+643
+00:50:46,280 --> 00:50:48,280
+is flipping between
+
+644
+00:50:48,280 --> 00:50:50,280
+0 and 1
+
+645
+00:50:50,280 --> 00:50:52,280
+it was 1
+
+646
+00:50:52,280 --> 00:50:54,280
+it was 1
+
+647
+00:50:54,280 --> 00:50:56,280
+it was 1
+
+648
+00:50:56,280 --> 00:50:58,280
+it was 1
+
+649
+00:50:58,280 --> 00:51:00,280
+it was 1
+
+650
+00:51:00,280 --> 00:51:02,280
+0 and 1
+
+651
+00:51:02,280 --> 00:51:04,280
+it was 1
+
+652
+00:51:04,280 --> 00:51:06,280
+it became 0
+
+653
+00:51:06,280 --> 00:51:08,280
+0 and 1
+
+654
+00:51:08,280 --> 00:51:10,280
+0 and 1
+
+655
+00:51:10,280 --> 00:51:12,280
+0 and 1
+
+656
+00:51:12,280 --> 00:51:14,280
+and
+
+657
+00:51:14,280 --> 00:51:16,280
+yeah
+
+658
+00:51:16,280 --> 00:51:18,280
+so okay
+
+659
+00:51:18,280 --> 00:51:20,280
+my handwriting right
+
+660
+00:51:20,280 --> 00:51:22,280
+so let me read i equal to 1
+
+661
+00:51:22,280 --> 00:51:24,280
+j equal to 1
+
+662
+00:51:24,280 --> 00:51:26,280
+if j equal to equal to 1
+
+663
+00:51:26,280 --> 00:51:28,280
+i plus plus
+
+664
+00:51:28,280 --> 00:51:30,280
+and j equal to
+
+665
+00:51:30,280 --> 00:51:32,280
+flip basically
+
+666
+00:51:32,280 --> 00:51:34,280
+if it is 0 make it 1 if it is 1 make it 0
+
+667
+00:51:34,280 --> 00:51:36,280
+and the way the code is designed
+
+668
+00:51:36,280 --> 00:51:38,280
+both i and j will
+
+669
+00:51:38,280 --> 00:51:40,280
+keep flipping
+
+670
+00:51:40,280 --> 00:51:42,280
+we k
+
+671
+00:51:42,280 --> 00:51:44,280
+our values are
+
+672
+00:51:44,280 --> 00:51:46,280
+always going in one direction
+
+673
+00:51:46,280 --> 00:51:48,280
+but now
+
+674
+00:51:48,280 --> 00:51:50,280
+my i will
+
+675
+00:51:50,280 --> 00:51:52,280
+my j will flip
+
+676
+00:51:52,280 --> 00:51:54,280
+and it will flip i
+
+677
+00:51:54,280 --> 00:51:56,280
+so will i go into infinite loop
+
+678
+00:51:58,280 --> 00:52:00,280
+so
+
+679
+00:52:00,280 --> 00:52:02,280
+so
+
+680
+00:52:02,280 --> 00:52:04,280
+so
+
+681
+00:52:04,280 --> 00:52:06,280
+so
+
+682
+00:52:06,280 --> 00:52:08,280
+so
+
+683
+00:52:08,280 --> 00:52:10,280
+so
+
+684
+00:52:10,280 --> 00:52:12,280
+so
+
+685
+00:52:12,280 --> 00:52:14,280
+so
+
+686
+00:52:14,280 --> 00:52:16,280
+so
+
+687
+00:52:16,280 --> 00:52:18,280
+so initially i will be 0
+
+688
+00:52:18,280 --> 00:52:20,280
+after one iteration it will be 1
+
+689
+00:52:20,280 --> 00:52:22,280
+but at the end of the iteration when i take a meat
+
+690
+00:52:22,280 --> 00:52:24,280
+it will become bottom
+
+691
+00:52:24,280 --> 00:52:26,280
+let them flip in real
+
+692
+00:52:26,280 --> 00:52:28,280
+in the real world
+
+693
+00:52:28,280 --> 00:52:30,280
+in the abstract world
+
+694
+00:52:30,280 --> 00:52:32,280
+we wont go to infinite loop
+
+695
+00:52:34,280 --> 00:52:36,280
+are you guys convinced of this
+
+696
+00:52:36,280 --> 00:52:38,280
+anyone who is not
+
+697
+00:52:38,280 --> 00:52:40,280
+i can go over it no issues
+
+698
+00:52:40,280 --> 00:52:42,280
+but this is kind of a very
+
+699
+00:52:42,280 --> 00:52:44,280
+a beautiful point here
+
+700
+00:52:44,280 --> 00:52:46,280
+that even though
+
+701
+00:52:46,280 --> 00:52:48,280
+the values keep on
+
+702
+00:52:48,280 --> 00:52:50,280
+either increasing decreasing or going back and forth
+
+703
+00:52:50,280 --> 00:52:52,280
+it is not that
+
+704
+00:52:52,280 --> 00:52:54,280
+only when it is increasing continuously we will
+
+705
+00:52:54,280 --> 00:52:56,280
+hit a bottom
+
+706
+00:52:56,280 --> 00:52:58,280
+for us we are not checking whether it is increasing or not
+
+707
+00:52:58,280 --> 00:53:00,280
+we are seeing it is different or not
+

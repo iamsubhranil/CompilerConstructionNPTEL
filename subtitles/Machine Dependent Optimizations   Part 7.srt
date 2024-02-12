@@ -1,0 +1,3016 @@
+1
+00:00:00,000 --> 00:00:10,839
+Software Pipelining. Software Pipelining is essentially instruction scheduling for loops.
+
+2
+00:00:10,839 --> 00:00:16,600
+So, we will talk about all of those topics in the current module, right. So, the current
+
+3
+00:00:16,600 --> 00:00:21,600
+module is titled Instruction Scheduling. And what you are going to see here as I mentioned
+
+4
+00:00:21,600 --> 00:00:26,800
+earlier is that we will introduce the need for instruction scheduling. Then we will talk
+
+5
+00:00:26,800 --> 00:00:32,799
+about how basic block scheduling is done. And subsequently we will extend this to global
+
+6
+00:00:32,799 --> 00:00:38,120
+instruction scheduling beyond basic blocks. And there are three different global instruction
+
+7
+00:00:38,120 --> 00:00:44,000
+scheduling that we talk about namely trace scheduling, super block scheduling and then
+
+8
+00:00:44,000 --> 00:00:49,200
+hyper block scheduling. Then subsequently we will talk about software pipelining which
+
+9
+00:00:49,200 --> 00:00:55,219
+is all about instruction scheduling for loops. And towards the end we will very briefly talk
+
+10
+00:00:55,259 --> 00:01:00,899
+about the interaction between register allocation and instruction scheduling that is something
+
+11
+00:01:00,899 --> 00:01:02,780
+it is also used.
+
+12
+00:01:02,780 --> 00:01:08,859
+So, what is instruction scheduling? Instruction scheduling is essentially given an instruction
+
+13
+00:01:08,859 --> 00:01:15,980
+sequence you reorder them in some other way such that it minimizes certain things. But
+
+14
+00:01:15,980 --> 00:01:20,780
+when you do the reordering you have to make sure that the dependences which are there
+
+15
+00:01:20,780 --> 00:01:27,379
+in the original program are always preserved, right. And what you try to minimize? You try
+
+16
+00:01:27,379 --> 00:01:33,180
+to minimize the execution time of the program that is of concern to you, right.
+
+17
+00:01:33,180 --> 00:01:38,700
+So, instruction scheduling can be done to minimize the number of stalls that would be
+
+18
+00:01:38,700 --> 00:01:45,020
+incurred by the pipeline execution unit. Remember we talked about data hazards and control hazards.
+
+19
+00:01:45,020 --> 00:01:50,020
+And then when you have these hazards, right, normally stalls are incurred and to avoid
+
+20
+00:01:50,060 --> 00:01:56,060
+these stalls you can again reorder instructions to avoid them. Some processors may exploit,
+
+21
+00:01:56,060 --> 00:02:01,579
+not some, today almost all processors exploit instruction level parallelism. That means
+
+22
+00:02:01,579 --> 00:02:07,939
+that they are capable of executing multiple independent instructions in a single cycle.
+
+23
+00:02:07,939 --> 00:02:13,139
+And when you have processors of that kind then instruction scheduling can expose these
+
+24
+00:02:13,139 --> 00:02:18,780
+independent instructions to these processors so that they can be executed together. And
+
+25
+00:02:18,780 --> 00:02:23,580
+when you have instruction level parallelism and when you kind of expose this parallelism
+
+26
+00:02:23,580 --> 00:02:30,580
+using instruction scheduling you have to make sure that the schedule that you generate,
+
+27
+00:02:30,580 --> 00:02:36,020
+right, the schedule will have multiple parallel instructions because they are able to, your
+
+28
+00:02:36,020 --> 00:02:40,780
+architecture is able to exploit them. But these multiple parallel instructions should
+
+29
+00:02:40,780 --> 00:02:46,139
+also obey resource constraints. By that what we mean? If you say that there are three multiply
+
+30
+00:02:46,259 --> 00:02:52,139
+instructions, right, in your instruction schedule then there must be at least three multiply
+
+31
+00:02:52,139 --> 00:02:57,500
+function units for you to execute them. If you have fewer than that then obviously this
+
+32
+00:02:57,500 --> 00:03:03,299
+schedule does not satisfy that resource constraint. So when you talk about instruction scheduling
+
+33
+00:03:03,299 --> 00:03:08,699
+you always talk about satisfying dependence constraints which is data dependency and you
+
+34
+00:03:08,699 --> 00:03:14,299
+always talk about satisfying resource constraints, right. These are the two things that you talk
+
+35
+00:03:14,380 --> 00:03:19,380
+about, okay. So instruction scheduling can improve the performance of a program by actually
+
+36
+00:03:19,380 --> 00:03:25,260
+moving these independent instructions around, okay, independent instructions in parallel
+
+37
+00:03:25,260 --> 00:03:30,260
+or adjacent positions. Parallel because if you have a VLIW kind of an architecture you
+
+38
+00:03:30,260 --> 00:03:35,780
+express them in parallel. If you have a superscalar architecture even, I mean each instruction
+
+39
+00:03:35,780 --> 00:03:40,540
+is going to hold only one operation. So successive independent operations are put next to each
+
+40
+00:03:40,579 --> 00:03:45,379
+other so that the hardware when it decodes can actually look at these instructions and
+
+41
+00:03:45,379 --> 00:03:48,419
+then say that yes they can be executed in parallel, right.
+
+42
+00:03:48,419 --> 00:03:55,019
+And of course in simple pipeline the processor you also use these things to stall data and
+
+43
+00:03:55,019 --> 00:04:00,579
+control hazards, okay. Whereas for VLIW, EPIC and superscalar processor they are meant for
+
+44
+00:04:00,579 --> 00:04:05,019
+exposing the parallelism, instruction level parallelism. We will give examples of these
+
+45
+00:04:05,020 --> 00:04:10,580
+things as we go by, right. Essentially the clue is important point here is that we need
+
+46
+00:04:10,580 --> 00:04:16,220
+to make sure that these independent instructions, right, are exposed as parallelism. That is
+
+47
+00:04:16,220 --> 00:04:18,379
+really the key point, okay.
+
+48
+00:04:18,379 --> 00:04:24,420
+In this example we saw in the in yesterday's class you have a sequence of instructions,
+
+49
+00:04:24,420 --> 00:04:31,420
+right and here is there is a data dependency. The load instruction writes a value into R3
+
+50
+00:04:31,420 --> 00:04:36,540
+transistor which is being used by the add instruction. Typically load instructions have
+
+51
+00:04:36,540 --> 00:04:43,060
+a stall of one cycle that means that the load value is only available during the mem phase
+
+52
+00:04:43,060 --> 00:04:48,379
+of the pipeline and the mem phase is always after the execute phase. Therefore if the
+
+53
+00:04:48,379 --> 00:04:53,139
+next instruction wants to execute this it has to at least wait till the mem phase of
+
+54
+00:04:53,139 --> 00:04:57,360
+the next instruction and that is where the stall is kind of introduced.
+
+55
+00:04:57,360 --> 00:05:04,080
+So both these instructions essentially generate one-one stall each, right and therefore you
+
+56
+00:05:04,080 --> 00:05:10,699
+have two stalls following the two loads. But if you do instruction scheduling and then
+
+57
+00:05:10,699 --> 00:05:16,560
+replace the loads around or move the loads around then you can avoid all of these stalls
+
+58
+00:05:16,560 --> 00:05:21,439
+as you can see in this example. Here what you have done is that between the load and
+
+59
+00:05:21,439 --> 00:05:27,399
+the dependent add instruction you have another load instruction and that itself ensures that
+
+60
+00:05:27,399 --> 00:05:33,199
+this load and the dependent add instruction are at least separated by one instruction,
+
+61
+00:05:33,199 --> 00:05:39,600
+right. Therefore this schedule which you see on the right hand side essentially satisfies
+
+62
+00:05:39,600 --> 00:05:45,480
+all the stalls and removes them. It satisfies all the dependencies and removes all the stalls.
+
+63
+00:05:45,480 --> 00:05:50,159
+Again you can see that the data dependencies that you see in the original source program
+
+64
+00:05:50,160 --> 00:05:56,680
+are always observed in the instruction in the scheduled program in the reordered program,
+
+65
+00:05:56,680 --> 00:06:02,200
+right. The essential dependencies that we talk about is from this R 3 to R 3 that dependency
+
+66
+00:06:02,200 --> 00:06:07,680
+is being preserved, right. Similarly this R 13 to R 13 that dependency is being preserved.
+
+67
+00:06:07,680 --> 00:06:13,800
+There is a dependency from this R 3 to this R 3 that is also being preserved, correct.
+
+68
+00:06:13,800 --> 00:06:18,760
+That is why we were unable to move either of these add instructions. Both of these add
+
+69
+00:06:18,759 --> 00:06:22,839
+instructions are dependent, right. So, we could not have moved that thing. We cannot
+
+70
+00:06:22,839 --> 00:06:27,599
+even move this instruction ahead here because this add is dependent on the load. So, you
+
+71
+00:06:27,599 --> 00:06:32,240
+cannot move this earlier than the load. When you talk about instruction scheduling essentially
+
+72
+00:06:32,240 --> 00:06:38,240
+to hide stalls it is still a serial schedule, serial but reordered schedule. Right there
+
+73
+00:06:38,240 --> 00:06:43,920
+you do not talk about resource constraints because every instruction means in every instruction
+
+74
+00:06:43,920 --> 00:06:47,920
+contains only one operation. So, there is no notion of a resource constraint that you
+
+75
+00:06:47,920 --> 00:06:53,840
+talk about. But of course, if you have non-pipelined units then there are certain other things
+
+76
+00:06:53,840 --> 00:06:57,759
+that you need to do but we will not get into that right now.
+
+77
+00:06:57,759 --> 00:07:05,160
+Okay. So, if you have a superscalar architecture, right, which exploits instruction level parallelism
+
+78
+00:07:05,160 --> 00:07:11,400
+then it may have multiple function units and during the instruction fetch and decode phase
+
+79
+00:07:11,400 --> 00:07:16,660
+it can fetch and decode multiple instructions. These multiple instructions are put into this
+
+80
+00:07:16,980 --> 00:07:23,620
+issue queue or some kind of a buffer where they wait for the dependencies to be satisfied
+
+81
+00:07:23,620 --> 00:07:28,940
+and after the dependencies are satisfied, right, whenever they are ready, data ready,
+
+82
+00:07:28,940 --> 00:07:33,980
+they can go to the respective function units and can start execution, right.
+
+83
+00:07:33,980 --> 00:07:40,379
+So, if an add instruction and a load instruction are independent of each other we can actually
+
+84
+00:07:40,379 --> 00:07:46,540
+put them next to each other so that they could be fetched, decoded and then issued also in
+
+85
+00:07:46,540 --> 00:07:51,740
+parallel, right. That is what you do in the superscalar processor. Instruction scheduling
+
+86
+00:07:51,740 --> 00:07:58,580
+helps in superscalar process but it is not mandatory, okay. Without even instruction
+
+87
+00:07:58,580 --> 00:08:03,900
+scheduling also the superscalar processor can identify the parallelism and can export.
+
+88
+00:08:03,900 --> 00:08:09,140
+Maybe it can identify only lesser amount of parallelism and exploit that because independent
+
+89
+00:08:09,140 --> 00:08:14,379
+instructions are far apart from each other. Typically what happens in a superscalar processor
+
+90
+00:08:14,379 --> 00:08:18,939
+there is something called a reorder buffer, right. The reorder buffer is the extent to
+
+91
+00:08:18,939 --> 00:08:24,500
+which it can actually see the instruction, reorder buffer or the issue queue is the extent
+
+92
+00:08:24,500 --> 00:08:30,699
+to which it can really see, you know, independent instructions and expose parallelism, right.
+
+93
+00:08:30,699 --> 00:08:37,259
+Whereas the compiler can see a much larger window of instructions and can possibly move
+
+94
+00:08:37,259 --> 00:08:42,419
+that ahead and then allow this to exploit parallelism. So, remember that in the case
+
+95
+00:08:42,419 --> 00:08:49,699
+of superscalar processor instruction scheduling is preferable and it helps to expose the
+
+96
+00:08:49,699 --> 00:08:55,339
+parallelism but it is not mandatory, right, because the architecture is smart enough to
+
+97
+00:08:55,339 --> 00:09:02,419
+identify whatever it can identify the parallelism. Whereas in the case of VLIW processor instruction
+
+98
+00:09:02,419 --> 00:09:08,860
+scheduling is mandatory. If you do not identify independent instructions and put them together
+
+99
+00:09:08,940 --> 00:09:14,340
+the processor cannot exploit. Whatever you specify as a parallel operation, right, in
+
+100
+00:09:14,340 --> 00:09:22,300
+a single VLIW word that is the only thing that it can execute, right. So, in that architecture
+
+101
+00:09:22,300 --> 00:09:27,659
+the compiler's role particularly, I mean, the compiler role in terms of doing instruction
+
+102
+00:09:27,659 --> 00:09:33,460
+scheduling is very important, okay. So, the VLIW processor again we saw this in the last
+
+103
+00:09:34,019 --> 00:09:39,220
+class consists of a simple instruction memory from where instructions are fetched but the
+
+104
+00:09:39,220 --> 00:09:45,259
+fetched instruction could be a long word meaning it could be 256 bit, 128 bits or 256 bits
+
+105
+00:09:45,259 --> 00:09:52,259
+or 512 bits and it may contain multiple operations but these multiple operations that are there
+
+106
+00:09:52,259 --> 00:09:58,620
+in a single word they are independent of each other and they can be executed in parallel.
+
+107
+00:09:59,220 --> 00:10:04,940
+So, the hardware in a VLIW processor essentially decodes that instruction and then moves those
+
+108
+00:10:04,940 --> 00:10:09,539
+instruction to the respective functional unit and those functional units can actually start
+
+109
+00:10:09,539 --> 00:10:14,940
+executing them because when an instruction is issued it is assumed that it will have
+
+110
+00:10:14,940 --> 00:10:19,940
+its operands available. So, you do not need to necessarily check whether the instruction
+
+111
+00:10:19,940 --> 00:10:26,060
+is data ready to be executed. The operands would be anyway available. So, it can be issued
+
+112
+00:10:26,099 --> 00:10:31,939
+and then in the next cycle it can be executed, right. And after they finish executing they
+
+113
+00:10:31,939 --> 00:10:38,699
+write the results either in the register file or in the memory and of course, this instruction
+
+114
+00:10:38,699 --> 00:10:45,699
+execution itself can be pipelined, VLIW instruction execution itself can be pipelined. So, what
+
+115
+00:10:45,939 --> 00:10:50,979
+we will see next is that we will see one example program. So, this is again an architecture
+
+116
+00:10:50,980 --> 00:10:57,980
+that we talked about which has 256 bit instruction word, 7 operations can be done in parallel,
+
+117
+00:10:58,060 --> 00:11:02,940
+it has one branch, two integer, two memory operation and two floating point operation
+
+118
+00:11:02,940 --> 00:11:09,940
+in every cycle and so on, right. So, here is how the instruction schedule looks for
+
+119
+00:11:10,019 --> 00:11:16,100
+a VLIW processor, okay. Let us see if we can understand. Unfortunately, I did not put the
+
+120
+00:11:16,100 --> 00:11:21,340
+initial part of this example here, but it does not matter. We will try to understand
+
+121
+00:11:21,340 --> 00:11:28,340
+what this code is trying to do, right. So, you can see that in this particular example
+
+122
+00:11:31,980 --> 00:11:37,740
+I have taken memory operation, floating point operation and integer or branch operation.
+
+123
+00:11:37,740 --> 00:11:44,740
+So, I have taken an example of three operations in every VLIW word, okay, right.
+
+124
+00:11:46,740 --> 00:11:50,659
+And then you can see that in each one of this, it would have been nice if I have taken, okay.
+
+125
+00:11:50,659 --> 00:11:57,659
+Let me try to do the following. Let me first try to, just give me a minute here. Let us
+
+126
+00:12:04,220 --> 00:12:11,220
+see what this code is because this is when you will appreciate what this is doing. So,
+
+127
+00:12:16,100 --> 00:12:24,100
+let me try to do this. Okay.
+
+128
+00:12:46,100 --> 00:12:53,100
+So, let us say this is my original program, right. You are able to see that, correct.
+
+129
+00:13:01,100 --> 00:13:08,100
+So, can somebody look at it and then tell what it is trying to do? Let us say that R
+
+130
+00:13:08,420 --> 00:13:15,420
+1 contains the address of an array A, right, contains the address of A of 0, let us say
+
+131
+00:13:17,100 --> 00:13:23,100
+then it loads that value into F 0 register, it loads that value into the F 0 register,
+
+132
+00:13:23,100 --> 00:13:30,100
+it adds it with some scalar value, okay. F 2 is the other scalar with which it is adding,
+
+133
+00:13:30,340 --> 00:13:36,580
+putting the result in F 4 and then storing the result back in the same memory location.
+
+134
+00:13:36,580 --> 00:13:43,580
+So, this is a code which says A of i is equal to A of i plus s, correct. And then it is
+
+135
+00:13:44,580 --> 00:13:51,580
+incrementing the pointer by 8 assuming that these are double precision floating point
+
+136
+00:13:52,020 --> 00:13:59,020
+numbers, correct. And then what it does is it subtracts the loop count by 1 and when
+
+137
+00:14:00,660 --> 00:14:06,700
+the loop count becomes 0, it comes out of the loop otherwise, right.
+
+138
+00:14:07,140 --> 00:14:14,140
+Now assume that I have unrolled this loop, right, 6 times, right. That is why you see
+
+139
+00:14:14,540 --> 00:14:21,540
+6 of those loads, right. So, you have 5 loads here that corresponds to 5 times unrolling,
+
+140
+00:14:21,780 --> 00:14:28,780
+isn't it, right. So, you have 5 loads, 5 floating point adds and 5 stores, correct.
+
+141
+00:14:29,300 --> 00:14:36,020
+So, those are the 3 instructions which are what are here. This of course is incrementing
+
+142
+00:14:36,019 --> 00:14:43,019
+the pointer, right. Now how am I loading A of 0? It is 0 of R 1. A of 1 is offset 8,
+
+143
+00:14:48,220 --> 00:14:55,220
+right, from A of 0. A of 2 is offset 16 and so on, right. So, each one of this load is
+
+144
+00:14:58,419 --> 00:15:04,220
+doing A of i, A of i plus 1 and so on. So, yesterday when you are unrolling the code,
+
+145
+00:15:04,220 --> 00:15:11,220
+were you seeing something like this in the, yes or no? How many of you saw this? Okay,
+
+146
+00:15:13,820 --> 00:15:19,019
+how many of you did not see this? Did you? Yeah, yeah, don't feel bad to say that you
+
+147
+00:15:19,019 --> 00:15:24,019
+did not see it. Maybe the compiler did not do it for you, right. It is not your problem.
+
+148
+00:15:24,019 --> 00:15:29,019
+It is a compiler's problem. So, the question is did you use the minus o 2 option? If you
+
+149
+00:15:29,419 --> 00:15:35,419
+use the minus o 2 option, it would not try to add 8 to this and then try to do this,
+
+150
+00:15:35,419 --> 00:15:39,819
+add 8 to this and then try to do this because when you add 8 and then try to do this, there
+
+151
+00:15:39,819 --> 00:15:46,340
+is a dependency chain that you are creating, correct. Whereas when you do like this, all
+
+152
+00:15:46,340 --> 00:15:50,620
+these instructions are independent of each other. Any of these instructions could be
+
+153
+00:15:50,620 --> 00:15:57,620
+executed in any order, correct. If I have done this instruction, add 8 to R 1, then
+
+154
+00:15:57,820 --> 00:16:04,820
+0 of R 1, then another add 8, 0 of R 1, another add 8, 0 of R 1, then it would have become
+
+155
+00:16:05,259 --> 00:16:11,419
+sequential. But just by using these offsets appropriately, right, there is no dependency
+
+156
+00:16:11,419 --> 00:16:17,379
+between these load instructions. But there is a dependency from this load instruction
+
+157
+00:16:17,379 --> 00:16:23,259
+to this add instruction because this loads the value into F naught, that F naught is
+
+158
+00:16:23,299 --> 00:16:30,299
+being used here. And then you compute some F 4 and that F 4 is being stored here. So,
+
+159
+00:16:31,100 --> 00:16:36,700
+this dependency that you see here is a original dependency which was there in the code and
+
+160
+00:16:36,700 --> 00:16:42,500
+you want to retain the dependency, right. That is what we mean by saying that dependence
+
+161
+00:16:42,500 --> 00:16:48,539
+constraints have to be satisfied, right. We are not violating that. And look at this,
+
+162
+00:16:48,539 --> 00:16:54,339
+this load and this add are separated by at least one cycle. That means that this one
+
+163
+00:16:54,339 --> 00:17:01,339
+stall that we talked about has also been taken into account, correct, right.
+
+164
+00:17:01,699 --> 00:17:07,659
+And then in cycles 3, 4 and 5, you have a load instruction and an add instruction executing
+
+165
+00:17:07,659 --> 00:17:13,659
+together because these are independent of each other. They can be executed in parallel,
+
+166
+00:17:14,340 --> 00:17:20,100
+right. And if you look at this particular cycle, right, you have a store instruction,
+
+167
+00:17:20,100 --> 00:17:25,900
+an additional add instruction and a subtract instruction. So, one integer operation, one
+
+168
+00:17:25,900 --> 00:17:32,140
+floating point operation and one memory operation. All of this can be executed in parallel. If
+
+169
+00:17:32,140 --> 00:17:36,180
+you have unrolled this loop more number of times, for example, 8 times or something like
+
+170
+00:17:36,180 --> 00:17:39,500
+that, more of these instructions could have been in parallel.
+
+171
+00:17:40,460 --> 00:17:45,779
+Now, let us look at the instructions which are integer instructions, right, and then
+
+172
+00:17:45,779 --> 00:17:52,779
+see what is happening here. See this subtract instructions when we unroll, right, 5 iterations
+
+173
+00:17:53,299 --> 00:17:59,140
+of the loops are executed in this one unrolled version. Therefore, the count has to be decremented
+
+174
+00:17:59,140 --> 00:18:04,619
+by it could have been decremented by 1, 5 times or it would have been decremented by
+
+175
+00:18:04,739 --> 00:18:11,739
+5 one time, right. That is right. So, this is 5, right. Similarly, this add instruction
+
+176
+00:18:14,659 --> 00:18:21,659
+which was incrementing the R 1 pointer by 8 for each iteration can now be incremented
+
+177
+00:18:21,939 --> 00:18:28,939
+by 40 because we are incrementing for every 5 iterations and these offsets are appropriately
+
+178
+00:18:29,420 --> 00:18:36,420
+taken into account, okay. Now, anything else that you see strange in this code or you are
+
+179
+00:18:36,900 --> 00:18:43,900
+happy with it? So, this branch instruction is dependent on this R 2. There is no problem.
+
+180
+00:18:44,940 --> 00:18:50,380
+The dependency is being preserved. If you think of a branch delay slot, this is the
+
+181
+00:18:50,380 --> 00:18:55,019
+branch delay slot in which a useful instruction is being put. That means the branch has been
+
+182
+00:18:55,019 --> 00:19:02,019
+moved a little earlier, okay. That is fine and every one of these instructions satisfies
+
+183
+00:19:02,619 --> 00:19:07,180
+the resource constraint because exactly there is one memory operation, one floating point
+
+184
+00:19:07,180 --> 00:19:14,180
+operation and one integer operation every cycle, right. What else do you see as something
+
+185
+00:19:15,779 --> 00:19:22,779
+different can be discussed about? The first two, first three stores are all right, 0,
+
+186
+00:19:25,019 --> 00:19:32,019
+8, 16. Then you should have seen 24 and 32, correct, but you are not seeing that. Why?
+
+187
+00:19:34,379 --> 00:19:41,379
+Right. You see here what is happening to your R 1. R 1 in between has been incremented to
+
+188
+00:19:41,980 --> 00:19:48,980
+incremented by 40, correct. That means that after this instruction R 1 is already R 1
+
+189
+00:19:49,980 --> 00:19:56,980
+plus 40. That means that the pointer has been moved to A 5. So, if you want A 4 and A 3,
+
+190
+00:19:57,420 --> 00:20:04,420
+they are minus 8 and minus 16 from the A 5. So, that is why these have the offset values
+
+191
+00:20:05,579 --> 00:20:12,220
+minus 16 and minus 8. In other words, other way of looking at it is that this add instruction
+
+192
+00:20:12,220 --> 00:20:18,019
+should not have been moved before the store, but if you want to move it, you have to adjust
+
+193
+00:20:18,019 --> 00:20:25,019
+the offset values. Otherwise, you will be violating the dependence, correct, because
+
+194
+00:20:25,220 --> 00:20:32,220
+if you have moved this by 40, incremented this by 40 and kept 24 and 32 here, then you
+
+195
+00:20:32,980 --> 00:20:39,980
+will be writing some A 8 and A 9 instead of A 3 and A 4, correct. That is wrong. So, when
+
+196
+00:20:41,779 --> 00:20:47,379
+the scheduler does this, it can possibly do this also, right. It should possibly do this
+
+197
+00:20:47,380 --> 00:20:54,380
+also, not it can. It should do this, right. So, this schedule which is the schedule obtained
+
+198
+00:20:59,900 --> 00:21:06,900
+for this loop over here, right, which was unrolled five times and scheduled for a VLIW
+
+199
+00:21:09,540 --> 00:21:14,620
+machine with three parallel operations. Of course, I should have considered eight parallel
+
+200
+00:21:14,619 --> 00:21:19,059
+operations, but then I could not have been able to fit it in the slide, could not have
+
+201
+00:21:19,059 --> 00:21:23,139
+been able to fit it in the slide. I have to unroll it maybe eight times or 16 times to
+
+202
+00:21:23,139 --> 00:21:27,979
+get the parallelism. What else do you observe here? Very simple
+
+203
+00:21:27,979 --> 00:21:34,979
+observation is that in many places we have dashes and what does this dash means? It is
+
+204
+00:21:35,179 --> 00:21:40,019
+no instruction for that or no op for that. That means that these are wasted opportunities
+
+205
+00:21:40,019 --> 00:21:46,420
+for parallelism. My code did not have enough parallelism. That is why I was not able to
+
+206
+00:21:46,420 --> 00:21:53,420
+exploit it. If I have unrolled it maybe eight times, right, I would have had fewer of these
+
+207
+00:21:53,660 --> 00:21:59,660
+tools compared to the number of instructions that I have. Okay, what else do you observe
+
+208
+00:21:59,660 --> 00:22:06,660
+since we have talked about the other point? Is there anything else that you observe with
+
+209
+00:22:07,180 --> 00:22:14,180
+regard to let us say register allocation? Such an exercise that you will probably do
+
+210
+00:22:14,180 --> 00:22:21,180
+today, right. So, how many registers, how many floating point registers was the original
+
+211
+00:22:22,740 --> 00:22:29,740
+code using? F naught, F 2, F 4, correct, three registers, but it is actually three into two,
+
+212
+00:22:29,740 --> 00:22:36,740
+six registers because each floating point register is actually here, two registers because
+
+213
+00:22:38,339 --> 00:22:43,059
+it is a double value, but again even if you take it as three, it is only three. What about
+
+214
+00:22:43,059 --> 00:22:50,059
+here? Yeah, something like that, right. And if you have unrolled it eight times instead
+
+215
+00:22:51,900 --> 00:22:58,900
+of five times, it would have increased more. If I have unrolled it 16 times, it would have
+
+216
+00:23:00,500 --> 00:23:05,720
+increased more. What would have happened? I would require even more number of registers
+
+217
+00:23:05,720 --> 00:23:12,720
+and when I do not have that registers, I would have to spill, right. So, you cannot be stretching
+
+218
+00:23:13,700 --> 00:23:18,160
+this unroll, unroll, unroll and then you can put more instruction. Somewhere it is going
+
+219
+00:23:18,160 --> 00:23:24,019
+to come back and then tell you as you unroll, your register pressure is going to increase
+
+220
+00:23:24,019 --> 00:23:29,099
+and if the register pressure increases, you will introduce spill code which is waste.
+
+221
+00:23:29,659 --> 00:23:36,659
+So, there is some kind of, right, conflicting requirements happening. You can unroll and
+
+222
+00:23:36,659 --> 00:23:41,939
+then expose more parallelism, but as you unroll, one thing that happens is that the number
+
+223
+00:23:41,939 --> 00:23:47,980
+of instructions increase. That is also true, right. Your code earlier had only six instructions.
+
+224
+00:23:47,980 --> 00:23:54,619
+Now you have this many instructions, right, ten instructions or something like that. So,
+
+225
+00:23:54,619 --> 00:24:01,619
+your code size increases. The code size increases, what happens? We do not know. The code will
+
+226
+00:24:05,459 --> 00:24:10,539
+not fit in the instruction cache, ok. Whoever who suggests raise their hand, they could
+
+227
+00:24:10,539 --> 00:24:14,179
+get the appreciation. That is good. So, it will not fit into the instruction cache and
+
+228
+00:24:14,179 --> 00:24:20,819
+therefore more instruction cache misses can happen, right. That is why you do not want
+
+229
+00:24:20,819 --> 00:24:27,179
+to unroll the loop infinite number of times, right. If you unroll it eight or sixteen,
+
+230
+00:24:27,179 --> 00:24:32,579
+you will increase the thing by a factor of nearly eight or sixteen. It increases the
+
+231
+00:24:32,579 --> 00:24:37,899
+code size, so potentially there could be instruction cache misses that could happen. You will increase
+
+232
+00:24:37,899 --> 00:24:43,980
+the register pressure, potentially there could be spills. So, do this, but do it carefully
+
+233
+00:24:43,980 --> 00:24:50,460
+is the advice, ok. Alright, so we have really not seen how instruction scheduling works,
+
+234
+00:24:50,460 --> 00:24:56,779
+but we saw an example of an instruction schedule and how that is helpful in terms of exploiting
+
+235
+00:24:56,779 --> 00:25:01,860
+instruction level parallelism, ok. Now let us go to the nitty-gritty details of how to
+
+236
+00:25:01,860 --> 00:25:05,980
+do instruction scheduling. That is if you are given this loop or if you are given the
+
+237
+00:25:05,980 --> 00:25:12,579
+unrolled version of this loop, but still a sequential code, how do I generate this code?
+
+238
+00:25:12,579 --> 00:25:17,420
+How do we do this magic, right? That is the question. Because if I take the unrolled version
+
+239
+00:25:18,100 --> 00:25:21,460
+of the loop, what would I have seen? I would have seen three of these instructions, another
+
+240
+00:25:21,460 --> 00:25:24,940
+three of these instructions, another three of those instructions, another three of those
+
+241
+00:25:24,940 --> 00:25:29,820
+instructions like that and then maybe the control transfer instructions in the end.
+
+242
+00:25:29,820 --> 00:25:36,220
+But from that, how do I get this, this parallel version, right. I need to understand the dependencies
+
+243
+00:25:36,220 --> 00:25:41,200
+between the instructions. I need to understand when this add instruction can be scheduled.
+
+244
+00:25:41,200 --> 00:25:46,480
+I need to understand when this store instruction can be scheduled and so on and so forth,
+
+245
+00:25:46,480 --> 00:25:54,840
+right. So, we need to talk about all of these things. Question? No? Okay, right. So, we
+
+246
+00:25:54,840 --> 00:26:00,240
+will we will get to that details now, okay. So, as I mentioned earlier we do instruction
+
+247
+00:26:00,240 --> 00:26:06,319
+scheduling to reduce stalls which is basically control hazard and data hazards, okay, to
+
+248
+00:26:06,319 --> 00:26:14,599
+exploit parallelism in super scalar processors and VLIW processors, okay. And the instruction
+
+249
+00:26:14,599 --> 00:26:22,839
+scheduling that you do must necessarily obey data dependence and resource constraint, okay.
+
+250
+00:26:22,839 --> 00:26:27,919
+When you talk about instruction scheduling within a basic block, it is basic block scheduling.
+
+251
+00:26:27,919 --> 00:26:33,119
+When you talk about instruction scheduling beyond basic block, it is global scheduling,
+
+252
+00:26:34,119 --> 00:26:38,679
+So let us get into basic block instruction scheduling. First we will talk about instruction
+
+253
+00:26:38,679 --> 00:26:43,239
+scheduling on a processor which is a simple pipeline processor. That means that we are
+
+254
+00:26:43,239 --> 00:26:48,759
+not interested in exposing parallelism, right. Later we will also talk about parallelism,
+
+255
+00:26:48,759 --> 00:26:54,319
+okay. So, basic block scheduling or instruction scheduling is essentially a reordering of
+
+256
+00:26:54,319 --> 00:27:00,799
+instructions within the basic block, right. And what we try to do is that we want to minimize
+
+257
+00:27:00,799 --> 00:27:07,279
+the execution time of this instruction schedule that essentially reducing the schedule length
+
+258
+00:27:07,279 --> 00:27:14,159
+or schedule length is the total time it takes to execute this instruction, okay.
+
+259
+00:27:14,159 --> 00:27:17,919
+Again there are different instruction scheduling methods. Again instruction scheduling problem
+
+260
+00:27:17,919 --> 00:27:23,480
+is an NP complete problem, okay. If you want to do optimal instruction scheduling that
+
+261
+00:27:23,480 --> 00:27:29,240
+is an NP complete problem, right. And therefore, what you can say is that instead of getting
+
+262
+00:27:29,319 --> 00:27:35,000
+the optimal schedule which is going to take a very large amount of time, one could actually
+
+263
+00:27:35,000 --> 00:27:40,480
+go for some heuristic methods which will give you close to that good solution but at a much
+
+264
+00:27:40,480 --> 00:27:47,039
+smaller computation time. So, this typically talk about heuristic scheduling methods and
+
+265
+00:27:47,039 --> 00:27:52,039
+they differ in terms of whether they do operation based scheduling or cycle based scheduling.
+
+266
+00:27:52,039 --> 00:27:56,759
+We will talk about examples of these two things or we will talk about these two algorithms
+
+267
+00:27:56,839 --> 00:28:01,960
+in detail and also examples of these. You can also do an optimal instruction scheduling,
+
+268
+00:28:01,960 --> 00:28:07,400
+right. You can also do optimal instruction scheduling using integer linear programming
+
+269
+00:28:07,400 --> 00:28:13,920
+approach or using other approaches. But the time to compute the schedule could take very,
+
+270
+00:28:13,920 --> 00:28:20,000
+very long time because these are NP complete problems, okay. Or you could have used other
+
+271
+00:28:20,000 --> 00:28:26,359
+kinds of evolutionary algorithms like genetic algorithm, right or simulated annealing kind
+
+272
+00:28:26,359 --> 00:28:32,240
+of algorithms and so on, okay. Now, before we do instruction scheduling as I mentioned
+
+273
+00:28:32,240 --> 00:28:37,799
+earlier instruction scheduling has to obey all the dependence constraints. So, how do
+
+274
+00:28:37,799 --> 00:28:43,199
+we identify this dependence constraint and how do we ensure that they are satisfied?
+
+275
+00:28:43,199 --> 00:28:48,159
+Again to do this thing what we do is that we represent the basic block in terms of a
+
+276
+00:28:48,159 --> 00:28:54,599
+data dependence graph, okay. And in this data dependence graph each instruction is a node,
+
+277
+00:28:54,599 --> 00:29:03,639
+right. There is a directed arc from instruction i to instruction j if j is dependent on i,
+
+278
+00:29:03,639 --> 00:29:11,399
+right. So, that is what it says there is an edge directed edge, okay from u to v, right.
+
+279
+00:29:11,399 --> 00:29:18,359
+If there exists a dependence from instruction u to v. So, here I talk about true dependence,
+
+280
+00:29:19,039 --> 00:29:24,559
+okay. So, let me just say how many of you know about true dependency, anti dependency
+
+281
+00:29:24,559 --> 00:29:31,559
+and output dependencies? One, only one. How many of you know raw dependency, war dependency
+
+282
+00:29:33,759 --> 00:29:39,639
+and war dependency? They are the same, yes very good, right. So, those who know this
+
+283
+00:29:39,639 --> 00:29:43,959
+same thing, okay. Now, let us see what it is, okay. Let us first start off with this
+
+284
+00:29:44,039 --> 00:29:48,279
+example and then come to the dependence graph. So, can you just tell me where there is a
+
+285
+00:29:48,279 --> 00:29:55,279
+raw dependency in this? i 1 to i 2, correct, right. Where else? i 2, i 4, okay. i 1 to
+
+286
+00:29:55,279 --> 00:30:02,279
+itself, i 1, i 3, okay. I am sorry i 1, i 3, correct. i 3, i 4 should be there, right.
+
+287
+00:30:25,279 --> 00:30:32,279
+All of these dependencies are what are called raw dependency or true dependencies, right.
+
+288
+00:30:39,399 --> 00:30:46,399
+Raw is read after write. These reads must happen after those writes have happened, right.
+
+289
+00:30:48,319 --> 00:30:53,759
+And this dependency is a dependency which must necessarily be observed in the program,
+
+290
+00:30:54,440 --> 00:31:01,440
+correct. Because you expect this add instruction to take the value produced by this load instruction.
+
+291
+00:31:03,039 --> 00:31:09,720
+You expect this load instruction to take the value produced by this add instruction and
+
+292
+00:31:09,720 --> 00:31:16,720
+so on, correct. So, these are what we are going to call as raw dependency or true dependency.
+
+293
+00:31:17,720 --> 00:31:24,720
+So, what is a war dependency? Write after read. Can you give me an example here? Is
+
+294
+00:31:25,440 --> 00:31:32,440
+there one? No, right. There is none here, okay. Let us just try to change this to R3,
+
+295
+00:31:32,440 --> 00:31:39,440
+right. Then now what happens? In this case, this write of R3 should happen only after
+
+296
+00:31:54,080 --> 00:32:01,080
+this read of R3 has happened, correct. So, this is what is called a war dependency. The
+
+297
+00:32:01,639 --> 00:32:08,639
+dependency between them let me, right. So, the dependency that you see from this instruction
+
+298
+00:32:08,720 --> 00:32:15,720
+to this one, okay. This is what you are going to call as the war dependency, right after
+
+299
+00:32:16,759 --> 00:32:23,759
+read dependency. This is also called the anti-dependency. Dependency, anti-dependency, correct. Why
+
+300
+00:32:23,839 --> 00:32:30,839
+does this anti-dependency happen? Now that you people have seen register allocation,
+
+301
+00:32:31,640 --> 00:32:37,640
+right. Let us say that this is the code generated by your register allocator, right. At that
+
+302
+00:32:37,640 --> 00:32:44,640
+time you thought you did something very smart, right.
+
+303
+00:32:47,559 --> 00:32:52,799
+Exactly. There was a variable which was live up to here and that was using the register
+
+304
+00:32:53,000 --> 00:33:00,000
+R3. That liveness ended here. A new liveness started, new variable started here for which
+
+305
+00:33:00,000 --> 00:33:04,879
+you gave the same register which was okay because the live ranges were not conflicting.
+
+306
+00:33:04,879 --> 00:33:11,139
+You did the smart thing by giving the same register, right. But now what have you done?
+
+307
+00:33:11,139 --> 00:33:18,139
+You have created an anti-dependence between these two instructions, isn't it? So, the
+
+308
+00:33:18,140 --> 00:33:24,900
+anti-dependence happens because you are reusing the same register, okay. Let me give you one
+
+309
+00:33:24,900 --> 00:33:31,180
+more example, right. Let us say that this instruction instead of using R5, let us say
+
+310
+00:33:31,180 --> 00:33:38,180
+was using R1. Then what happens? Then we introduce what is called the war dependency. So, between
+
+311
+00:33:38,180 --> 00:33:45,180
+this instruction and this instruction there is a wow hazard or sorry wow dependency,
+
+312
+00:33:54,580 --> 00:34:01,580
+W A W right after right. What do we say that? This right must happen only, sorry this right
+
+313
+00:34:02,259 --> 00:34:07,659
+must happen only after this right has happened or this right must happen before this right
+
+314
+00:34:07,659 --> 00:34:14,659
+happens. So, this is essentially called output dependency. Output meaning destination, correct.
+
+315
+00:34:16,259 --> 00:34:23,259
+So, in this example what we have seen is that we have seen true dependency, anti-end, output
+
+316
+00:34:23,699 --> 00:34:30,099
+dependency. Among all these dependencies why do we only call this as the true dependencies?
+
+317
+00:34:30,099 --> 00:34:37,099
+Because these two dependencies are false dependencies. Why is that they are false dependencies?
+
+318
+00:34:39,460 --> 00:34:45,940
+They happen essentially because you are reusing the same register, correct. If instead of
+
+319
+00:34:45,940 --> 00:34:52,940
+using R3 here, if you have used some R13 there would not have been any dependence between
+
+320
+00:34:52,940 --> 00:34:59,940
+these two instructions, correct. Similarly, instead of using R1 if you have used R21 there
+
+321
+00:35:01,500 --> 00:35:07,300
+would not have been any dependence between I1 and I4, correct. So, the dependence has
+
+322
+00:35:07,300 --> 00:35:12,820
+happened because you are reusing the registers, not the true dependence which is dictated
+
+323
+00:35:12,820 --> 00:35:18,820
+by the program. Whereas, this dependence that you talk about between this R3 and R3 that
+
+324
+00:35:19,220 --> 00:35:24,940
+a true dependent the program wants is if you rename this register to R13 this also has
+
+325
+00:35:24,940 --> 00:35:31,700
+to be R13. If you rename this to R24 this also has to be R24 because here you want to
+
+326
+00:35:31,700 --> 00:35:37,700
+take the value produced by add and use it in this add instruction, right. So, this is
+
+327
+00:35:37,700 --> 00:35:44,700
+a true dependence no matter how you do register allocation this dependence will always exist.
+
+328
+00:35:44,819 --> 00:35:49,339
+This dependence anti-dependence was introduced by your register allocator or introduced by
+
+329
+00:35:49,339 --> 00:35:54,339
+something that you have done during code generation phase. It is not what is there in the original
+
+330
+00:35:54,339 --> 00:36:00,339
+program. Maybe you reuse the same temporary variable, right. In your program you always
+
+331
+00:36:00,339 --> 00:36:04,419
+write temp is equal to something and after some point in time, okay let me reuse the
+
+332
+00:36:04,419 --> 00:36:09,739
+temp instead of declaring one more variable, right. That is exactly what has happened here,
+
+333
+00:36:09,819 --> 00:36:15,819
+right. That is why you have this anti-dependency and that is why you have this output dependency.
+
+334
+00:36:15,819 --> 00:36:21,379
+That is why anti and output dependencies are together called false dependencies whereas,
+
+335
+00:36:21,379 --> 00:36:26,939
+this one is called true dependence, okay. Alright, now I need to find a mechanism for
+
+336
+00:36:26,939 --> 00:36:32,339
+clearing this mess. So, we all understand all these dependencies, right. So, if somebody
+
+337
+00:36:32,339 --> 00:36:36,939
+asks you now what is an output dependence or what is an anti-dependency you should be
+
+338
+00:36:36,940 --> 00:36:43,940
+able to. Okay, now let us get back to our data dependence graph, right. So, in this
+
+339
+00:36:43,940 --> 00:36:49,099
+data dependence graph you are going to say that each node represents an instruction and
+
+340
+00:36:49,099 --> 00:36:54,740
+there is an edge from one node to the other if there is a true dependence. Now, you understand
+
+341
+00:36:54,740 --> 00:36:59,659
+why we talk about true dependence, okay. Of course, we need to worry about anti and output
+
+342
+00:36:59,659 --> 00:37:03,740
+dependencies as long as they use the same register names but then that is something
+
+343
+00:37:03,819 --> 00:37:08,379
+that we can talk about it later. Remember I said that typically instruction scheduling
+
+344
+00:37:08,379 --> 00:37:13,859
+is done first in the compiler and then register allocation. If instruction scheduling is done
+
+345
+00:37:13,859 --> 00:37:19,119
+first then it will be using only temporary variables. There the chances of seeing anti
+
+346
+00:37:19,119 --> 00:37:24,939
+and output dependencies are lower. So, you do not necessarily see them, right. Therefore,
+
+347
+00:37:24,939 --> 00:37:29,379
+it is okay to only talk about true dependencies in those cases, okay.
+
+348
+00:37:30,019 --> 00:37:34,539
+Now here is the sequence of instructions. We already analyzed all the true dependencies
+
+349
+00:37:34,539 --> 00:37:41,539
+and those true dependencies are depicted by means of an edge. Now it is a directed edge,
+
+350
+00:37:42,579 --> 00:37:47,579
+remember, okay. In addition to this what we are going to say is that we will also allocate
+
+351
+00:37:47,579 --> 00:37:53,220
+or assign weights to each one of the nodes that will essentially tell how long it takes
+
+352
+00:37:53,299 --> 00:37:59,579
+for that instruction to execute, right. When I say that this takes one cycle to execute
+
+353
+00:37:59,579 --> 00:38:05,459
+that after one cycle this node will produce the value which can be consumed by this. When
+
+354
+00:38:05,459 --> 00:38:11,980
+I say two cycles here after two cycles only this can produce the value. So, if this is
+
+355
+00:38:11,980 --> 00:38:18,980
+scheduled at time t then this node can only be scheduled at time t plus 2 or later because
+
+356
+00:38:19,059 --> 00:38:22,900
+this is not going to produce a result value until t plus 2, right.
+
+357
+00:38:22,900 --> 00:38:28,139
+Similarly, if this is scheduled at time t 2 then this can also be scheduled only after
+
+358
+00:38:28,139 --> 00:38:34,699
+t 2 plus 2, correct. That is really what we mean. So, each node has a weight assigned
+
+359
+00:38:34,699 --> 00:38:40,780
+to it or associated with it which tells you how much time it takes to execute this node.
+
+360
+00:38:40,780 --> 00:38:46,059
+Sometimes we will put the weights on the node, sometimes we will put the weights on the edges.
+
+361
+00:38:46,059 --> 00:38:51,779
+The kind of mean more or less the same thing. When you put the weights on the node it means
+
+362
+00:38:51,779 --> 00:38:58,500
+that all the outgoing edges have the same latency. When you put the weights on the edges
+
+363
+00:38:58,500 --> 00:39:03,659
+then you can individually specify this has one latency, this has two latency or this
+
+364
+00:39:03,659 --> 00:39:09,539
+has five latency and so on and so forth, right. You can do it either way but you only need
+
+365
+00:39:09,539 --> 00:39:15,340
+to do one of them not both, okay. Either associate the weights with the nodes or associate the
+
+366
+00:39:15,340 --> 00:39:22,340
+weights with the edges, one of the two things that you do, right. And what do these weights
+
+367
+00:39:22,340 --> 00:39:28,860
+represent? Number of cycles or amount of time it takes to execute that node, okay.
+
+368
+00:39:28,860 --> 00:39:33,500
+So, when you talk about this schedule for pipeline to processors where you are only
+
+369
+00:39:33,500 --> 00:39:40,940
+talking about avoiding stalls, the schedule problem is essentially defined as below. Basically,
+
+370
+00:39:40,940 --> 00:39:45,659
+you have an instruction in the basic instruction sequence in the basic block which is I 1,
+
+371
+00:39:45,659 --> 00:39:52,420
+I 2, I 3, I m and you want to reorder them such that the number of stalls is minimized.
+
+372
+00:39:52,420 --> 00:39:57,220
+That is really what you are trying to do and this reordering is going to be in such a way
+
+373
+00:39:57,220 --> 00:40:03,659
+that these m instructions are going to be permuted in some form, right. Their positions
+
+374
+00:40:03,659 --> 00:40:09,740
+are being changed in some form but then in the change the form you essentially make sure
+
+375
+00:40:09,819 --> 00:40:16,339
+that the dependences are again satisfied, right. So, the instruction reordering in this
+
+376
+00:40:16,339 --> 00:40:25,339
+serial schedule is essentially a permutation function f on 1 to m such that f of j identifies
+
+377
+00:40:25,339 --> 00:40:32,139
+the new position of instruction j, right. But then whatever is the new position of instruction
+
+378
+00:40:32,139 --> 00:40:40,659
+j, if j is dependent on some k, sorry in this case, yeah, okay. If k is dependent on j,
+
+379
+00:40:40,659 --> 00:40:49,539
+then f of j must necessarily happen before f of k, right. So, that is essentially saying
+
+380
+00:40:49,539 --> 00:40:54,859
+that all instructions on which an instruction is dependent must necessarily happen before,
+
+381
+00:40:54,859 --> 00:41:00,980
+right. Here we are not worried so much about the delay cycles and other things because
+
+382
+00:41:00,980 --> 00:41:05,900
+it is a serial schedule and we are trying to put them and the delay cycles essentially tell
+
+383
+00:41:05,900 --> 00:41:11,019
+you that if you do not have enough stall cycles between them, they will be introduced as stall.
+
+384
+00:41:11,019 --> 00:41:17,139
+And your objective is to minimize the number of stalls, okay. That is really what it is, okay.
+
+385
+00:41:17,139 --> 00:41:21,860
+Now, let us define a few terms before we go into the details of instruction scheduling,
+
+386
+00:41:21,860 --> 00:41:29,539
+right. We define the start time of a node which is the time in which it starts executing, okay.
+
+387
+00:41:29,539 --> 00:41:37,579
+Obviously, the start time of a node j has to be greater than or equal to 0, right. And two
+
+388
+00:41:37,579 --> 00:41:42,420
+instructions can have, okay. In this particular case, I am saying the two instructions cannot
+
+389
+00:41:42,420 --> 00:41:46,539
+have the same start time. That means that I am putting one instruction in every cycle. So,
+
+390
+00:41:46,539 --> 00:41:55,380
+this is still the serial schedule that we are talking about, right. And if there is an edge
+
+391
+00:41:55,420 --> 00:42:03,180
+from j to k, that means that k is dependent on j, then the start time of k has to be greater
+
+392
+00:42:03,180 --> 00:42:07,980
+than the completion time of j. And what is the completion time of j? Which is basically
+
+393
+00:42:07,980 --> 00:42:15,380
+start time of j plus execution time of j, right. So, that is essentially what it is, okay.
+
+394
+00:42:15,380 --> 00:42:24,300
+Now, the schedule length is essentially the completion time of the last, not necessarily
+
+395
+00:42:24,300 --> 00:42:29,780
+the last node in the schedule. The node that finishes last or finishes execution last. That
+
+396
+00:42:29,780 --> 00:42:35,460
+means that for all the nodes, you find out what is the completion time, whichever one which ends
+
+397
+00:42:35,460 --> 00:42:41,740
+last max, okay. That is the one that we are going to take as the completion time. So,
+
+398
+00:42:41,740 --> 00:42:47,380
+essentially if you are given an instruction sequence and you construct a schedule that
+
+399
+00:42:47,380 --> 00:42:53,180
+satisfies these properties, correct, which is basically the resource constraint, right,
+
+400
+00:42:53,179 --> 00:43:01,099
+then the cost of that schedule is essentially the make span of that schedule, which essentially
+
+401
+00:43:01,099 --> 00:43:06,699
+tells you how long it takes to complete execution of all the instructions in the schedule. And the
+
+402
+00:43:06,699 --> 00:43:12,779
+idea is to minimize the schedule length, correct. That is really what we want to do. Again, we will
+
+403
+00:43:12,779 --> 00:43:17,739
+see examples. That is how we understand things, right. So, again I have taken the same program,
+
+404
+00:43:17,739 --> 00:43:26,619
+okay, and I want to construct a serial schedule for this, okay. So, here is one schedule where I do
+
+405
+00:43:26,619 --> 00:43:35,019
+I1, I2, I3, I4, which is the original schedule, right. Now, what happens? Okay, I may have made
+
+406
+00:43:35,019 --> 00:43:42,500
+some mistake, but let us see. So, this takes five cycles, okay. So, this must not, this must have
+
+407
+00:43:42,500 --> 00:43:52,099
+been one instead of two, okay. So, let us do the correction, okay. So, for example, let us say that
+
+408
+00:43:52,099 --> 00:44:04,059
+this is not two, but one, okay. Then this schedule, okay, should have checked this. Sorry about that,
+
+409
+00:44:04,059 --> 00:44:11,260
+okay. So, let us start off with this example again. Remember that I2 is an add instruction and I3 is
+
+410
+00:44:11,260 --> 00:44:16,540
+a load instruction. So, the load instruction is the one which takes two cycles. Add instruction takes
+
+411
+00:44:16,540 --> 00:44:23,580
+only one cycle. By mistake, I put two here. So, ignore that for the time being, okay. So, if I have
+
+412
+00:44:23,580 --> 00:44:31,140
+one here and if I do this schedule, because I3 takes two cycles, I3 will only complete at the end
+
+413
+00:44:31,140 --> 00:44:39,620
+of the cycle and I4 can only start here, right. Whereas, if I do this schedule where I first schedule
+
+414
+00:44:39,779 --> 00:44:47,859
+I3 and then come back and schedule I2, right, by the time I2 finishes, I3 would have also finished,
+
+415
+00:44:47,859 --> 00:44:55,380
+because I3 takes two cycles and I2 takes only one cycle. Therefore, I can now start I4 in the next
+
+416
+00:44:55,380 --> 00:45:00,900
+cycle and this schedule would have resulted me only four cycles, whereas this one would have
+
+417
+00:45:00,900 --> 00:45:06,739
+resulted five cycles. So, the instruction reordering problem essentially says that the instruction
+
+418
+00:45:06,739 --> 00:45:17,779
+order should be I1, I3, I2 and I4, correct. Okay. So, with that understanding, let us just move
+
+419
+00:45:17,779 --> 00:45:24,139
+forward. Okay. Again, this is the same idea, but let us just try to explain this also, okay.
+
+420
+00:45:24,139 --> 00:45:31,299
+I have taken another data dependence graph and in this example, instead of attaching the weights
+
+421
+00:45:31,300 --> 00:45:39,060
+to the nodes, I have attached the weights to the arcs. As I mentioned earlier, this representation
+
+422
+00:45:39,060 --> 00:45:45,539
+is useful only if the different arcs from the same node have different weights. Otherwise,
+
+423
+00:45:45,539 --> 00:45:51,660
+I could have attached it to the nodes itself. So, for example, if this takes one cycle and
+
+424
+00:45:51,660 --> 00:45:57,740
+this takes two cycles, then this representation is useful. But if both of them take only one cycle
+
+425
+00:45:57,739 --> 00:46:01,779
+because both of them take only two cycles, then attaching weights would have been the
+
+426
+00:46:01,779 --> 00:46:08,139
+same thing, right. So, essentially we have a data dependence graph and the arcs represent
+
+427
+00:46:08,139 --> 00:46:16,339
+dependence, right, from node I to node J, okay. And the edge weight or arc weight essentially
+
+428
+00:46:16,339 --> 00:46:21,339
+tells you how much time it takes for the node to produce the result.
+
+429
+00:46:21,339 --> 00:46:26,419
+Now the goal of instruction scheduling is to construct a schedule such that the length
+
+430
+00:46:26,420 --> 00:46:31,539
+of the schedule is minimized. And the length of the schedule is typically defined by what
+
+431
+00:46:31,539 --> 00:46:37,780
+is called the critical path, right, the path which takes the maximum amount of time, right.
+
+432
+00:46:37,780 --> 00:46:49,059
+So, in this example, right, 1, 3, 4, 6 would be the critical path if d 1 3 plus d 3 4 plus
+
+433
+00:46:49,699 --> 00:47:00,699
+6 has a value which is greater than d 1 3 plus d 3 5 plus d 5 6 or d 1 2 plus d 2 6
+
+434
+00:47:00,699 --> 00:47:07,699
+or d 1 2 plus d 2 4 plus d 4, right. So, you call this a critical path only if that path
+
+435
+00:47:07,699 --> 00:47:14,699
+takes more amount of time. What do we mean by this? By this we say that if node 1 is
+
+436
+00:47:14,859 --> 00:47:20,899
+scheduled, for example, let us take some examples, right, supposing let us say this is 1, this
+
+437
+00:47:20,899 --> 00:47:29,899
+is 5 and this is 3, okay. And let us just take all of the others as 1 just to make things
+
+438
+00:47:29,899 --> 00:47:38,899
+easier, right. Now see what happens, right. If this node is scheduled, if node 1 is scheduled,
+
+439
+00:47:39,900 --> 00:47:46,900
+right, at time step 0, node 3 can be scheduled at time step 1 and node 4 can be scheduled
+
+440
+00:47:47,300 --> 00:47:54,300
+at time step, yes, it depends on this also, correct, but the earliest it can be scheduled
+
+441
+00:47:54,619 --> 00:48:01,619
+is 6, right, because this result is going to come no earlier than time step 6, okay.
+
+442
+00:48:02,380 --> 00:48:08,099
+Let us assume that the other nodes get completed before that. And then what about this? What
+
+443
+00:48:08,099 --> 00:48:15,099
+about node 6? The earliest it is going to get scheduled is time step 9, correct. So,
+
+444
+00:48:16,219 --> 00:48:23,219
+this path takes 9 units of time, whereas this path takes only 2 units of time, this path
+
+445
+00:48:23,659 --> 00:48:30,659
+takes 5 units of time, this path takes 3 units of time. So, this is the critical path, right.
+
+446
+00:48:31,659 --> 00:48:38,659
+And what does the critical path tell you? Critical path tells you that these nodes are
+
+447
+00:48:38,659 --> 00:48:45,219
+important nodes, do not delay scheduling them, correct. If you delay any of these nodes by
+
+448
+00:48:45,219 --> 00:48:51,859
+one cycle, what happens to your critical path length? It increases by 1, because this node
+
+449
+00:48:51,859 --> 00:48:57,859
+is going to finish later. Whereas if you delay this node or this node, it may not matter
+
+450
+00:48:57,860 --> 00:49:04,860
+that much, correct, because you have some buffer amount of time, right. This is how
+
+451
+00:49:05,500 --> 00:49:11,460
+you schedule your work, right. So, that is essentially what is being done in this. So,
+
+452
+00:49:11,460 --> 00:49:15,980
+when we talk about instruction scheduling, we will always talk about this critical path
+
+453
+00:49:15,980 --> 00:49:21,420
+either directly or indirectly and try to make sure that the nodes on the critical path are
+
+454
+00:49:22,059 --> 00:49:26,420
+scheduled as soon as possible without delaying them, right.
+
+455
+00:49:26,420 --> 00:49:33,420
+Okay, so the heuristic series scheduler is going to do the following things. You construct
+
+456
+00:49:33,460 --> 00:49:40,460
+the data dependence graph and for all the nodes in the dependence graph, okay, you want
+
+457
+00:49:40,579 --> 00:49:45,019
+to schedule them. You can have some kind of a rank function. We will discuss what the
+
+458
+00:49:45,019 --> 00:49:51,340
+rank function is little later, okay, but right, but then you basically try to schedule
+
+459
+00:49:51,340 --> 00:49:56,539
+the nodes based on this rank function. The rank function could be either the node is
+
+460
+00:49:56,539 --> 00:50:01,699
+critical or non-critical. Critical nodes are given more priority than the non-critical
+
+461
+00:50:01,699 --> 00:50:08,059
+nodes, right. Now, for each instruction j, what you do is that you make sure that how
+
+462
+00:50:08,059 --> 00:50:12,579
+many instructions on which it is dependent on. That is basically what we call the number
+
+463
+00:50:12,579 --> 00:50:19,579
+of predecessors, right. Until all of those nodes finish, you cannot schedule j, right.
+
+464
+00:50:19,980 --> 00:50:25,739
+So, you do all of this preparatory work and then you start your instruction scheduling.
+
+465
+00:50:25,739 --> 00:50:31,900
+First, you schedule all the nodes which has predecessor count equal to 0. That means that
+
+466
+00:50:31,900 --> 00:50:37,900
+these are the what we call as the root nodes or the start nodes in your program. They do
+
+467
+00:50:38,019 --> 00:50:44,539
+not have any dependencies. They can be scheduled in the initial cycle, right and as and when
+
+468
+00:50:44,539 --> 00:50:51,539
+you schedule them, you make sure that their successors are decremented. The successor
+
+469
+00:50:51,539 --> 00:50:55,860
+predecessor counts are decremented which is being done by this. Of course, you need to
+
+470
+00:50:55,860 --> 00:51:01,220
+do this only for the at the appropriate time, but in this example we will not really worry
+
+471
+00:51:01,220 --> 00:51:05,420
+about that too much. Let us assume that all of them have one cycle or so. So, it can be
+
+472
+00:51:05,420 --> 00:51:12,420
+immediately decremented, okay. So, you schedule j and then you continue you kind of update
+
+473
+00:51:12,940 --> 00:51:19,380
+all its successors, their predecessor counts and as and when there are more instructions
+
+474
+00:51:19,380 --> 00:51:24,900
+in your ready queue, you start doing this. And when you pick a ready instruction, you
+
+475
+00:51:24,900 --> 00:51:30,659
+always pick the ready instruction based on some priority which could be critical versus
+
+476
+00:51:30,659 --> 00:51:37,420
+non-critical, right. That is really what you do. These functions for doing update of predecessor
+
+477
+00:51:37,420 --> 00:51:43,059
+count is that basically you look at all successor and for every successor, you decrement its
+
+478
+00:51:43,059 --> 00:51:48,619
+predecessor count by 1. That is really what it is and if the predecessor count of that
+
+479
+00:51:48,619 --> 00:51:54,259
+node becomes 0, you can put it into the ready list, okay.
+
+480
+00:51:54,259 --> 00:51:59,139
+This simple scheduling essentially has an order m squared complexity because at every
+
+481
+00:51:59,219 --> 00:52:03,460
+step you need to kind of look at this all other things. So, it is an n squared complexity
+
+482
+00:52:03,460 --> 00:52:10,460
+algorithm, right. And even constructing the DDG where you try to find out sorry where
+
+483
+00:52:11,379 --> 00:52:15,819
+you try to find out whether a node has a dependence to any other node, you essentially have to
+
+484
+00:52:15,819 --> 00:52:22,579
+consider all node to every other node in the graph. So, it has a complexity of order n
+
+485
+00:52:22,579 --> 00:52:28,299
+squared in the worst case. An interesting result which was proved in 1987 is that the
+
+486
+00:52:28,300 --> 00:52:33,980
+heuristic scheduling that you try to do is always within a factor of 2 from the optimal
+
+487
+00:52:33,980 --> 00:52:38,980
+schedule. That means that you will never ever do worse than the 2 times the best schedule.
+
+488
+00:52:38,980 --> 00:52:44,980
+But let us not worry about it. We want to do as good as the best schedule, okay.
+
+489
+00:52:44,980 --> 00:52:51,980
+Now, let us talk about one kind of a rank function for nodes. We said that one possibility
+
+490
+00:52:52,820 --> 00:52:58,019
+is critical node versus non-critical node. That is more like a binary decision, right.
+
+491
+00:52:58,019 --> 00:53:01,940
+But we can do something better than that and that is typically decided by what is
+
+492
+00:53:01,940 --> 00:53:08,940
+called the earliest start time and the latest start time, right. So, let us define these
+
+493
+00:53:09,619 --> 00:53:16,619
+two functions, one called EST and the other called LST, latest start time, right. Let
+
+494
+00:53:17,179 --> 00:53:23,739
+us see what it is. The earliest start time, okay, is essentially the earliest time in
+
+495
+00:53:23,739 --> 00:53:30,739
+which a node can be executed. That means that for the start node, it is 0 because all
+
+496
+00:53:31,019 --> 00:53:38,019
+the root nodes can be started to start with. But then for any other node, it is the start
+
+497
+00:53:38,019 --> 00:53:45,019
+time, earliest start time of its predecessor plus that node weight. But then among all
+
+498
+00:53:45,299 --> 00:53:49,339
+these nodes, you should take the one which is giving you the maximum because it can have
+
+499
+00:53:49,340 --> 00:53:56,340
+multiple predecessors. Whichever predecessor which gets executed last, that completion
+
+500
+00:53:56,780 --> 00:54:01,900
+plus its completion time, not necessarily scheduled last, but scheduled plus its completion
+
+501
+00:54:01,900 --> 00:54:06,260
+time, whichever one which has the greater value, that is the one which dictates how
+
+502
+00:54:06,260 --> 00:54:11,059
+soon this node can be started, right. So, that is the earliest start time. I will give
+
+503
+00:54:11,059 --> 00:54:15,460
+you an example in the next slide. So, do not worry. You will understand that better. The
+
+504
+00:54:15,460 --> 00:54:20,420
+latest start time is actually the reverse of that, right. If I am, if I want to schedule
+
+505
+00:54:20,420 --> 00:54:26,139
+this node as late as possible, but still meet the overall critical path length, how late
+
+506
+00:54:26,139 --> 00:54:31,539
+can I schedule? That is really what is the latest start time. And to compute the latest
+
+507
+00:54:31,539 --> 00:54:35,980
+start time, what you do is that you first compute the critical path length. Critical
+
+508
+00:54:35,980 --> 00:54:42,980
+path length is essentially the earliest start time of a node, okay, plus its execution time
+
+509
+00:54:43,900 --> 00:54:50,900
+across all nodes. That is the completion time. And that completion time is same as the start
+
+510
+00:54:50,900 --> 00:54:56,539
+time of the end node, which is our fictitious end node. But let us call this as the completion
+
+511
+00:54:56,539 --> 00:55:03,539
+time. Then what you do is that for every node, you say that the latest start time is basically
+
+512
+00:55:03,820 --> 00:55:10,820
+the minimum of the latest start time of its successor minus the weight of this node. That
+
+513
+00:55:11,820 --> 00:55:18,820
+is, if that node has to start at time t, I have a weight of 2, then I must at least start
+
+514
+00:55:20,500 --> 00:55:27,220
+t minus 2 cycles before. That is really what you do. And if you, if that node has, sorry,
+
+515
+00:55:27,220 --> 00:55:33,100
+if you have multiple such successors, then among all of them, whichever one is the minimum,
+
+516
+00:55:33,100 --> 00:55:37,539
+that is the latest start you can do. Because if you delay it further, potentially you might
+
+517
+00:55:37,539 --> 00:55:41,460
+be affecting the critical path. That is really what it is.
+
+518
+00:55:41,460 --> 00:55:46,860
+So, we will give you examples of this. Rank is essentially the difference between the
+
+519
+00:55:46,860 --> 00:55:52,779
+latest start time and the earliest start time. If the rank is 0, that means it should be
+
+520
+00:55:52,779 --> 00:55:59,779
+given very high priority because there is no slack between its earliest start time and
+
+521
+00:55:59,779 --> 00:56:05,779
+its latest start time. Only critical nodes in the critical path will have slack 0, right.
+
+522
+00:56:06,380 --> 00:56:10,900
+And when you have slack 0 for the nodes on the critical path, you essentially say that
+
+523
+00:56:10,900 --> 00:56:15,900
+they have to be scheduled as soon as possible, right, and they have no slack. And that is
+
+524
+00:56:15,900 --> 00:56:20,900
+why they have higher priority. So, let us, let us see the same example. I have taken
+
+525
+00:56:20,900 --> 00:56:27,900
+the same graph, okay, and here correctly I have put the weight as 1, thankfully, right.
+
+526
+00:56:28,019 --> 00:56:33,620
+And then I have introduced two fictitious nodes, start and end, right. There is an arc
+
+527
+00:56:33,619 --> 00:56:38,420
+from the start node to every node, but here I have only shown it to the first node, right,
+
+528
+00:56:38,420 --> 00:56:43,619
+but you can actually put it. Similarly, there is an arc from every node to the end node,
+
+529
+00:56:43,619 --> 00:56:47,980
+but I have only shown it for this just for the sake of clarity. You will see how that
+
+530
+00:56:47,980 --> 00:56:54,980
+doesn't really matter. Now, this node can start at time t 0, right. Its earliest start
+
+531
+00:56:55,539 --> 00:57:01,940
+time is 0, okay, right. Because this is the first node, it can start at time 0. What about
+
+532
+00:57:01,980 --> 00:57:08,059
+this one? What would be its earliest start time? If this starts at 0, this can start
+
+533
+00:57:08,059 --> 00:57:15,059
+at 1, right. What about this one? That can also start at 1, right. What about this one?
+
+534
+00:57:20,019 --> 00:57:27,019
+3, because 1 plus 1 is 2, whereas 1 plus 2 is 3 and I have to take the maximum of these
+
+535
+00:57:28,019 --> 00:57:35,019
+two things. So, let us see whether it calculates these things correctly, right. It does, right.
+
+536
+00:57:35,539 --> 00:57:40,460
+And then I say that the earliest start time of end, which is same as the maximum of all
+
+537
+00:57:40,460 --> 00:57:47,460
+of these things, well, this completes at 4. So, this is 4, right. Now, from here I am
+
+538
+00:57:47,539 --> 00:57:54,340
+going to work backward to compute the latest start time. If this has to complete at 4,
+
+539
+00:57:54,340 --> 00:58:01,340
+this must start at 3, otherwise it won't complete at 4. If this has to start at 3,
+
+540
+00:58:03,140 --> 00:58:10,140
+what about this one? This has to start at least at 2, because this has only one latency.
+
+541
+00:58:10,180 --> 00:58:17,180
+What about this one? It has to be 1, right. So, its latest start time is 1. What about
+
+542
+00:58:18,179 --> 00:58:24,659
+this node? This latest start time is 1, this latest start time is 2. Let us start from
+
+543
+00:58:24,659 --> 00:58:31,659
+here. This 2 minus 1, this says that the latest start time is 1, right. Whereas, if I take
+
+544
+00:58:33,219 --> 00:58:38,460
+this 1 minus 1, what does it say about its latest start time? 0. Since for the latest
+
+545
+00:58:38,460 --> 00:58:43,460
+start time I have to take the minimum of the two, I will take this as 0. So, let us see
+
+546
+00:58:43,460 --> 00:58:50,460
+what happens. CPL is 4, LST is 0. So, these are the values that we have calculated, right.
+
+547
+00:58:54,179 --> 00:59:01,179
+So, let us say for node 1, the earliest start time and the latest start time are both 0.
+
+548
+00:59:04,380 --> 00:59:11,380
+For node 3, the earliest start time and the latest start time are both 1. For node 4,
+
+549
+00:59:12,380 --> 00:59:19,380
+the earliest start time and the latest start time is 3. Which is the critical path here?
+
+550
+00:59:19,740 --> 00:59:25,460
+This is the critical path, right, because that is the one which takes maximum amount
+
+551
+00:59:25,460 --> 00:59:31,900
+of time. This is not the critical path, because on this path if I add the weights of all the
+
+552
+00:59:31,900 --> 00:59:37,019
+nodes, it is only 3. Whereas, if I add the weights of all the nodes here, the weight
+
+553
+00:59:37,019 --> 00:59:43,860
+is 4, correct. So, for the nodes which are on the critical path, the earliest start time
+
+554
+00:59:43,860 --> 00:59:50,380
+and the latest start time would be same. And because they are the same, the rank value
+
+555
+00:59:50,380 --> 00:59:57,380
+for them are 0. Whereas, for all the other nodes, the rank will be greater than 0. Now,
+
+556
+00:59:58,659 --> 01:00:03,219
+at any point in time when you have multiple ready nodes, you can choose the nodes based
+
+557
+01:00:03,219 --> 01:00:09,179
+on the rank. The ones which have the lowest rank can be chosen first. If you have multiple
+
+558
+01:00:09,179 --> 01:00:14,619
+nodes and you can only schedule one of them, the ones with higher priority will get scheduled,
+
+559
+01:00:14,619 --> 01:00:19,619
+the others will be delayed. That is really how it goes.
+
+560
+01:00:19,619 --> 01:00:25,379
+So, that is as far as the serial schedule is concerned. We will now move on to more
+
+561
+01:00:25,379 --> 01:00:32,379
+interesting things like the parallel schedule, multiple ALUs, VLIW architectures and so on,
+
+562
+01:00:33,539 --> 01:00:40,539
+so here this problem essentially becomes an important problem because you now have M resources,
+
+563
+01:00:40,539 --> 01:00:45,500
+a machine with M identical. Let us say to start off with identical resources, then we
+
+564
+01:00:45,500 --> 01:00:52,500
+will talk about different types of resources and so on, right. If I have M identical resources
+
+565
+01:00:52,579 --> 01:00:58,619
+and I want to schedule these things, right, then that particular problem for M greater
+
+566
+01:00:58,619 --> 01:01:03,900
+than or equal to 3 is NP complete. This is again what is called the job stop scheduling
+
+567
+01:01:03,900 --> 01:01:10,900
+problem, okay. I will try to explain some notions here before we move further.
+
+568
+01:01:11,139 --> 01:01:17,699
+So let us try to write down something, right. This notion of what are called identical function
+
+569
+01:01:17,699 --> 01:01:24,699
+units and clean pipeline, right. So, two things that we talked about, identical function units
+
+570
+01:01:25,259 --> 01:01:32,259
+and clean pipeline, okay. First of all, let us just talk about pipeline function unit.
+
+571
+01:01:32,259 --> 01:01:39,259
+We say a function unit is pipeline, okay. If every cycle you can put an operation into
+
+572
+01:01:40,059 --> 01:01:47,059
+it and now we are talking about function units, not just the instruction execution pipeline.
+
+573
+01:01:47,539 --> 01:01:51,699
+Remember that in the instruction execution pipeline, you have the instruction fetch phase,
+
+574
+01:01:51,699 --> 01:01:57,539
+the decode phase and then the execute phase. The execute phase is essentially what corresponds
+
+575
+01:01:57,539 --> 01:02:02,699
+to the function unit. If you have an add instruction, maybe there is a simple add function unit.
+
+576
+01:02:02,699 --> 01:02:08,419
+If you have a multiply, then you have a integer multiply function unit. If you have, let us
+
+577
+01:02:08,419 --> 01:02:13,059
+say a floating point add, you have a floating point function unit and so on. In the superscalar
+
+578
+01:02:13,059 --> 01:02:17,099
+architecture, we saw these things as different functional units, right.
+
+579
+01:02:17,099 --> 01:02:22,179
+So these functional units again depending on what they perform may take one or more
+
+580
+01:02:22,179 --> 01:02:27,819
+cycles. If you want, I can quickly show you. So, each one of these function units depending
+
+581
+01:02:27,819 --> 01:02:34,819
+on, okay. So, they may take multiple time steps to complete, but if it is fully pipelined,
+
+582
+01:02:35,059 --> 01:02:40,299
+then you can actually start issuing an operation every cycle. Let me take an example. Let us
+
+583
+01:02:40,620 --> 01:02:47,620
+say that I have an integer, okay. So, let us say that I have this integer multiply function
+
+584
+01:02:48,019 --> 01:02:55,019
+unit, which takes four latencies, four cycles time, right, latency of four cycles. That
+
+585
+01:02:55,740 --> 01:03:02,740
+is essentially a pipeline with four stages, correct. I do not even know what this is,
+
+586
+01:03:03,100 --> 01:03:07,780
+okay. Let us just call them stage one, stage two, stage three and stage four. This is only
+
+587
+01:03:07,780 --> 01:03:14,780
+for, let us say, floating point multiply, right. And if I say that this is pipeline,
+
+588
+01:03:16,100 --> 01:03:23,100
+then what it means is that every cycle I can initiate a new operation in this, right. That
+
+589
+01:03:23,140 --> 01:03:29,660
+means that at time t equal to one, that could be instruction i one, right, going through
+
+590
+01:03:29,660 --> 01:03:36,660
+this i one, i one, i one, i one. So, this is time one, i one, i one, i one, i one.
+
+591
+01:03:37,780 --> 01:03:44,780
+So, this is time two, three, four, right. In the next cycle, I can start the next operation
+
+592
+01:03:44,780 --> 01:03:50,260
+and in the next cycle, I can start the next operation and so on. And they will go through
+
+593
+01:03:50,260 --> 01:03:57,260
+the pipeline completing it one cycle through. Correct. But the instruction still takes,
+
+594
+01:03:57,900 --> 01:04:03,980
+the floating point multiplication still takes four cycles. So, the latency is four cycles,
+
+595
+01:04:03,980 --> 01:04:10,980
+but it is pipeline. And when we say it is pipeline, you can issue one operation every
+
+596
+01:04:11,139 --> 01:04:17,099
+cycle. How is this important from a scheduling perspective? From a scheduling perspective,
+
+597
+01:04:17,099 --> 01:04:23,179
+if I schedule, let us say, a floating point multiply operation in time t, I can schedule
+
+598
+01:04:23,179 --> 01:04:30,179
+another floating point multiply operation on the same pipeline at time t plus one. If
+
+599
+01:04:30,779 --> 01:04:37,779
+it is not pipeline, what does it mean? The one can only be issued at time t plus four,
+
+600
+01:04:39,219 --> 01:04:44,899
+exactly. Correct. So, that is why this may not be possible and you can only do that.
+
+601
+01:04:44,899 --> 01:04:49,539
+Okay. So, that is what we mean by pipeline versus non-pipeline functional unit.
+
+602
+01:04:49,539 --> 01:04:55,460
+When I talk about identical, when I say identical, it is actually a simplification. In practice,
+
+603
+01:04:55,460 --> 01:04:59,419
+what happens is that you have a separate function unit for integer operation, you have a separate
+
+604
+01:04:59,420 --> 01:05:03,460
+function unit for floating point, you have a separate function unit for load store, you
+
+605
+01:05:03,460 --> 01:05:08,099
+have a separate function unit for let us say integer divide or floating point divide and
+
+606
+01:05:08,099 --> 01:05:13,500
+so on and so forth. They are all different. Okay. But to do the instruction scheduling,
+
+607
+01:05:13,500 --> 01:05:19,019
+sometimes we will assume that let us say I have n pipelines and all of them are identical.
+
+608
+01:05:19,019 --> 01:05:24,340
+But in practice, this does not happen. Okay. In practice, it is always each function unit
+
+609
+01:05:24,340 --> 01:05:29,539
+is unique or different. Right. So, but for simplification, we will consider it to be
+
+610
+01:05:29,539 --> 01:05:34,620
+that way. Oftentimes, we will either use this word called homogeneous, which means that
+
+611
+01:05:34,620 --> 01:05:41,620
+all of them are same or heterogeneous. Okay. In practice, it is always heterogeneous, but
+
+612
+01:05:44,579 --> 01:05:49,460
+to make the problem simple, we can look at it as homogeneous. Even when you look at it
+
+613
+01:05:49,460 --> 01:05:55,980
+as homogeneous, when you have more than three functional units, right, the instruction scheduling
+
+614
+01:05:55,980 --> 01:06:02,420
+problem, optimal instruction scheduling problem is NP complete. So, if it is heterogeneous,
+
+615
+01:06:02,420 --> 01:06:09,420
+it is going to be equally or more hard. Right. That is the reason. Okay. So, as I mentioned
+
+616
+01:06:10,780 --> 01:06:14,780
+earlier, different resources, for example, integer operation, memory operation, floating
+
+617
+01:06:15,100 --> 01:06:19,740
+point operation, etcetera, they all go through different pipelines. And each one of these
+
+618
+01:06:19,740 --> 01:06:24,940
+pipelines could either be fully pipelined or non-pipelined. If they are pipelined, then
+
+619
+01:06:24,940 --> 01:06:29,380
+every successive cycle, you can actually initiate a new operation, even though the latency
+
+620
+01:06:29,380 --> 01:06:35,420
+may be greater than one. Whereas, if it is non-pipelined, you can only initiate after
+
+621
+01:06:35,420 --> 01:06:42,420
+that operation completes. That is really what it is. Okay.
+
+622
+01:06:42,980 --> 01:06:48,059
+Alright. So, we will see some instruction scheduling methods, essentially what you are
+
+623
+01:06:48,059 --> 01:06:54,019
+going to call as the list scheduling methods. They differ, there are many list scheduling
+
+624
+01:06:54,019 --> 01:06:59,220
+methods that have been published in the literature. And they differ in terms of whether these
+
+625
+01:06:59,220 --> 01:07:04,300
+are, so what happens is that there are several list scheduling methods. And these list scheduling
+
+626
+01:07:04,300 --> 01:07:10,019
+methods depends, you know, varies in terms of the following aspects. Some list scheduling
+
+627
+01:07:10,019 --> 01:07:14,579
+methods are operation based and some are cycle based. I will give you examples of these
+
+628
+01:07:14,579 --> 01:07:21,579
+two things as we go by. Some are forward and some are backward or some are what we call
+
+629
+01:07:21,820 --> 01:07:28,579
+as greedy and some are lazy. And then they use some extent of backtracking, which essentially
+
+630
+01:07:28,579 --> 01:07:34,860
+means that after I have done scheduling of an instruction, I try to go forward and as
+
+631
+01:07:34,860 --> 01:07:39,300
+I keep scheduling more instruction, suddenly I decide that one of the instruction that
+
+632
+01:07:39,300 --> 01:07:45,180
+I have scheduled earlier is possibly a wrong choice. I try to undo that instruction and
+
+633
+01:07:45,180 --> 01:07:50,260
+then try to schedule more instructions. So, that is backtracking. And if you do backtracking,
+
+634
+01:07:50,260 --> 01:07:55,700
+like in any backtracking things, you actually spend more time, but you are likely to produce
+
+635
+01:07:55,700 --> 01:08:02,140
+better schedules. Then they use different kinds of priorities and some of them update
+
+636
+01:08:02,140 --> 01:08:07,500
+this priority only once at the beginning of scheduling. Some of them keep updating the
+
+637
+01:08:07,500 --> 01:08:14,500
+priority as time goes by. So, they differ in that as well. They also differ in terms
+
+638
+01:08:15,619 --> 01:08:19,460
+of how they consider these functional units, whether they consider these functional units
+
+639
+01:08:19,460 --> 01:08:26,460
+as uniform, that means homogeneous or heterogeneous and whether they consider how many units are
+
+640
+01:08:26,460 --> 01:08:32,260
+there, etcetera, depending on that they differ. So, here is the algorithm for doing what we
+
+641
+01:08:32,260 --> 01:08:38,300
+call as cycle based scheduling. So, what you do is that you have the instructions
+
+642
+01:08:38,300 --> 01:08:43,699
+from the basic block from which you construct the data dependence graph. The data dependence
+
+643
+01:08:43,699 --> 01:08:50,699
+graph is represented by means of the edges and sorry vertices and edges. Now, what you
+
+644
+01:08:51,500 --> 01:08:57,020
+do in a cycle based scheduling is that you start with time step 0 and you keep visiting
+
+645
+01:08:57,020 --> 01:09:02,380
+every cycle. And as you keep visiting each cycle, you will see whether there are any
+
+646
+01:09:02,380 --> 01:09:07,900
+ready operations to be scheduled. And among all the ready operations, you choose the ones
+
+647
+01:09:07,900 --> 01:09:13,620
+which have higher priority and you start scheduling them in the decreasing order of priority.
+
+648
+01:09:13,620 --> 01:09:20,620
+If you cannot schedule any more operations, you increase your time step to the next cycle.
+
+649
+01:09:20,860 --> 01:09:24,980
+And before you increase our time step to the next cycle, you also make sure whether there
+
+650
+01:09:24,979 --> 01:09:30,539
+are any new ready operations that have become available. Then in the next cycle again, you
+
+651
+01:09:30,539 --> 01:09:35,819
+try to schedule the operations based on the priority and you keep doing this. So, that
+
+652
+01:09:35,819 --> 01:09:39,659
+is essentially what this algorithm is. Let us go through the detail.
+
+653
+01:09:39,659 --> 01:09:46,659
+To start with your schedule is initially empty and you start off at cycle t equal to 0. Now,
+
+654
+01:09:46,779 --> 01:09:52,259
+you start saying that ready list is the list of all nodes which are the source node in
+
+655
+01:09:52,260 --> 01:09:56,500
+the graph. That means that they do not have any predecessors. They are always ready. They
+
+656
+01:09:56,500 --> 01:10:02,659
+can be executed. So, now prioritize this ready queue because you do not, there may be five
+
+657
+01:10:02,659 --> 01:10:07,699
+nodes that are ready in the initial list. There may be five source nodes and you may
+
+658
+01:10:07,699 --> 01:10:12,460
+have only slot for scheduling two of them or you can only do two integer instruction
+
+659
+01:10:12,460 --> 01:10:16,940
+and one floating point instruction. So, you have to now see which ones can be scheduled.
+
+660
+01:10:17,259 --> 01:10:24,179
+So, what you do is that you prioritize them. Then, right, while schedule is not complete,
+
+661
+01:10:24,179 --> 01:10:27,819
+that means that while you have not scheduled all the nodes in the graph, keep doing the
+
+662
+01:10:27,819 --> 01:10:34,819
+following, right. What you do is that you first take a node from V, from the ready list
+
+663
+01:10:35,339 --> 01:10:41,139
+in the priority order, okay. In the prioritize order, you take a node and then you try to
+
+664
+01:10:41,139 --> 01:10:45,979
+schedule the node in the current time step, okay. And when you schedule the node, you
+
+665
+01:10:45,979 --> 01:10:52,500
+have to essentially ensure that there is no resource conflict. That means that if in
+
+666
+01:10:52,500 --> 01:10:57,059
+the current schedule, let us say you have already scheduled two integer add operations
+
+667
+01:10:57,059 --> 01:11:02,019
+and there are only two integer function unit, then the third odd operation cannot be scheduled
+
+668
+01:11:02,019 --> 01:11:07,219
+in the current cycle no matter how high its priority is. Because the other two nodes must
+
+669
+01:11:07,219 --> 01:11:11,619
+have had higher priorities. That is why they have got scheduled. This node has a higher
+
+670
+01:11:11,619 --> 01:11:15,899
+priority than some of the other operations, but still it cannot be scheduled in the current
+
+671
+01:11:16,299 --> 01:11:21,139
+cycle. So, you have to skip this operation and go to the next operation in the priority
+
+672
+01:11:21,139 --> 01:11:26,379
+queue and then see whether any of them can be scheduled, right. So, that is really what
+
+673
+01:11:26,379 --> 01:11:32,819
+you try to see. If there is no resource conflict, then you add this node to what is called the
+
+674
+01:11:32,819 --> 01:11:39,139
+schedule, right. And then you mark the resources that are being used for this schedule. That
+
+675
+01:11:39,139 --> 01:11:44,059
+is essentially what this add function is doing. You add the node to the schedule and then
+
+676
+01:11:44,060 --> 01:11:49,780
+mark all the resources which are used by the schedule. And you keep doing this. If
+
+677
+01:11:49,780 --> 01:11:55,420
+the node has a resource conflict, you skip that, go to the next node in the priority
+
+678
+01:11:55,420 --> 01:12:02,820
+list until you exhaust all the nodes in the ready list. After you have exhausted all the
+
+679
+01:12:02,820 --> 01:12:08,500
+nodes in the ready list, you know that no more nodes can be scheduled. Then you increment
+
+680
+01:12:08,500 --> 01:12:13,980
+your time step. After you have incremented your time step, you try to find out whether
+
+681
+01:12:13,979 --> 01:12:20,699
+any node v has now become ready. When would you know a node is ready? Know a node is ready
+
+682
+01:12:20,699 --> 01:12:25,699
+if its predecessor has completed its execution. If all its predecessors have completed its
+
+683
+01:12:25,699 --> 01:12:32,699
+execution. Therefore, whenever you schedule a node, you have to make sure that its successors
+
+684
+01:12:34,139 --> 01:12:41,139
+will be intimated after a time which is equal to the execution time of this. So, if node
+
+685
+01:12:41,539 --> 01:12:48,539
+v is scheduled at time step t, this is v and v has a successor u and let us say u has only
+
+686
+01:12:54,300 --> 01:13:01,300
+v as the predecessor. If this is scheduled at time step t and this takes let us say two
+
+687
+01:13:01,300 --> 01:13:08,300
+cycles to execute, then obviously this will become ready in t plus 2. If u has multiple
+
+688
+01:13:11,700 --> 01:13:18,700
+predecessors, then it will be ready at t plus 2 or later depending on whichever ones that
+
+689
+01:13:22,260 --> 01:13:29,260
+happen. So, you can say that one of its predecessors have become ready at t plus 2 and then you
+
+690
+01:13:29,260 --> 01:13:34,460
+can decrement the predecessor count. So, that when the predecessor count becomes 0, you
+
+691
+01:13:34,460 --> 01:13:41,460
+know that all the inputs are available and then at that point in time node u can be added
+
+692
+01:13:41,619 --> 01:13:48,619
+to the ready list. So, you do that for all the successor nodes of v, not only the v,
+
+693
+01:13:50,300 --> 01:13:57,300
+I mean for every v that is scheduled in the current cycle. So, that essentially increases
+
+694
+01:13:57,300 --> 01:14:03,140
+your ready list, then again you prioritize your ready list and then keep doing this again
+
+695
+01:14:03,140 --> 01:14:10,140
+and again until you schedule all the nodes. Now, let us see what this schedule is, how
+
+696
+01:14:10,340 --> 01:14:15,340
+do you represent this schedule and how do you kind of keep track of your resources.
+
+697
+01:14:15,340 --> 01:14:22,340
+So, let me try to do this example. So, let us consider the simple case that I have that
+
+698
+01:14:24,340 --> 01:14:31,340
+I am trying to schedule for an architecture which has one integer unit, one floating point
+
+699
+01:14:31,900 --> 01:14:38,900
+unit and one load store unit. So, this schedule is essentially a table, the number of columns
+
+700
+01:14:46,220 --> 01:14:53,220
+is equal to the number of resources that you have and the number of rows is equal to the
+
+701
+01:14:53,380 --> 01:15:00,380
+schedule length. So, if when I schedule let us say an operation v at time step t, then
+
+702
+01:15:02,020 --> 01:15:07,659
+what do I do? If it is a load store operation, then I say that that particular operation
+
+703
+01:15:07,659 --> 01:15:14,659
+is scheduled. If I am at time step t and I find one more load store operation, I go and
+
+704
+01:15:15,460 --> 01:15:21,460
+look in this table, I find that there is already an entry that therefore, I cannot schedule
+
+705
+01:15:21,460 --> 01:15:27,860
+any more operation, any more load store operation. So, similarly I see at time step t plus 1,
+
+706
+01:15:27,859 --> 01:15:34,859
+what happens? Correct? May be a node u was scheduled in the floating point unit. If I
+
+707
+01:15:34,939 --> 01:15:39,859
+have an integer operation, I can schedule this. If I have a load store operation, I
+
+708
+01:15:39,859 --> 01:15:44,659
+can schedule this in time plus 1, but not a floating point up. So, you keep kind of
+
+709
+01:15:44,659 --> 01:15:51,659
+updating this table and that tells you how your resources are being used. As far as the
+
+710
+01:15:52,659 --> 01:15:59,659
+cycle based scheduler is concerned, it basically goes from t equal to 0 to some t equal to
+
+711
+01:16:00,420 --> 01:16:06,739
+k in the increasing order, keep scheduling the nodes. Let us later on see what is called
+
+712
+01:16:06,739 --> 01:16:11,739
+an operation based scheduler, which will actually do things in a slightly different way.
+
+713
+01:16:11,739 --> 01:16:18,739
+That is the next slide. Any questions on this cycle based scheduler? No, right? Easy enough
+
+714
+01:16:19,739 --> 01:16:25,739
+to understand? Okay. So, the operation based scheduler works in a different way. It does
+
+715
+01:16:25,739 --> 01:16:32,739
+not have the notion of cycle time. Instead what it does is that you have the d d g and
+
+716
+01:16:32,979 --> 01:16:39,979
+then you have the for all the nodes, there is a priority function just like the LST minus
+
+717
+01:16:40,859 --> 01:16:47,340
+EST kind of a priority function. Correct? So, every node has an assigned priority. Now,
+
+718
+01:16:47,340 --> 01:16:53,940
+what you do is that among all the nodes you find, this is what you try to do, right? You
+
+719
+01:16:53,940 --> 01:17:00,940
+find, okay, so let us assume that for every node we have this notion of EST and LST, okay,
+
+720
+01:17:07,020 --> 01:17:14,020
+to start with. Now, what I do is that ready node is the set of source nodes in the set
+
+721
+01:17:17,539 --> 01:17:23,779
+of nodes. So, initially I have all the source nodes in the ready list and then I start off
+
+722
+01:17:23,779 --> 01:17:29,140
+with an empty schedule, okay, and I continue to do this until I construct the schedule
+
+723
+01:17:29,140 --> 01:17:35,539
+for all the nodes. Then what I do is that I do select the node with the highest priority
+
+724
+01:17:35,539 --> 01:17:42,539
+from the ready queue, right? Okay. So, now given this operation, what I try to do is
+
+725
+01:17:43,420 --> 01:17:50,420
+that I now try to schedule this not in the current time step, but from its earliest time
+
+726
+01:17:50,859 --> 01:17:57,859
+step to its latest time step I try to schedule it or the maximum time I try to schedule this.
+
+727
+01:17:58,420 --> 01:18:03,420
+In other words, what happens is that you remember the resource graph that we talked about, sorry,
+
+728
+01:18:03,420 --> 01:18:10,260
+right, the resource graph that we talked about, the table. So, if you are scheduling for that,
+
+729
+01:18:10,260 --> 01:18:17,260
+then what I do is that, so this table has all these rows and columns. So, I take an
+
+730
+01:18:25,020 --> 01:18:31,020
+operation V, I find out when is the earliest that it can get scheduled, correct? So, let
+
+731
+01:18:31,020 --> 01:18:37,420
+us say if it can get scheduled at time step 0, I try to schedule this in time step 0,
+
+732
+01:18:37,619 --> 01:18:44,619
+correct? But let us say this operation V has an earliest start time of 0 and blah, blah,
+
+733
+01:18:45,060 --> 01:18:50,579
+blah. I do not even worry about its latest start time for the time being, okay, right?
+
+734
+01:18:50,579 --> 01:18:55,380
+Now what I try to do is that I take this operation, I try to see if I can schedule this in time
+
+735
+01:18:55,380 --> 01:19:00,140
+step 0. Maybe this is a floating point operation and I see that there is already a floating
+
+736
+01:19:00,140 --> 01:19:06,539
+point operation in time step 0. Then I go to time step 1 or I go to time step 2 or I
+
+737
+01:19:06,539 --> 01:19:12,260
+go to time step 3 and then try to schedule this wherever it is possible to schedule this.
+
+738
+01:19:12,260 --> 01:19:17,420
+Let us say finally I find a place to schedule, I schedule it. Then I go and take the next
+
+739
+01:19:17,420 --> 01:19:23,859
+operation and then try to schedule. So, for each operation I try to find a time slot from
+
+740
+01:19:23,859 --> 01:19:30,859
+its earliest time step to the maximum possible time step where it can be scheduled, okay?
+
+741
+01:19:31,019 --> 01:19:38,019
+Now let us see how do we update the ready list here, right? So, we now start adding
+
+742
+01:19:39,859 --> 01:19:46,859
+all the nodes V such that, okay, there is an edge from U to V, right? V is the node
+
+743
+01:19:47,779 --> 01:19:53,380
+that we have just completed execution. So, let us look at it in the following way. U
+
+744
+01:19:53,380 --> 01:20:00,380
+is already scheduled and the scheduled time of U plus the delay of U is greater than the
+
+745
+01:20:00,779 --> 01:20:05,140
+cycle time. Well, this actually should not be cycle time, okay? Let us do one thing.
+
+746
+01:20:05,140 --> 01:20:09,100
+I think there is something wrong here. We will probably stop here and then complete
+
+747
+01:20:09,100 --> 01:20:14,100
+because this does not work this way. This essentially tries to take each node and try
+
+748
+01:20:14,100 --> 01:20:19,900
+to schedule it between its earliest time and end wherever it is possible and then try to
+
+749
+01:20:19,900 --> 01:20:24,420
+adjust things. So, I will come back and then correct this tomorrow and then maybe we can
+
+750
+01:20:24,420 --> 01:20:30,340
+discuss it, okay? We will probably stop here because this is more or less what I wanted
+
+751
+01:20:30,340 --> 01:20:35,699
+to cover for the day. After this we have an example, but that example is not very specific
+
+752
+01:20:35,699 --> 01:20:40,779
+to the earliest, I mean to the operation base or other things. Then we will go to global
+
+753
+01:20:40,779 --> 01:20:41,300
+scheduling.
+
+754
+01:20:41,300 --> 01:20:42,460
+So, let us stop here.
+

@@ -1,0 +1,26 @@
+ **Topic:** Advanced Code Generation & Dynamic Programming Approach
+
+**Terms:**
+
+1. Labeling Pass
+2. Code Generation Pass
+3. Optimal Substructure Property
+4. Dominator
+5. Contiguous Evaluation
+6. Register Allocation
+7. Memory Storage Cost
+8. Bottom-Up Evaluation
+9. Minimum Cost Memoization
+
+**Concepts:**
+
+- Continuing from the previous lectures, the presentation introduces a dynamic programming approach for optimal code generation of trees.
+- The cost of generating code for an operation is the sum of the costs of generating code for its subtrees and the cost of the instruction itself.
+- The problem exhibits the optimal substructure property, making it suitable for dynamic programming.
+- During the code generation process, some results may be temporarily stored in memory due to limited register availability.
+- The method computes the cost of generating code for each node considering varying register counts (from 0 to R) and memory storage.
+- Each node stores an array of R+1 elements representing the minimum cost for each register count and memory storage.
+- The overall cost is calculated in a bottom-up manner, starting from the leaves of the tree.
+- The memoization strategy ensures the tree is traversed only once, yielding a cost calculation with a complexity proportional to the number of nodes in the tree.
+
+Confidence: 85%

@@ -1,0 +1,2748 @@
+1
+00:00:00,000 --> 00:00:13,560
+So, when I here at the end of this end of the round you have bottom bottom. When you
+
+2
+00:00:13,560 --> 00:00:21,760
+come back at this point it is bottom bottom. What is the value of your map after j equal
+
+3
+00:00:21,760 --> 00:00:31,480
+to 3? Bottom 3. It is not bottom bottom and has the value instead of going only one direction
+
+4
+00:00:31,480 --> 00:00:39,240
+has gone in the other direction? No. The value for each at each end of each statement it
+
+5
+00:00:39,240 --> 00:00:45,600
+should go in one direction. At the end of it here it was bottom 7 it became bottom bottom.
+
+6
+00:00:46,120 --> 00:00:51,880
+So, in one direction here it was bottom 3 remain bottom 3. So, it is not that we are
+
+7
+00:00:51,880 --> 00:00:58,520
+going in sometimes up sometimes down no. So, the monotonicity property still holds and
+
+8
+00:00:58,520 --> 00:01:05,040
+then once you get bottom 3 here you will go to the if j not equal to 3 and then check
+
+9
+00:01:05,040 --> 00:01:11,000
+that the in has not changed it was bottom 3 before it remain bottom 3. So, you will
+
+10
+00:01:11,000 --> 00:01:15,560
+stop your analysis and then you will say replace the constants you will find this j has not
+
+11
+00:01:15,560 --> 00:01:23,680
+j equal to 3 and then this j you can remove this because this j is always 3. So, this
+
+12
+00:01:23,680 --> 00:01:28,760
+is if condition and this part can go and this will become j equal to 5. So, the code will
+
+13
+00:01:28,760 --> 00:01:41,359
+become I think just j equal to 5 because the else part can go sorry the then part can go
+
+14
+00:01:41,359 --> 00:01:51,000
+does not make sense why? So, with that so yeah so that was the last thing I want to
+
+15
+00:01:51,000 --> 00:01:55,200
+say ok. So, let us do a quick recap of what we did today morning.
+
+16
+00:01:55,200 --> 00:02:02,159
+What did we do? We started with constant propagation we started with the intro of data flow analysis
+
+17
+00:02:02,159 --> 00:02:08,879
+looked at constant propagation we took the iterated data flow analysis the general algorithm
+
+18
+00:02:08,879 --> 00:02:18,280
+and then we derived an algorithm for constant propagation we then took it for conditional
+
+19
+00:02:18,280 --> 00:02:24,960
+constant propagation we are finding we are now finding conditional constants.
+
+20
+00:02:24,960 --> 00:02:35,879
+And now I am in a dilemma I have 3 more hours to go I have 4 topics that I have in mind
+
+21
+00:02:35,879 --> 00:02:43,799
+which I definitely cannot cover. So, the topics I have in mind are something called
+
+22
+00:02:43,799 --> 00:02:57,439
+SSA and use that to improve the constant propagation. Second one is about flow analysis which will
+
+23
+00:02:58,439 --> 00:03:07,159
+inlining. Third one is loop optimizations. Fourth one is dependence analysis I am nearly
+
+24
+00:03:07,159 --> 00:03:10,520
+sure I am not touching dependence analysis because that will probably require us to go
+
+25
+00:03:10,520 --> 00:03:17,319
+in a different direction completely. So, what I am thinking I will do I will cover flow
+
+26
+00:03:17,319 --> 00:03:26,000
+analysis and inlining depending on time we will quickly do loop transformations then
+
+27
+00:03:26,000 --> 00:03:36,879
+we will skip SSA and optimizations. Because I kept thinking should I pick A B C somewhere
+
+28
+00:03:36,879 --> 00:03:46,159
+I did inky pinky ponky and this came in. So, when we say flow analysis what is flow analysis?
+
+29
+00:03:46,159 --> 00:03:49,659
+You have been actually doing flow analysis when you did constant propagation at some
+
+30
+00:03:50,259 --> 00:03:55,819
+level you did flow analysis to find out what is flowing what constants are flowing into
+
+31
+00:03:55,819 --> 00:04:06,500
+different variables. So, this is not flow analysis what flows into it what flows into
+
+32
+00:04:06,500 --> 00:04:13,780
+the expression what flows into a variable and one instance of flow analysis is what
+
+33
+00:04:13,780 --> 00:04:17,060
+you did in constant propagation where you saw constant flowing.
+
+34
+00:04:17,060 --> 00:04:25,259
+Another instance is let us not look at scalar variables, but let us look at reference variables.
+
+35
+00:04:25,259 --> 00:04:37,220
+Say in Java you have when you do when you declare a variable A of type X at runtime
+
+36
+00:04:38,220 --> 00:04:49,220
+point to an object of type X or subtypes X or any of its subtypes. Now, I want to know
+
+37
+00:04:49,220 --> 00:05:00,580
+given a variable some such variable X what flows into it I want to know what type of
+
+38
+00:05:01,579 --> 00:05:10,339
+flows into it that is which at runtime it will hold some object what is the type of
+
+39
+00:05:10,339 --> 00:05:20,259
+that object what are those classes. I mean if we say that the flow set of an expression
+
+40
+00:05:20,259 --> 00:05:27,180
+E is A B C it means at runtime this expression may hold an object of type A or B or C.
+
+41
+00:05:27,180 --> 00:05:34,180
+If I write X equal to nu A later again both are two different objects, but for me both
+
+42
+00:05:39,740 --> 00:05:46,740
+are of same type A. So, I am only looking at the type make sense. So, we say that if
+
+43
+00:05:46,740 --> 00:05:53,740
+an expression E has a flows I mean the flow set of an expression is A B C it means at
+
+44
+00:05:57,180 --> 00:06:04,180
+runtime either it can be null or A or B or C nothing else. It is a main analysis. So,
+
+45
+00:06:09,540 --> 00:06:16,540
+whatever it says will not flow will never flow make sense.
+
+46
+00:06:16,740 --> 00:06:23,740
+What is the use of such a flow information? Let us say in Java or any of these O languages
+
+47
+00:06:31,259 --> 00:06:38,259
+if I have some expression E dot foo this foo can be present could be present in anywhere
+
+48
+00:06:39,259 --> 00:06:45,420
+right the method foo can be present in many places. I want to know which foo should I
+
+49
+00:06:45,420 --> 00:06:52,420
+call and if I know that this foo can be only present in class A because this E will hold
+
+50
+00:06:59,459 --> 00:07:06,459
+an object of type A only then what I can do I can inline the method there, but if multiple
+
+51
+00:07:09,259 --> 00:07:14,980
+if this E can hold objects of multi different types or where I cannot be sure then I cannot
+
+52
+00:07:14,980 --> 00:07:21,980
+inline because which method should I inline this guy or this guy right.
+
+53
+00:07:23,620 --> 00:07:30,620
+Here is one more thing let us say you have looked at your whole program and found that
+
+54
+00:07:30,740 --> 00:07:37,740
+for a certain class it has a method m which is never called anyway. So, this is the method
+
+55
+00:07:38,259 --> 00:07:44,060
+anywhere method m is called, but not from this class then in that class you can remove
+
+56
+00:07:44,060 --> 00:07:51,060
+that code that is dead code correct. So, what is our goal? We want to find out for each
+
+57
+00:07:55,339 --> 00:08:02,339
+expression using which I am making a call something of E dot foo types I want to know
+
+58
+00:08:02,339 --> 00:08:09,339
+what is the flow set is the flow set a singleton set if it is singleton set then I can inline
+
+59
+00:08:11,619 --> 00:08:18,620
+it. So, we will study two things one how to compute this flow set number two how to inline
+
+60
+00:08:18,620 --> 00:08:25,620
+this flow set number two how to inline. So, what is our we will have an assumption that
+
+61
+00:08:31,540 --> 00:08:38,539
+we have closed world assumption that is I know the whole program nothing else is missing
+
+62
+00:08:39,899 --> 00:08:43,779
+all parts of the program including library they are all available and will not change.
+
+63
+00:08:44,100 --> 00:08:50,220
+So, we want assuming we want to assume dynamic class loading this and that sometimes you
+
+64
+00:08:50,220 --> 00:08:57,220
+have some analysis is done using open world assumption for instance when you do when in
+
+65
+00:08:57,899 --> 00:09:04,899
+java when it does type checking for a class right it may not have the rest of the whole
+
+66
+00:09:05,500 --> 00:09:10,740
+all the library available it still does type checking that is an open world assumption
+
+67
+00:09:10,740 --> 00:09:15,700
+here for our analysis we will assume closed world assumption.
+
+68
+00:09:15,700 --> 00:09:22,700
+We already know that inlining is an important optimization for over languages. So, if you
+
+69
+00:09:24,340 --> 00:09:31,340
+can say example let us say I have a class A with a method M B extends A it also has
+
+70
+00:09:33,419 --> 00:09:40,419
+a method M class Q has a method P S extends P and it also has a method M. So, this is
+
+71
+00:09:40,740 --> 00:09:47,740
+also has a method P see the funny thing is when I when I say I want to know what flows
+
+72
+00:09:48,180 --> 00:09:55,180
+into E it will impact which foo it is if I know precisely what is getting inside this
+
+73
+00:09:58,500 --> 00:10:05,100
+I will know what is happening inside precisely what is happening in foo if I know what is
+
+74
+00:10:05,100 --> 00:10:12,100
+happening in foo it will help me in doing more precise flow analysis.
+
+75
+00:10:12,100 --> 00:10:19,100
+So, to know to know what is called I mean what is the type of arc I need to know who
+
+76
+00:10:23,659 --> 00:10:30,660
+is calling M to know who is calling it. So, it is as if my analysis needs me to know what
+
+77
+00:10:35,779 --> 00:10:42,779
+is flowing into this arc you need flow analysis to know that you need to know who is calling
+
+78
+00:10:44,019 --> 00:10:48,899
+M, but to know who is calling M you need flow analysis. So, there is a you will see there
+
+79
+00:10:48,899 --> 00:10:55,899
+is a recursive dependence like. So, in this case here I have a method X equal to nu A
+
+80
+00:10:56,060 --> 00:11:03,060
+Y equal to nu B and I am calling X dot M nu Q X dot M Q X dot M Q X dot M Q X dot M
+
+81
+00:11:05,420 --> 00:11:12,420
+nu Q which X is this here the declared type of X is A the run time type also happens to
+
+82
+00:11:13,779 --> 00:11:20,779
+be A here the declared type is B run time type is B I could have this the declared type
+
+83
+00:11:24,740 --> 00:11:31,740
+of this Y could have also be A when I call X dot M which M will I call X dot M X dot
+
+84
+00:11:35,200 --> 00:11:42,200
+M what I call A's when I call Y dot M A B A B I think I need to do a quick revision
+
+85
+00:11:53,580 --> 00:12:00,580
+of Java's how virtual functions work.
+
+86
+00:12:00,580 --> 00:12:07,580
+If I have sir is it ok ok ok. So, I have this class A method M class B method M I am not
+
+87
+00:12:07,580 --> 00:12:14,580
+declaring the written type and all that. So, and now I have A method X method X method
+
+88
+00:12:37,580 --> 00:12:45,580
+I have field int f sorry some field f 1 here field f 1 A X ok if I do X 1 dot M X 2 A X
+
+89
+00:13:07,720 --> 00:13:14,720
+2 dot M X 3 dot M X 1 dot M which which M will it be A's M or B's M A's M X 2 dot
+
+90
+00:13:24,639 --> 00:13:31,640
+M which one will it be X 3 dot M which one will it be X 3 dot M X 3 dot M which one
+
+91
+00:13:38,000 --> 00:13:45,000
+will it be X 3 dot M ok A B wow 50 50 is it sorry my bad thank you yeah otherwise it is
+
+92
+00:13:53,220 --> 00:14:00,220
+of otherwise this this should be wrong yeah B extends yeah. So, yeah so X 3 dot M will
+
+93
+00:14:00,220 --> 00:14:07,220
+it which one will it be B or A B why B because it run time because it run time because it
+
+94
+00:14:08,560 --> 00:14:15,560
+this is this will be resolved to object B what about this if I write if I access X 1
+
+95
+00:14:15,560 --> 00:14:22,560
+dot f X 2 dot f and X 3 dot f which one will it be X 1 dot f X 2 dot f not not loud enough
+
+96
+00:14:22,699 --> 00:14:29,699
+X 2 dot f uh ok B you said A this you said B X 3 dot f joule this is allowed Thank you
+
+97
+00:14:40,019 --> 00:14:48,139
+all right I will try same question one is I can P P X X X
+
+98
+00:14:48,139 --> 00:15:12,939
+x3 dot f. B or A? Yeah, yeah, f is there here. Both are declared. So, some type, let us call
+
+99
+00:15:12,940 --> 00:15:39,380
+it c. So, x3 dot f. B. So, it so happens one of these answers is wrong. So, in java the
+
+100
+00:15:39,379 --> 00:15:47,299
+method resolution, all methods are virtual, c plus plus you have declared it explicitly.
+
+101
+00:15:47,299 --> 00:15:54,620
+Java the method resolution happens at runtime. So, that is it depends on the runtime object.
+
+102
+00:15:54,620 --> 00:16:00,580
+You can do it statically if you can. So, x3 dot at runtime the object x1 holds an object
+
+103
+00:16:00,580 --> 00:16:10,340
+of type A. So, it will be A dot m. x2 holds an object of type. So, it should be B dot
+
+104
+00:16:10,340 --> 00:16:27,220
+m. x3 holds an object of type B at runtime. So, this will be B dot m. Field resolution
+
+105
+00:16:27,220 --> 00:16:38,700
+happens based on the static type. So, what is the static type of x1? A. So, x1 dot f
+
+106
+00:16:38,700 --> 00:16:45,500
+is A dot f. What is the static type of x2? B. So, this will be B. What is the static
+
+107
+00:16:45,500 --> 00:17:09,980
+type of x3? A. So, this should be A. Now, I will do this. Yeah, one minute. It is not
+
+108
+00:17:09,980 --> 00:17:15,900
+visible, too small. Thank you. I have this bad habit of making it smaller and smaller
+
+109
+00:17:39,980 --> 00:18:02,940
+than that. Wait, wait. Just give me just, just, just, just, just, just. I am nearly
+
+110
+00:18:02,940 --> 00:18:28,980
+done. Okay. Yeah. Perfect. I was coming there. I was coming there. We will come to that.
+
+111
+00:18:29,980 --> 00:18:37,779
+Let me not, I was coming there in a minute. Okay. Now, I have added a method. So, m calls
+
+112
+00:18:37,779 --> 00:18:44,940
+foo. There is a method called bar which calls foo. Class B also has method m which calls
+
+113
+00:18:44,940 --> 00:19:01,380
+foo. Now, I am calling x1 dot m. Okay. Which in turn calls foo? Which foo is it? A's foo.
+
+114
+00:19:01,380 --> 00:19:20,900
+Okay. I call x2 dot m. It calls B's foo. x3 dot m. When I call x3 dot m, which foo
+
+115
+00:19:20,900 --> 00:19:41,100
+will it call? That side is pretty silent. So, keeping silence is safe. So, let us see,
+
+116
+00:19:41,699 --> 00:19:52,019
+know, x3 dot m. What is the dynamic type of x3? It happens to be B. Let us go here. There
+
+117
+00:19:52,019 --> 00:20:00,859
+is a call to foo. What is the receiver object here? You need receiver object for every call,
+
+118
+00:20:00,859 --> 00:20:07,659
+right? What is the receiver object here? The this pointer, right? What is the type of this,
+
+119
+00:20:08,060 --> 00:20:17,420
+runtime type of this? B. So, which foo will it be? Sorry, x3 dot m here. Which foo is it?
+
+120
+00:20:17,420 --> 00:20:30,300
+B. It is the dynamic type is? B. So, it will call B's foo. Fine. Okay. Now, if I do x3 dot bar,
+
+121
+00:20:30,299 --> 00:20:39,419
+which bar will it call? This bar is only there in A. So, this will go here. Now,
+
+122
+00:20:39,419 --> 00:20:50,819
+there is a call to foo. Which foo will be called? What is this pointer? B. So, it will call B's.
+
+123
+00:20:50,819 --> 00:21:02,819
+Right? Okay. Let me write this. In foo, I am writing to F. I am accessing F here. In this foo
+
+124
+00:21:02,819 --> 00:21:28,579
+also, I am accessing F. When I call, oh, better. When I call x3 dot bar, which bar is it called?
+
+125
+00:21:28,579 --> 00:21:43,179
+Only one bar. If I am accessing F there, is it an F, is it reading the F of A or B?
+
+126
+00:21:58,579 --> 00:22:19,699
+So, some of you have already said this is this dot F. Correct? What is the static type of this?
+
+127
+00:22:19,700 --> 00:22:32,059
+At this position. Right? What is the, because this here is different. What is the static type
+
+128
+00:22:32,059 --> 00:22:39,259
+of this in this class? B. What is the static type of this pointer in this class? A. So,
+
+129
+00:22:39,259 --> 00:22:56,379
+this is an F of A. I am calling x3 dot bar, but I am getting the F of A. Make sense? So,
+
+130
+00:22:56,379 --> 00:23:04,660
+this field resolution happens using static types. The method resolution happens using
+
+131
+00:23:04,660 --> 00:23:21,220
+dynamic types. All on the same page? Declared type. So, in this case, type of x3 is A. Type
+
+132
+00:23:21,220 --> 00:23:30,380
+of this in a class is the class name. Static type of x2 is B. And as you can easily see,
+
+133
+00:23:30,380 --> 00:23:35,820
+the static type and dynamic type need not match. Like the static type of x3 is A, dynamic
+
+134
+00:23:35,820 --> 00:23:44,140
+type is B. And not always you can see it this way, right? I could have written type of A
+
+135
+00:23:44,140 --> 00:23:58,580
+is static type of x4 is A, if some condition x4 equal to nu A, else x4 equal to nu B. And
+
+136
+00:23:59,579 --> 00:24:12,019
+here I may call x4 dot foo, right? I may call x4 dot foo. What is the static type of x4?
+
+137
+00:24:12,019 --> 00:24:19,220
+What is the static type of x4? A. What is the dynamic type of x4? We do not know, because
+
+138
+00:24:19,940 --> 00:24:31,259
+depends on the condition. Every variable will have a fixed static type in Java. Dynamically,
+
+139
+00:24:31,259 --> 00:24:37,100
+at runtime, of course, it will have only one type, but statically we may not be able to know
+
+140
+00:24:37,099 --> 00:24:51,939
+it. So, your question is, why do not we even methods, sorry even member fields, why do not
+
+141
+00:24:51,939 --> 00:25:01,419
+we do dynamic access, right? If we do that, it is an excellent question, think about it. What we
+
+142
+00:25:01,420 --> 00:25:12,060
+are saying? We are accessing the static fields, sorry fields using static type. Why not access
+
+143
+00:25:12,060 --> 00:25:25,460
+the fields also using dynamic resolution? What will we lose? Something we will lose.
+
+144
+00:25:25,460 --> 00:25:34,180
+No, no, no, well, I mean you can, you will lose a bit of static checking, but that is okay,
+
+145
+00:25:34,180 --> 00:25:40,900
+I mean some overheads, I mean you will, what is, I mean we have to postpone some checking to runtime,
+
+146
+00:25:40,900 --> 00:25:46,420
+that is okay. I mean some more cache type of things have to be added. Those things can be done,
+
+147
+00:25:46,420 --> 00:25:54,500
+but we will lose something else as well. See, one thing is this checking, right? For field checking,
+
+148
+00:25:54,500 --> 00:26:00,819
+you do not do the type checking for fields at runtime during the execution time at all. You do
+
+149
+00:26:00,819 --> 00:26:08,380
+not need to. Why? Yeah, because it is all statically done. So, it speeds up the things,
+
+150
+00:26:08,380 --> 00:26:15,259
+but there is something else. If you do not do, if you do the field resolution at runtime, right?
+
+151
+00:26:15,259 --> 00:26:25,259
+How do I access my parent classes field? Let us say there is a get method, right? To access my
+
+152
+00:26:25,259 --> 00:26:38,180
+parent classes field, the get method always returns f. Okay, good, good, good, good, good.
+
+153
+00:26:38,180 --> 00:26:45,700
+I like this, I like this. Let us do this. No, no, no, I understand what you are saying. So,
+
+154
+00:26:45,700 --> 00:26:59,700
+in this x3.bar, what will happen here? I am typecasting x3 to a, x3, why x3? x2 I will make it,
+
+155
+00:26:59,700 --> 00:27:16,740
+still better. Dot 4 bar, does not matter. Okay, I am doing typecast on x2 and then doing dot m.
+
+156
+00:27:16,740 --> 00:27:35,779
+Which m will it be? Asm or bsm? Wow, half. Asm or bsm? Asm, bsm. Wow, if you, if this was
+
+157
+00:27:35,779 --> 00:27:46,339
+con managya kararapathi and you take popular opinion, you lose your money. Okay, this is Java
+
+158
+00:27:46,339 --> 00:28:03,700
+101 or C++ and any OO101. Typecast does not change the object. Typecast does not change
+
+159
+00:28:03,700 --> 00:28:10,340
+the object. The memory has already been allocated here. The memory has already been allocated.
+
+160
+00:28:10,340 --> 00:28:19,059
+You do not change the object, right? So, here since the method resolution happens at runtime,
+
+161
+00:28:19,059 --> 00:28:24,140
+you look at the runtime object. What is the runtime object? You are asking,
+
+162
+00:28:24,140 --> 00:28:35,300
+wink wink, for static type checking, you can assume an object a exists. At runtime,
+
+163
+00:28:35,300 --> 00:28:45,580
+you are guaranteed that at least an object a exists, a or more, a or higher up, but at least
+
+164
+00:28:45,580 --> 00:28:52,060
+an a exists, that is it. So, this will be the static type. What is the dynamic type of x2 here?
+
+165
+00:28:52,059 --> 00:29:00,179
+B. So, it will be bsm. So, let me, why did I come to this? Do you have question on this or something
+
+166
+00:29:00,179 --> 00:29:11,059
+else? Okay, so I should go to Java discussions. Okay, good question. We will come there. Too
+
+167
+00:29:11,059 --> 00:29:17,539
+many context switches. So, you said I could do a typecast to get the field, does not help.
+
+168
+00:29:18,539 --> 00:29:25,460
+If it is dynamic resolution, the dynamic field remains. See, now if to access the method of my
+
+169
+00:29:25,460 --> 00:29:30,899
+parent class, I have to do something like super dot something, right? So, then to access the
+
+170
+00:29:30,899 --> 00:29:36,659
+parent's fields, you need to do something like my dot super, some such complications you have to
+
+171
+00:29:36,659 --> 00:29:44,099
+do, but in the absence of that, it is hard. So, what normally we do is we do static resolution of
+
+172
+00:29:44,099 --> 00:29:50,059
+the fields because it avoids type checks at runtime. I can do all the type checks at compile
+
+173
+00:29:50,059 --> 00:29:57,619
+time and just methods become the expensive one. Coming back to why do we have the cast? Now,
+
+174
+00:29:57,619 --> 00:30:12,819
+you tell me which field it is. Sorry, which field it is? What is this expression? It is an
+
+175
+00:30:12,819 --> 00:30:22,220
+expression of type. X2 is an expression whose dynamic static type is B, runtime type happens
+
+176
+00:30:22,220 --> 00:30:27,859
+to be B, I do not care, but what does this tell me, this typecast? It tells me that this is an
+
+177
+00:30:27,859 --> 00:30:38,099
+object of type A. So, the static type of this expression is A. So, when I access an F, which
+
+178
+00:30:38,099 --> 00:30:49,699
+F will it be? A is F. So, from the B's object, you can do a typecast and get the field of my
+
+179
+00:30:49,699 --> 00:31:00,699
+parent of B's parent. It is very simple, only two rules, method resolution, runtime, field resolution,
+
+180
+00:31:00,700 --> 00:31:11,059
+static type. That is it. Everything, so, I have pulled, maybe this is just my bad. All the
+
+181
+00:31:11,059 --> 00:31:18,299
+explanations should stop at the same thing. Resolution, field resolution, what is the static
+
+182
+00:31:18,299 --> 00:31:23,580
+type, what is the dynamic type? Field resolution, look at the static type. Method resolution, look
+
+183
+00:31:23,579 --> 00:31:31,619
+at the runtime type. So, these two, I think you will see less complication. Do not go to,
+
+184
+00:31:31,619 --> 00:31:37,980
+oh and if this is a method of that method, do not look all that. Just look at just that method call.
+
+185
+00:31:37,980 --> 00:31:47,299
+No, this, not location, this. Look at the type of this. To get the type of this, you need the
+
+186
+00:31:48,259 --> 00:32:00,619
+See, let us keep the problem in a small. The problem is to find the type, the problem is to find the
+
+187
+00:32:00,619 --> 00:32:15,539
+method. Both are different. So, in this example, for instance, perfect. The static, the errors you
+
+188
+00:32:15,539 --> 00:32:28,619
+get, a type mismatch, they are all static type mismatches. For instance, if you have a field
+
+189
+00:32:28,619 --> 00:32:42,139
+variable BX5 and write X5 equal to X3, what is the type of X5, static type? What is the static
+
+190
+00:32:42,180 --> 00:33:01,060
+type of X3? A, type mismatch, type error. And now, I could put a type cast here and tell the compiler,
+
+191
+00:33:01,060 --> 00:33:11,980
+trust me, trust me, you will get an object of B. So, what the compiler says, I shall not trust
+
+192
+00:33:11,980 --> 00:33:18,700
+you, but I will give you an impression that I am trusting you. So, what the compiler says,
+
+193
+00:33:18,700 --> 00:33:26,259
+okay fine, for the time being, I will let you go. So, it will compile this, but it will also add a
+
+194
+00:33:26,259 --> 00:33:37,380
+check that will check at runtime, but in X3, indeed, there is an object of type B and if the cast may
+
+195
+00:33:37,380 --> 00:33:43,380
+fail at runtime. For example, we have this if then else here, right, with X4 equal to nu A or nu B.
+
+196
+00:33:43,380 --> 00:33:53,060
+So, if I write here, it will compile successfully, but runtime it may fail if it is not an object
+
+197
+00:33:53,060 --> 00:34:05,700
+of type B. Make sense? Yeah, so we are, I mean the other classes, they are.
+
+198
+00:34:07,380 --> 00:34:15,980
+Right, we should have a separate this thing on PL theory, summer school. PL theory is very interesting,
+
+199
+00:34:15,980 --> 00:34:22,579
+I mean, programming language theory. You are studying programming languages, but there is a
+
+200
+00:34:22,579 --> 00:34:27,340
+theory behind programming languages. Lot of math on why the programming languages are designed,
+
+201
+00:34:27,340 --> 00:34:35,740
+the way they are designed. It is not just somebody's whims and wishes, okay, so that is later.
+
+202
+00:34:35,739 --> 00:34:49,939
+Right, so now let us look at this. I am calling X dot M passing Q. X dot M will call this guy and
+
+203
+00:34:49,939 --> 00:34:59,299
+which will call R dot P. So, this R can be type of type Q and here I am passing an S,
+
+204
+00:34:59,300 --> 00:35:12,460
+right. So, an S can also flow here at some level. Now, it is coming here, Q dot arg and here I am
+
+205
+00:35:12,460 --> 00:35:17,980
+not calling anything, but I could have called nu S as well here, right. If I was calling nu S,
+
+206
+00:35:17,980 --> 00:35:26,220
+what will happen? An arg will get an S. So, if I, when I do R dot P, which P is it? Right, S or,
+
+207
+00:35:26,219 --> 00:35:34,819
+so I need to be careful, right. So, given such a program, right, I want to know what is the flow
+
+208
+00:35:34,819 --> 00:35:43,219
+set of X, Y, arg and so on. What is the flow set of X? Simple, right. X, I mean, there is only one
+
+209
+00:35:43,219 --> 00:35:52,899
+guy here, that is the only assignment to X. So, flow set of X is A. It should be set A,
+
+210
+00:35:52,900 --> 00:36:08,220
+right. Flow set of B, sorry, flow set of B is, sorry, flow set of Y is B, okay.
+
+211
+00:36:08,219 --> 00:36:25,579
+What if I have code like this, nu Q, nu Q dot P, right. Wait, wait, I do not know why,
+
+212
+00:36:25,579 --> 00:36:34,619
+I, it should have come later. Wait, just a minute. So, see, since it was X dot M,
+
+213
+00:36:34,619 --> 00:36:46,179
+if I know that flow set of X is A, what can I do? This method can be inline. If I inline this
+
+214
+00:36:46,179 --> 00:36:59,099
+method, what will I get? Nu Q dot P, correct, because whatever, not why, nu Q, nu Q. So,
+
+215
+00:36:59,579 --> 00:37:07,980
+nu Q is the argument, right. We have not yet covered how to do the inlining, but we are
+
+216
+00:37:07,980 --> 00:37:15,860
+just showing nevertheless. So, this X dot M, nu Q, this became nu Q dot P, because this is arg,
+
+217
+00:37:15,860 --> 00:37:27,780
+arg dot P became nu Q dot P, right, okay. What about Y? What is the type of Y? B,
+
+218
+00:37:27,780 --> 00:37:39,380
+can I inline this? So, B, what is, what do I do? Whatever the code, right, whatever the code there,
+
+219
+00:37:39,380 --> 00:37:49,780
+I have to plunk it in here, okay. So, this, I am not showing the code, right. So, we will,
+
+220
+00:37:49,780 --> 00:37:58,099
+we would not show that. And there may be some code in between, then I have to make sure that
+
+221
+00:37:58,099 --> 00:38:03,220
+what is flowing into X, what is flowing into Y. And now, instead of just looking at the code,
+
+222
+00:38:03,220 --> 00:38:07,780
+we will try to come up with a scheme in which we can do this in a systematic manner, okay.
+
+223
+00:38:07,780 --> 00:38:15,500
+We want to know unique colors, that is our goal. We will use a set based analysis,
+
+224
+00:38:15,500 --> 00:38:26,140
+that is, we will, for each expression, we will compute a flow set, right. And again,
+
+225
+00:38:26,140 --> 00:38:32,620
+this is an approximation. This is not a, we are not saying exact this thing, we would not know it,
+
+226
+00:38:32,620 --> 00:38:37,500
+right. And there is always a tradeoff between precision and speed, we will see how that comes.
+
+227
+00:38:37,500 --> 00:38:54,500
+Okay. Given a variable, something like here, X3 dot bar or X1 dot m, X2 dot m, given any method
+
+228
+00:38:54,500 --> 00:39:01,900
+call, can you quickly tell me what all the possible m's it can be? It has to be either that class or
+
+229
+00:39:01,900 --> 00:39:08,900
+its child. This m may be present in so many other classes, but definitely not those classes,
+
+230
+00:39:08,900 --> 00:39:17,579
+only that class and its children. So, using class hierarchy, you can quickly give me a
+
+231
+00:39:17,579 --> 00:39:24,619
+conservative estimation of which methods can be called. This is called class hierarchy analysis,
+
+232
+00:39:24,619 --> 00:39:37,179
+right. This is called class hierarchy analysis. You want to watch? Okay. So, class hierarchy
+
+233
+00:39:37,179 --> 00:39:42,980
+analysis is super fast, but the precision is less, right. In this case, in X3 dot m,
+
+234
+00:39:42,980 --> 00:39:53,779
+I will say it points to a or b, whereas we can be slightly more precise and get that this is b.
+
+235
+00:39:53,780 --> 00:40:07,220
+Question is there? No. Okay. Fine. We will not use CHA. So, CHA is a common word people keep
+
+236
+00:40:07,220 --> 00:40:12,940
+using class hierarchy analysis. We will instead use a method called control flow analysis. Why
+
+237
+00:40:12,940 --> 00:40:28,579
+the zero will come to that later? Okay. So, CHA I will skip. So, using CHA, if we use CHA,
+
+238
+00:40:28,579 --> 00:40:41,179
+for the same example, what is the flow set for X? X can be an object of type. No. Class hierarchy
+
+239
+00:40:41,179 --> 00:40:52,259
+analysis will say a or b, right, but flow set of Y will be unique. It will be only b,
+
+240
+00:40:52,259 --> 00:41:06,179
+because b can be anything below b, right. So, but X is not precise. So, I cannot inline X dot m.
+
+241
+00:41:06,179 --> 00:41:19,139
+Okay. We will instead see what is called a zero CFA. Here, this is we will keep a flow. We will
+
+242
+00:41:19,139 --> 00:41:26,899
+learn a flow insensitive version. Flow insensitive as in we would we would not remember the order
+
+243
+00:41:26,899 --> 00:41:34,179
+in which the statements are processed. Okay. And we will also, this is also context insensitive,
+
+244
+00:41:34,179 --> 00:41:43,699
+that is we would not remember a given call. We would not differentiate a method call from
+
+245
+00:41:43,699 --> 00:41:48,819
+here and here. We will treat all the, we will mix up all the method calls into a single method
+
+246
+00:41:48,819 --> 00:42:00,339
+call. So, okay. So, here is the process. We will generate some constraints about what can flow into
+
+247
+00:42:00,340 --> 00:42:06,740
+variables. We will solve those constraints and get the answer. For each expression E,
+
+248
+00:42:06,740 --> 00:42:17,820
+we will keep a flow variable. So, for example, if I have a program new, whenever I do a new C,
+
+249
+00:42:17,820 --> 00:42:30,380
+whenever I do a new C, I say that C flows into the this expression. And when I do X equal to E,
+
+250
+00:42:30,380 --> 00:42:42,740
+whatever was flowing into E will flow into X. Simple idea. Okay. So, we will say whatever was
+
+251
+00:42:42,739 --> 00:42:49,099
+flowing into E will flow into X. But X may contain other things as well because at some
+
+252
+00:42:49,099 --> 00:42:54,139
+other point I may write X equal to E prime. So, that will also flow into X. Again, we are not
+
+253
+00:42:54,139 --> 00:43:00,939
+remembering the, we are not flow sensitive. I want to have a statement what all may flow into
+
+254
+00:43:00,940 --> 00:43:13,460
+X, not what all may flow into X here. Okay. This is flow insensitive. Okay. So, if I have a method
+
+255
+00:43:13,460 --> 00:43:20,300
+call E1 dot m equal to E1 dot m and pass E2 and the method m looks like this. It is a type of A,
+
+256
+00:43:20,300 --> 00:43:29,300
+I have an argument small a and it returns b. If I write E1 dot m, right, and I am passing E2,
+
+257
+00:43:29,300 --> 00:43:36,780
+it is as if I am writing small a equal to E2, right. So, whatever was passing into E2
+
+258
+00:43:36,780 --> 00:43:50,019
+should also pass to A. So, E2 is a subset of, this set is a subset of whatever is flowing into A.
+
+259
+00:43:50,019 --> 00:44:07,579
+And E1, E1, when can I say that E2 will go into A? Only if E1 includes C. If E1 does not include
+
+260
+00:44:07,579 --> 00:44:18,940
+C, it does not make sense. If C flows into E1, if C flows into E1, then whatever is flowing into
+
+261
+00:44:19,059 --> 00:44:31,539
+E2 will also go into A. Is it too complicated? Anyone? Last part once more. Okay. Look at this
+
+262
+00:44:31,539 --> 00:44:44,740
+way here. I have a, I have a, I have a method call here which is calling E1 dot m. Just
+
+263
+00:44:44,739 --> 00:44:52,139
+syntactically looking at my code, I can see m is present in class A, class B, class D, class whatever.
+
+264
+00:44:52,139 --> 00:45:07,779
+So, all I am saying one such class is class C. I am saying if, if C flows into E1, right,
+
+265
+00:45:07,820 --> 00:45:17,300
+this implies whatever is there in E2 will also flow in A, flow into A, right. Because there may be
+
+266
+00:45:17,300 --> 00:45:28,740
+another call which will pass some other E3 that will also flow into A, right. Because at the end,
+
+267
+00:45:28,740 --> 00:45:35,780
+I want to answer what flows into A. Is it singleton or not? Because maybe there is a call here A dot
+
+268
+00:45:35,780 --> 00:45:45,820
+bar. I want to know can I inline it? I can inline it if only a single type object is flowing into A,
+
+269
+00:45:45,820 --> 00:46:03,380
+right. Okay. So, if I have a call like this, I will add a one constraint like this. And what
+
+270
+00:46:03,380 --> 00:46:17,900
+is the type of this expression? It has to be related to the written type of m, correct. So,
+
+271
+00:46:17,900 --> 00:46:33,380
+I will say if C flows into E1, if E1 can be of type C, then whatever is flowing into this
+
+272
+00:46:33,380 --> 00:46:43,619
+written type of E, not just B, whatever is flowing into the written type of E can flow into this.
+
+273
+00:46:43,619 --> 00:46:54,179
+And now you have to tell me the direction of this guy. Why am I saying this to be a subset
+
+274
+00:46:54,179 --> 00:47:01,579
+of the right side and not the other way around? I am saying whatever flows into it can be part
+
+275
+00:47:01,579 --> 00:47:09,460
+of the written type of this, not the other way around. Why? I am not even equating it. I am saying
+
+276
+00:47:10,300 --> 00:47:34,619
+it is a subset. Where? Very good. First point is I can have multiple return statements. If some
+
+277
+00:47:34,619 --> 00:47:40,539
+condition return, if some condition return, so all of those will flow into this. But let us say
+
+278
+00:47:40,539 --> 00:47:51,420
+there is only one return, then what? Correct. See I do not know which m will it resolve to. This
+
+279
+00:47:51,420 --> 00:47:58,739
+may be in class C1 or C2. I am saying if it is C1, this gets added. If C1 is present, if C2 is
+
+280
+00:47:58,739 --> 00:48:04,219
+present, something else will get added to the written type. Because if I write here some variable
+
+281
+00:48:04,219 --> 00:48:16,500
+D equal to this expression, D will get any of those objects from class C or D or E. So pay
+
+282
+00:48:16,500 --> 00:48:42,699
+attention to these directions. But if the bracket is missing here. Any questions? No? So this is
+
+283
+00:48:42,699 --> 00:48:57,339
+how we want to generate constraints. So my constraint generation, we will, if you look at
+
+284
+00:48:57,339 --> 00:49:04,939
+it, now the constraint generation is very simple. I have only every assignment I will deal in the
+
+285
+00:49:04,939 --> 00:49:12,379
+exactly same way. I have a new allocation, assignment and function curve. I am just looking
+
+286
+00:49:12,380 --> 00:49:23,019
+at these three. I am just looking at A, B, C. I can actually, I am not looking at the fields at
+
+287
+00:49:23,019 --> 00:49:30,539
+this time. I load and store A dot F equal to blah and blah equal to A dot F. But they can be dealt
+
+288
+00:49:30,539 --> 00:49:36,539
+with similarly. Let us only look at this part for the time being without complicating with store.
+
+289
+00:49:36,539 --> 00:49:46,779
+It does not complicate much but a bit. So we will assume that all program names, variable names
+
+290
+00:49:46,779 --> 00:49:52,059
+are different so that this X does not collide with that X. So when I say what flows into X,
+
+291
+00:49:52,059 --> 00:50:01,980
+it is a unique name, simple. And we will use for this pointer to make it unique. See there is a
+
+292
+00:50:01,980 --> 00:50:07,579
+this pointer in class A also in class B. To make it unique, we will say that this pointer in this,
+
+293
+00:50:07,579 --> 00:50:16,059
+I will call it this A. Here I will call this B. We will generate the constraints and then at the
+
+294
+00:50:16,059 --> 00:50:30,019
+end I will have some set of constraints. The constraints will be either of this form, something
+
+295
+00:50:30,019 --> 00:50:36,259
+belongs to blah, something is a subset or a superset or something is a conditionally subset
+
+296
+00:50:36,259 --> 00:50:48,659
+or a superset. Only three types of conditions, nothing else. So this is what you get in the
+
+297
+00:50:48,659 --> 00:50:53,940
+beginning. Just looking at the code itself, when you do new, when you look at the new statements,
+
+298
+00:50:54,900 --> 00:51:00,260
+you will get these elements, belongs to constraints. During when you process the
+
+299
+00:51:02,099 --> 00:51:07,460
+assignments, you will do this propagation type of constraints and then you will have
+
+300
+00:51:07,460 --> 00:51:15,220
+conditionals looking at the calls. And if you have these constraints, you will see that we can get a
+
+301
+00:51:15,219 --> 00:51:23,699
+minimum, minimal solution guaranteed. We will see that. So what are my constraints? Every time I
+
+302
+00:51:23,699 --> 00:51:30,339
+have an assignment statement, I will say whatever flows into expression will also flow into ID.
+
+303
+00:51:34,019 --> 00:51:42,500
+What about this? Here I have this variable, this A, here I have this B. What flows into this A?
+
+304
+00:51:42,500 --> 00:51:54,420
+What can be the type of this A? Similarly, this C will have C. Whenever you have a new C,
+
+305
+00:51:55,940 --> 00:52:03,059
+C gets into it. If you have a method call, which is also called as a message send
+
+306
+00:52:04,340 --> 00:52:11,539
+of some receiver dot method name, we will look at all my programs and see where this method is
+
+307
+00:52:11,539 --> 00:52:21,860
+present. And then I will generate the constraints of the form. I will find out these methods and
+
+308
+00:52:21,860 --> 00:52:36,259
+then generate constraints. For this ID1, the type of EXP1 will flow. For this IDN, EXPN will flow.
+
+309
+00:52:36,260 --> 00:52:48,260
+Right? This will flow only if C, where this method is present, is present in the type of EXP.
+
+310
+00:52:50,900 --> 00:53:01,220
+Right? Okay? And I will also generate the further written type. Since this is written EXP0,
+
+311
+00:53:01,219 --> 00:53:08,819
+I will say type of EXP0 is flowing into this whole expression. Okay? Now,
+
+312
+00:53:08,819 --> 00:53:11,059
+once I have the constraints, I am saying we can solve them.
+
+313
+00:53:14,659 --> 00:53:19,219
+We will see with an example soon. For the same example, let us generate the constraints.
+
+314
+00:53:20,579 --> 00:53:22,019
+What are the belongs to constraints?
+
+315
+00:53:22,019 --> 00:53:38,659
+So, I will have A belongs to this nu A, B goes to nu B and Q goes to nu Q and S goes to
+
+316
+00:53:39,539 --> 00:53:48,900
+nu S. That is it. So, that is easy to generate the starting constraints. Right? Next,
+
+317
+00:53:49,300 --> 00:53:56,660
+let us process the assignment statements. So, what constraints will I get by processing the first
+
+318
+00:53:57,860 --> 00:54:04,740
+X equal to nu A? I will say whatever is flowing into nu A will flow into X like this.
+
+319
+00:54:06,900 --> 00:54:13,139
+Whatever is flowing into nu A will flow into X. Whatever is flowing into nu B will flow into
+
+320
+00:54:13,139 --> 00:54:20,099
+nu B will flow into Y. There are only two assignment statements. What are the condition
+
+321
+00:54:20,099 --> 00:54:27,619
+statements I have? Calls I have. I have a call here X dot M, Y dot M. I have a call
+
+322
+00:54:29,379 --> 00:54:36,980
+R dot P. Three calls. For each call, I will have conditional statements. What conditional
+
+323
+00:54:36,980 --> 00:54:46,340
+statement I will have? I will say, see M is present in A and B. If A flows into X,
+
+324
+00:54:49,059 --> 00:54:58,980
+then this nu Q whatever is flowing in, that will flow into arg. If A flows into X, nu Q will flow
+
+325
+00:54:58,980 --> 00:55:09,860
+into arg. If B flows into X, then nu Q will flow into B dot arg. Similarly, if A flows into Y,
+
+326
+00:55:10,579 --> 00:55:23,860
+nu S will flow into arg. If B flows into Y, nu S will flow into this arg. So far so good?
+
+327
+00:55:24,500 --> 00:55:37,300
+Okay. Once I have these conditions, solving them is pretty easy. I will, it is as if I initialize
+
+328
+00:55:37,300 --> 00:55:43,620
+this to this and keep on pushing it. And while pushing, once in a while I will check these
+
+329
+00:55:43,620 --> 00:55:51,700
+conditions. If this condition is true, I will make these the subset constraints. See, if I know the
+
+330
+00:55:51,699 --> 00:55:57,379
+condition is true, then I can add this constraint. The constraints can add. So, we will see that.
+
+331
+00:55:59,859 --> 00:56:05,059
+So, we will take one more example for constraint generation before we solve them.
+
+332
+00:56:07,139 --> 00:56:18,019
+A implements some interface I. X is nu D and here again B implements I. Here I have a method M.
+
+333
+00:56:18,019 --> 00:56:28,259
+Here also I have method M and I am calling nu A dot M dot M. Look at the constraints I may generate.
+
+334
+00:56:29,780 --> 00:56:36,259
+For this, I will have, why do not we do one thing? For this, why do not we generate the constraints?
+
+335
+00:56:36,259 --> 00:56:40,259
+That will also help us wake up. I see some of you are having bit of a trouble.
+
+336
+00:56:41,060 --> 00:56:44,580
+Right. So, we have three types of constraints. What are those?
+
+337
+00:56:45,860 --> 00:56:51,380
+Belongs to constraints, subset constraints that you get from assignment and method calls.
+
+338
+00:56:52,820 --> 00:57:06,500
+Right. Let us write the constraints for this.
+
+339
+00:57:10,900 --> 00:57:23,780
+So, three types of constraints.
+
+340
+00:57:30,100 --> 00:57:33,940
+First type of constraints is belongs to constraints. So, can we write the belongs to constraints?
+
+341
+00:57:34,099 --> 00:57:58,099
+What are those? D belongs to nu D, then A belongs to nu A, then B belongs to nu B and to nu C.
+
+342
+00:57:58,099 --> 00:58:00,500
+Write those.
+
+343
+00:58:17,940 --> 00:58:20,420
+Now, do we have an assignment statement anywhere?
+
+344
+00:58:21,699 --> 00:58:23,860
+Yes. So, what is the subset constraint we have?
+
+345
+00:58:28,099 --> 00:58:35,299
+This is some left hand side equal to right hand side. Whatever flows into the right hand
+
+346
+00:58:35,299 --> 00:58:43,380
+side will flow into the left hand side. So, I will write it as subset constraint. What will it be?
+
+347
+00:58:44,579 --> 00:58:51,779
+Whatever is flowing into D, nu D will flow into X.
+
+348
+00:58:58,099 --> 00:59:08,099
+Any other assignment? No. Now, let us generate conditional statements.
+
+349
+00:59:10,900 --> 00:59:15,619
+So, I have multiple method calls here. First method call is E1 dot m,
+
+350
+00:59:15,619 --> 00:59:29,139
+then dot m, one more m. Let us handle the first m first. This is E1 dot m. So, what conditions
+
+351
+00:59:29,139 --> 00:59:39,460
+can I write? Where is m defined? In which class? A and B both. So, what will the conditions be?
+
+352
+00:59:46,339 --> 01:00:12,019
+If A flows into nu A, I will write A is in nu A implies what? If A flows into nu A,
+
+353
+01:00:12,019 --> 01:00:31,380
+then whatever is flowing into this guy will flow into A dot F. Whatever is flowing here will flow
+
+354
+01:00:31,380 --> 01:00:51,780
+into A dot F. Any doubts? Good. Fine. What am I saying? Whatever flows into
+
+355
+01:00:52,580 --> 01:01:08,180
+A dot F, nu B will flow into A dot F. And whatever flows into F dot m dot X will flow into
+
+356
+01:01:08,659 --> 01:01:24,739
+A dot F. Correct? So, for this argument flows into this, this written expressions,
+
+357
+01:01:24,739 --> 01:01:37,940
+whatever the types, they will flow into this guy. Right? I mean this F. I just named it A dot F.
+
+358
+01:01:37,940 --> 01:01:43,700
+So, that it is we do not conflict with this. You can just since there is only one F,
+
+359
+01:01:43,700 --> 01:01:52,179
+just call it as F. That is F. This is G. So, we are in business. But if whatever is then just make
+
+360
+01:01:52,179 --> 01:02:03,059
+it A dot F P dot G. Just we need to make sure that names are not conflicting. Now, let us look at
+
+361
+01:02:04,019 --> 01:02:10,500
+this whole thing as one expression. Let us look at this whole thing, this whole nu A,
+
+362
+01:02:11,139 --> 01:02:19,940
+this thing as one expression. So, this expression dot m, this expression dot m.
+
+363
+01:02:21,699 --> 01:02:30,500
+So, what will I do? What condition will it be? If A belongs to this whole thing, then
+
+364
+01:02:33,699 --> 01:02:48,099
+nu C will flow into F. And if A belongs to this whole thing, then F dot m dot X,
+
+365
+01:02:48,099 --> 01:02:55,299
+whatever the flow set will flow into this expression. Similarly, for B what will I write?
+
+366
+01:02:55,300 --> 01:03:11,780
+If B belongs to nu A, then what is the name? No, not the pink, the magenta color shirt.
+
+367
+01:03:11,860 --> 01:03:30,900
+Yeah. So, if B flows to nu A, then which method will it be? Which method will it be if B flows
+
+368
+01:03:30,900 --> 01:03:41,700
+to this expression? Which m will it be? A's m or B's m? B's m. B's m. Very good. So, what I am
+
+369
+01:03:41,700 --> 01:03:49,059
+saying? If B flows into this, then this nu B will flow into which argument? G. This will flow to?
+
+370
+01:03:49,059 --> 01:04:06,500
+G. G. And if B flows to nu A, then this will flow to this expression. So, now if you do all
+
+371
+01:04:06,500 --> 01:04:18,099
+these constraints, this is what it will look like. We have this and now how do we solve them?
+
+372
+01:04:19,380 --> 01:04:23,380
+What we are saying is we are generating the constraints, we need to now solve it.
+
+373
+01:04:37,059 --> 01:04:43,619
+We will skip one or two slides. Wait. Okay. How do we do the constraint solving?
+
+374
+01:04:44,820 --> 01:04:48,900
+We will solve one constraint at a time. We will process one constraint at a time.
+
+375
+01:04:49,699 --> 01:04:57,059
+Not solve. We will process one constraint at a time and then see if we have more constraints to
+
+376
+01:04:57,059 --> 01:05:05,059
+solve. We keep on solving. Once in a while, we add new constraints. When will we add a new constraint?
+
+377
+01:05:06,900 --> 01:05:11,539
+We have this conditional constraints, right? If the condition is true, I will add the right
+
+378
+01:05:11,539 --> 01:05:17,460
+side as my constraint. So, once in a while, we will add new constraints. But when we add,
+
+379
+01:05:17,460 --> 01:05:23,219
+there are finite number of conditional constraints. So, I will add them finite number of times.
+
+380
+01:05:26,340 --> 01:05:30,500
+We will take one constraint at a time. At any point of time, it will maintain a minimal solution
+
+381
+01:05:31,460 --> 01:05:35,380
+and what we will do internally, the constraints can be represented as a graph
+
+382
+01:05:36,260 --> 01:05:46,099
+where n is the set of flow variables and if there is, if I have V is a subset of W,
+
+383
+01:05:47,380 --> 01:05:55,139
+I will add an edge from V to W. That is whatever is in V should go to W. You see this is one
+
+384
+01:05:55,139 --> 01:06:00,900
+directional, right? What is in V will go to W does not mean whatever is in W will also flow to V,
+
+385
+01:06:01,699 --> 01:06:12,420
+right? Okay. We can store the flow variable X in a bit vector, initialize the bit vector for every
+
+386
+01:06:12,420 --> 01:06:23,139
+variable to 0. That is nothing flows into no variable, nothing. With each bit,
+
+387
+01:06:25,139 --> 01:06:30,420
+we will have some pending constraints also. We may have some pending constraints that says,
+
+388
+01:06:31,139 --> 01:06:38,579
+if something flows, this will come in. Okay. If that bit is set, then what should I do?
+
+389
+01:06:38,739 --> 01:06:50,259
+Okay. So, if I have a condition, constraint of the form, if C flows into X, then Y is a subset of Z.
+
+390
+01:06:51,539 --> 01:07:00,340
+Okay. Then what will I do? In X, for each variable, I have a bit vector, right? There is a bit for
+
+391
+01:07:00,340 --> 01:07:08,500
+every class. If I have 10 classes, I will have 10 bits. For the bit corresponding to C, I will
+
+392
+01:07:09,059 --> 01:07:18,099
+keep a constraint, which is Y is subset of Z. So, if that bit is true, this Y subset of Z
+
+393
+01:07:18,099 --> 01:07:24,420
+can be added. If that bit is false, I will keep this pending constraint. I will keep it pending.
+
+394
+01:07:25,619 --> 01:07:35,219
+Okay. So, this is how do I deal with different constraints? If I am inserting a constraint of
+
+395
+01:07:35,219 --> 01:07:42,339
+the form, I belongs to X, what do I do? I will call a method called propagate.
+
+396
+01:07:43,859 --> 01:07:50,980
+Basically, what I want to do, whenever I see that I is getting added to X, push it as far as possible.
+
+397
+01:07:53,219 --> 01:08:00,819
+Okay. If I have an insert X subset of Y type of constraint, what will I do? First, I will add an
+
+398
+01:08:00,820 --> 01:08:09,780
+edge from X to Y. I will add an edge from X to Y and then what will I see? Hey, hold on. I am saying
+
+399
+01:08:09,780 --> 01:08:16,819
+whatever should flow into X should flow to Y. What is already there in X? Whatever is there already
+
+400
+01:08:16,819 --> 01:08:25,619
+in X, what should I do? Push it. I will propagate. So, for every I which is already present
+
+401
+01:08:26,099 --> 01:08:33,619
+in the bit vector for X, I will say propagate to Y. Simple idea, right? We will see the method
+
+402
+01:08:33,619 --> 01:08:39,859
+propagate. We will see the method propagate, but what am I doing? I am taking the, I am seeing,
+
+403
+01:08:39,859 --> 01:08:46,739
+hey I have to add the flow set of X to Y. Whatever is already there, let me push it.
+
+404
+01:08:48,979 --> 01:08:54,899
+For conditional constraints, what will I do? I will see when I am processing it, I will see, hey
+
+405
+01:08:54,899 --> 01:09:02,819
+see if it is already present in X, what should I do? If C is already present in the flow set of X,
+
+406
+01:09:02,819 --> 01:09:07,619
+then I can process this constraint itself. That is what I will do. If it is already present,
+
+407
+01:09:07,619 --> 01:09:14,339
+I will call the insert function for Y subset of Z. It may not be present yet, it may get added later.
+
+408
+01:09:15,779 --> 01:09:21,460
+What will I do? I will add a pending constraint. I will say if it is not currently present
+
+409
+01:09:21,859 --> 01:09:31,300
+in X corresponding to C, okay, whatever, it may have some set of constraints, add one more,
+
+410
+01:09:33,460 --> 01:09:37,539
+add one more. We will solve it when it comes, okay.
+
+411
+01:09:40,100 --> 01:09:43,939
+So, we have processed all the three types of constraints and we said we call a function
+
+412
+01:09:43,939 --> 01:09:47,779
+called propagate. What does this propagate do? What do you think it should do?
+
+413
+01:09:51,460 --> 01:09:56,340
+There is an edge from the variable Y.
+
+414
+01:09:56,340 --> 01:09:57,140
+So, let us say here.
+
+415
+01:09:57,140 --> 01:09:59,939
+There is an edge from the variable Y. Yeah.
+
+416
+01:09:59,939 --> 01:10:02,980
+From the variable Y to any other. We should propagate further.
+
+417
+01:10:02,980 --> 01:10:08,260
+Yeah. So, what he said is very simple, right. He says, see propagate, let us look at here.
+
+418
+01:10:10,020 --> 01:10:15,699
+If there is an edge X to Y, I am saying whatever is in X, push it to Y.
+
+419
+01:10:15,699 --> 01:10:23,939
+And while propagating in Y, you see hey, in Y I got something new. What you should do?
+
+420
+01:10:25,139 --> 01:10:31,460
+Wherever there is an edge from Y, propagate. And again, let us say Y has an edge to Z.
+
+421
+01:10:32,260 --> 01:10:36,979
+From Z, propagate further. So, recursively call, right. That is what we will do.
+
+422
+01:10:36,979 --> 01:10:49,939
+Okay. When you want certain, when you want certain bit to be propagated for a variable,
+
+423
+01:10:49,939 --> 01:10:53,299
+you first check is it already set. If it is already set, what does it mean?
+
+424
+01:10:53,859 --> 01:10:59,219
+Whatever is required is already done. Do not need to do anything more. If it is not set,
+
+425
+01:10:59,220 --> 01:11:07,539
+then set it to 1. And then for each edges like you said, from V what are the edges?
+
+426
+01:11:09,460 --> 01:11:17,860
+Propagate. I may also have, after I set B, V, I equal to true, it may have some pending,
+
+427
+01:11:17,860 --> 01:11:26,100
+hanging constraints. For all those hanging constraints, insert them into my list of
+
+428
+01:11:26,100 --> 01:11:31,460
+constraints. So, I will call insert. And after you process these constraints, just make them empty.
+
+429
+01:11:33,380 --> 01:11:40,900
+Very simple idea, right? If it belongs to constraint, propagate. Subset constraints,
+
+430
+01:11:41,460 --> 01:11:45,780
+propagate to the right side. Whatever is in my left side, propagate to the right side.
+
+431
+01:11:46,420 --> 01:11:52,660
+If it is a conditional constraint, if you know the condition is true, insert the right hand side.
+
+432
+01:11:53,300 --> 01:11:56,340
+If you do not know the condition is true, keep it pending.
+
+433
+01:12:00,819 --> 01:12:09,539
+Okay. With this, do you remember these constraints we generated for the first example?
+
+434
+01:12:11,460 --> 01:12:16,579
+Can we solve this? Right. I will see if I can keep both of them together.
+
+435
+01:12:22,819 --> 01:12:27,939
+Okay. Is it visible? Font is a bit small, but is it visible?
+
+436
+01:12:32,819 --> 01:12:37,939
+Okay. So, solve this and let me know how things go.
+
+437
+01:12:42,500 --> 01:12:49,460
+And again, like before, the order in which you solve does not make a difference, even though
+
+438
+01:12:50,420 --> 01:12:54,420
+it would be faster to solve using a certain order. You will figure out that order.
+
+439
+01:13:02,579 --> 01:13:04,020
+Yes, sir. Are you starting?
+
+440
+01:13:04,020 --> 01:13:20,020
+So, by the way, the B set, so for each of these things, the B is initialized to,
+
+441
+01:13:20,580 --> 01:13:25,860
+bit vector set is initialized to all zeros, right? What is the size of my bit vector set?
+
+442
+01:13:25,859 --> 01:13:34,659
+4, 4 bit set, right? A, B, Q, S, they are 4 bits. Okay.
+
+443
+01:13:42,979 --> 01:13:45,219
+For every expression, we need one such bit vector.
+
+444
+01:13:45,460 --> 01:14:02,820
+Yes, sir. So, one thing that we can try doing is make a table A, B, Q, S. For every expression
+
+445
+01:14:02,819 --> 01:14:28,819
+I have, for every flow expression I have, nu A, nu B, nu Q, including X, Y, what is
+
+446
+01:14:28,819 --> 01:14:40,019
+this? A dot arg. Why am I calling it A dot arg? Just to give it a different name from the A's arg
+
+447
+01:14:40,019 --> 01:14:57,859
+and B's arg. Okay. So, for each one of them, you have, you have 0, 0, 0, 0 initially for all of them,
+
+448
+01:14:57,859 --> 01:15:05,779
+right? Fill this table and then keep modifying the table. When you process, let us say A goes
+
+449
+01:15:05,779 --> 01:15:16,819
+to nu A, you call the propagate function. Is the bit 1 or 0? The bit is 0, so you will make it,
+
+450
+01:15:18,179 --> 01:15:24,099
+you will set it to 1, true, and then you will see, is there an edge from
+
+451
+01:15:24,100 --> 01:15:33,380
+nu A? Now you have no edges in the graph yet, right? Your graph has no edges at this time,
+
+452
+01:15:34,260 --> 01:15:39,539
+so nothing to do for the first for each loop. Does it have any constraints, no pending constraints?
+
+453
+01:15:41,140 --> 01:15:46,579
+So, nothing to do. Now, process the second constraint.
+
+454
+01:15:46,579 --> 01:15:58,260
+B goes to nu B, so you will make it 0, 1, 0, 0, call the propagate function, finish the invocation
+
+455
+01:15:59,380 --> 01:16:11,059
+and proceed.
+
+456
+01:16:16,579 --> 01:16:23,059
+When I process this propagation constraint, nu A goes to X, what will I do?
+
+457
+01:16:26,739 --> 01:16:30,420
+So, I will randomly pick a person, they have to answer. Let us say,
+
+458
+01:16:31,619 --> 01:16:36,899
+a green shirt, what is your name? Varun. Yes, Varun, what will I do when I process this?
+
+459
+01:16:36,899 --> 01:16:48,420
+Yes, so which method will I call? Which insert? I have three inserts here,
+
+460
+01:16:51,699 --> 01:16:56,819
+first one, second one, third one. Second one.
+
+461
+01:16:56,819 --> 01:17:04,259
+Second one, very good. What will I do first? I will add an edge, so what? So, I will add an edge from
+
+462
+01:17:04,900 --> 01:17:18,900
+this node, which node? Nu A to, I will add an edge and then, then call, then do what?
+
+463
+01:17:20,820 --> 01:17:31,539
+No, for each i in bit vector of X, what is there in bit vector of nu A, which is
+
+464
+01:17:31,539 --> 01:17:44,819
+only, only A is set, only A is set, so for that I will call, I will call propagate.
+
+465
+01:17:45,859 --> 01:17:54,260
+So, propagate, I will do propagate X, A, so in this case bit is 0, right, X, 0.
+
+466
+01:17:54,260 --> 01:18:00,260
+So, what will I do there in the propagate function? Let us ask your neighbor,
+
+467
+01:18:03,619 --> 01:18:06,659
+what is your name? Aditya. Yes, Aditya, what will I do?
+
+468
+01:18:09,060 --> 01:18:11,619
+Do not know, so what does the propagate function say?
+
+469
+01:18:16,340 --> 01:18:16,820
+I am sorry.
+
+470
+01:18:24,900 --> 01:18:28,500
+I thought you came pretty, you came back pretty early.
+
+471
+01:18:31,619 --> 01:18:42,420
+Was it? So, sorry to hear that, you could have, okay, what about on the other side?
+
+472
+01:18:42,420 --> 01:19:01,699
+Good, it will set it to 1 and then? For every edge from X.
+
+473
+01:19:04,180 --> 01:19:09,220
+Yeah, so what edge do I have from X? Nothing at this time, so nothing more to do. Is there
+
+474
+01:19:09,220 --> 01:19:17,860
+any pending items on X? No, nothing to do, okay. When I do the next constraint, nu B flows to Y,
+
+475
+01:19:18,420 --> 01:19:22,100
+what will I do? What is your name? Nimisha.
+
+476
+01:19:22,100 --> 01:19:29,619
+Nimisha, yes, Nimisha. We add an edge from nu B to Y.
+
+477
+01:19:29,619 --> 01:19:48,420
+We add an edge from nu B to Y, okay. B is set here, so for Y and B, okay. What will happen in
+
+478
+01:19:48,420 --> 01:19:51,539
+propagate, what is your name? Lakshmi.
+
+479
+01:19:51,539 --> 01:19:58,980
+Lakshmi, yes Lakshmi. The B bit of Y, yes.
+
+480
+01:20:04,980 --> 01:20:06,260
+Are there any? No.
+
+481
+01:20:06,260 --> 01:20:13,140
+No, stop. Are there any pending constraints on Y? No, at this time, okay, good.
+
+482
+01:20:13,860 --> 01:20:17,380
+So, what happened? So, this, we said, right, when we process
+
+483
+01:20:17,380 --> 01:20:22,260
+this conditional constraints, we will add to this pending constraints, they have not come yet. So,
+
+484
+01:20:23,700 --> 01:20:31,860
+you remember we said, whenever I process this, I will add, let us do one thing. Let us,
+
+485
+01:20:33,140 --> 01:20:39,940
+for the heck of it, I am undoing Lakshmi your changes, okay. Lakshmi and Nimisha,
+
+486
+01:20:39,939 --> 01:20:46,419
+we will just undo these changes. We will process this constraint later, okay. We will
+
+487
+01:20:46,419 --> 01:20:57,379
+process this constraint later. Let us process this constraint first, okay. Prerna, go ahead.
+
+488
+01:21:03,379 --> 01:21:05,219
+Will third function, yes.
+
+489
+01:21:09,939 --> 01:21:13,219
+Hello.
+
+490
+01:21:13,219 --> 01:21:15,219
+Okay.
+
+491
+01:21:15,219 --> 01:21:19,219
+Sir, why is there?
+
+492
+01:21:19,219 --> 01:21:38,500
+No, first I will check, if B is set, is it set? So, what do we set? In the bit vector
+
+493
+01:21:38,579 --> 01:21:48,340
+of Y, do I have B? Do I have it? No. So, I will not, since I do not know if it is already there,
+
+494
+01:21:49,380 --> 01:21:55,300
+I will not add process the, I will not add the right hand side yet, but I have to remember it.
+
+495
+01:21:56,340 --> 01:22:08,180
+How will I remember? I will, in X, okay, that is in this case, in Y, in Y corresponding to the
+
+496
+01:22:08,659 --> 01:22:16,260
+B bit, I will add a pending constraint. What will I add? Yes, what constraint will I add?
+
+497
+01:22:18,260 --> 01:22:24,899
+Nu S, whatever that constraint is, right. So, let me,
+
+498
+01:22:32,739 --> 01:22:34,500
+can you, can someone dictate? Nu S.
+
+499
+01:22:38,500 --> 01:22:49,779
+Nu S, right. So, this is a pending constraint and now, what is the name?
+
+500
+01:22:49,779 --> 01:22:50,739
+Amea.
+
+501
+01:22:50,739 --> 01:22:59,220
+Amea. So, Amea, you process this constraint and see what will happen. No, first we will come here,
+
+502
+01:22:59,860 --> 01:23:08,980
+we will add an edge, let us add an edge from nu B to and then,
+
+503
+01:23:14,820 --> 01:23:24,420
+okay. So, what is there nu B? B. So, it will call propagate on
+
+504
+01:23:24,739 --> 01:23:35,140
+Y and B, okay. So, let us go there. Is the bit set? No. So, it will set it to 1 and then,
+
+505
+01:23:38,100 --> 01:23:40,659
+is there any edge from Y? No. Then,
+
+506
+01:23:43,699 --> 01:23:52,340
+pending, what is pending here? Nu S and B dot arg. What will it do? It will call,
+
+507
+01:23:52,340 --> 01:23:59,300
+it will call insert and then remove, okay. I am just removing it first,
+
+508
+01:24:00,900 --> 01:24:04,819
+okay. It will call insert. So, what will it do in insert?
+
+509
+01:24:07,140 --> 01:24:16,180
+It will add an edge from nu S to B dot arg, nu S to and then,
+
+510
+01:24:16,740 --> 01:24:22,579
+set B. And then, for each i which is set in nu S,
+
+511
+01:24:24,420 --> 01:24:33,300
+it will propagate to B dot arg. So, which bit is set? 1 bit is set. So, it will copy the 1 bit.
+
+512
+01:24:33,300 --> 01:24:38,740
+So, in propagate, what will happen? Let us say, yeah, what is your name?
+
+513
+01:24:39,300 --> 01:24:45,699
+Prof. Yes, Prof. Please tell me. So, I have to now do propagate B dot arg and S bit.
+
+514
+01:24:48,500 --> 01:25:00,819
+So, is that bit set in B dot arg S bit, Prof. In the bit vector, for B dot arg is the S bit set.
+
+515
+01:25:01,059 --> 01:25:07,299
+For the B dot arg, the bit vector is the S bit set.
+
+516
+01:25:10,259 --> 01:25:16,259
+No. So, if not, then what will I do? I will first set it. Okay, let me do that.
+
+517
+01:25:17,619 --> 01:25:24,420
+And then, what will I do? For each edge that is going out of B dot arg,
+
+518
+01:25:25,220 --> 01:25:31,859
+do you have any outgoing edges from B dot arg? No. Since, we do not have any outgoing edges,
+
+519
+01:25:31,859 --> 01:25:39,460
+no pending arguments, pending conditions, we are done here. Okay. So, now, let us process the other
+
+520
+01:25:39,460 --> 01:25:46,260
+constraints. So, we are done with all these four, we are done with these two, we are done with the
+
+521
+01:25:46,260 --> 01:25:55,140
+last one, we are done, we are still, we do these three. Let us process which one? Let us say, this
+
+522
+01:25:55,140 --> 01:26:05,699
+A, let us process this condition. Insert K.
+
+523
+01:26:05,699 --> 01:26:12,020
+Insert K, we did it, right? We had, we inserted, we set every constraint which is pending on the,
+
+524
+01:26:12,020 --> 01:26:18,100
+which right-hand side is pending, we will call the insert on that constraint. So, we call the
+
+525
+01:26:18,100 --> 01:26:30,980
+insert for this part, do you remember? Right? Okay. Yeah, what is your name? Yes. Yes, yes.
+
+526
+01:26:30,980 --> 01:26:33,940
+So, let us process this constraint. What will happen?
+
+527
+01:26:33,939 --> 01:26:45,299
+Okay, is it set? It should not be. Why? Because we made a mistake, it should be in B, right? Yeah.
+
+528
+01:26:45,299 --> 01:27:00,579
+And then? Right now, so, correct, correct. We have to add to the pending list. What will we add? Where
+
+529
+01:27:00,579 --> 01:27:09,300
+will we add? Here, what will we add? For space, I will just mark it here and write below. Yeah,
+
+530
+01:27:09,300 --> 01:27:30,019
+what will I add? Nu S. Right? Good. So, this is a pending constraint. If in future, A gets added to
+
+531
+01:27:30,020 --> 01:27:43,540
+Y, I will call insert on this constraint. Make sense? Okay. Now, what is your name?
+
+532
+01:27:45,700 --> 01:27:59,060
+Neha. So, Neha, can you process this constraint for me?
+
+533
+01:28:00,660 --> 01:28:12,980
+Which insert will you call, Neha? Which insert will you call? First one, second one, third one.
+
+534
+01:28:14,900 --> 01:28:22,580
+Third one, good. And third one, what will I do? Is the bit set in X, is the B bit set?
+
+535
+01:28:22,659 --> 01:28:38,979
+No. No. Then, what will I do? I will add a pending constraint. Okay. I will add a? Okay,
+
+536
+01:28:38,979 --> 01:28:57,459
+what will I add? Nu Q B dot A R G. Right? Good.
+
+537
+01:28:57,460 --> 01:29:08,180
+Good. Chai kitne bhi chik hai? Four o'clock. We have time. Okay. And that is it, right? Okay.
+
+538
+01:29:08,180 --> 01:29:16,659
+Now, let us process this constraint. Who will do it? Kaun bach cha? The first one.
+
+539
+01:29:20,500 --> 01:29:25,699
+Okay. Is it set? IIS. It is set. Then, what will you do?
+
+540
+01:29:27,460 --> 01:29:33,220
+Then, I will call the insert. Insert on which one?
+
+541
+01:29:37,939 --> 01:29:41,380
+Nu Q subset of A dot A R G. Very good.
+
+542
+01:29:42,340 --> 01:29:58,819
+Oh, by the way, this is… Okay. Go ahead. So, we are calling what? Nu Q subset of A
+
+543
+01:29:58,819 --> 01:30:07,140
+dot A R G. So, who will… So, you will now call the insert on that, right? Okay. Yeah.
+
+544
+01:30:07,300 --> 01:30:14,900
+Prakhar. Prakhar. Okay, Prakhar. We will call the second insert and then add an?
+
+545
+01:30:18,579 --> 01:30:24,500
+Nu Q to A dot A R G. I do not know why I am using two different colors. Does not matter.
+
+546
+01:30:25,060 --> 01:30:34,819
+And then, we will call propagate on? A dot A R G.
+
+547
+01:30:34,819 --> 01:30:38,100
+A dot A R G. For which bit?
+
+548
+01:30:43,619 --> 01:30:53,460
+For which bit? So, in nu Q, which bit is set? The Q bit. So, you will call propagate for Q bit on
+
+549
+01:30:53,460 --> 01:31:04,500
+A dot A R G. Okay. What is your name? Rathuja. So, Rathuja. So, what do we do here? So,
+
+550
+01:31:04,500 --> 01:31:10,340
+we have to call propagate on A dot A R G and Q. What will you do?
+
+551
+01:31:10,340 --> 01:31:24,980
+Q is to be set. Q is to be set. If it is not set, is it already set?
+
+552
+01:31:28,739 --> 01:31:31,300
+No. So, I will set it to 1 and then?
+
+553
+01:31:31,300 --> 01:31:44,020
+And then? And then? Are there any edges from A dot A R G? No. Are there any pending edges here?
+
+554
+01:31:44,739 --> 01:31:52,500
+No. Have I finished processing my constraints? Yes. Have I finished processing these constraints?
+
+555
+01:31:52,500 --> 01:31:59,699
+Yes. Are there some pending constraints in some of them? Yes. I will just drop them.
+
+556
+01:32:01,380 --> 01:32:09,300
+I will just drop because those will now won't be satisfied. Those won't be satisfied anymore. So,
+
+557
+01:32:09,300 --> 01:32:16,100
+I will just drop them and my flow information becomes this is my flow information.
+
+558
+01:32:20,020 --> 01:32:25,300
+Then we will you will call propagate again. Yes. We will call propagate again.
+
+559
+01:32:25,300 --> 01:32:34,340
+So, there is something interesting here. We seem to be adding constraints. We are processing these
+
+560
+01:32:34,980 --> 01:32:40,500
+and we are kind of adding some constraints during the processing. But still there is
+
+561
+01:32:40,500 --> 01:32:43,860
+a confidence we have that it will terminate. What is the confidence?
+
+562
+01:32:43,859 --> 01:32:54,899
+Sorry. Number of these constraints are finite, but I am adding new ones.
+
+563
+01:32:54,899 --> 01:32:57,939
+Right.
+
+564
+01:32:57,939 --> 01:33:03,939
+Either there is a change like we are always setting it.
+
+565
+01:33:03,939 --> 01:33:11,939
+Okay. So, we are always going towards having every bit as set. We will either achieve fixed point or
+
+566
+01:33:11,939 --> 01:33:18,339
+we will have achieved all of this. But what if I am continuously just
+
+567
+01:33:18,339 --> 01:33:21,939
+processing? I am not changing anything. Nowhere I am checking for till no change.
+
+568
+01:33:22,099 --> 01:33:26,099
+Here I am not checking for till no change. Am I? But.
+
+569
+01:33:26,099 --> 01:33:33,299
+If you go back to like insert, if you try to propagate something that you have not
+
+570
+01:33:34,579 --> 01:33:38,659
+that is already set, you will not like you will not enter you will not actually enter
+
+571
+01:33:38,659 --> 01:33:44,419
+doing anything because of the if condition. Because of the if condition. If it is already
+
+572
+01:33:44,419 --> 01:33:49,299
+set you are not doing anything. Right. But what if I am not setting anything,
+
+573
+01:33:49,300 --> 01:33:52,100
+but I am continuously calling propagate insert, propagate insert.
+
+574
+01:33:52,100 --> 01:34:01,140
+But I am adding newer constraints. That is a good point. Number of constraints
+
+575
+01:34:01,140 --> 01:34:05,779
+are finite, but even the ones on the right hand side the conditional ones that I may add
+
+576
+01:34:05,779 --> 01:34:08,659
+that list is finite. There none of these are recursive.
+
+577
+01:34:11,380 --> 01:34:16,020
+So, the number of times I will process them is finite. In the worst case I will call
+
+578
+01:34:20,020 --> 01:34:27,460
+okay process these and these. But is it possible that within them while processing them the
+
+579
+01:34:27,460 --> 01:34:32,659
+propagate which is a recursive function I will keep on recursively calling forever.
+
+580
+01:34:36,420 --> 01:34:37,220
+What is the guarantee?
+
+581
+01:34:42,739 --> 01:34:44,180
+No, if the bit is not set.
+
+582
+01:34:44,180 --> 01:34:54,260
+If the bit is set I would not call it. So, you will never have a infinite this thing.
+
+583
+01:34:55,060 --> 01:35:00,020
+Right. No, see these things are important. I mean they look subtle, but when you design
+
+584
+01:35:00,020 --> 01:35:08,420
+your own algorithms you should be able to argue that yes this will terminate.
+
+585
+01:35:14,180 --> 01:35:38,900
+So, if you have N2 for the example we have shown here right where is the second example?
+
+586
+01:35:38,899 --> 01:35:46,899
+Where is the second example? For this example also you will see the constraints are much
+
+587
+01:35:46,899 --> 01:35:53,460
+simpler. There are a few direct things. Then you have bunch of conditionals,
+
+588
+01:35:54,339 --> 01:36:05,059
+but none of them will get satisfied because you have x will have D, B will have this and
+
+589
+01:36:09,539 --> 01:36:13,699
+this. There is nothing complicated here. I mean you should be able to just run the same
+
+590
+01:36:13,699 --> 01:36:20,420
+thing again. Unless if some one of you is stuck we will go over the second example or
+
+591
+01:36:20,420 --> 01:36:25,219
+if you think the second example should be you understand the concept then we will skip the
+
+592
+01:36:25,219 --> 01:36:31,859
+second example. Can you skip the second example should you go over it? Skip right okay.
+
+593
+01:36:39,539 --> 01:36:53,939
+Then so what is the complexity of this algorithm by the way? Complexity I mean why am I asking
+
+594
+01:36:53,939 --> 01:37:03,699
+that? No, no we have to ask. So, let us say the program is of size N right N lines. So,
+
+595
+01:37:03,699 --> 01:37:18,659
+there are N classes. So, or if I give you N constraints how much time will it take?
+
+596
+01:37:20,179 --> 01:37:25,619
+You do not like such complexity things. Sorry.
+
+597
+01:37:25,619 --> 01:37:39,779
+Give it as a homework. Yeah, we will help understand.
+
+598
+01:37:42,659 --> 01:37:46,899
+So, what is the complexity of this? Let us look at the propagate function right.
+
+599
+01:37:46,899 --> 01:38:00,819
+Wait how many bits can be there here? At most N, N classes N. So, I may call propagate N number
+
+600
+01:38:00,819 --> 01:38:07,699
+of times. So, the cost of this insert is N times propagate. Cost of this one is no this is cost of
+
+601
+01:38:07,699 --> 01:38:14,259
+this one is cost of insert which is same as N times propagate this is propagate. So, if we get
+
+602
+01:38:14,260 --> 01:38:19,940
+the cost of propagate we are in business. Okay, what is the cost of propagate?
+
+603
+01:38:23,060 --> 01:38:32,420
+How many edges can be there? N edges. So, N times propagate.
+
+604
+01:38:32,420 --> 01:38:50,899
+Sorry. Yeah, in the worst case all are N order N.
+
+605
+01:39:02,659 --> 01:39:21,779
+So, for each correct for each Xc I am doing for one specific i. How many times for that i I will
+
+606
+01:39:21,779 --> 01:39:31,539
+call propagate only for number of them not more than that. But each one of them
+
+607
+01:39:35,859 --> 01:39:41,859
+from X I may call propagate for Y from Y I may call for Z. But this whole chain is maximum bound
+
+608
+01:39:41,859 --> 01:39:50,420
+by N number of times. It is not N times N times N times N right. Why? Because there may be an edge
+
+609
+01:39:50,420 --> 01:39:58,260
+from A to B, B to C and C to B again. But I will not process this B second time because that bit
+
+610
+01:39:58,260 --> 01:40:10,739
+is already set. So, what I will do? So, this propagate here will only be called N number of
+
+611
+01:40:10,739 --> 01:40:21,059
+times recursively or otherwise. Either I am doing it for all my edges or by recursion at most N times.
+
+612
+01:40:23,380 --> 01:40:34,340
+So, it is not going ever right. So, then so the cost of so I am calling propagate here N number of times
+
+613
+01:40:35,140 --> 01:40:46,659
+and besides this for loop what else am I doing. So, in each of these N times what is the maximum
+
+614
+01:40:46,659 --> 01:40:57,860
+I can do? I will call I will call the insert. What is the cost of that insert? What type of
+
+615
+01:40:57,939 --> 01:41:08,500
+constraint am I adding here? A subset constraint. I am adding a subset constraint.
+
+616
+01:41:11,059 --> 01:41:18,500
+What is the cost of that now? He does not like it.
+
+617
+01:41:28,259 --> 01:41:33,299
+So, if you look at this insert here this is always a subset constraint of this sort
+
+618
+01:41:35,059 --> 01:41:45,380
+right. When you called the propagate on a node for A bit it may lead to calling propagate on
+
+619
+01:41:45,380 --> 01:41:52,099
+how many other bits? See for each of the bits it may call. You have called it for one bit here.
+
+620
+01:41:53,060 --> 01:41:58,900
+You have called it for one bit, but you are calling insert k some other
+
+621
+01:42:00,980 --> 01:42:08,500
+new edge completely new edge. In that edge it could be from P to Q. In P you may have some
+
+622
+01:42:08,500 --> 01:42:13,780
+how many bits? N bits set. For each of those bits you have to call propagate.
+
+623
+01:42:14,579 --> 01:42:25,699
+So, N bits for each of those N you will come back here. So, this is this propagate recursively
+
+624
+01:42:25,699 --> 01:42:36,420
+can be called N times and then again you will call insert. So, what is the cost?
+
+625
+01:42:36,420 --> 01:42:47,060
+See at most I am calling this how many times am I calling this propagate function?
+
+626
+01:42:50,659 --> 01:42:53,460
+Again N times, but I have already
+
+627
+01:42:57,380 --> 01:43:03,380
+counted for when I am counting this insert I have already said how many constraints do I have order
+
+628
+01:43:03,380 --> 01:43:08,659
+N including the right side. I have already taken into consideration how many times will I call that.
+
+629
+01:43:08,659 --> 01:43:16,579
+So, this is N times whatever the cost of this. So, N times N times that is N square
+
+630
+01:43:17,619 --> 01:43:22,980
+I may have to do something more. So, N square times I may have to process the constraints.
+
+631
+01:43:22,980 --> 01:43:31,460
+So, N cube times. So, do not we should not over count this how many times will I call this total
+
+632
+01:43:31,460 --> 01:43:37,619
+N times either directly or via conditional. I should not say directly I will count once
+
+633
+01:43:37,619 --> 01:43:43,859
+and conditional again I will count once let us not do that total I will call it N times.
+
+634
+01:43:44,899 --> 01:44:00,500
+So, every time I call I may process this and I will. So, this is N times N square. So, I will do
+
+635
+01:44:00,500 --> 01:44:13,699
+N cube amount of time at most. So, you can I mean there is another way to calculate if you care I
+
+636
+01:44:13,699 --> 01:44:30,500
+mean there are N nodes up to N square edges you will for each at each call site you will have
+
+637
+01:44:30,500 --> 01:44:38,340
+N possible calls N possible classes and you will add N number of constraints. So, that is O N cube.
+
+638
+01:44:39,300 --> 01:44:47,779
+So, the work done at most is it is kind of bound by that, but if we calculate from the propagate
+
+639
+01:44:47,779 --> 01:44:53,940
+side we say how many times it is called N square number I mean for each call you are calling once
+
+640
+01:44:53,940 --> 01:45:00,900
+propagate that is also N cube. Moral of the story it is a N cube algorithm on paper,
+
+641
+01:45:01,859 --> 01:45:11,059
+but as we have seen in practice it runs much faster. So, it is a common thing that people
+
+642
+01:45:11,059 --> 01:45:19,539
+keep remembering doing this CFA is an N cube algorithm control flow analysis is an N cube
+
+643
+01:45:19,539 --> 01:45:30,259
+algorithm in practice it is mostly linear. So, do not worry about this is an over this is
+
+644
+01:45:30,260 --> 01:45:34,900
+taken this slide is taken from a class. So, there is an assignment due for you there is no assignment,
+
+645
+01:45:36,739 --> 01:45:48,739
+but you should be able to from what we have learned given a program O program should be able
+
+646
+01:45:48,739 --> 01:45:54,260
+to generate the constraints solve the constraints right we should be able to do that.
+
+647
+01:45:55,140 --> 01:46:04,820
+So, the algorithm that we have seen is not very precise there are many challenges there can be
+
+648
+01:46:04,820 --> 01:46:10,579
+large number of libraries I am going over all classes and all that right. So, that can be a
+
+649
+01:46:10,579 --> 01:46:18,980
+bit of an issue we can improve by improve, but so that we do not generate too many constraints
+
+650
+01:46:19,939 --> 01:46:29,779
+we will see two of them one we will say we will not generate code for unreachable code.
+
+651
+01:46:31,059 --> 01:46:36,339
+For example, it is a library code right for a given program the library may not even be accessed
+
+652
+01:46:37,219 --> 01:46:43,219
+why should I generate constraint if that for each class I am generating constraint right if that
+
+653
+01:46:43,220 --> 01:46:48,980
+class is a member of this conditional constraint if that class there are lot of conditional
+
+654
+01:46:48,980 --> 01:46:53,460
+constraints that we generate we can avoid that for library classes which are not called.
+
+655
+01:46:56,740 --> 01:46:57,619
+So, what I can do
+
+656
+01:46:57,699 --> 01:47:14,420
+is I can look at my main program look at the main program and say for in the main program
+
+657
+01:47:15,059 --> 01:47:23,300
+whatever are the for those constraints I will add them the constraint, but in the library code
+
+658
+01:47:27,619 --> 01:47:37,779
+right. So, I will take the methods of main add to live take from the main there is a method which
+
+659
+01:47:37,779 --> 01:47:43,140
+is called add the constraints of that do not add the constraints of the whole world because
+
+660
+01:47:43,140 --> 01:47:49,460
+the library methods which are not even called why should I add the constraints for that right.
+
+661
+01:47:49,619 --> 01:47:55,380
+So, the complexity does not change the complexity still remains so in queue
+
+662
+01:47:59,779 --> 01:48:06,579
+but it will be more efficient in practice similarly here is one more I have a class C
+
+663
+01:48:08,980 --> 01:48:16,579
+in which there is a method id. So, here if you look at it I am doing new c
+
+664
+01:48:16,579 --> 01:48:23,220
+dot id new c dot id the argument here I am passing new a here I am passing new b
+
+665
+01:48:24,739 --> 01:48:29,140
+and then I am calling dot m this m is present in the interface.
+
+666
+01:48:33,300 --> 01:48:38,979
+The problem is even though it is a identity function I am calling identity dot method. So,
+
+667
+01:48:38,979 --> 01:48:45,220
+this should have been new a dot m this should have been new b dot m, but the way the code is written
+
+668
+01:48:45,780 --> 01:48:56,340
+my x will have flow set of both a and b do you see that because I am calling new a flows into x
+
+669
+01:48:56,340 --> 01:49:03,140
+new b flows into x I am calling returning x. So, whatever this return x will be the
+
+670
+01:49:03,780 --> 01:49:07,220
+will flow into this guy. So, what will flow into this guy
+
+671
+01:49:07,380 --> 01:49:15,300
+a b what will flow into this guy a b as a result this m is going from both a and b.
+
+672
+01:49:16,579 --> 01:49:24,100
+So, one thing I could do is I can create a copy
+
+673
+01:49:24,500 --> 01:49:41,780
+of this id this id I can create one id 1 and one id 2 and in new c in the class I duplicated the
+
+674
+01:49:41,780 --> 01:49:50,820
+method in the class I can duplicate the method this id becomes id 1 and id 2 for new a I will
+
+675
+01:49:50,819 --> 01:50:01,460
+call id 1 for new b I will call id 2. So, what will flow into this x now a what will flow into this x b
+
+676
+01:50:05,539 --> 01:50:09,139
+so what I did I duplicated the method because I duplicated the method
+
+677
+01:50:10,019 --> 01:50:14,340
+for at this context I am calling id 1 in the second context I am calling id 2.
+
+678
+01:50:14,340 --> 01:50:23,300
+So, you can I mean and again this will this is more precise not changing the complexity,
+
+679
+01:50:23,300 --> 01:50:33,940
+but making it more precise sorry so that I can inline we will come we will see now
+
+680
+01:50:35,300 --> 01:50:43,140
+how will be inline we already have said every time there is a at a call site x.foo
+
+681
+01:50:44,100 --> 01:50:49,300
+if x's flow set is a singleton set only then I can inline correct.
+
+682
+01:50:53,539 --> 01:51:05,860
+Okay I can also I can also do a class duplication I will skip that there are few other methods
+
+683
+01:51:06,739 --> 01:51:13,299
+in which you can improve the precision we will take a break now, but let us remember what we
+
+684
+01:51:13,299 --> 01:51:22,099
+learned now we learned how to do flow analysis how to solve the constraints generate the constraints
+
+685
+01:51:22,099 --> 01:51:28,019
+how to solve the constraints. So, out if you construct make a black box with what we have
+
+686
+01:51:28,020 --> 01:51:34,660
+learnt to now in comes a program out tells out goes the flow sets for every expression
+
+687
+01:51:36,660 --> 01:51:43,860
+remember this when we come back we will use that information to do inlining okay.
+

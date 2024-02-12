@@ -1,0 +1,38 @@
+ Pointer Analysis:
+
+- Given a set of pointer variables and memory locations, determine the set of memory locations that a variable may access (points to).
+- Solution format: For each variable, store the set of memory locations it points to.
+- Assume empty pointer sets initially.
+- Use flow-sensitive analysis, updating pointer sets at the end of each basic block.
+
+Transfer Functions:
+
+- `y = &A`: Kill the existing pointer set of y, add A as the sole member.
+- `y = x`: Replace the pointer set of y with that of x.
+- `y = *x`: Find the memory locations that x points to, and union the pointer sets of those locations for y's pointer set.
+- `*y = x`: Similar to the previous case, but with additional care for weak vs. strong updates.
+    - Strong Update: If y points to a single location, replace the contents with the set of locations that x points to.
+    - Weak Update: If y points to multiple locations, add the set of locations that x points to all the locations pointed to by y.
+
+Ordering Relation:
+
+- Ordering relation for pointer analysis is subset equality (⊆).
+- Each variable has its own separate lattice, and the entire lattice is the Cartesian product of the individual lattices.
+
+Flow Insensitive Analysis:
+
+- Also performed in a flow insensitive manner for large codebases.
+- Introduces Points To Graph to represent the points to relation between variables and memory locations.
+- Directed edge from location A to location B if A can point to B.
+
+Steensgaard's Analysis:
+
+- Fast flow insensitive pointer analysis.
+- Works by performing weak updates and unifying sets.
+- Based on equality, treating pointsTo(A) == pointsTo(B) as opposed to pointsTo(B) ⊆ pointsTo(A).
+
+Implementation in LLVM:
+
+- Iterate over all basic blocks.
+- Maintain pointer sets using disjoint set union data structure.
+- Merge sets when necessary using the union-find operation.

@@ -1,0 +1,2788 @@
+1
+00:00:00,000 --> 00:00:10,060
+And annotate wherever each variable begins.
+
+2
+00:00:10,060 --> 00:00:13,759
+This is something which you can try in your free time.
+
+3
+00:00:13,759 --> 00:00:15,400
+But I think we can begin.
+
+4
+00:00:15,400 --> 00:00:21,559
+So the next topic, so the last session for today, this is also going to be bit heavy
+
+5
+00:00:21,559 --> 00:00:23,420
+in terms of the information.
+
+6
+00:00:23,420 --> 00:00:28,039
+But if you're feeling too sleepy or something, let me know, we'll see.
+
+7
+00:00:28,039 --> 00:00:33,159
+But essentially the idea now is to, so what we have seen is primarily what all goes into
+
+8
+00:00:33,159 --> 00:00:35,280
+the object file.
+
+9
+00:00:35,280 --> 00:00:42,820
+Let's look at assemblers a bit just to figure out how assemblers are producing this information.
+
+10
+00:00:42,820 --> 00:00:44,280
+So what do assemblers do?
+
+11
+00:00:44,280 --> 00:00:51,159
+So essentially assemblers translate the textual assembly program into the binary object file.
+
+12
+00:00:51,159 --> 00:00:57,359
+And it's more of a simple translation, not really a compilation.
+
+13
+00:00:57,679 --> 00:01:02,880
+Essentially one of the primary tasks is to figure out how to convert the text instructions
+
+14
+00:01:02,880 --> 00:01:04,879
+into the machine code.
+
+15
+00:01:04,879 --> 00:01:08,439
+And we saw some examples prior where opc...
+
+16
+00:01:08,439 --> 00:01:12,480
+55 meant push EBP and so on.
+
+17
+00:01:12,480 --> 00:01:18,599
+So every architecture publishes its instruction encoding information that this instruction
+
+18
+00:01:18,599 --> 00:01:21,200
+needs to be encoded this way and so on.
+
+19
+00:01:21,200 --> 00:01:26,280
+So assemblers will use this information to essentially translate the text program into
+
+20
+00:01:26,280 --> 00:01:28,560
+the machine code.
+
+21
+00:01:28,560 --> 00:01:33,920
+And it needs to do some resolution of the internal references and it needs to record
+
+22
+00:01:33,920 --> 00:01:38,960
+some metadata for linker, which is what we will see now.
+
+23
+00:01:38,960 --> 00:01:42,480
+So essentially let's look at this sample code.
+
+24
+00:01:42,480 --> 00:01:48,560
+So let's say I have some instruction written and then I do jump to done.
+
+25
+00:01:48,560 --> 00:01:51,079
+And done is defined here.
+
+26
+00:01:51,079 --> 00:01:54,879
+Now in the machine code, there is nothing like done, right?
+
+27
+00:01:54,879 --> 00:01:56,120
+There is no symbol done.
+
+28
+00:01:56,120 --> 00:01:58,359
+It has to be a binary number.
+
+29
+00:01:58,359 --> 00:02:02,040
+So done needs to really be an address, right?
+
+30
+00:02:02,040 --> 00:02:07,040
+So how does assembler know what is address of the done, right?
+
+31
+00:02:07,040 --> 00:02:15,439
+So essentially what assemblers do is typically they do a two pass algorithm.
+
+32
+00:02:15,439 --> 00:02:23,080
+So what they will first do is they will first read the program, assign address to everything.
+
+33
+00:02:23,080 --> 00:02:27,840
+So they know that move instruction takes five bytes, for example, move the instruction
+
+34
+00:02:27,840 --> 00:02:31,880
+takes two bytes, JMP instruction takes four bytes.
+
+35
+00:02:31,880 --> 00:02:37,280
+So done will come at four plus five plus five, 20 offset, something like that, right?
+
+36
+00:02:37,280 --> 00:02:42,920
+So they will keep assigning address to each of the label, which is defined in the program,
+
+37
+00:02:42,920 --> 00:02:45,280
+okay, according to size.
+
+38
+00:02:45,280 --> 00:02:50,400
+So for example, whenever I declare a data of some size, I know that the next address
+
+39
+00:02:50,400 --> 00:02:52,720
+will be after that, right?
+
+40
+00:02:52,719 --> 00:02:57,359
+And this is what is the value field which we were seeing in the symbol table, right?
+
+41
+00:02:57,359 --> 00:03:03,400
+Whenever we were seeing in it where was at offset four, this is how it kind of calculated
+
+42
+00:03:03,400 --> 00:03:06,520
+it, okay?
+
+43
+00:03:06,520 --> 00:03:11,680
+And in the second pass, what you do is you replace all the references with the actual
+
+44
+00:03:11,680 --> 00:03:12,680
+address.
+
+45
+00:03:12,680 --> 00:03:16,879
+So for example, in the first pass, you assign some address to done.
+
+46
+00:03:16,879 --> 00:03:23,439
+And in the second pass, you go and change this instruction from gem done to JMP of address
+
+47
+00:03:23,439 --> 00:03:26,680
+of done, which was assigned, okay?
+
+48
+00:03:26,680 --> 00:03:29,919
+Now the question is, can you do this in single pass?
+
+49
+00:03:29,919 --> 00:03:34,280
+Instead of doing two passes, can you do it in single pass?
+
+50
+00:03:34,280 --> 00:03:35,280
+And it is possible.
+
+51
+00:03:35,280 --> 00:03:40,479
+So there is an algorithm called as backpatching, which will actually do it in single pass.
+
+52
+00:03:40,479 --> 00:03:41,479
+But that's a reading exercise.
+
+53
+00:03:41,479 --> 00:03:43,680
+I don't want to get into that algorithm.
+
+54
+00:03:43,680 --> 00:03:46,400
+It's unnecessary, okay?
+
+55
+00:03:46,400 --> 00:03:53,159
+And one of the things you have to realize is most of the branch instructions in the
+
+56
+00:03:53,159 --> 00:03:59,040
+processors by default have PC relative address, okay?
+
+57
+00:03:59,040 --> 00:04:06,040
+By PC relative, I mean address of done is not really from start of the program.
+
+58
+00:04:06,040 --> 00:04:10,120
+Address of done is relative to the current instruction, okay?
+
+59
+00:04:10,120 --> 00:04:15,120
+So PC relative address means the address which is relative to the current instruction.
+
+60
+00:04:15,120 --> 00:04:21,439
+So if you look at it, done itself has really three addresses, okay?
+
+61
+00:04:21,439 --> 00:04:28,120
+Done can have an address which is PC relative, which is from the current instruction where
+
+62
+00:04:28,120 --> 00:04:29,840
+we need its address.
+
+63
+00:04:29,840 --> 00:04:32,360
+It could be section relative.
+
+64
+00:04:32,360 --> 00:04:35,360
+That means within the text section, done occurs here.
+
+65
+00:04:35,360 --> 00:04:41,519
+Or it could be file relative, where it says from start of the file, where is the done,
+
+66
+00:04:41,519 --> 00:04:42,519
+okay?
+
+67
+00:04:42,519 --> 00:04:45,279
+So all three are valid addresses.
+
+68
+00:04:45,279 --> 00:04:50,120
+It just that depending on context where you need to use it, you need to use the appropriate
+
+69
+00:04:50,120 --> 00:04:51,120
+address, okay?
+
+70
+00:04:51,120 --> 00:05:03,479
+Yes, that is to some extent correct.
+
+71
+00:05:03,479 --> 00:05:07,599
+Where will we use that is what was the actual question.
+
+72
+00:05:07,599 --> 00:05:08,819
+But that we will see later.
+
+73
+00:05:09,819 --> 00:05:14,219
+What we were trying to find is what is the address of the current instruction and what
+
+74
+00:05:14,219 --> 00:05:22,459
+is the address of done and then if you subtract it, you get the PC relative offset, okay?
+
+75
+00:05:22,459 --> 00:05:24,180
+Is this clear?
+
+76
+00:05:24,180 --> 00:05:31,379
+So what link assembler is simply going to do since JMP instruction takes PC relative
+
+77
+00:05:31,379 --> 00:05:36,539
+address, it is going to change this instruction to JMP with offset of whatever is done which
+
+78
+00:05:36,540 --> 00:05:39,660
+is PC relative, okay?
+
+79
+00:05:39,660 --> 00:05:43,220
+Now and what about data variables, right?
+
+80
+00:05:43,220 --> 00:05:47,520
+So data variables are also handled in similar way, okay?
+
+81
+00:05:47,520 --> 00:05:54,500
+So what assembler will do is it will do a first pass, say that var is at offset 0, section
+
+82
+00:05:54,500 --> 00:05:57,020
+relative offset 0.
+
+83
+00:05:57,019 --> 00:06:01,819
+Then X, this takes a byte, right?
+
+84
+00:06:01,819 --> 00:06:06,579
+And then I see leave a line of 4, we will get to this.
+
+85
+00:06:06,579 --> 00:06:14,659
+But essentially what this is saying is var is taking 1 byte whose value is 15, okay?
+
+86
+00:06:14,659 --> 00:06:20,019
+Then I want to ensure X is aligned to 4 bytes, okay?
+
+87
+00:06:20,019 --> 00:06:23,500
+And then X holds 1, 2 and 3, okay?
+
+88
+00:06:23,500 --> 00:06:32,220
+So the section relative offset of var is 0 because it begins at the data section and
+
+89
+00:06:32,220 --> 00:06:39,779
+section relative offset of X is 4 because I assigned address 0 to this and then I had
+
+90
+00:06:39,779 --> 00:06:46,339
+to choose the next multiple of 4 to assign X, okay?
+
+91
+00:06:46,339 --> 00:06:51,680
+So essentially these are the values which you are seeing in the ELF symbol table.
+
+92
+00:06:51,680 --> 00:06:57,040
+So whenever you are seeing value field in the ELF symbol table, this is how assembler
+
+93
+00:06:57,040 --> 00:06:59,720
+had allocated it, okay?
+
+94
+00:06:59,720 --> 00:07:04,879
+Remember we were seeing in it var then arr was there, then something was there and so
+
+95
+00:07:04,879 --> 00:07:05,920
+on, right?
+
+96
+00:07:05,920 --> 00:07:10,399
+So this is how assembler would have allocated offsets to it, okay?
+
+97
+00:07:10,399 --> 00:07:16,180
+Now any idea why is alignment needed?
+
+98
+00:07:16,180 --> 00:07:18,680
+Why did I need this align for?
+
+99
+00:07:18,680 --> 00:07:28,600
+Does everyone understand that?
+
+100
+00:07:28,600 --> 00:07:35,019
+So essentially what happens is whenever you are accessing some data of some size s, if
+
+101
+00:07:35,019 --> 00:07:40,199
+your address is multiple of s, then you can fetch it easily, okay?
+
+102
+00:07:40,199 --> 00:07:45,319
+Now easily is actually dependent on processors, okay?
+
+103
+00:07:45,759 --> 00:07:48,680
+So S86 allows you to do misaligned access.
+
+104
+00:07:48,680 --> 00:07:58,519
+That means I could access 4 bytes at an address which is not multiple of 4 and the only problem
+
+105
+00:07:58,519 --> 00:08:01,759
+with that is performance, okay?
+
+106
+00:08:01,759 --> 00:08:03,139
+There is no other problem.
+
+107
+00:08:03,139 --> 00:08:09,180
+But on some other processors like ARM or even NVIDIA GPUs for that matter, you are not even
+
+108
+00:08:09,180 --> 00:08:11,279
+allowed to do unaligned access.
+
+109
+00:08:11,279 --> 00:08:17,419
+So hardware will give an error if you try to access data which is not aligned to proper
+
+110
+00:08:17,419 --> 00:08:19,939
+address.
+
+111
+00:08:19,939 --> 00:08:21,000
+Is that clear?
+
+112
+00:08:21,000 --> 00:08:27,319
+So whether unaligned accesses are supported or not is a property of processor.
+
+113
+00:08:27,319 --> 00:08:31,239
+S86 supports it at cost of performance.
+
+114
+00:08:31,239 --> 00:08:34,480
+Other processors may not even support it, okay?
+
+115
+00:08:34,480 --> 00:08:42,240
+So let's say you had these 4 variables, char C, float F, double D, int X.
+
+116
+00:08:42,240 --> 00:08:49,539
+What's the best order in which you should allocate them to reduce the padding?
+
+117
+00:08:49,539 --> 00:08:53,720
+What do you mean by ascending or descending?
+
+118
+00:08:53,720 --> 00:08:56,680
+Okay.
+
+119
+00:08:56,680 --> 00:09:02,560
+So the answer should be as he said, you should probably try to allocate the variable with
+
+120
+00:09:02,559 --> 00:09:05,199
+the highest alignment requirement first.
+
+121
+00:09:05,199 --> 00:09:07,000
+So double is 8 bytes.
+
+122
+00:09:07,000 --> 00:09:10,599
+So it is better to say D lives at offset 0.
+
+123
+00:09:10,599 --> 00:09:17,459
+See because offset 0 is the best thing because it can be aligned to anything, right?
+
+124
+00:09:17,459 --> 00:09:19,639
+So offset 0 is the best thing.
+
+125
+00:09:19,639 --> 00:09:24,119
+Whatever is your highest thing, you allocate at offset 0.
+
+126
+00:09:24,119 --> 00:09:30,119
+Then you can allocate either F or X because both of them have the same, this thing and
+
+127
+00:09:30,119 --> 00:09:31,119
+then C.
+
+128
+00:09:31,279 --> 00:09:38,399
+If you allocated it in other order, what will happen is if you allocate C, then C is at
+
+129
+00:09:38,399 --> 00:09:39,399
+offset 0.
+
+130
+00:09:39,399 --> 00:09:43,360
+Then no matter what you try to allocate, you have to create padding.
+
+131
+00:09:43,360 --> 00:09:50,120
+Now if you create double as the next thing, then you have to create padding of 7 elements.
+
+132
+00:09:50,120 --> 00:09:55,240
+Whereas if you do float F and float X, then you can do some, okay?
+
+133
+00:09:55,240 --> 00:10:00,759
+So it's actually better to do it in descending order where you first always allocate a variable
+
+134
+00:10:00,759 --> 00:10:04,879
+with the highest alignment requirement and then so on.
+
+135
+00:10:04,879 --> 00:10:09,000
+And this is something you should remember even when you are declaring your structures,
+
+136
+00:10:09,000 --> 00:10:10,000
+okay?
+
+137
+00:10:10,000 --> 00:10:13,200
+So this is not just for independent variables.
+
+138
+00:10:13,200 --> 00:10:18,960
+Even when you are defining a structure of something, it's better to write members in
+
+139
+00:10:18,960 --> 00:10:21,960
+the order of decreasing alignment.
+
+140
+00:10:21,960 --> 00:10:27,960
+That will reduce the total size of your structure, okay?
+
+141
+00:10:27,960 --> 00:10:35,440
+Now, coming to the data addresses, right?
+
+142
+00:10:35,440 --> 00:10:41,960
+So we assigned address 0 to this and address 4 to this, okay?
+
+143
+00:10:41,960 --> 00:10:46,519
+Are these addresses final?
+
+144
+00:10:46,519 --> 00:10:47,840
+Are these addresses final?
+
+145
+00:10:47,840 --> 00:10:53,160
+So is var at offset 0 always going to be true?
+
+146
+00:10:53,159 --> 00:11:07,039
+Okay, so at runtime, they will get picked at some address, but is it just adding offset
+
+147
+00:11:07,039 --> 00:11:11,120
+of that address or is it something more?
+
+148
+00:11:11,120 --> 00:11:17,639
+So for example, loader chooses to put .data section at address 1000, then is var at 1000
+
+149
+00:11:17,639 --> 00:11:22,759
+and X at 1004?
+
+150
+00:11:22,759 --> 00:11:46,679
+So is it simply act of adding some base to it or something more?
+
+151
+00:11:46,679 --> 00:11:51,200
+Any other things?
+
+152
+00:11:51,200 --> 00:11:57,800
+So actually, one thing you have to just let's try to first go again in step by step order.
+
+153
+00:11:57,800 --> 00:12:02,800
+So when I am accessing this instruction, what should I do for var?
+
+154
+00:12:02,800 --> 00:12:08,759
+Should I say move value 10 into address 0?
+
+155
+00:12:08,759 --> 00:12:14,520
+Can I encode a PC relative offset of var?
+
+156
+00:12:15,519 --> 00:12:17,600
+offset of var will be?
+
+157
+00:12:17,600 --> 00:12:23,159
+This is how far is var relative to current instruction?
+
+158
+00:12:23,159 --> 00:12:31,960
+I mean, one way to refer to var in the text section will be to encode its PC relative
+
+159
+00:12:31,960 --> 00:12:33,439
+offset.
+
+160
+00:12:33,439 --> 00:12:39,299
+The problem with that is data could be fairly far from where the text is.
+
+161
+00:12:39,299 --> 00:12:42,639
+So that offset cannot be encoded.
+
+162
+00:12:42,639 --> 00:12:46,159
+Then we encode section relative offset.
+
+163
+00:12:46,159 --> 00:12:52,480
+So if I encode 0 here, the problem still remains because the data might actually get allocated
+
+164
+00:12:52,480 --> 00:12:55,960
+at some different address than 0.
+
+165
+00:12:55,960 --> 00:13:02,779
+So what happens is we don't know really the final address when we are accessing this.
+
+166
+00:13:02,779 --> 00:13:10,360
+So what assembler will actually do is it will assume value 0 and 4 for var and X, but it
+
+167
+00:13:10,360 --> 00:13:15,919
+will keep some additional metadata that this needs to change.
+
+168
+00:13:15,919 --> 00:13:17,919
+It is not really 0 and 4.
+
+169
+00:13:17,919 --> 00:13:19,600
+It needs to change.
+
+170
+00:13:19,600 --> 00:13:25,159
+So when assembler is assembling this code, it will actually put 0 here and it will actually
+
+171
+00:13:25,159 --> 00:13:31,560
+put 4 here, but it will have some additional information to change that later.
+
+172
+00:13:31,560 --> 00:13:36,519
+And we'll see how linker changes that.
+
+173
+00:13:37,279 --> 00:13:41,720
+Same thing happens when you have external variables.
+
+174
+00:13:41,720 --> 00:13:48,439
+So when I do say move 10 into var and let's say var was an external variable, then again
+
+175
+00:13:48,439 --> 00:13:53,079
+assembler has no idea what is the address of var.
+
+176
+00:13:53,079 --> 00:13:56,360
+So how does it produce this instruction in binary?
+
+177
+00:13:56,360 --> 00:14:00,360
+So it will simply assume that var is at some location 0.
+
+178
+00:14:00,360 --> 00:14:05,720
+I don't know what is that location, but it is at some location 0 and records some
+
+179
+00:14:05,720 --> 00:14:09,680
+metadata which says change this.
+
+180
+00:14:09,680 --> 00:14:13,480
+And that information is called as relocation.
+
+181
+00:14:13,480 --> 00:14:21,639
+So relocations is essentially a piece of information generated by assembler which says how to change
+
+182
+00:14:21,639 --> 00:14:24,019
+whatever assembler has produced.
+
+183
+00:14:24,019 --> 00:14:28,800
+So assembler didn't have visibility of addresses of some of the things, but it still had to
+
+184
+00:14:28,800 --> 00:14:30,660
+generate binary code.
+
+185
+00:14:30,659 --> 00:14:35,699
+So it generated binary code, but kept some additional metadata which says these need
+
+186
+00:14:35,699 --> 00:14:36,699
+to change.
+
+187
+00:14:36,699 --> 00:14:40,019
+Does conceptually that sound okay?
+
+188
+00:14:40,019 --> 00:14:43,419
+What is exactly in relocation and how it works we'll see later.
+
+189
+00:14:43,419 --> 00:14:50,500
+But conceptually, just remember that assembler's generated code is not final.
+
+190
+00:14:50,500 --> 00:14:57,139
+It will be modified in some way by the linker, especially with respect to addresses.
+
+191
+00:14:57,139 --> 00:15:05,819
+So whenever data addresses or variables addresses are needed, that portion will change.
+
+192
+00:15:05,819 --> 00:15:11,699
+So essentially if you look at it, what assembler will be generating is whatever are the labels
+
+193
+00:15:11,699 --> 00:15:17,759
+within the text section, so whenever we had jump to done or jump to label, those things
+
+194
+00:15:17,759 --> 00:15:24,179
+are actually resolved to the fixed thing because they are not going to change within the text
+
+195
+00:15:24,179 --> 00:15:25,580
+section.
+
+196
+00:15:25,580 --> 00:15:32,139
+Assembler was defined in the same file that was resolved to be the offset, but there was
+
+197
+00:15:32,139 --> 00:15:37,980
+some additional metadata recorded here.
+
+198
+00:15:37,980 --> 00:15:41,320
+And we'll see what that metadata is.
+
+199
+00:15:41,320 --> 00:15:42,320
+Is it clear?
+
+200
+00:15:42,320 --> 00:15:48,700
+So just to summarize on the assembler side, assembler generates machine code and the machine
+
+201
+00:15:48,700 --> 00:15:50,480
+code is not final.
+
+202
+00:15:50,480 --> 00:15:55,620
+The addresses used in the machine code need to be changed and assembler has produced some
+
+203
+00:15:55,620 --> 00:16:02,519
+information for linker on how to change it.
+
+204
+00:16:02,519 --> 00:16:04,000
+So what do linkers do?
+
+205
+00:16:04,000 --> 00:16:05,000
+Yes.
+
+206
+00:16:05,000 --> 00:16:26,519
+I'll come to that.
+
+207
+00:16:27,519 --> 00:16:35,960
+So linker's job is essentially to merge the object files and linker will take multiple
+
+208
+00:16:35,960 --> 00:16:42,879
+relocatable object files as the input and produce a single executable file.
+
+209
+00:16:42,879 --> 00:16:47,519
+And one of the main task of linker is to be able to do symbol resolution, which is what
+
+210
+00:16:47,519 --> 00:16:52,500
+we were trying to see in the quiz that whether this were and this were are same.
+
+211
+00:16:52,500 --> 00:16:57,539
+So it somehow needs to associate a symbol with its use.
+
+212
+00:16:57,539 --> 00:17:01,340
+That is called as symbol resolution.
+
+213
+00:17:01,340 --> 00:17:06,420
+And we just now saw that linker also has to do something called as relocation, which is
+
+214
+00:17:06,420 --> 00:17:12,660
+essentially changing addresses or filling in the addresses which assembler couldn't
+
+215
+00:17:12,660 --> 00:17:14,779
+fill.
+
+216
+00:17:14,779 --> 00:17:15,779
+So the section.
+
+217
+00:17:15,779 --> 00:17:16,779
+Yes.
+
+218
+00:17:16,779 --> 00:17:32,839
+Yes.
+
+219
+00:17:32,839 --> 00:17:36,579
+So linker has optimizations also, which we'll see.
+
+220
+00:17:36,579 --> 00:17:41,859
+I mean, I don't have time to cover how link time optimizations work, but I will mention
+
+221
+00:17:41,859 --> 00:17:47,139
+what kind of things linker do as optimizations.
+
+222
+00:17:47,139 --> 00:17:48,759
+So coming to your question.
+
+223
+00:17:48,759 --> 00:17:53,019
+So essentially what if you think of elf linker, this is what it gets.
+
+224
+00:17:53,019 --> 00:17:57,379
+It gets multiple object files as the input.
+
+225
+00:17:57,379 --> 00:18:03,619
+What it is going to do is it is going to create, take all the text sections from all the elf
+
+226
+00:18:03,619 --> 00:18:07,219
+files, put them together.
+
+227
+00:18:07,219 --> 00:18:10,139
+And this is what forms a segment.
+
+228
+00:18:10,220 --> 00:18:16,259
+So you can think of chunks of text sections which were pulled in from multiple files and
+
+229
+00:18:16,259 --> 00:18:19,420
+put together forms a segment.
+
+230
+00:18:19,420 --> 00:18:25,380
+Similarly, it will take data section from each of the object file and create a data
+
+231
+00:18:25,380 --> 00:18:28,180
+segment out of it and so on.
+
+232
+00:18:28,180 --> 00:18:32,180
+So segment, you can think of it as collects.
+
+233
+00:18:32,180 --> 00:18:36,860
+It's a big text section conceptually.
+
+234
+00:18:36,859 --> 00:18:40,459
+And what all goes into the segment, we'll see tomorrow when we actually look at the
+
+235
+00:18:40,459 --> 00:18:43,019
+execution properties.
+
+236
+00:18:43,019 --> 00:18:50,099
+But for now, you can assume a segment is collection of same sections, which came from different
+
+237
+00:18:50,099 --> 00:18:54,019
+object files.
+
+238
+00:18:54,019 --> 00:18:59,259
+Now as far as you can see here, what is linker going to do is linker is going to produce
+
+239
+00:18:59,259 --> 00:19:03,899
+an object file, which actually pulled in data from multiple things.
+
+240
+00:19:03,940 --> 00:19:09,140
+So what linker ended up doing is it took text section which was present at offset 500 in
+
+241
+00:19:09,140 --> 00:19:18,540
+file 0, offset 300 in file 2 and put it at offset maybe 100 in the output file.
+
+242
+00:19:18,540 --> 00:19:21,500
+So it is going to merge all these together.
+
+243
+00:19:21,500 --> 00:19:25,259
+Now what all symbols linker care about?
+
+244
+00:19:25,259 --> 00:19:29,300
+So linker cares about symbols which were global.
+
+245
+00:19:29,299 --> 00:19:35,779
+Global are the symbols which are defined in the current object file and can be referenced
+
+246
+00:19:35,779 --> 00:19:40,379
+in the other object file.
+
+247
+00:19:40,379 --> 00:19:45,659
+External symbols which are essentially referenced in the object file but not defined in the
+
+248
+00:19:45,659 --> 00:19:47,339
+object file.
+
+249
+00:19:47,339 --> 00:19:52,899
+And local which is essentially defined in the object file but cannot be referred by
+
+250
+00:19:52,899 --> 00:19:54,539
+the other object file.
+
+251
+00:19:54,539 --> 00:19:56,819
+So we saw global and local.
+
+252
+00:19:56,819 --> 00:20:00,700
+We were seeing that when we saw the MyWare example.
+
+253
+00:20:00,700 --> 00:20:06,579
+When I declare something as static, it appeared as local and when I declared it as non-static,
+
+254
+00:20:06,579 --> 00:20:08,179
+it appeared as global.
+
+255
+00:20:08,179 --> 00:20:12,939
+And external is the one which had UND section index.
+
+256
+00:20:12,939 --> 00:20:18,399
+So anything with the UND shn index is external.
+
+257
+00:20:18,399 --> 00:20:24,579
+Anything which has global bind is global and anything which has local bind is local.
+
+258
+00:20:24,579 --> 00:20:29,740
+So these are the only symbols which linker cares about.
+
+259
+00:20:29,740 --> 00:20:40,659
+Now symbol resolution is act of associating each symbol with its references.
+
+260
+00:20:40,659 --> 00:20:48,099
+So linker's job is to figure out these references correspond to this definition.
+
+261
+00:20:48,099 --> 00:20:59,299
+Now if you look at this, var is a global variable, foo is an external variable, here var is an
+
+262
+00:20:59,299 --> 00:21:06,099
+external variable and var2 is a local variable because it was static.
+
+263
+00:21:06,099 --> 00:21:11,539
+And linker doesn't see v because it was allocated on stack.
+
+264
+00:21:11,740 --> 00:21:18,779
+And symbol resolution is simply saying var2 is associated with this var2.
+
+265
+00:21:18,779 --> 00:21:25,940
+But linker has no idea what is this foo referring to, what is this printf referring to and what
+
+266
+00:21:25,940 --> 00:21:30,700
+is this var referring to.
+
+267
+00:21:30,700 --> 00:21:34,500
+Now if you look at the object file, this is how it will look.
+
+268
+00:21:34,500 --> 00:21:39,700
+The text section will have a reference to foo which it doesn't know about.
+
+269
+00:21:39,700 --> 00:21:44,019
+Text section will have a reference to printf which it doesn't know about.
+
+270
+00:21:44,019 --> 00:21:50,019
+Similarly here text section will have reference to var which it doesn't know about.
+
+271
+00:21:50,019 --> 00:21:58,420
+And text section will have a reference to var2 which is say at this location 54.
+
+272
+00:21:58,420 --> 00:22:02,700
+Now what linker is conceptually doing is merging two things together.
+
+273
+00:22:02,700 --> 00:22:05,220
+So the resultant thing will look something like this.
+
+274
+00:22:05,220 --> 00:22:10,620
+So it took text section from the first program, it took the text section from the second program
+
+275
+00:22:10,620 --> 00:22:12,660
+and put them one after the other.
+
+276
+00:22:12,660 --> 00:22:18,420
+So this became 0, 100, 150.
+
+277
+00:22:18,420 --> 00:22:22,700
+Similarly it took the data section from the first program, data section from the second
+
+278
+00:22:22,700 --> 00:22:27,980
+program so this became 150 and 154.
+
+279
+00:22:27,980 --> 00:22:30,420
+And the resolution is just something like this.
+
+280
+00:22:30,420 --> 00:22:36,580
+So now linker notes foo is at address 100 because foo is defined in the text section
+
+281
+00:22:36,580 --> 00:22:39,620
+which starts at 100.
+
+282
+00:22:39,620 --> 00:22:49,380
+Then this text section refers to the variable here which is defined at 150 and this variable
+
+283
+00:22:49,380 --> 00:22:53,259
+refers to the second variable which is var2.
+
+284
+00:22:53,259 --> 00:22:54,539
+Is that clear?
+
+285
+00:22:54,539 --> 00:22:56,860
+What linker is conceptually trying to do?
+
+286
+00:22:56,859 --> 00:23:03,539
+So it has put together all the things one after the other and then assigned addresses
+
+287
+00:23:03,539 --> 00:23:06,219
+on what refers to what.
+
+288
+00:23:06,219 --> 00:23:15,259
+So here in foo we refer to var so that reference what changed to address 150 and foo refers
+
+289
+00:23:15,259 --> 00:23:21,119
+to var2 so that reference what changed to address 154.
+
+290
+00:23:21,119 --> 00:23:24,179
+Is that clear?
+
+291
+00:23:24,180 --> 00:23:33,620
+Now what I said is symbol resolution associates each reference with a single definition.
+
+292
+00:23:33,620 --> 00:23:37,220
+What if there are multiple definitions?
+
+293
+00:23:37,220 --> 00:23:41,600
+So what if something like this is done?
+
+294
+00:23:41,600 --> 00:23:46,539
+So I have int var and I have int var.
+
+295
+00:23:46,539 --> 00:23:54,420
+I have defined it twice and I assign var here and I assign var and I read var here.
+
+296
+00:23:54,420 --> 00:24:03,579
+What will happen?
+
+297
+00:24:03,579 --> 00:24:10,619
+Remember this is not external so both of them are trying to define it.
+
+298
+00:24:10,619 --> 00:24:14,220
+How many of you think it is an error?
+
+299
+00:24:14,220 --> 00:24:16,660
+How many of you think it is not an error?
+
+300
+00:24:16,660 --> 00:24:31,299
+Or you have lost faith on blue linker to give any meaningful error?
+
+301
+00:24:31,299 --> 00:24:42,860
+So whoever thinks it is not an error can you explain why it is not an error?
+
+302
+00:24:42,859 --> 00:24:52,179
+So it is actually not an error.
+
+303
+00:24:52,179 --> 00:24:54,379
+But it is defined twice.
+
+304
+00:24:54,379 --> 00:24:55,659
+So let us look at it this way.
+
+305
+00:24:55,659 --> 00:25:01,500
+So let us say they belong to so when I compile object file of this I will see var belongs
+
+306
+00:25:01,500 --> 00:25:06,500
+in data section and when I compile this file I will see var belongs in data section.
+
+307
+00:25:06,500 --> 00:25:12,419
+Now does this var refer to this var or so where will this var come from?
+
+308
+00:25:12,500 --> 00:25:22,580
+So are you saying this program is going to print 0?
+
+309
+00:25:22,580 --> 00:25:29,740
+How many of you think this program will print 0 after linking?
+
+310
+00:25:29,740 --> 00:25:32,539
+Does everyone think it is 0?
+
+311
+00:25:32,539 --> 00:25:36,940
+So it should have been error ideally but that is not the case.
+
+312
+00:25:36,940 --> 00:25:39,980
+So what is the next meaningful answer?
+
+313
+00:25:40,819 --> 00:25:42,819
+0.
+
+314
+00:25:42,819 --> 00:25:48,980
+Because we are printing var which belongs in this file and in this file var is 0.
+
+315
+00:25:48,980 --> 00:25:54,019
+Let us try that.
+
+316
+00:25:54,019 --> 00:26:03,620
+You guys are up for a surprise.
+
+317
+00:26:03,620 --> 00:26:05,220
+I have this.
+
+318
+00:26:05,220 --> 00:26:09,019
+I have file 2.c.
+
+319
+00:26:09,019 --> 00:26:17,339
+So I say int var and in foo I do var is equal to 10.
+
+320
+00:26:17,339 --> 00:26:22,539
+And here I print var.
+
+321
+00:26:22,539 --> 00:26:41,420
+Gcc file 1.c file 2.c dash.
+
+322
+00:26:41,420 --> 00:26:44,339
+Printed 10.
+
+323
+00:26:44,339 --> 00:26:48,019
+So both the meaningful things which you were thinking.
+
+324
+00:26:48,019 --> 00:26:53,099
+So first of all it did not issue error that you should have suspected by now that it does
+
+325
+00:26:53,099 --> 00:26:55,619
+not give any errors.
+
+326
+00:26:55,619 --> 00:27:13,940
+But on top of it, it says that this var is actually same as this var.
+
+327
+00:27:13,940 --> 00:27:19,259
+So linker somehow said that both are var but both are actually same.
+
+328
+00:27:19,259 --> 00:27:30,740
+So linker ended up saying that there is only one var which exists.
+
+329
+00:27:30,740 --> 00:27:33,900
+This is one of the quirks in language c.
+
+330
+00:27:33,900 --> 00:27:36,420
+It is called tentative definitions.
+
+331
+00:27:36,420 --> 00:27:41,620
+How many of you have heard of this term?
+
+332
+00:27:41,619 --> 00:27:58,019
+So the program which I showed in the morning, this one.
+
+333
+00:27:58,019 --> 00:28:03,659
+This also works because of this quirk called tentative definitions.
+
+334
+00:28:04,660 --> 00:28:12,940
+So c says, anything which you define which is uninitialized, the definition is actually
+
+335
+00:28:12,940 --> 00:28:13,940
+tentative.
+
+336
+00:28:13,940 --> 00:28:17,860
+It is not final definition.
+
+337
+00:28:17,860 --> 00:28:22,380
+It is not.
+
+338
+00:28:22,380 --> 00:28:28,460
+I mean you can think of it logically that way but it is not actually that.
+
+339
+00:28:28,539 --> 00:28:35,299
+And c then allows everyone to define tentative definitions and so on.
+
+340
+00:28:35,299 --> 00:28:40,920
+And finally only one will be chosen.
+
+341
+00:28:40,920 --> 00:28:46,779
+So these are treated as something called as common block symbols.
+
+342
+00:28:46,779 --> 00:28:54,660
+So whenever I define this variable var, this is not actually true definition.
+
+343
+00:28:54,660 --> 00:28:57,240
+c says it is a tentative definition.
+
+344
+00:28:57,240 --> 00:29:01,160
+When it encounters this, it is a tentative definition.
+
+345
+00:29:01,160 --> 00:29:05,599
+And if it did not find any other definition, one of the tentative definitions became the
+
+346
+00:29:05,599 --> 00:29:08,319
+true definition.
+
+347
+00:29:08,319 --> 00:29:10,160
+And that is why this code worked.
+
+348
+00:29:10,160 --> 00:29:14,960
+Same thing happened when we had this, when the file 2 defined it.
+
+349
+00:29:14,960 --> 00:29:22,079
+So when linker saw var here and var here, it says one of them is tentative and I will
+
+350
+00:29:22,079 --> 00:29:28,759
+still look for a final definition and it does not find it so it picks one of them.
+
+351
+00:29:28,759 --> 00:29:29,759
+Arbitrary.
+
+352
+00:29:29,759 --> 00:29:36,119
+We will come to that.
+
+353
+00:29:36,119 --> 00:29:40,000
+So these are actually called as common block symbols.
+
+354
+00:29:40,000 --> 00:29:45,279
+Remember we saw something like com here when we had uninitialized variable.
+
+355
+00:29:45,279 --> 00:29:49,879
+So this was actually referring to common block symbols.
+
+356
+00:29:49,880 --> 00:29:52,100
+The history is in Fortran.
+
+357
+00:29:52,100 --> 00:29:57,400
+So Fortran had this concept called as common block symbols.
+
+358
+00:29:57,400 --> 00:30:00,240
+So in Fortran the semantics were slightly different.
+
+359
+00:30:00,240 --> 00:30:08,740
+In Fortran the semantics were every object file can define a variable with the same name
+
+360
+00:30:08,740 --> 00:30:12,780
+of different sizes.
+
+361
+00:30:12,780 --> 00:30:18,960
+So every file is not only allowed to define a tentative definition, but the sizes can
+
+362
+00:30:19,039 --> 00:30:26,840
+actually be different across different files and the largest one will be chosen.
+
+363
+00:30:26,840 --> 00:30:32,960
+That was the semantics in Fortran and those were called as common block symbols.
+
+364
+00:30:32,960 --> 00:30:40,519
+This is a very crude way of implementing unions in C. So if you did not have unions in C,
+
+365
+00:30:40,519 --> 00:30:48,720
+one of the ways to implement union was through common blocks in Fortran.
+
+366
+00:30:49,480 --> 00:30:55,640
+So this actually forces C language to still carry forward that semantics because C programs
+
+367
+00:30:55,640 --> 00:31:01,000
+have to be compatible with Fortran programs because there were tons of Fortran code written
+
+368
+00:31:01,000 --> 00:31:07,839
+already and part of that code was ported to C, but things still had to be linked together
+
+369
+00:31:07,839 --> 00:31:13,839
+and that would work only if the language semantics were same.
+
+370
+00:31:13,839 --> 00:31:16,339
+That's where the problem comes in.
+
+371
+00:31:16,959 --> 00:31:25,299
+So these codes actually work because of Fortran and you can actually avoid this by passing
+
+372
+00:31:25,299 --> 00:31:28,220
+a flag called F no common.
+
+373
+00:31:28,220 --> 00:31:31,379
+So let's look at magic of that.
+
+374
+00:31:31,420 --> 00:31:48,020
+So if I say here it detects that there are some multiple definitions happening.
+
+375
+00:31:48,020 --> 00:31:51,340
+Does that make sense?
+
+376
+00:31:51,340 --> 00:32:00,900
+Now what happens in C++?
+
+377
+00:32:01,420 --> 00:32:07,220
+How many of you have heard of this term called as one definition rule or ODR?
+
+378
+00:32:07,220 --> 00:32:10,220
+So C++ has a different semantics.
+
+379
+00:32:10,220 --> 00:32:17,920
+C++ says that every variable at link time must have a single definition and no more
+
+380
+00:32:17,920 --> 00:32:19,580
+and no less.
+
+381
+00:32:19,580 --> 00:32:23,720
+So C++ actually errors out on this code.
+
+382
+00:32:23,720 --> 00:32:34,759
+So if you compile this code as C++ code, it errors out saying there are multiple definitions.
+
+383
+00:32:34,759 --> 00:32:41,519
+It errors out in this case as well as it errors out at link stage.
+
+384
+00:32:41,519 --> 00:32:46,559
+So C++ that way is slightly better because it says that every variable must be defined
+
+385
+00:32:46,559 --> 00:32:48,279
+only once.
+
+386
+00:32:48,279 --> 00:32:51,960
+So this will actually error out.
+
+387
+00:32:52,200 --> 00:32:55,440
+But there are some exceptions to one definition rule.
+
+388
+00:32:55,440 --> 00:33:02,120
+So nothing comes without caveat and this we will see tomorrow in what case two things
+
+389
+00:33:02,120 --> 00:33:08,539
+can have multiple definitions even in C++.
+
+390
+00:33:08,539 --> 00:33:11,700
+But got what we discussed so far?
+
+391
+00:33:11,700 --> 00:33:20,140
+Now one of the things in C to avoid this pitfall, you don't want accidentally to something
+
+392
+00:33:20,140 --> 00:33:27,100
+to link and even multiple definitions become allowed.
+
+393
+00:33:27,100 --> 00:33:34,620
+What C says is only uninitialized variables have tentative definition.
+
+394
+00:33:34,619 --> 00:33:56,059
+So if I initialize this variable, now C also errors out.
+
+395
+00:33:56,059 --> 00:34:14,420
+So if you look at where it is no longer COM, it belongs in data section.
+
+396
+00:34:14,420 --> 00:34:25,340
+If this was uninitialized, this belonged in COM.
+
+397
+00:34:25,340 --> 00:34:30,860
+So any uninitialized variable belongs in COM and that's why these tentative definitions
+
+398
+00:34:30,860 --> 00:34:33,860
+come into picture.
+
+399
+00:34:33,860 --> 00:34:43,460
+So every time you write a global variable, initialize it in C to avoid these problems.
+
+400
+00:34:43,460 --> 00:34:48,820
+Now how does linker, so we saw what it is in C, but how does linker actually deal with
+
+401
+00:34:48,820 --> 00:34:50,579
+it?
+
+402
+00:34:50,579 --> 00:34:54,940
+So linker actually treats every symbol in two categories.
+
+403
+00:34:54,940 --> 00:35:00,460
+Linker says every symbol is either a strong symbol or a weak symbol.
+
+404
+00:35:00,460 --> 00:35:09,220
+So as far as linker goes, every function or initialized global is a strong symbol.
+
+405
+00:35:09,220 --> 00:35:15,700
+Anything uninitialized global and few other things which we will see later are categorized
+
+406
+00:35:15,700 --> 00:35:18,860
+as weak.
+
+407
+00:35:18,860 --> 00:35:20,619
+Is it clear?
+
+408
+00:35:20,619 --> 00:35:29,259
+So as far as C goes, uninitialized globals are weak, everything else is strong.
+
+409
+00:35:29,259 --> 00:35:35,619
+So this symbol is strong because it is initialized, this symbol is strong because it is a function,
+
+410
+00:35:35,619 --> 00:35:42,099
+this symbol is strong because it is a function, this symbol is weak because it is uninitialized.
+
+411
+00:35:42,099 --> 00:35:45,179
+Now there are rules of how to resolve things.
+
+412
+00:35:45,179 --> 00:35:48,739
+So what linker says is multiple strong symbols are not allowed.
+
+413
+00:35:48,739 --> 00:35:56,299
+So if you had two strong symbols, it is not allowed and linker will error out.
+
+414
+00:35:56,299 --> 00:36:06,500
+Rule two is if you have a strong symbol and a weak symbol, choose the strong symbol.
+
+415
+00:36:06,500 --> 00:36:10,039
+And all the references are changed to point to the strong symbol.
+
+416
+00:36:10,039 --> 00:36:15,739
+So finally there will be only one symbol which will be the strong symbol variant.
+
+417
+00:36:15,739 --> 00:36:16,739
+Is it clear?
+
+418
+00:36:17,739 --> 00:36:27,500
+Rule three is about if there are multiple weak symbols, then choose any weak symbol.
+
+419
+00:36:27,500 --> 00:36:32,019
+So if you had strong, you give preference to strong, but if you don't have any strong
+
+420
+00:36:32,019 --> 00:36:37,059
+symbol, then you pick anyone.
+
+421
+00:36:37,059 --> 00:36:39,419
+Is it clear?
+
+422
+00:36:39,419 --> 00:36:43,739
+Now quizzes, what will happen in this case?
+
+423
+00:36:46,739 --> 00:36:49,359
+Error out.
+
+424
+00:36:49,359 --> 00:36:52,959
+You have faith in linker that it will error out.
+
+425
+00:36:52,959 --> 00:37:02,739
+It will error out because var is strong here and strong here, two strong not allowed error.
+
+426
+00:37:02,739 --> 00:37:13,639
+In this case, no error and only one copy of var will remain finally.
+
+427
+00:37:13,639 --> 00:37:18,400
+So there are no two var's earlier as you were thinking that there is one var here and
+
+428
+00:37:18,400 --> 00:37:19,400
+one var here.
+
+429
+00:37:19,400 --> 00:37:24,400
+There is no, there is only single copy of var.
+
+430
+00:37:24,400 --> 00:37:28,839
+What happens in this case?
+
+431
+00:37:28,839 --> 00:37:33,159
+Remember the rule which I told says pick any weak symbol.
+
+432
+00:37:33,159 --> 00:38:01,719
+It didn't say anything about size or anything.
+
+433
+00:38:01,719 --> 00:38:03,919
+No error, but what will actually happen?
+
+434
+00:38:03,919 --> 00:38:09,079
+Which var will be picked up?
+
+435
+00:38:09,079 --> 00:38:10,639
+You can't say, right?
+
+436
+00:38:10,639 --> 00:38:14,559
+So does everyone agree that there is no error in this?
+
+437
+00:38:14,559 --> 00:38:18,119
+Because both var here and here are weak, right?
+
+438
+00:38:18,119 --> 00:38:21,719
+So linker is free to choose any one of them.
+
+439
+00:38:21,719 --> 00:38:29,079
+Now we don't even know whether linker will choose var which has 12 byte size or 8 byte
+
+440
+00:38:29,079 --> 00:38:31,439
+size.
+
+441
+00:38:31,440 --> 00:38:34,480
+Linker may choose any one of them.
+
+442
+00:38:34,480 --> 00:38:41,400
+And let's hypothetically assume if linker chose the one which has 12 byte size, what
+
+443
+00:38:41,400 --> 00:38:47,400
+will be output of this code?
+
+444
+00:38:47,400 --> 00:38:58,800
+So link, sorry.
+
+445
+00:38:58,800 --> 00:39:26,600
+What if linker chose this var to resolve?
+
+446
+00:39:26,599 --> 00:39:42,239
+So, what will happen?
+
+447
+00:39:42,239 --> 00:39:48,000
+So if linker chooses var to be 8 bytes, what will happen?
+
+448
+00:39:48,000 --> 00:39:54,239
+Correct.
+
+449
+00:39:54,239 --> 00:39:59,599
+So if a happens to be following var in terms of the memory addresses, a will actually get
+
+450
+00:39:59,599 --> 00:40:03,599
+overwritten.
+
+451
+00:40:03,599 --> 00:40:13,320
+What will happen in this case?
+
+452
+00:40:13,320 --> 00:40:19,440
+In the prior case, you might get lucky because if linker chooses this to be var, in this
+
+453
+00:40:19,440 --> 00:40:25,519
+case your luck runs out because linker has to choose this one because this is a strong
+
+454
+00:40:25,519 --> 00:40:28,519
+definition.
+
+455
+00:40:28,519 --> 00:40:31,519
+Yes.
+
+456
+00:40:31,519 --> 00:40:34,760
+Sorry.
+
+457
+00:40:35,760 --> 00:40:45,360
+So, if you look at the rules which I told, when linker is resolving it is not looking
+
+458
+00:40:45,360 --> 00:40:48,600
+at any things like size and other things.
+
+459
+00:40:48,600 --> 00:40:50,560
+Just saying that, okay.
+
+460
+00:40:50,560 --> 00:40:55,720
+And this is why it said that even variable could be a function and function could be
+
+461
+00:40:55,720 --> 00:40:59,560
+a variable which we saw just before the break.
+
+462
+00:40:59,560 --> 00:41:02,600
+So when it's resolving references, it's not looking at anything.
+
+463
+00:41:02,599 --> 00:41:05,199
+It's just looking at name.
+
+464
+00:41:05,199 --> 00:41:07,039
+Yes.
+
+465
+00:41:07,039 --> 00:41:16,920
+So, this typically actually will fall into undefined behavior because this code is logically
+
+466
+00:41:16,920 --> 00:41:17,920
+incorrect.
+
+467
+00:41:17,920 --> 00:41:22,079
+There is no sane way to say what will happen in this code and that's why you shouldn't
+
+468
+00:41:22,079 --> 00:41:23,880
+be writing these kind of codes.
+
+469
+00:41:23,880 --> 00:41:27,199
+These are use at your own risk kind of codes.
+
+470
+00:41:27,399 --> 00:41:33,199
+So, don't say that we learned coding guidelines which said define two variables with the same
+
+471
+00:41:33,199 --> 00:41:34,799
+name in multiple files.
+
+472
+00:41:34,799 --> 00:41:37,799
+Don't do such things.
+
+473
+00:41:37,799 --> 00:41:45,159
+So, does everyone understand subtle difference between this case and this case?
+
+474
+00:41:45,159 --> 00:41:50,399
+In this case, linker, you are forcing linker to choose this as the definition.
+
+475
+00:41:50,399 --> 00:41:55,199
+That means you are guaranteed to override something which falls in this memory location
+
+476
+00:41:55,199 --> 00:41:58,000
+which in most likely case will be A.
+
+477
+00:42:03,199 --> 00:42:08,799
+So, are you still up and we can continue for some more time or you are tired?
+
+478
+00:42:13,199 --> 00:42:17,000
+So, the last thing which linker needs to do is relocation.
+
+479
+00:42:17,000 --> 00:42:25,599
+So, what will linker essentially do is merge these things.
+
+480
+00:42:25,599 --> 00:42:32,400
+As a part of that, it is going to change addresses because data section might be leaving here
+
+481
+00:42:32,400 --> 00:42:38,400
+at address 100, but in this case it might leave at address 10,000 and vice versa.
+
+482
+00:42:38,400 --> 00:42:43,599
+So, what linker is doing is relocating various sections which were present in the object
+
+483
+00:42:43,599 --> 00:42:46,400
+file to a different layout.
+
+484
+00:42:46,400 --> 00:42:55,200
+Now, after relocating these things and together what you have is you have a executable file
+
+485
+00:42:55,200 --> 00:42:57,599
+which has the final addresses.
+
+486
+00:42:57,599 --> 00:43:04,000
+Remember, assembler did not have this information.
+
+487
+00:43:04,000 --> 00:43:12,099
+So, assembler had to somehow say that change these references.
+
+488
+00:43:12,099 --> 00:43:18,299
+The way assembler does this is by doing something called as a relocation entry.
+
+489
+00:43:18,299 --> 00:43:22,699
+So, there are two kinds of common relocations.
+
+490
+00:43:22,699 --> 00:43:29,900
+One is R386PC32 and one is R38632 which we will see.
+
+491
+00:43:29,900 --> 00:43:40,299
+So, R386PC32 says change this value with the PC relative offset and R38632 says change
+
+492
+00:43:40,500 --> 00:43:42,900
+this value with the address of whatever it is.
+
+493
+00:43:42,900 --> 00:43:44,300
+We will see the details.
+
+494
+00:43:44,300 --> 00:43:48,100
+I am just trying to give abstract way of what these do.
+
+495
+00:43:48,100 --> 00:43:50,200
+Who defines these relocations?
+
+496
+00:43:50,200 --> 00:43:51,700
+These are again part of the ABI.
+
+497
+00:43:51,700 --> 00:43:59,500
+So, ABI will say that assembler should generate these relocations for this type of use.
+
+498
+00:43:59,500 --> 00:44:04,900
+Now, let us look at this code.
+
+499
+00:44:04,900 --> 00:44:16,300
+Let us say I have file 1 and I am calling function foo.
+
+500
+00:44:16,300 --> 00:44:32,700
+Now, when I do gcc dash c dash m32 foo dot c, sorry, file 1 dot c and let me do objdump
+
+501
+00:44:32,700 --> 00:44:37,300
+dash d file 1 dot o.
+
+502
+00:44:37,300 --> 00:44:40,940
+What you see here is you see a call.
+
+503
+00:44:40,940 --> 00:44:43,500
+This was supposed to be called to foo.
+
+504
+00:44:43,500 --> 00:44:44,500
+Remember?
+
+505
+00:44:44,699 --> 00:44:47,800
+What you see here is some garbage stuff.
+
+506
+00:44:47,800 --> 00:44:54,300
+This is not even address of foo.
+
+507
+00:44:54,300 --> 00:45:00,699
+So, what is actually happening is link assembler is generating some placeholder number.
+
+508
+00:45:00,699 --> 00:45:03,699
+We will see why that 7 came there.
+
+509
+00:45:03,699 --> 00:45:08,099
+But for now, assume whenever call happened, assembler did not know what to generate.
+
+510
+00:45:08,099 --> 00:45:10,500
+So, it puts 0 there.
+
+511
+00:45:10,500 --> 00:45:18,199
+It generated additional relocation entry called r386pc32 with foo.
+
+512
+00:45:18,199 --> 00:45:19,500
+We can see that here.
+
+513
+00:45:19,500 --> 00:45:26,500
+So, if I do redelp dash r file 1 dot o, we can actually see that.
+
+514
+00:45:26,500 --> 00:45:35,900
+So, it is something r386pc32 foo and some other information.
+
+515
+00:45:35,900 --> 00:45:40,700
+What will happen is when linker is taking these two things together, linker will look
+
+516
+00:45:40,700 --> 00:45:48,300
+at the relocations and after it is done merging things together, linker knows how to change
+
+517
+00:45:48,300 --> 00:45:54,900
+this 0 to actual address of foo using this relocation entry.
+
+518
+00:45:54,900 --> 00:45:56,300
+Is it clear?
+
+519
+00:45:56,300 --> 00:45:58,099
+In nutshell, what linker is doing?
+
+520
+00:45:58,099 --> 00:46:01,300
+So, linker will concatenate all the text sections together.
+
+521
+00:46:01,300 --> 00:46:03,900
+So, linker will know what is address of foo.
+
+522
+00:46:03,900 --> 00:46:10,599
+And then it will look at wherever this entry is there and it will go and change this somehow
+
+523
+00:46:10,599 --> 00:46:12,500
+to point to address of foo.
+
+524
+00:46:12,500 --> 00:46:16,099
+So, linker will essentially end up doing this.
+
+525
+00:46:16,099 --> 00:46:20,500
+Somehow change this code to call foo.
+
+526
+00:46:20,500 --> 00:46:23,900
+Now how it actually does that is this.
+
+527
+00:46:23,900 --> 00:46:29,900
+So, if you look at this obj dump with dash dr.
+
+528
+00:46:30,900 --> 00:46:36,900
+So, it is saying this instruction actually has this relocation associated with it.
+
+529
+00:46:36,900 --> 00:46:40,500
+Now, we will see details of that.
+
+530
+00:46:40,500 --> 00:46:46,900
+So, each relocation entry which is generated has offset.
+
+531
+00:46:46,900 --> 00:46:57,900
+The offset is 7 and the reason offset is 7 is because this is 1, 2, 3, 4, 5, 6, 7.
+
+532
+00:46:58,900 --> 00:47:04,300
+4, 5, 6 and these are this is where the 7 points to.
+
+533
+00:47:04,300 --> 00:47:10,900
+So, E8 what you are seeing here is actually the up code for call instruction.
+
+534
+00:47:10,900 --> 00:47:18,700
+So, call instruction in x86 architecture is encoded as E8 followed by a 32 bit number
+
+535
+00:47:18,700 --> 00:47:21,300
+which is supposed to give the address.
+
+536
+00:47:21,300 --> 00:47:22,500
+Is it clear?
+
+537
+00:47:22,500 --> 00:47:26,900
+So, these next 4 bytes are supposed to give the address.
+
+538
+00:47:26,900 --> 00:47:35,900
+So, what this relocation is saying is at offset 7 within the text section apply this relocation.
+
+539
+00:47:35,900 --> 00:47:40,900
+Now, the relocation has symbol associated with it.
+
+540
+00:47:40,900 --> 00:47:48,900
+Now, what is this symbol saying is change address of this whatever is the content of
+
+541
+00:47:48,900 --> 00:47:52,900
+this with address of foo.
+
+542
+00:47:53,900 --> 00:48:01,900
+And what is this fc ffff this is actually minus 4 if you look at the 2's complement.
+
+543
+00:48:01,900 --> 00:48:07,900
+I mean this number is actually 2's complement of I mean hex representation of minus 4 in
+
+544
+00:48:07,900 --> 00:48:09,900
+2's complement format.
+
+545
+00:48:09,900 --> 00:48:17,900
+So, what this instruction is saying is this is E8 this address needs to be changed to foo
+
+546
+00:48:17,900 --> 00:48:21,900
+and there is something called as addend which is minus 4.
+
+547
+00:48:22,900 --> 00:48:31,900
+Now, what linker will do is linker will change this content with address of symbol plus addend
+
+548
+00:48:31,900 --> 00:48:34,900
+minus the offset.
+
+549
+00:48:34,900 --> 00:48:45,900
+The offset is 7 addend is minus 4 and symbol is foo.
+
+550
+00:48:45,900 --> 00:48:50,900
+So, this is actually going to change it to something like this.
+
+551
+00:48:50,900 --> 00:49:05,900
+Why because address of foo was this 80483 eaf it added minus 4 to it and it subtracted
+
+552
+00:49:05,900 --> 00:49:08,900
+this current address from it.
+
+553
+00:49:08,900 --> 00:49:15,900
+Current address was 80483 e4 is this clear.
+
+554
+00:49:15,900 --> 00:49:24,900
+So, what we are seeing is essentially this content was being changed with function which
+
+555
+00:49:24,900 --> 00:49:35,900
+changed which added address of foo subtracted minus 4 from it added offset of the current
+
+556
+00:49:35,900 --> 00:49:41,900
+instruction itself to form this.
+
+557
+00:49:41,900 --> 00:49:46,900
+And if you look at why this is 7 is if you actually calculate the PC relative address
+
+558
+00:49:46,900 --> 00:49:50,900
+of foo from here it is 7 bytes away.
+
+559
+00:49:50,900 --> 00:49:54,900
+So, 1 2 3 4 5 6 7.
+
+560
+00:49:54,900 --> 00:50:03,900
+So, this instruction is saying that jump to PC relative address which is 7 bytes away.
+
+561
+00:50:03,900 --> 00:50:06,900
+Does that make sense?
+
+562
+00:50:06,900 --> 00:50:08,900
+Let us look at this in action.
+
+563
+00:50:08,900 --> 00:50:21,900
+So, I have file 1 dot c and I have file 2 dot c for simplicity I will not do anything
+
+564
+00:50:21,900 --> 00:50:23,900
+in foo.
+
+565
+00:50:23,900 --> 00:50:32,900
+Now, let us do.
+
+566
+00:50:32,900 --> 00:50:51,900
+So, what this is saying is this is saying call has this relocation.
+
+567
+00:50:51,900 --> 00:51:00,900
+Now, I have file 1.
+
+568
+00:51:01,900 --> 00:51:06,900
+Now, let us link these things together file 1 dot o file 2 dot o dash m 32.
+
+569
+00:51:06,900 --> 00:51:14,900
+Now, let me dump a dot out dash dr.
+
+570
+00:51:14,900 --> 00:51:28,900
+So, if you look at main main is at address this foo is at address this.
+
+571
+00:51:28,900 --> 00:51:40,900
+Now, if you look at this instruction this earlier had let me copy paste this part.
+
+572
+00:51:58,900 --> 00:52:20,900
+So, originally this instruction was looking something like this.
+
+573
+00:52:20,900 --> 00:52:32,900
+The way I changed this instruction is I looked at what is address of foo.
+
+574
+00:52:32,900 --> 00:52:43,900
+So, this then I added added value to it addend value is this which was here.
+
+575
+00:52:43,900 --> 00:52:54,900
+So, I did minus 4 and I added address of the current where the relocation needs to be
+
+576
+00:52:54,900 --> 00:53:02,900
+applied which happens to be 4 because this is 3.
+
+577
+00:53:02,900 --> 00:53:05,900
+So, this address starts at 4.
+
+578
+00:53:05,900 --> 00:53:08,900
+So, this computation actually results in.
+
+579
+00:53:35,900 --> 00:53:49,900
+Something is wrong.
+
+580
+00:53:49,900 --> 00:54:08,900
+Something is wrong.
+
+581
+00:54:08,900 --> 00:54:28,900
+Sorry, this should have been minus.
+
+582
+00:54:28,900 --> 00:54:49,900
+So, it results in 2 which is what you see encoded here and why it is 2 is because foo
+
+583
+00:54:49,900 --> 00:54:51,900
+is actually 2 bytes away from this.
+
+584
+00:54:51,900 --> 00:54:58,900
+So, what it essentially did is this relocation helped you compute the relative address of
+
+585
+00:54:58,900 --> 00:55:00,900
+foo from main.
+
+586
+00:55:00,900 --> 00:55:03,900
+Let us look at a slightly simpler example.
+
+587
+00:55:03,900 --> 00:55:26,900
+Let us say I had in here I was referring to some data in and here I defined.
+
+588
+00:55:26,900 --> 00:55:38,900
+Now, let us look at this.
+
+589
+00:55:38,900 --> 00:55:50,900
+So, what you see is var is undefined here.
+
+590
+00:55:50,900 --> 00:56:03,900
+Now, if I look at objdump dash dr of file 1 dot o, I see that this instruction is trying
+
+591
+00:56:03,900 --> 00:56:12,900
+to move value 10 into an address 0 and address 0 is there because I do not know what is the
+
+592
+00:56:12,900 --> 00:56:14,900
+address of var.
+
+593
+00:56:15,900 --> 00:56:21,900
+So, there is a relocation called var with r38632.
+
+594
+00:56:21,900 --> 00:56:26,900
+Now, let us look at file 2.
+
+595
+00:56:26,900 --> 00:56:29,900
+So, I have file 2.
+
+596
+00:56:29,900 --> 00:56:38,900
+Now, what I will do is file 2 defines this variable at some offset 0.
+
+597
+00:56:38,900 --> 00:56:45,900
+Now let us link these together file 2 dot o.
+
+598
+00:56:45,900 --> 00:57:01,900
+Now, when I look at a dot out, you will actually see this instruction it changed to move a
+
+599
+00:57:01,900 --> 00:57:17,900
+to something like this and if you look at this was the exact address.
+
+600
+00:57:17,900 --> 00:57:22,900
+So, what this did?
+
+601
+00:57:22,900 --> 00:57:23,900
+Let us look at it.
+
+602
+00:57:23,900 --> 00:57:28,900
+I will copy paste some part.
+
+603
+00:57:28,900 --> 00:57:50,900
+So, this was the original code.
+
+604
+00:57:50,900 --> 00:58:17,900
+This is the final var and this is how it looks in the text section.
+
+605
+00:58:17,900 --> 00:58:39,900
+So, what this did is when assembler generated this reference to var, it did not know what
+
+606
+00:58:39,900 --> 00:58:40,900
+address to generate.
+
+607
+00:58:40,900 --> 00:58:49,900
+So, it generated address 0 and it says that I need to change the 32 bits here with the
+
+608
+00:58:49,900 --> 00:58:50,900
+address of var.
+
+609
+00:58:50,900 --> 00:58:59,900
+Now, when linker laid out all the things together, linker chose var to be at this address and
+
+610
+00:58:59,900 --> 00:59:08,900
+what relocation told linker is I need to change this instruction to contain its address and
+
+611
+00:59:08,900 --> 00:59:12,900
+linker ended up putting this address.
+
+612
+00:59:12,900 --> 00:59:13,900
+Is this clear?
+
+613
+00:59:13,900 --> 00:59:17,900
+This is kind of bit tricky because this is and this is the most complicated part of the
+
+614
+00:59:17,900 --> 00:59:26,260
+linker where it needs to do the relocation application.
+
+615
+00:59:26,260 --> 00:59:28,900
+Any doubts or questions so far?
+
+616
+00:59:28,900 --> 00:59:33,460
+So, fundamental reason why relocations exist is fairly simple.
+
+617
+00:59:33,460 --> 00:59:37,660
+When assembler is generating code, assembler does not have information about addresses
+
+618
+00:59:37,659 --> 00:59:38,659
+of the symbols.
+
+619
+00:59:38,659 --> 00:59:45,500
+So, it generates some placeholder saying it could be 0 and generates additional metadata
+
+620
+00:59:45,500 --> 00:59:54,659
+for linker to say change these 0s to some values and linker after it has laid out everything
+
+621
+00:59:54,659 --> 00:59:59,659
+will actually change them.
+
+622
+00:59:59,659 --> 01:00:04,659
+So, this is what we actually did essentially.
+
+623
+01:00:04,659 --> 01:00:07,659
+Now, we still have 5-10 minutes.
+
+624
+01:00:07,659 --> 01:00:13,659
+So, what you can do is you can look at this sample code and see what relocations were
+
+625
+01:00:13,659 --> 01:00:16,659
+generated for this code.
+
+626
+01:00:16,659 --> 01:00:19,659
+You just have to observe what kind of things were generated.
+
+627
+01:00:19,659 --> 01:00:26,659
+So, I have a external int i and I declare a pointer and take its address.
+
+628
+01:00:26,659 --> 01:00:31,659
+Now, you can see that there is no way assembler knows what is the address of i.
+
+629
+01:00:31,659 --> 01:00:34,659
+So, it has to generate some relocation.
+
+630
+01:00:34,659 --> 01:00:39,659
+So, you can look at redelf-r and see what happens.
+
+631
+01:00:39,659 --> 01:00:48,659
+Actually, let us try it ourselves here that it might be easier.
+
+632
+01:00:48,659 --> 01:00:53,659
+So, let us say I have this file.
+
+633
+01:00:53,659 --> 01:01:02,059
+Here I declare int star ptr and I have external int i.
+
+634
+01:01:02,059 --> 01:01:19,659
+I do address of i and in file 2, I define i.
+
+635
+01:01:19,659 --> 01:01:35,659
+Now, gcc.
+
+636
+01:01:35,659 --> 01:01:48,739
+If we look at redelf, so it says i is undefined and pointer is a 4 byte value into data section
+
+637
+01:01:48,739 --> 01:01:57,059
+into data section.
+
+638
+01:01:57,059 --> 01:02:04,139
+If we observe the contents of data section, they should ideally contain address of i.
+
+639
+01:02:04,139 --> 01:02:22,179
+So, if you look at it, the content is actually 0 0 because it has no idea what content to
+
+640
+01:02:22,179 --> 01:02:24,619
+put there because it was supposed to be address of i.
+
+641
+01:02:24,619 --> 01:02:42,940
+Now, if we look at redelf, what it is saying is at offset 0 in the data section, apply
+
+642
+01:02:42,940 --> 01:02:48,339
+this relocation and put address of i.
+
+643
+01:02:48,339 --> 01:02:49,819
+Does it make sense?
+
+644
+01:02:50,700 --> 01:02:58,180
+So, in the data section at offset 0, offset 0 holds content of ptr.
+
+645
+01:02:58,180 --> 01:03:02,660
+Put the address of i.
+
+646
+01:03:02,660 --> 01:03:05,260
+Let us look at slightly more convoluted example.
+
+647
+01:03:05,260 --> 01:03:25,900
+So, let us say I had int i and int j and I had two pointers, let us say.
+
+648
+01:03:25,900 --> 01:03:33,180
+So, I see two relocations.
+
+649
+01:03:33,180 --> 01:03:40,280
+One is at address 0 which says patch the address of i and other is at offset 4 which says patch
+
+650
+01:03:40,280 --> 01:03:43,019
+the address of j.
+
+651
+01:03:43,019 --> 01:03:54,460
+If you look at symbol table, i is at offset 0 in the data section and j, sorry ptr is
+
+652
+01:03:54,539 --> 01:03:59,179
+at offset 0 in the data section and ptr 2 is at offset 4.
+
+653
+01:03:59,179 --> 01:04:03,900
+So, are you getting how the relocation information is generated?
+
+654
+01:04:03,900 --> 01:04:09,860
+So, relocation information in nutshell is saying go to this section, add this offset,
+
+655
+01:04:09,860 --> 01:04:12,780
+change these values by address of this.
+
+656
+01:04:12,780 --> 01:04:17,059
+Now, let us look at what happens in file 2.c.
+
+657
+01:04:17,059 --> 01:04:21,659
+So, I have file 2.c which defined this.
+
+658
+01:04:22,299 --> 01:04:34,379
+So, if I look at dot data section, I could see this.
+
+659
+01:04:34,379 --> 01:04:42,219
+So, it says that the content of ptr is 0000, but it has a relocation which is going to
+
+660
+01:04:42,219 --> 01:04:49,339
+change it with address of i and then ptr 2 is again 0000 and its content is going to
+
+661
+01:04:49,340 --> 01:04:51,100
+change with address of j.
+
+662
+01:04:51,100 --> 01:04:53,740
+Now, let us link these two things.
+
+663
+01:04:53,740 --> 01:05:07,100
+So, these are now linked.
+
+664
+01:05:07,099 --> 01:05:28,739
+Now let us look at, so we can see the content of data section is something like this 1cA408
+
+665
+01:05:28,739 --> 01:05:30,380
+and something like this.
+
+666
+01:05:30,380 --> 01:05:47,820
+And if we look at i, this is actually at address this 1c0A408.
+
+667
+01:05:47,820 --> 01:05:50,420
+So, you could see that.
+
+668
+01:05:50,420 --> 01:05:56,700
+So, essentially what linker ended up doing is after it allocated i, it changed that content
+
+669
+01:05:57,179 --> 01:06:02,219
+to whatever was address of i.
+
+670
+01:06:02,219 --> 01:06:04,859
+Is this clear on what happened so far?
+
+671
+01:06:04,859 --> 01:06:11,779
+So, just to summarize, relocation is going to change content of a section with address
+
+672
+01:06:11,779 --> 01:06:14,899
+of some variables.
+
+673
+01:06:14,899 --> 01:06:19,980
+And it is going to do that after linker has allocated addresses to everything.
+
+674
+01:06:20,340 --> 01:06:26,219
+So when linker merged the input files, it assigned addresses to everything and after
+
+675
+01:06:26,219 --> 01:06:31,980
+that it went over each relocation and changed the content to hold that address, whichever
+
+676
+01:06:31,980 --> 01:06:33,539
+it was assigned.
+
+677
+01:06:33,539 --> 01:06:39,699
+And by this mechanism, the executable file which you have does not have any unresolved
+
+678
+01:06:39,699 --> 01:06:46,099
+references because all the move instructions were changed to point to actual address.
+
+679
+01:06:46,099 --> 01:06:50,699
+Content of PTR was changed to point to the actual address of i.
+
+680
+01:06:50,699 --> 01:06:54,860
+That is why executable files are self-sufficient.
+
+681
+01:06:54,860 --> 01:06:59,539
+They do not have any other dependencies and they can actually be run directly.
+
+682
+01:06:59,539 --> 01:07:04,299
+So, I think we will stop here for today.
+
+683
+01:07:04,299 --> 01:07:08,500
+I am still here for some more time, so if you have questions, I can answer that.
+
+684
+01:07:08,500 --> 01:07:14,500
+And tomorrow we will start with how static libraries are implemented in the linker and
+
+685
+01:07:14,579 --> 01:07:21,300
+various other things with respect to how program will actually start executing in the system.
+
+686
+01:07:21,300 --> 01:07:27,900
+Just to summarize today's discussion, so we kind of started off with what happens during
+
+687
+01:07:27,900 --> 01:07:35,019
+the overall compilation flow, preprocessor, compiler, linker, assembler and so on.
+
+688
+01:07:35,019 --> 01:07:41,099
+Then we looked into details of what all happens during a function call, how the return addresses
+
+689
+01:07:41,099 --> 01:07:47,579
+are saved, how parameters are passed, how stack is used to allocate local variables.
+
+690
+01:07:47,579 --> 01:07:52,980
+Then we looked into the linker and linker kind of tried to have details of how the object
+
+691
+01:07:52,980 --> 01:07:59,599
+files are merged together, how the references are resolved and what are the rules about
+
+692
+01:07:59,599 --> 01:08:02,219
+strong and weak symbols.
+
+693
+01:08:02,219 --> 01:08:07,860
+And we also looked at content of the object file itself that it has sections which are
+
+694
+01:08:07,860 --> 01:08:14,579
+organized and section itself are described using section header.
+
+695
+01:08:14,579 --> 01:08:20,260
+Section headers are derived from the elf header which has a pointer to it.
+
+696
+01:08:20,260 --> 01:08:26,060
+And each of the section may have relocations which dictate how to change content of the
+
+697
+01:08:26,060 --> 01:08:29,579
+section to hold final date.
+

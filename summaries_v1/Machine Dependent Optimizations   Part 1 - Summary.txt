@@ -1,0 +1,32 @@
+ Exam Notes from Lecture on Backend of Compiler and Machine Architecture:
+
+* The lecture focuses on the backend of the compiler, specifically code generation and machine-dependent optimizations.
+* Prior knowledge of machine architecture and compiler frontend (lexical analysis, semantic analysis, data flow analysis, intermediate code representation) is assumed.
+* The instructor will begin with a brief overview of machine architecture, including instruction set architecture, processor data path, pipelining, and hazards.
+* Instruction Set Architecture (ISA): The view of the computer to the programmer or compiler. Divided into Complex Instruction Set Computer (CISC) and Reduced Instruction Set Computer (RISC). CISC hosts complex operations involving memory and registers or memory and memory; RISC has fewer instructions but more registers.
+* Processor Data Path and Pipelining: Discusses how instructions are processed in a pipeline, broken down into instruction fetch, decode, execute, memory, and writeback stages. Also covers structural hazards, data hazards, and control hazards, which can cause stalls in the pipeline.
+* Code Generation: Focuses on generating assembly instructions for a specific machine. Covers instruction selection, determining the best way to generate code for intermediate code.
+* Register Allocation: Assigning appropriate registers to operands in the machine code. Important in RISC machines as all instructions use registers.
+* Instruction Scheduling: Reordering of machine instructions to expose instruction-level parallelism.
+* Memory Hierarchy: Understanding the memory architecture, including caches, to generate efficient code.
+* Data Parallelism: Exploiting data parallelism in the architecture for optimal code generation.
+* Optimization: Discussion on specific machine-specific optimizations like optimizing for memory hierarchy or vector parallelism.
+
+Key Terms:
+
+* Machine Architecture
+	+ ISA (Instruction Set Architecture)
+		- CISC (Complex Instruction Set Computer)
+		- RISC (Reduced Instruction Set Computer)
+	+ Processor Data Path
+	+ Pipelining
+		- Structural Hazards
+		- Data Hazards
+		- Control Hazards
+* Code Generation
+	+ Instruction Selection
+* Register Allocation
+* Instruction Scheduling
+* Memory Hierarchy
+* Data Parallelism
+* Optimization

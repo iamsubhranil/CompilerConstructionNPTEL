@@ -1,0 +1,2956 @@
+1
+00:00:00,000 --> 00:00:10,220
+So, today we will look at lattice theory. So, we will look at more the lattice theory
+
+2
+00:00:10,220 --> 00:00:14,240
+and fixed point theory. So, see we look at look at the mathematical foundations of why
+
+3
+00:00:14,240 --> 00:00:22,199
+the analysis that we described yesterday really works. Why do you think it should really work?
+
+4
+00:00:22,199 --> 00:00:29,640
+So, before we get into anything let us just start covering the basics. So, first is what
+
+5
+00:00:29,640 --> 00:00:41,359
+is a set? So, what is a set? So, it is a collection of elements. The next thing is
+
+6
+00:00:41,359 --> 00:00:54,840
+a notion of a binary relation. So, what is a binary relation? Relation between two elements
+
+7
+00:00:54,920 --> 00:01:06,240
+of a relation between elements of a set. Can you describe the binary relation? What was
+
+8
+00:01:06,240 --> 00:01:18,439
+it? Marriage. Marriage, okay nice. That was a good relation in all senses. So, other than
+
+9
+00:01:18,439 --> 00:01:31,920
+mathematically what relation can you think of? Other than social relation. So, relations like
+
+10
+00:01:31,920 --> 00:01:41,560
+greater than less than. So, essentially we will use this notation. So, you say if A and B are
+
+11
+00:01:41,560 --> 00:01:51,719
+elements of some set then I can say that I use the notation A R B to say is A is related to B,
+
+12
+00:01:51,719 --> 00:01:58,800
+right? Or we can also essentially describe the same thing in a slightly different way.
+
+13
+00:01:58,800 --> 00:02:08,480
+I can think of the same business. I can think of this R the relation R as also a set and now it is
+
+14
+00:02:08,479 --> 00:02:14,959
+a set of tuples A comma B, right? So, people keep on using these two notation interchangeably,
+
+15
+00:02:14,959 --> 00:02:21,199
+right? So, I can say that A is less than equal to B. So, less than equal to being the binary
+
+16
+00:02:21,199 --> 00:02:29,079
+relation or I can say the tuple A comma B is element of this set less than equal to, right?
+
+17
+00:02:29,079 --> 00:02:35,560
+Both of them mean the same thing. So, this ordering you maintain this. So, it is a tuple. It is not
+
+18
+00:02:35,560 --> 00:02:44,439
+so you have to that ordering does matter, right? So, now there are some properties of
+
+19
+00:02:44,439 --> 00:02:51,400
+sets that we properties of relations we discuss. So, the first is reflexivity. So, what is
+
+20
+00:02:51,400 --> 00:03:04,840
+reflexivity? When do we say relation is reflexive? When every element is related to itself, right? So,
+
+21
+00:03:04,840 --> 00:03:14,280
+when A comma A is always a member of this relation, right? Then the next is symmetry.
+
+22
+00:03:14,280 --> 00:03:29,199
+What is symmetry? Right. So, if A is related to B, it implies that B is related to A. The next is
+
+23
+00:03:29,199 --> 00:03:37,839
+anti-symmetry. What is anti-symmetry? There is small difference between asymmetry and anti-symmetry.
+
+24
+00:03:37,839 --> 00:03:48,839
+Yes, that is the right definition. So, you say that if A is related to B and you say that B is
+
+25
+00:03:48,840 --> 00:03:59,599
+also related to A, then it implies that A must be equal to B, right? So, it is possible that these
+
+26
+00:03:59,599 --> 00:04:07,520
+two happen, but if these two happen, it simply means that this must be the same element, right?
+
+27
+00:04:07,520 --> 00:04:21,800
+And the next is transitivity. What is transitivity? Yeah. So, A is related to B and B is related to some C,
+
+28
+00:04:21,800 --> 00:04:35,840
+then we simply say A must be related to C. Agreed? Okay. So, next we define the notion of a poset or
+
+29
+00:04:35,839 --> 00:04:41,079
+a partially ordered set. So, we talked a little bit about that yesterday, but let us define it
+
+30
+00:04:41,079 --> 00:04:47,319
+formally now. So, whenever I say, okay, there is a poset, you should ask me that what is the set here?
+
+31
+00:04:47,319 --> 00:04:54,359
+What is the underlying set? And you have to ask me what is the underlying relation, right? So,
+
+32
+00:04:55,359 --> 00:05:04,399
+I have a set S and a relation less than equal to. So, a poset, so what are the, anybody knows what
+
+33
+00:05:04,399 --> 00:05:16,279
+are the properties that a poset satisfies? So, first is it, is it reflexive? So, it is reflexive.
+
+34
+00:05:16,279 --> 00:05:24,439
+It means that every element in the poset must be related to itself by the less than equal to,
+
+35
+00:05:24,439 --> 00:05:31,079
+that is why it is a less than equal to and not less than, right? So, the next is, is it symmetric?
+
+36
+00:05:31,079 --> 00:05:43,159
+No, it is not symmetric, it is antisymmetric. And the third is, it is transitive.
+
+37
+00:05:43,159 --> 00:05:57,159
+What is antisymmetric will be symmetric, not really, actually they are anti, the names is anti, right?
+
+38
+00:05:57,240 --> 00:06:05,760
+Not belongs, related to.
+
+39
+00:06:05,760 --> 00:06:19,600
+No, just see the if then else condition. So, this is the condition, if this condition holds,
+
+40
+00:06:19,600 --> 00:06:23,600
+then this condition holds. It is not saying that for all elements this condition holds, right?
+
+41
+00:06:24,120 --> 00:06:31,439
+So, this is implies, this is implies, right? So, this is given the left hand side is true,
+
+42
+00:06:31,439 --> 00:06:33,200
+then the right hand side surely holds.
+
+43
+00:06:33,200 --> 00:06:40,280
+Yes.
+
+44
+00:06:40,280 --> 00:06:53,520
+Exactly, it is a very well put. And in fact, like you said that I am just speaking to elements,
+
+45
+00:06:53,919 --> 00:06:57,919
+and saying there is a relation between them. And not even saying any two element will have
+
+46
+00:06:57,919 --> 00:07:05,000
+to even be related, any two arbitrary elements have to be related, that is not even the case, right?
+
+47
+00:07:05,000 --> 00:07:09,479
+So, these just say that how does this relation look like. So, this says that if it is the case
+
+48
+00:07:09,479 --> 00:07:14,079
+that A is related to B and it is the case that B is related to A, then it is surely the case that
+
+49
+00:07:14,079 --> 00:07:32,399
+A must be equal to B, right? So, now let us try to think of a way of representing posets,
+
+50
+00:07:32,399 --> 00:07:39,240
+right? And they are, the posets are extremely important as mathematical structures as well
+
+51
+00:07:39,240 --> 00:07:45,960
+as in computer science when we discuss algorithms and things like that. So, we, we, let us have a
+
+52
+00:07:45,960 --> 00:07:52,480
+nice representation to describe a poset. So, that I, in graphically I can describe what my S is and
+
+53
+00:07:52,480 --> 00:07:58,720
+how does the relation less than equal to hold on that set. So, let us try to use the properties
+
+54
+00:07:58,720 --> 00:08:07,160
+of the poset, right? So, one property I know is that it is reflexive, it is anti-symmetric,
+
+55
+00:08:07,160 --> 00:08:13,920
+it is transitive. So, think about this. Let us say I use this, I try to represent it using a graph
+
+56
+00:08:13,920 --> 00:08:22,880
+where every point that I have is basically a member of this set. So, every member of this set,
+
+57
+00:08:22,880 --> 00:08:29,440
+I represent by this graph, as a node in this graph, right? The second is I need to describe
+
+58
+00:08:29,439 --> 00:08:37,919
+what are the edges. So, I say whenever A is related to B, I will have an edge going from A to B,
+
+59
+00:08:37,919 --> 00:08:45,919
+it is a directed edge, right? So, I will, whenever A is related to B, I will create an edge between
+
+60
+00:08:45,919 --> 00:08:51,000
+A and B. Whenever B is related to D, I will create an edge between, so this is the same relation,
+
+61
+00:08:51,000 --> 00:09:00,200
+so I need not keep on putting this. So, when A is related to itself, what will I have?
+
+62
+00:09:21,000 --> 00:09:33,799
+So, I will have a self-loop into this, right? What if this, so if this relation was transitive,
+
+63
+00:09:33,799 --> 00:09:44,519
+what will it look like? I will also have this thing between B and if I had a, if this relation
+
+64
+00:09:44,519 --> 00:09:59,319
+was reflexive, then what would I have? Self-loop on all nodes, right? So, do you agree that if
+
+65
+00:09:59,319 --> 00:10:06,559
+I give you this diagram, you should be able to, this completely describes the set and the relation
+
+66
+00:10:06,559 --> 00:10:15,639
+on this set, agreed? Okay. Now, this is looking really ugly, right? I mean forget my handwriting,
+
+67
+00:10:15,639 --> 00:10:25,119
+but even otherwise it is looking ugly, right? So, now the question is that can I use the property
+
+68
+00:10:25,119 --> 00:10:32,439
+of this poset to simplify this diagram? So, if I use this, if I tell you that this diagram is going
+
+69
+00:10:32,440 --> 00:10:41,040
+to be a poset, this is, I am only using to represent a poset, then you already know that because it is
+
+70
+00:10:41,040 --> 00:10:48,520
+a poset, this guy is going to be reflexive. It means that all nodes are surely going to have loops,
+
+71
+00:10:48,520 --> 00:10:53,160
+self-loops. So, what is the point of showing them? I know it is going to be the case, so let us not,
+
+72
+00:10:53,160 --> 00:10:56,440
+because that is not giving additional information, I know it is a poset, so they are going to be
+
+73
+00:10:56,440 --> 00:11:05,240
+self-loop on everything. So, let us get rid of the self-loops, right? Okay, good. Second thing I know
+
+74
+00:11:05,240 --> 00:11:15,640
+is that it is transitive. If it is transitive, if I see a continuous chain, like if I see a link from
+
+75
+00:11:15,640 --> 00:11:23,880
+A to B and B to D, then I know that there is going to be a link between A and D, right? So, I can just
+
+76
+00:11:23,879 --> 00:11:30,240
+follow a sequence of edges, I know that relation surely holds. Again, that extra edge is not giving
+
+77
+00:11:30,240 --> 00:11:38,039
+any extra information, right? So, again I can simplify my diagram, I can get rid of this, right?
+
+78
+00:11:38,039 --> 00:11:45,480
+The third thing I know that it is going to be antisymmetric, right? If it is antisymmetric,
+
+79
+00:11:45,480 --> 00:11:51,440
+then I am sure that if there is a relation between A to B, then there cannot be a relation,
+
+80
+00:11:51,920 --> 00:11:57,560
+there cannot be a line going the other direction, there cannot be a line going from B to A. If this
+
+81
+00:11:57,560 --> 00:12:01,760
+happens, then they surely are the same point, they will collapse into the same point, right? So,
+
+82
+00:12:01,760 --> 00:12:06,280
+it cannot happen that there is an edge going from A to B and there is also an edge going from B to A,
+
+83
+00:12:06,280 --> 00:12:14,040
+that is not possible, right? So, then what I can do is, I know that my edges can only flow in one
+
+84
+00:12:14,040 --> 00:12:19,840
+direction, they cannot flow in the other direction, this is not possible, right? So, now if my edges
+
+85
+00:12:19,840 --> 00:12:26,680
+flow in one direction, I can always lay my edges in a way that they all go down or they all go up,
+
+86
+00:12:26,680 --> 00:12:34,000
+I can do something like that, right? So, let us say I decide that all my arrows, I just line up my
+
+87
+00:12:34,000 --> 00:12:41,920
+arrows in a way so that they all go down, right? So, in this case, or let us say I am trying to
+
+88
+00:12:41,920 --> 00:12:47,280
+use this particular thing, so let us try to make that all of them, so which one will be the right
+
+89
+00:12:47,279 --> 00:12:56,159
+direction? So, if I order them by less than equal to, so let us keep the lesser guy below, right?
+
+90
+00:12:56,159 --> 00:13:02,360
+Just, I mean, just my way of putting it, it does not hurt anyway, right? So, because I want to,
+
+91
+00:13:02,360 --> 00:13:05,879
+because there is semantic meaning to less than equal to, had it been some arbitrary relation,
+
+92
+00:13:05,879 --> 00:13:10,039
+I would not have bothered, right? But if it, because it is less than equal to, let us keep
+
+93
+00:13:10,039 --> 00:13:17,120
+the lower element downwards, so the arrows go up, right? So, if there is a, if A is less than equal
+
+94
+00:13:17,120 --> 00:13:23,240
+to B, then I will put A below and I will put B upwards. So, all my arrows will only flow upwards,
+
+95
+00:13:23,240 --> 00:13:34,919
+right? Something like this. If all my arrows flow upwards, then what is the point of putting these
+
+96
+00:13:34,919 --> 00:13:42,879
+arrowheads, right? Now, from a directed graph, I can reduce this thing to an undirected graph.
+
+97
+00:13:42,879 --> 00:13:51,279
+So, what have I done? I have used my reflexivity to get rid of self-loops, I have used asymmetry
+
+98
+00:13:51,279 --> 00:13:56,399
+to get rid of direction, directed arrows and I have used transitivity to get rid of this
+
+99
+00:13:56,399 --> 00:14:04,080
+rendered edges which I know sure exist because edges between sequence of nodes, right? So,
+
+100
+00:14:04,080 --> 00:14:16,639
+this particular representation is known as a hash diagram, right? And now onwards,
+
+101
+00:14:16,639 --> 00:14:25,960
+we will forget everything else, we will only stare at hash diagrams, right? So, are we clear? So,
+
+102
+00:14:25,960 --> 00:14:34,120
+what does it, what will it look like? I will have elements from the set, then we will have
+
+103
+00:14:34,120 --> 00:14:49,639
+edges between them and now can I say what the relation is? What is the relation on this set?
+
+104
+00:14:49,639 --> 00:15:07,639
+If I use this diagram now, can you describe the relation? So, S is my set which is A,
+
+105
+00:15:07,639 --> 00:15:15,559
+B, C, D, E and I have a relation less than equal to. So, then what is the relation?
+
+106
+00:15:15,559 --> 00:15:31,879
+B is, A is less than equal to B, then C, A is less than equal to C, A is less than equal to D,
+
+107
+00:15:31,879 --> 00:15:45,799
+A is less than equal to E, exactly very good, E is less than equal to B. So, this A is less
+
+108
+00:15:45,799 --> 00:15:55,519
+than equal to D, I got through transitivity, that edge was not even there. Yes, and now the
+
+109
+00:15:55,519 --> 00:16:00,679
+reflexive relations, A is less than equal to A, B is less than equal to B and all this business,
+
+110
+00:16:00,679 --> 00:16:20,519
+right? Clear? Okay. Now, the next definition is a definition of a chain. So, now in your poset,
+
+111
+00:16:20,519 --> 00:16:26,799
+so this what I had here was a partially ordered set because you can see that there is a relation
+
+112
+00:16:26,799 --> 00:16:32,240
+between B and A, there is a relation between C and A, but there is no relation between B and C.
+
+113
+00:16:32,240 --> 00:16:42,759
+I cannot say which one is less than which one, right? So, that is why it is referred to as a
+
+114
+00:16:42,759 --> 00:16:51,319
+partially ordered set because the relation holds, does not hold for any two arbitrary elements in
+
+115
+00:16:51,319 --> 00:16:57,919
+the set, may or may not hold for any two arbitrary elements in the set, right? So, now the thing is
+
+116
+00:16:57,919 --> 00:17:02,399
+that, so remember the example that I gave yesterday, so what is a totally ordered set?
+
+117
+00:17:02,399 --> 00:17:16,559
+If an element is related to every other element, right? And what is a partially ordered set? Of
+
+118
+00:17:16,559 --> 00:17:24,240
+course, where it is not related, it may or may not be related to the other set. So, of course,
+
+119
+00:17:24,240 --> 00:17:30,839
+a totally ordered set is a more constrained form of a partially ordered set. So, partial
+
+120
+00:17:30,839 --> 00:17:36,039
+ordered set is a more general thing. If it so happens that in the partially ordered set,
+
+121
+00:17:36,039 --> 00:17:40,000
+there is a relation between everything, then becomes a totally ordered set, right?
+
+122
+00:17:40,000 --> 00:17:51,519
+Okay, so now the next notion is of a chain. So, a set of elements in a poset which are totally
+
+123
+00:17:51,519 --> 00:18:01,359
+ordered forms a chain. So, if I have a poset, let me keep it as S only. So, let us say I have
+
+124
+00:18:01,359 --> 00:18:13,680
+a poset S and let us say I extract out some subset X from it such that in X under the same relation
+
+125
+00:18:13,680 --> 00:18:20,279
+less than equal to all my elements in X are ordered. So, X is totally ordered,
+
+126
+00:18:20,279 --> 00:18:42,240
+then I will refer to X as a chain. Make sense? Some blank looks. If I am able to extract out,
+
+127
+00:18:42,240 --> 00:18:50,720
+if I take a subset of elements from X from S and that subset turns out to be totally
+
+128
+00:18:50,720 --> 00:18:55,519
+ordered under the same relation, then I will refer to this X as a chain.
+
+129
+00:18:55,519 --> 00:19:09,680
+So, the next definition is an anti-chain. It is the other way round. If I pick a subset out of my
+
+130
+00:19:09,680 --> 00:19:22,640
+set and none of them are related to each other, then it becomes an anti-chain, right? Now,
+
+131
+00:19:22,640 --> 00:19:36,759
+let us try to pick our older diagram. Let us look at this particular diagram and let us try to see
+
+132
+00:19:36,759 --> 00:19:50,480
+can you give me a chain on this? Tell me which one is a chain? AD is a chain. Anything else?
+
+133
+00:19:50,480 --> 00:20:00,240
+AC is a chain. AB is a chain. So, see why it is called a chain? Because it is a chain. It is a
+
+134
+00:20:00,240 --> 00:20:04,759
+sequence of elements, right? So, you can just follow the edges and whatever path you get,
+
+135
+00:20:04,759 --> 00:20:09,680
+if you can able to get a path, that is going to be a chain because every line is basically telling
+
+136
+00:20:09,680 --> 00:20:16,680
+your relation, right? But there is no other option. You will not be able to go in any other direction.
+
+137
+00:20:16,680 --> 00:20:22,440
+So, if there is an edge from that, either it will go upwards or it will not be there at all, right?
+
+138
+00:20:22,440 --> 00:20:30,519
+So, there cannot be an edge between like it. Ha, there can be an edge maybe. I should. Ha,
+
+139
+00:20:30,519 --> 00:20:34,599
+you are right. Maybe that is a better thing to say. So, like for instance, if this was the
+
+140
+00:20:34,599 --> 00:20:43,000
+case, I cannot come to D. I have to keep on going upwards only, right? So, like something like this.
+
+141
+00:20:43,000 --> 00:20:52,559
+Now, I cannot say AC D is a chain, right? Why is that? Because in that set A and D are not related,
+
+142
+00:20:52,559 --> 00:21:03,079
+right? I know that C is greater than A. I know that C is greater than D. But there is no relation
+
+143
+00:21:03,079 --> 00:21:14,720
+between A and D. Oh, on this path, it becomes an alternative relation. Sorry, because there is a
+
+144
+00:21:14,720 --> 00:21:23,159
+path like this. Right, right, right, right. So, I did not let us say, this edge is not even there,
+
+145
+00:21:23,160 --> 00:21:45,000
+right? So, I cannot do this business. So, okay. The next thing is that is what is an anti-chain?
+
+146
+00:21:45,000 --> 00:22:00,920
+Can I get an anti-chain here? Or BCD, right? So, there is no relation between B and C. There is,
+
+147
+00:22:00,920 --> 00:22:20,840
+sorry, why did I take D? I am sorry. D was not there. BC and BFNE, okay. Yeah, so BFNE. BC and E,
+
+148
+00:22:20,839 --> 00:22:31,240
+yeah, sure. Right. So, now, these are going to be anti-chains, right? So, it is slightly complicated.
+
+149
+00:22:31,240 --> 00:22:43,119
+You have to make sure that some other relation does not creep in. So, the next thing is this
+
+150
+00:22:43,119 --> 00:22:48,759
+notion of duality. Maybe I will come to it later, okay. So, now, then there is this notion of upper
+
+151
+00:22:48,759 --> 00:22:59,599
+bound and lower bounds. So, if there are two elements, if there is a set of elements such
+
+152
+00:22:59,599 --> 00:23:06,400
+that in this set of elements, maybe they look like this, right? So, let us say in this set of elements,
+
+153
+00:23:06,400 --> 00:23:15,519
+if I can find one element which is greater than all of them, including itself of course,
+
+154
+00:23:15,519 --> 00:23:29,599
+then I refer to this as the upper bound of this set, right? So, if I extract a subset out of my
+
+155
+00:23:29,599 --> 00:23:34,759
+set and in that subset I am able to find one element which dominates everything else, which
+
+156
+00:23:34,759 --> 00:23:40,000
+which is greater than everything else, then I say that element is the upper bound of that set.
+
+157
+00:23:40,000 --> 00:23:48,559
+So, is it required that will always happen? Not really, right? Like for instance, you pick
+
+158
+00:23:48,559 --> 00:23:52,519
+an anti-chain, nothing is related to anybody. So, there is not going to be an upper bound
+
+159
+00:23:52,519 --> 00:24:00,079
+anyway because you do not have a relation between them. What about a chain? Yes, because it is
+
+160
+00:24:00,079 --> 00:24:04,160
+always totally ordered. So, you can surely find somebody who is greater than everybody else,
+
+161
+00:24:04,160 --> 00:24:14,800
+because it is in a line like it is all going upwards and in that sequence. So, that is what
+
+162
+00:24:14,800 --> 00:24:21,800
+is referred to as a upper bound and similarly I can define my lower bound which says that it is
+
+163
+00:24:21,800 --> 00:24:26,320
+the set of element, if there exists an element which is smaller than everything else, that is
+
+164
+00:24:26,319 --> 00:24:33,319
+referred to as a lower bound. Then there is this notion of a lub or a least upper bound.
+
+165
+00:24:33,319 --> 00:24:40,839
+What is the least upper bound? So, it can happen that in a set there are multiple upper bounds,
+
+166
+00:24:40,839 --> 00:24:48,679
+there are multiple elements which are. So, the upper bound need or need not be part of the set.
+
+167
+00:24:48,680 --> 00:25:00,400
+So, I will maybe I will take better examples little later. So, now let us say this is my
+
+168
+00:25:00,400 --> 00:25:17,920
+poset and I consider only these elements. So, for these set of elements which are the upper bounds?
+
+169
+00:25:17,920 --> 00:25:35,880
+This one is an upper bound. So, let us say a, b, c, d, e, f, g. So, b is an upper bound. So,
+
+170
+00:25:35,880 --> 00:25:43,840
+for all these elements b, e, f, and g, b is an upper bound, because b is an element which
+
+171
+00:25:43,839 --> 00:25:51,039
+dominates everything else, it is greater than everything else. What about a? a is also an upper
+
+172
+00:25:51,039 --> 00:25:59,559
+bound, because a also is greater than d, greater than e, greater than f, greater than g. So,
+
+173
+00:25:59,559 --> 00:26:04,959
+it is possible that you can end up having multiple upper bounds. So, if you have multiple upper bounds,
+
+174
+00:26:04,959 --> 00:26:11,799
+the question is that which of them is the least upper bound. So, which is the closest upper bound
+
+175
+00:26:11,799 --> 00:26:17,639
+to the rest of the elements. So, in this case though we have a choice between a and b, b is
+
+176
+00:26:17,639 --> 00:26:31,839
+the least upper bound or lub. So, it also has a name called join. So, I will also refer to this
+
+177
+00:26:31,839 --> 00:26:37,839
+as join or the lub, both of them are the same. It is denoted using this particular symbol, this cups.
+
+178
+00:26:37,839 --> 00:26:49,399
+Yeah, it is the relation is greater than equal to. So, this b could have been in this set also,
+
+179
+00:26:49,399 --> 00:26:56,399
+then also it would have been an upper bound. For instance, if this was the set, then also b is an
+
+180
+00:26:56,399 --> 00:27:01,959
+upper bound. It need not be outside that set altogether, like outside the set of elements
+
+181
+00:27:01,960 --> 00:27:08,559
+I am talking about. So, it may be possible that if you have a, so like I said anti chain,
+
+182
+00:27:08,559 --> 00:27:14,279
+anti chain it may, the anti chain may also have an upper bound, but the upper bound will not lie
+
+183
+00:27:14,279 --> 00:27:18,840
+in that set. So, it is not required that upper bound or lower bound have to lie in that set,
+
+184
+00:27:18,840 --> 00:27:23,840
+but they may or may not lie in that set. There may be some upper bound lying in that set or may
+
+185
+00:27:23,839 --> 00:27:37,720
+not be there. So, now the next thing is the notion of, similar notion of something called
+
+186
+00:27:37,720 --> 00:27:45,679
+the greatest lower bound. So, similarly for these set of elements, like for D, E, B and G,
+
+187
+00:27:45,680 --> 00:27:56,400
+does there exist a lower bound? Unfortunately, in this case there does not exist any lower bound,
+
+188
+00:27:56,400 --> 00:28:03,400
+right? But I can join them and then I can say, let us say x and then x becomes the lower bound,
+
+189
+00:28:03,400 --> 00:28:13,480
+but then I can also have y and z, right? Then x, y and z are all lower bounds of these set of elements.
+
+190
+00:28:13,480 --> 00:28:22,360
+Right? And now there is a notion of something known as the greatest lower bound. So,
+
+191
+00:28:22,360 --> 00:28:31,200
+among all these elements x is the greatest. So, then x is my greatest lower bound. Okay.
+
+192
+00:28:31,200 --> 00:28:40,839
+So, consider this particular case. So, what are, what is the lower bounds of this set D,
+
+193
+00:28:40,879 --> 00:28:53,240
+E, F and G? x and y are both lower bounds of this particular, of this set. So,
+
+194
+00:28:53,240 --> 00:29:01,599
+does the greatest lower bound exist? No, because for the lower bounds these guys are not related
+
+195
+00:29:01,599 --> 00:29:06,319
+in by themselves, right? Because these are not related, there does not exist a greatest
+
+196
+00:29:06,319 --> 00:29:13,119
+lower bound. So, it is not necessary that you will surely the least upper bound or the greatest
+
+197
+00:29:13,119 --> 00:29:25,919
+lower bound exist. Greatest, right? Or lowest. So, it has to be, two people cannot be greatest,
+
+198
+00:29:26,080 --> 00:29:38,080
+so yeah, has to be one. So, now there is notion of something called top. Now,
+
+199
+00:29:38,080 --> 00:29:47,080
+if I take my whole set S and if I am able to get an element which is greater than every element in
+
+200
+00:29:47,080 --> 00:29:51,840
+this set, right? Now, consider the whole set of, not a subset of elements. Now, I consider the
+
+201
+00:29:51,839 --> 00:29:57,319
+whole set of elements. In this set of elements I say that there exists an element which is greater
+
+202
+00:29:57,319 --> 00:30:04,279
+than everybody else. That is referred to as the top element, top. Similarly, similarly there is
+
+203
+00:30:04,279 --> 00:30:09,959
+bottom which says for this set if there is an element which is smaller than everybody else,
+
+204
+00:30:09,959 --> 00:30:14,679
+then I refer to as bottom. So, this is denoted by t, this is denoted by,
+
+205
+00:30:14,680 --> 00:30:25,640
+so upper bound is for an arbitrary set of elements. So, you have to say upper bound of
+
+206
+00:30:25,640 --> 00:30:35,320
+which elements and top is the upper bound of all elements, rather the greatest upper bound for all
+
+207
+00:30:35,320 --> 00:30:41,440
+elements, rather sorry not necessarily. It has to be, so essentially I am saying,
+
+208
+00:30:41,440 --> 00:30:45,519
+so this is the element because it is the full set. There must be one element which is greater
+
+209
+00:30:45,519 --> 00:31:00,080
+than all of them. That is my top. Top will be the greatest upper bound, but it is surely going to
+
+210
+00:31:00,080 --> 00:31:08,120
+be an upper bound also because I am considering all elements now, right? So, no, like think about
+
+211
+00:31:08,639 --> 00:31:15,599
+B and C. It can be an upper bound if, so if I considering these two can be candidates for
+
+212
+00:31:15,599 --> 00:31:21,319
+upper bound for this set. If my set is the whole set of things, then B, I mean it cannot be B
+
+213
+00:31:21,319 --> 00:31:29,399
+anymore because I am considering top also, top itself also. So, top is not outside the set,
+
+214
+00:31:29,400 --> 00:31:38,600
+top is also part of the set. The top element is also part of the set. It is upper bound and
+
+215
+00:31:38,600 --> 00:31:43,000
+that upper bound has to be unique because I am saying there is only one element.
+
+216
+00:31:43,000 --> 00:31:48,759
+Greatest upper bound, so essentially top may not exist, that is a different matter. So,
+
+217
+00:31:48,759 --> 00:31:55,120
+it can happen that there is like the whole set of elements are like this. Then there is no top,
+
+218
+00:31:55,119 --> 00:32:02,919
+right? But the only way to get a top here is that if it is greater than everything else,
+
+219
+00:32:02,919 --> 00:32:08,959
+right? So, in this case, if I take this whole set of things, then this is the upper bound.
+
+220
+00:32:08,959 --> 00:32:13,599
+The upper bound itself is a singleton set and of course it is also greatest upper bound.
+
+221
+00:32:13,599 --> 00:32:31,240
+The whole set, upper bound on the whole set. So, upper bounds we essentially needs a set,
+
+222
+00:32:31,240 --> 00:32:35,319
+right? It needs a subset of this S and you say on this subset of this S,
+
+223
+00:32:35,319 --> 00:32:39,159
+which is the least upper bound or greatest upper bound or whatever it is.
+
+224
+00:32:39,160 --> 00:32:45,480
+Of course, of course, of course, because it is an upper bound for the whole set,
+
+225
+00:32:45,480 --> 00:32:48,120
+of course it is an upper bound on all the subsets.
+
+226
+00:32:48,120 --> 00:33:02,920
+No, so essentially you have this, so you have this set of elements, right? So,
+
+227
+00:33:02,920 --> 00:33:08,720
+on this set of elements you decide to, so you are, all you know is this set of elements. There is
+
+228
+00:33:08,720 --> 00:33:12,279
+nothing outside this set, right? You do not know what happens outside. You do not even care
+
+229
+00:33:12,279 --> 00:33:17,960
+about what happens outside this. On this set, particular set, you can take a subset say X and
+
+230
+00:33:17,960 --> 00:33:27,640
+then you can ask what is the upper bound of this subset X. Now, the upper bound of this subset X,
+
+231
+00:33:27,640 --> 00:33:33,880
+there may exist an upper bound of this right here or they may exist other upper bounds here as well,
+
+232
+00:33:33,880 --> 00:33:43,240
+right? But I will not go out of S itself, right? Yes, so you can ask what is the upper bound of
+
+233
+00:33:43,240 --> 00:33:50,240
+this X which lies in S, right? So, S is all I care about. I do not care about anything outside
+
+234
+00:33:50,240 --> 00:34:00,320
+S. Now, if my X becomes S, then my upper bound becomes my top and other, similarly my lower
+
+235
+00:34:00,319 --> 00:34:08,799
+bound becomes my bottom. No, like for this particular case, so if I have A, B, C, D,
+
+236
+00:34:08,799 --> 00:34:18,559
+right? So, for this set, subset, so my set is this whole thing. A, B, C, D is my set S and this is
+
+237
+00:34:18,559 --> 00:34:28,840
+my set X on which I am querying for a upper bound. Do you see an upper bound for A, B? Yeah, it is C
+
+238
+00:34:28,840 --> 00:34:37,519
+or D, right? So, the upper bound need not lie in X, but it surely must lie in S because I only know
+
+239
+00:34:37,519 --> 00:34:44,880
+about S. I do not know anything outside S, right? So, C and D are upper bounds of A and B. Similarly,
+
+240
+00:34:44,880 --> 00:34:53,960
+D is also an upper bound of A and B, but then there is no greatest upper bound, sorry least upper bound,
+
+241
+00:34:53,960 --> 00:35:00,880
+right? Because I cannot say because these are not related. So, now I cannot say which of them is
+
+242
+00:35:00,880 --> 00:35:08,240
+least, right? Least has to be unique element, right? It has to be singleton set. So, that is the issue,
+
+243
+00:35:08,240 --> 00:35:14,320
+but it could be possible that this D is not there, but then I have something is top of, yeah,
+
+244
+00:35:14,320 --> 00:35:21,360
+I have something related to C, right? So, maybe like this also E and F. So, had D not been there,
+
+245
+00:35:21,360 --> 00:35:29,880
+let us say D is not there. So, let us say D is not there, the structure is like this, then my C,
+
+246
+00:35:29,880 --> 00:35:36,720
+F and E are all upper bounds, right? And my C is my least upper bound.
+
+247
+00:35:36,720 --> 00:35:49,079
+Upper bound can be a part of X as well. So, it can be the case that A and B were also related,
+
+248
+00:35:49,079 --> 00:35:54,360
+right? In that case A becomes upper bound or whichever you see the, I do not know,
+
+249
+00:35:54,360 --> 00:36:00,880
+what does it look like? So, which way the arrow goes? So, I see slight tilt towards A. So,
+
+250
+00:36:00,880 --> 00:36:07,199
+in that case I will say A is a upper bound and also the least upper bound, yes.
+
+251
+00:36:07,199 --> 00:36:23,519
+So, are we good? Any questions here? So, lot of definitions and sorry if tomorrow,
+
+252
+00:36:23,519 --> 00:36:25,960
+today there will be lot of definitions, but we have to.
+
+253
+00:36:25,960 --> 00:36:36,319
+Yes, yes, yes. So, first we can calculate the upper bounds and then I can just see is there a
+
+254
+00:36:36,320 --> 00:36:46,519
+least element? If I find one, I will say that is the least upper bound. So, the next definition
+
+255
+00:36:46,519 --> 00:36:52,840
+is for something known as a lattice. So, what is a lattice? A lattice is a poset, a partially
+
+256
+00:36:52,840 --> 00:37:02,519
+ordered set where all the least upper bounds, so where there exists least upper bounds and
+
+257
+00:37:02,519 --> 00:37:12,599
+greatest lower bounds for all non-empty finite subsets, right? So, now in my set S, if I select
+
+258
+00:37:12,599 --> 00:37:23,599
+any non-empty finite subset X, I am sure I will be able to get one LUB and one GLB. It will surely
+
+259
+00:37:23,599 --> 00:37:30,599
+exist. So, it basically constrains on the structure of my hash diagrams. My hash diagram will be such
+
+260
+00:37:30,599 --> 00:37:36,239
+that that is no matter which particular subset of elements I pick, I will always be able to find
+
+261
+00:37:36,239 --> 00:37:52,559
+a LUB and a GLB, right? So, does it also mean that there always will also be a top and bottom?
+
+262
+00:37:52,559 --> 00:38:01,159
+Yeah, I can take the whole set S, right? And then I can ask what, because it is a whole set S,
+
+263
+00:38:01,159 --> 00:38:07,880
+it is I can ask what is LUB and GLB for it and those will correspond to the top and bottom. So,
+
+264
+00:38:07,880 --> 00:38:15,639
+my set of elements for which I will always be able to find the join and meet for any
+
+265
+00:38:15,799 --> 00:38:24,159
+arbitrary subsets is referred to as a lattice, right? It is a pretty strict structure on the
+
+266
+00:38:24,159 --> 00:38:32,639
+sets that you can have, right? Sets and the relation that you have. So, there is also notion
+
+267
+00:38:32,639 --> 00:38:39,199
+of a complete lattice. A complete lattice says a lattice in which all subsets have both a meet
+
+268
+00:38:39,199 --> 00:38:48,719
+and a join or a LUB and a GLB. So, here I do not even care about finiteness. It becomes little
+
+269
+00:38:48,719 --> 00:38:57,679
+weird. So, I am saying if I even take an infinite subset of elements, even then I will be able to
+
+270
+00:38:57,679 --> 00:39:18,919
+compute an upper bound and lower bound, right? Hey, you are cheating. That is actually a partially
+
+271
+00:39:19,920 --> 00:39:36,320
+ordered set. So, show me a proper poset and then give me an answer. No, but yeah, so no, but there is a small problem,
+
+272
+00:39:36,320 --> 00:39:45,840
+right? So, even in this particular set, all my let us say all my integers, then if I take the whole
+
+273
+00:39:45,840 --> 00:39:53,400
+set of integers, then what is my greatest upper bound and least upper bound and greatest lower bound?
+
+274
+00:39:53,400 --> 00:40:00,880
+Then? Then? It is a very good question actually. It is a very good point. So,
+
+275
+00:40:00,880 --> 00:40:08,600
+he gave a very good example, but he is stuck now. I turned tables on him. Now, tell me. So,
+
+276
+00:40:08,600 --> 00:40:12,400
+if you have an infinite set of elements, which is my let us say my set of integers,
+
+277
+00:40:12,400 --> 00:40:16,599
+which is not even a poset. It is actually totally ordered set, but is it a lattice?
+
+278
+00:40:16,599 --> 00:40:25,720
+Because now for any infinite subsets, I should be even for infinite subset, I should be able to take.
+
+279
+00:40:25,720 --> 00:40:31,800
+So, if I take an infinite subset, that is all integers greater than 0. I should be able to
+
+280
+00:40:31,800 --> 00:40:38,639
+consider. So, I can define it, right? Then I should be able to give you a least upper bound on it. I
+
+281
+00:40:38,639 --> 00:40:49,679
+have a greatest lower bound 0, but I need a least upper bound. So, what do I do? Give up. We never
+
+282
+00:40:49,679 --> 00:41:02,879
+give up. No, I want an infinite subset. I want an infinite set. I do not want the set of constraints.
+
+283
+00:41:02,880 --> 00:41:15,240
+Yes, yes. So, you can now go back to definitions. You can say, oh, my subset also contains these
+
+284
+00:41:15,240 --> 00:41:21,680
+two elements infinity and minus infinity. Nobody knows what they are. That is a different matter,
+
+285
+00:41:21,680 --> 00:41:26,720
+but I say that they exist, right? That is cool thing about mathematics. Whenever you are stuck
+
+286
+00:41:26,719 --> 00:41:35,559
+on a problem, define something and get out of it. So, then essentially you can say that there
+
+287
+00:41:35,559 --> 00:41:41,319
+exist these elements infinity and minus infinity, and then you say that no matter what, there is
+
+288
+00:41:41,319 --> 00:41:49,079
+nothing bigger than infinity, right? So, now no matter what infinite subset I give you,
+
+289
+00:41:49,079 --> 00:41:58,079
+you surely know infinity is my, it is bounded by infinity. If I give you well-ordered set,
+
+290
+00:41:58,079 --> 00:42:05,840
+if I say that all numbers greater than 2500 million, which is the greatest, the lowest
+
+291
+00:42:05,840 --> 00:42:13,679
+upper bound, 2500 million, right? Not a problem, right? But if I give you an open end where I say
+
+292
+00:42:13,679 --> 00:42:19,919
+all numbers greater than 0, then you say infinity. All numbers less than 0, minus infinity is the
+
+293
+00:42:19,919 --> 00:42:28,159
+greatest lower bound, right? So, essentially that is what you do. So, you define these arbitrary
+
+294
+00:42:28,159 --> 00:42:33,440
+elements, this minus infinity and plus infinity or something like that, to say that it is bounded
+
+295
+00:42:33,440 --> 00:42:38,879
+by these guys. And they may not even mean anything very meaningful for you, but they are just
+
+296
+00:42:38,880 --> 00:42:44,039
+definitions. They are just saying that these elements exist. With the element set of integers,
+
+297
+00:42:44,039 --> 00:42:49,559
+I union these two extra elements, infinity and minus infinity, and I say this is the subset set
+
+298
+00:42:49,559 --> 00:43:01,599
+S that I want to work with, right? Good you brought it up. And we will do that business,
+
+299
+00:43:01,599 --> 00:43:12,920
+actually. So, okay. Is an empty lattice a complete lattice? Yeah, again a matter of definitions.
+
+300
+00:43:12,920 --> 00:43:19,719
+I just say that, okay, my meat of empty is empty and I mean join of empty is also empty. Done. I
+
+301
+00:43:19,719 --> 00:43:27,719
+define it and I am out of that problem. Okay. The next is a notion of something called a
+
+302
+00:43:27,719 --> 00:43:36,559
+distributive lattice, right? So, a lattice which allows the meat and join operators to
+
+303
+00:43:36,559 --> 00:43:42,199
+distribute among themselves is referred to as a distributive lattice. So, the meat can distribute
+
+304
+00:43:42,199 --> 00:43:46,799
+over the join and the join can distribute over the meat. So, if this happens, then this is referred
+
+305
+00:43:46,799 --> 00:43:53,519
+to as a distributive lattice. So, lattices, because of this nice symmetry, there is this
+
+306
+00:43:53,519 --> 00:44:01,239
+very interesting notion of duality. So, duality says that if I consistently rename things,
+
+307
+00:44:01,239 --> 00:44:09,360
+like for instance, I just invert my relation. So, like I just flip my lattice, right? So,
+
+308
+00:44:09,360 --> 00:44:18,280
+my GLB becomes my LUB, my LUB becomes my upper bound become my lower bounds, right? All definitions
+
+309
+00:44:18,280 --> 00:44:22,960
+would still stand. Maybe I should say in a slightly different way. So, I am saying any
+
+310
+00:44:22,960 --> 00:44:32,200
+statement I make about say upper bounds or least upper bounds, if I consistently rename things like
+
+311
+00:44:32,200 --> 00:44:38,880
+joins by meats and upper bounds by lower bounds, least by upper, if I consistently rename them,
+
+312
+00:44:38,880 --> 00:44:47,400
+then whatever theorem works on the meats and the upper bounds and like meats and the lower bounds
+
+313
+00:44:47,400 --> 00:44:51,680
+and the greatest lower bounds that will also work on the joins and the upper bounds and the
+
+314
+00:44:51,680 --> 00:44:58,320
+lowest upper bounds, right? So, there is this like other side you get it for free essentially. It is
+
+315
+00:44:58,320 --> 00:45:01,680
+saying the whole thing is symmetric. Whatever happens upwards, very similar thing happens
+
+316
+00:45:01,680 --> 00:45:10,800
+downwards, right? So, here also this is simply distributivity, simply duality. So, what I did
+
+317
+00:45:10,800 --> 00:45:14,800
+was I consistently, so this was a theorem. So, I say some lattice is a distributive lattice if
+
+318
+00:45:14,800 --> 00:45:21,840
+this holds. So, I can simply rename all my meats I just replace by joins and join my meat and that
+
+319
+00:45:21,840 --> 00:45:28,840
+gives me the distributivity for the meats over joins and joins over meats, ok? So, the next notion
+
+320
+00:45:28,840 --> 00:45:38,000
+is the notion of something known as a semi-lattice. In many applications, I really do not need both
+
+321
+00:45:38,000 --> 00:45:43,960
+the join and the meat. I do not care if there a meat exists or not. Let us say if I have a join,
+
+322
+00:45:43,960 --> 00:45:50,320
+I am good enough. The whole application on which this thing is based on that works. So,
+
+323
+00:45:50,320 --> 00:45:57,280
+then why bother about the other side, right? So, we define a upper semi-lattice or a lower
+
+324
+00:45:57,280 --> 00:46:05,960
+semi-lattice depending on, I just defined the conditions on one side. I say that every finite
+
+325
+00:46:05,960 --> 00:46:12,880
+subset of elements must have an lub. That is all I care about. Then I have a upper semi-lattice.
+
+326
+00:46:12,880 --> 00:46:18,519
+I do not say that thing. It should have both an lub and a glb. I do not say that. I just say
+
+327
+00:46:18,519 --> 00:46:23,320
+that every element should have a lub. I am happy with it. They have a glb or not, I do not care.
+
+328
+00:46:23,320 --> 00:46:29,119
+Right? So, it is a relaxed definition. So, it will allow other things to become semi-lattices
+
+329
+00:46:29,119 --> 00:46:34,160
+which were not actually lattices, right? And that the reason is because I do not really
+
+330
+00:46:34,160 --> 00:46:39,280
+care what happens on the other side. Similarly, I can do things for meats and I can say I have
+
+331
+00:46:39,280 --> 00:46:45,800
+lower semi-lattices. So, now essentially the structure is only on one side. The other side
+
+332
+00:46:45,800 --> 00:46:52,120
+there may not be any structure. Okay. So, any questions on lattices? So, I am just doing
+
+333
+00:46:52,120 --> 00:46:57,320
+whatever is required to talk about data flow analysis. I will not go anywhere outside that.
+
+334
+00:46:57,320 --> 00:47:03,400
+Right? So, but it is a very interesting mathematical structure. So, I would really
+
+335
+00:47:03,400 --> 00:47:06,800
+encourage you to go back and read more on lattices and see how they are used in many
+
+336
+00:47:06,800 --> 00:47:13,440
+disciplines in computer science. Are we good? Are we good with all definitions? Any questions?
+
+337
+00:47:13,440 --> 00:47:15,039
+Let us discuss things on lattice if anything. Sir, even lattice is not possible.
+
+338
+00:47:15,039 --> 00:47:26,200
+What programming? Yeah, yeah. I am not so much aware of that, but surely it is very much possible
+
+339
+00:47:26,200 --> 00:47:30,280
+that there are applications there. Your model.
+
+340
+00:47:30,280 --> 00:47:34,800
+I see. Possible, possible. So, essentially this is used for modelling problems into mathematics.
+
+341
+00:47:34,800 --> 00:47:39,240
+So, any problem that you think needs this particular structure, you can just say that,
+
+342
+00:47:39,240 --> 00:47:43,519
+okay, I need to need it to be a lattice and all the theorems you prove on this mathematical
+
+343
+00:47:43,519 --> 00:47:49,560
+structure will hold on that. So, you can use all those theorems directly to prove your applied
+
+344
+00:47:49,560 --> 00:47:57,720
+thing, whatever you are applying it to. Right? Okay. So, now next we come to what are called
+
+345
+00:47:58,679 --> 00:48:04,959
+come to functions on lattices. Now, basically we have we talk about functions which operate
+
+346
+00:48:04,959 --> 00:48:13,119
+on the elements in the lattice. Right? So, the first definition is about something called
+
+347
+00:48:13,119 --> 00:48:19,079
+a monotonic function or a order preserving function. So, I say that f a function f is
+
+348
+00:48:19,079 --> 00:48:26,759
+an monotonic function. If I pick two arbitrary elements x and y in my set, which are related
+
+349
+00:48:26,760 --> 00:48:33,880
+by the ordering relation, then I can surely say that the results of applying the function
+
+350
+00:48:33,880 --> 00:48:40,120
+f on those two elements will also be related by the order that by the same ordering relation.
+
+351
+00:48:40,120 --> 00:48:44,840
+Right? So, essentially it means that it looks something like this. So, if you have an x
+
+352
+00:48:44,840 --> 00:48:52,280
+and if you have a y, I know that they are related. So, I have an edge between them.
+
+353
+00:48:52,280 --> 00:49:00,440
+If I apply f to x and I apply f to y f to y and f to x, then whatever I get. So, this
+
+354
+00:49:00,440 --> 00:49:11,440
+would be f of y and this is f of x. These elements must surely also have an edge between them.
+
+355
+00:49:11,440 --> 00:49:23,400
+Right? So, if my for any such x and y arbitrary elements x and y in my set, if my function
+
+356
+00:49:23,400 --> 00:49:28,679
+f hold this property holds for my function f, then I say my function f is a monotonic
+
+357
+00:49:28,679 --> 00:49:36,320
+function or an order preserving function. Very simple definition, but yeah.
+
+358
+00:49:36,320 --> 00:49:47,400
+No, we do not know that relation. No, so essentially what I all I am saying is I know the relation
+
+359
+00:49:47,400 --> 00:49:53,600
+between x and y. I am saying if I apply f to it, I do not know what f does. f can get
+
+360
+00:49:53,600 --> 00:50:01,320
+x to somewhere upper for y it can go it somewhere below. I do not know what happens. Just f
+
+361
+00:50:01,480 --> 00:50:08,480
+x and f y will have a relation under the same relation under the same relation r. Right?
+
+362
+00:50:08,480 --> 00:50:14,039
+So, I do not know what happens between these two guys, but I just say that if these two
+
+363
+00:50:14,039 --> 00:50:23,039
+guys were related, these two guys are surely going to be related as well. Agreed? Done?
+
+364
+00:50:23,039 --> 00:50:33,360
+Yes, yes. So, I can pick any two elements x and y from my set S. Right? So, it should
+
+365
+00:50:33,360 --> 00:50:39,719
+hold for any such x and y in my set X. So, if it holds for any domain of a function is
+
+366
+00:50:39,719 --> 00:50:45,079
+this set S. So, if it works for any two elements in this domain, only then will I say that
+
+367
+00:50:45,079 --> 00:50:52,079
+it is a not a preserving function. No, no, no. f x and f y are also elements in this
+
+368
+00:50:59,440 --> 00:51:06,440
+set. Right? So, I am assuming my function f is closed. I mean let us let that makes
+
+369
+00:51:06,440 --> 00:51:13,440
+things easier. So, let my domain and range of this function is the same set S. That is
+
+370
+00:51:19,000 --> 00:51:24,240
+a easier thing to understand. So, then essentially I take x and y they also go somewhere in this
+
+371
+00:51:24,240 --> 00:51:31,240
+set, but they will also be related by the same ordering relation. Right? So, I can say
+
+372
+00:51:37,400 --> 00:51:44,400
+can you give me an example of an order preserving function? Plus by any constant addition with
+
+373
+00:51:49,720 --> 00:51:56,720
+any constant that gives me an order preserving function. Multiplication by positive number,
+
+374
+00:52:00,720 --> 00:52:05,880
+multiplication by negative number. It change the order between the elements. So, that is
+
+375
+00:52:05,880 --> 00:52:12,880
+not order preserving. Right? As simple as that. Log order preserving. Right? So, things
+
+376
+00:52:17,280 --> 00:52:24,280
+can get skewed right badly, but it is still like as long as I the resultant elements the
+
+377
+00:52:25,680 --> 00:52:32,680
+order is the same I am good. So, next is commutativity of functions. So,
+
+378
+00:52:33,199 --> 00:52:40,199
+I will say the functions f and g commute if I can apply them in any order and the result
+
+379
+00:52:41,759 --> 00:52:48,759
+is the same. So, if I compute f of g of some x or g of f of x for any x then I would say
+
+380
+00:52:48,760 --> 00:52:55,760
+that f and g commute not so important actually. This is important. So, this is this is distributivity
+
+381
+00:53:07,800 --> 00:53:14,800
+of functions over joints. Right? So, if I say my function distributes over my joint
+
+382
+00:53:15,800 --> 00:53:21,240
+which means that I can take the joint of my elements first and then apply the function
+
+383
+00:53:21,240 --> 00:53:27,720
+on it or I can do it the other way I just get the images of all my elements and then
+
+384
+00:53:27,720 --> 00:53:33,280
+take their joint. Both of them will give me the same result. If that happens I would say
+
+385
+00:53:33,280 --> 00:53:40,280
+that it is a distributive function. See I have already switched to my semi lattice
+
+386
+00:53:40,280 --> 00:53:47,280
+thing. I did not even talk about meat. So, we will now start living in semi lattices.
+
+387
+00:53:48,519 --> 00:53:55,519
+So, the next topic is about fixed points. So, remember what was the definition of fixed
+
+388
+00:53:57,640 --> 00:54:04,640
+point? I say that if I have an element E. So, who remembers the definition? Yes. So,
+
+389
+00:54:04,639 --> 00:54:11,639
+if I say x 0 is a fixed point of some function f it means that if I apply x 0 to f I would
+
+390
+00:54:22,879 --> 00:54:29,879
+end up getting x 0. So, what it means is that like if I have this element x 0 then I would
+
+391
+00:54:34,639 --> 00:54:41,639
+get x 0. I apply f to it. It will go back and f of x 0 will again come back to the same
+
+392
+00:54:41,679 --> 00:54:48,679
+point. So, the next definition is something called a prefix point. Prefix point means
+
+393
+00:54:54,920 --> 00:55:01,920
+that if I have an x 0, I would get x 0. So, I would get x 0. So, I would get x 0. So,
+
+394
+00:55:05,480 --> 00:55:12,480
+if I apply f to it, it will always jump to an element higher. So, now here we have this
+
+395
+00:55:18,519 --> 00:55:25,519
+relation between the element and its image. Here we are saying that if I apply my f to
+
+396
+00:55:25,799 --> 00:55:32,799
+this x 0 then it will always give me something larger than f 0. Similarly, I can come up
+
+397
+00:55:33,800 --> 00:55:40,400
+with something called a postfix point which means that if I have an x 0 and if I apply
+
+398
+00:55:40,400 --> 00:55:47,400
+x 0 to this I will end up getting an element which is lower than x 0. So, any questions
+
+399
+00:55:47,400 --> 00:56:03,639
+till all this business? Now is the question why now is the place where we will start
+
+400
+00:56:03,639 --> 00:56:10,639
+at looking at why we did we do so many definitions.
+
+401
+00:56:10,639 --> 00:56:17,639
+For the fix point. It is a different x 0. So, I am saying so see here what did I say?
+
+402
+00:56:25,839 --> 00:56:32,839
+I said that x 0 is the fix point of f. So, it is a relation between its both x 0 and
+
+403
+00:56:33,840 --> 00:56:40,840
+f. So, I say x 0 is a fix point of f if I apply x 0 to f it gives me x 0 back. If it
+
+404
+00:56:42,680 --> 00:56:49,680
+gives me something for some other x 0 or some other let us say x 1 if I apply f 0 and I
+
+405
+00:56:51,200 --> 00:56:58,200
+if I apply f to it if I get something bigger then x 1 is a prefix point. If there is some
+
+406
+00:56:59,199 --> 00:57:06,199
+x 2 if I apply f to x 2 if I get something lower then x 2 is a postfix point. Now of
+
+407
+00:57:08,119 --> 00:57:13,119
+course, any element in this set I can classify it as a fix point prefix point or postfix
+
+408
+00:57:13,119 --> 00:57:20,119
+point. So, note that fix points are both prefix points and postfix points this is less than
+
+409
+00:57:21,119 --> 00:57:28,119
+equal to. So, if you diagrammatically want to see it looks like this. So, you have your
+
+410
+00:57:32,839 --> 00:57:39,839
+bottom here you have your top here and all these things let us say these are all prefix
+
+411
+00:57:40,679 --> 00:57:47,679
+points and all these are my postfix points. So, it should cover it properly. So, this
+
+412
+00:57:50,199 --> 00:57:57,199
+is f and these are the elements which are my fix points. So, here if I apply f to any
+
+413
+00:58:01,679 --> 00:58:06,719
+element it should climb higher if I apply anything to this it climbs lower goes lower
+
+414
+00:58:06,719 --> 00:58:13,719
+and if I apply anybody to this it just stays there.
+
+415
+00:58:14,719 --> 00:58:21,719
+So, now let us come to back to our data flow analysis let us come to our reaching definitions
+
+416
+00:58:25,799 --> 00:58:32,799
+problem. So, now with all these things think of your set of data flow facts what was the
+
+417
+00:58:32,800 --> 00:58:39,800
+set of set of data flow facts in reaching definitions? What was it what was it? Remember
+
+418
+00:58:48,200 --> 00:58:55,200
+the what was the solution look like? What is it? Set of all definitions and what is
+
+419
+00:59:02,800 --> 00:59:09,800
+it? What did we want to compute? At every point I wanted to compute what are the what
+
+420
+00:59:11,120 --> 00:59:17,360
+is the reaching definitions reaching a particular point? So, think about the solution at let
+
+421
+00:59:17,360 --> 00:59:23,560
+us say to begin with I have a very simple problem say simple analysis which is trying
+
+422
+00:59:23,560 --> 00:59:30,400
+to compute the reaching definitions only for one variable in the program just to make things
+
+423
+00:59:30,400 --> 00:59:33,320
+simpler we will see what happens to extended case.
+
+424
+00:59:33,320 --> 00:59:39,119
+To begin with let us assume that I have only one variable in the program that I am interested
+
+425
+00:59:39,119 --> 00:59:46,119
+in for computing the reaching definitions for that particular variable at a program
+
+426
+00:59:46,559 --> 00:59:53,559
+point what all can be can the solutions look like? So, that is going to be my set of like
+
+427
+00:59:54,559 --> 01:00:01,559
+my set S over which I am doing my computation I am trying to figure out let us go back.
+
+428
+01:00:03,639 --> 01:00:10,539
+So, I am given a program point I would like to find out what will the solution at this
+
+429
+01:00:10,539 --> 01:00:17,539
+location for reaching definitions look like? What will it look like?
+
+430
+01:00:23,679 --> 01:00:30,679
+It is going to be. So, it is going to be a set of definitions right. So, what is the
+
+431
+01:00:37,360 --> 01:00:43,960
+possible set of solutions from which this solution has to be extracted? So, now think
+
+432
+01:00:43,960 --> 01:00:48,519
+of a like think more mathematically think about that I have extracting this particular
+
+433
+01:00:48,519 --> 01:00:54,440
+solution D1 D5 right. So, what is this possible space of solutions from which I am extracting
+
+434
+01:00:54,440 --> 01:01:01,440
+this particular solution? Which are which is all the?
+
+435
+01:01:01,440 --> 01:01:08,440
+Not. So, let us let us take a set if you are having problem explaining. So, let us
+
+436
+01:01:18,200 --> 01:01:25,039
+say D1 D2 D3 this is the set of elements this set of definitions then what is the set from
+
+437
+01:01:25,039 --> 01:01:30,159
+which this particular solution will come out? Yes the power set of this right. So, what
+
+438
+01:01:30,159 --> 01:01:33,799
+will that look like? It can either be empty set there is no definition reaching here or
+
+439
+01:01:33,799 --> 01:01:40,799
+it can be single ten set there is either D1 or D2 or D3 coming here or it can be sets
+
+440
+01:01:42,079 --> 01:01:49,079
+of twos D1 D2 D2 D3 these guys coming in now there is only one remaining or it can be the
+
+441
+01:01:52,759 --> 01:01:59,759
+whole set D1 D2 D3 all definitions reach here right. So, this is my space of solutions from
+
+442
+01:02:00,159 --> 01:02:04,839
+this solution I will eventually get one element which will be the solution at this particular
+
+443
+01:02:04,839 --> 01:02:11,839
+program this is going to be my S from which I will get a solution. Now we will we are
+
+444
+01:02:12,440 --> 01:02:16,559
+switching to a very abstract very mathematical domain right now we are not even. So, now
+
+445
+01:02:16,559 --> 01:02:23,559
+this is a possible solution to the set of equations that I came about next time last
+
+446
+01:02:23,559 --> 01:02:30,599
+class right. Now can I so can I think about how to put it. So, how do I how do I think
+
+447
+01:02:54,039 --> 01:03:01,039
+so let us say this particular ok. So, think about this particular case. So, this particular
+
+448
+01:03:01,599 --> 01:03:08,599
+at in of a particular basic block I am trying to compute this solution to begin with how
+
+449
+01:03:09,000 --> 01:03:16,000
+did I initialize it empty right to begin with it was empty then I would have maybe one element
+
+450
+01:03:23,679 --> 01:03:30,679
+one arm became something came from one arm maybe D1 came from one arm right then maybe
+
+451
+01:03:30,679 --> 01:03:36,599
+D2 came from the other arm maybe this also changed and brought in D3 also. So, the set
+
+452
+01:03:36,599 --> 01:03:42,920
+of val the set of elements from this set that you see here can you see some relation among
+
+453
+01:03:42,920 --> 01:03:49,920
+those elements just try to think about how the this thing is growing how the elements
+
+454
+01:03:49,920 --> 01:03:56,920
+the how this particular solution is changing at every iteration of my fixed point iteration.
+
+455
+01:04:00,119 --> 01:04:05,119
+What is increasing size is increasing, but anything more can you see about the elements.
+
+456
+01:04:05,119 --> 01:04:12,119
+So, let us say in one first time I got a solution S0 second time I got a solution S1 these are
+
+457
+01:04:12,119 --> 01:04:19,119
+all subsets of S surely right can I find some relation between let us say these are
+
+458
+01:04:22,559 --> 01:04:29,559
+S1 and S2 are different iterations agreed agreed this is going to be the case right
+
+459
+01:04:33,159 --> 01:04:37,079
+you will never be able to pull out a definition remember that is what we argued about yesterday
+
+460
+01:04:37,079 --> 01:04:42,079
+right you only union you are just unioning new definitions you are putting in new definitions.
+
+461
+01:04:42,079 --> 01:04:49,079
+So, what so now subset looks to be a interesting relation to describe this to describe this
+
+462
+01:04:50,279 --> 01:04:56,000
+computation right because every solution that I get every sequence of solutions that I get
+
+463
+01:04:56,000 --> 01:05:03,000
+at a point are related by the subsetting relation on this on this set of solutions.
+
+464
+01:05:04,000 --> 01:05:11,000
+Then for this particular set for this relation subset equal to can I come up with can you
+
+465
+01:05:16,559 --> 01:05:23,559
+describe the lattice. So, for I want the lattice for less than under the subset relation. So,
+
+466
+01:05:33,199 --> 01:05:40,199
+how will the lattice look like can you give me the hash diagram of the lattice. So, what
+
+467
+01:05:41,280 --> 01:05:48,280
+is the bottom element empty set is going to be the bottom element then the singleton elements
+
+468
+01:05:48,280 --> 01:05:55,280
+D1 D2 D3 then sets of two D1 D2 D1 D3 D2 D3 D3 D3 D3 D3 D3 D3 D3 D3 D3 D3 D3 D3 D3 D3
+
+469
+01:06:03,780 --> 01:06:10,780
+D3 and D2 D3 right and then the top element which is D1 D2 D3 agreed yeah, yes.
+
+470
+01:06:10,780 --> 01:06:39,140
+the top element which is d1, d2, d3 agreed. Yes, yes, yeah, but that is exactly what we
+
+471
+01:06:39,139 --> 01:06:44,619
+did. Last time the proof we gave was exactly this. We did not really set up it as an inductive
+
+472
+01:06:44,619 --> 01:07:06,059
+proof but the argument was exactly that. Excellent, exactly. That is the next question I was going
+
+473
+01:07:06,059 --> 01:07:15,179
+to put. So essentially all my solutions would form a chain in this lattice. See how beautiful
+
+474
+01:07:15,179 --> 01:07:20,980
+the structure is now. So we came up with an ad hoc algorithm which was supposed to be
+
+475
+01:07:20,980 --> 01:07:26,179
+doing something. I do not even know. Then I defined some abstract mathematical concepts
+
+476
+01:07:26,179 --> 01:07:31,019
+which none of you had a clue why we are doing all this business. And then the problem essentially
+
+477
+01:07:31,019 --> 01:07:36,940
+boils down to computing, essentially computing along a chain in this lattice.
+
+478
+01:07:36,940 --> 01:07:43,539
+Now I am going too far.
+
+479
+01:07:43,539 --> 01:07:55,820
+Okay, now you are going too far. Look who. Okay, so this is nice, right? Okay, there
+
+480
+01:07:55,820 --> 01:08:00,420
+is more to it. The drama is not over yet. Now think about the case. Now think about
+
+481
+01:08:00,420 --> 01:08:07,700
+the case. Now we talked about the over approximate solutions. Remember we talked about something
+
+482
+01:08:07,700 --> 01:08:23,060
+called over approximation. What is over approximation? Yes, we can miss out on optimizations but
+
+483
+01:08:23,060 --> 01:08:29,020
+it is still safe. Can you give me a structure on the over approximations possible on that
+
+484
+01:08:29,020 --> 01:08:40,060
+set here? So my solution can be any of these sets here, right? So let us say my solution
+
+485
+01:08:40,060 --> 01:08:47,740
+is D2. That is a big deal. Let us say D2 was my actual solution that I got. Can you tell
+
+486
+01:08:47,740 --> 01:08:54,980
+me what are the over approximations of this particular set? How do I get this from this
+
+487
+01:08:54,979 --> 01:09:01,299
+lattice? Upwards means what? Can you define it in terms of lattice theory whatever we
+
+488
+01:09:01,299 --> 01:09:16,539
+learnt? Need not be. Yes. The upper bounds of this particular solution are my over approximations.
+
+489
+01:09:16,539 --> 01:09:23,459
+If there are elements which are some people are still quizzical. Are you convinced? So
+
+490
+01:09:23,460 --> 01:09:37,020
+upper bounds means what? It has this element but maybe something more. I see a quizzical
+
+491
+01:09:37,020 --> 01:09:51,220
+face. I do not like it. Tell me. Over approximation in this case meant that what happens if I
+
+492
+01:09:51,220 --> 01:09:56,699
+let us say I have a set of definitions. What if I say that there is an extra definition
+
+493
+01:09:56,699 --> 01:10:00,100
+in that set though it was not there? Like for instance let us say the definition was
+
+494
+01:10:00,100 --> 01:10:06,460
+D2 but I simply put another definition D1 in this and though D1 was not actually in
+
+495
+01:10:06,460 --> 01:10:12,579
+the set is not actually a reaching definition. Let us say put it and say okay take this solution.
+
+496
+01:10:12,579 --> 01:10:18,900
+The solver has a bug and gives you the solution. What does it do? So first there are two questions
+
+497
+01:10:18,899 --> 01:10:24,699
+we were talking about yesterday. One question was about safety. Safety was about can my
+
+498
+01:10:24,699 --> 01:10:30,420
+optimization go wrong? Remember the constant propagation application we were talking about.
+
+499
+01:10:30,420 --> 01:10:35,939
+If I put a new element D1 in this set the algorithm will not go wrong. It will not do
+
+500
+01:10:35,939 --> 01:10:40,659
+a transformation that will. So what? So otherwise what was happening was because D2 was a singleton
+
+501
+01:10:40,659 --> 01:10:45,579
+set maybe it would have enabled an optimization. Maybe D2 was a singleton set and maybe D2
+
+502
+01:10:45,579 --> 01:10:49,739
+was something like x equals 5. Then it could have just pulled in that value 5 into the
+
+503
+01:10:49,739 --> 01:10:56,260
+set into that computation. But because now with D1 also being the set it is no more a
+
+504
+01:10:56,260 --> 01:11:01,859
+singleton set I cannot do that optimization. So I will not be able to enable the optimization
+
+505
+01:11:01,859 --> 01:11:09,819
+but I will not do something which makes the program wrong. So the other thing was accuracy.
+
+506
+01:11:09,819 --> 01:11:19,539
+So essentially what is happening is my accuracy is getting compromised but it is still safe.
+
+507
+01:11:19,539 --> 01:11:24,939
+Think about the other situation. If I had a set D1 D2 actual mass solution was D1 D2
+
+508
+01:11:24,939 --> 01:11:36,859
+but if I somehow my solver does not give me D1. What about this? This is dangerous because
+
+509
+01:11:36,859 --> 01:11:43,259
+let us say D1 was of the form x equals 5 D2 was of the form x equals 2 and both the
+
+510
+01:11:43,259 --> 01:11:47,699
+definitions were reaching me. That was the actual solution. So I could not have done
+
+511
+01:11:47,699 --> 01:11:52,819
+the optimization but because I disallowed D1 I only see one reaching definition which
+
+512
+01:11:52,819 --> 01:11:58,019
+is x equals 2 and I say do the optimization. Looks good to me. That will make my program
+
+513
+01:11:58,020 --> 01:12:13,060
+wrong. So it is not safe anymore. So yes the bad solution is the inaccurate solution which
+
+514
+01:12:13,060 --> 01:12:17,420
+is the larger set and bad because it is not able to let me do the optimization. It is
+
+515
+01:12:17,420 --> 01:12:27,700
+stopping me from doing an optimization. But the unsafe solution is bad because it can
+
+516
+01:12:27,699 --> 01:12:32,739
+make the program go wrong. So it is not even a solution to be very frank because I cannot
+
+517
+01:12:32,739 --> 01:12:37,979
+even allow that.
+
+518
+01:12:37,979 --> 01:12:44,179
+So now as you can see all the upper bounds of this actual solution will be a superset
+
+519
+01:12:44,179 --> 01:12:47,819
+of that. That is my relation on which I am doing the construction of this lattice. It
+
+520
+01:12:47,819 --> 01:12:50,979
+means that it will surely have the set of definitions that are in the actual solution
+
+521
+01:12:50,979 --> 01:12:55,300
+plus maybe something more. So they are all going to be over approximate. They are all
+
+522
+01:12:55,300 --> 01:13:04,140
+going to be inaccurate but all sound solutions, all safe solutions. So all safe solutions
+
+523
+01:13:04,140 --> 01:13:13,340
+are my upper bounds of my optimal solution, my best solution.
+
+524
+01:13:13,340 --> 01:13:20,140
+Now staring at you at this can you give me a constant time algorithm to compute the reaching
+
+525
+01:13:20,140 --> 01:13:33,660
+definitions which gives me a safe solution. This is sort of half a joke but think about
+
+526
+01:13:33,660 --> 01:13:44,940
+it. Upper bound but which one? But I need to know the solution first to get the least
+
+527
+01:13:45,939 --> 01:13:56,460
+So how can I give you in constant time I can give you a solution. The top element. Say
+
+528
+01:13:56,460 --> 01:14:04,259
+everything reaches everywhere, done. No optimization will be enabled anywhere but it is a safe
+
+529
+01:14:04,259 --> 01:14:11,979
+solution and it is a solution. So I can always take the top element and say oh here is a
+
+530
+01:14:11,979 --> 01:14:28,179
+solution. So now the other thing is that. So now let us look at the nature of this computation
+
+531
+01:14:28,179 --> 01:14:34,979
+here. There are too many curves here. So now let us try to look at the nature of this what
+
+532
+01:14:34,979 --> 01:14:43,019
+is happening at this basic block at this program point. So there are there is some
+
+533
+01:14:43,019 --> 01:14:48,699
+solutions coming from here. There are some solutions coming from here and they are getting
+
+534
+01:14:48,699 --> 01:14:57,699
+combined. Can you visualize that what is happening on this lattice? What is really going on?
+
+535
+01:14:57,699 --> 01:15:12,819
+What am I doing? How do I combine? Join. So I take the join of the solutions from my
+
+536
+01:15:12,819 --> 01:15:25,139
+left arm and my right arm. So this is how we like compute the next solution on my this
+
+537
+01:15:25,140 --> 01:15:35,860
+set. That is the other question. So let us yeah I will just take that up now. So now
+
+538
+01:15:35,860 --> 01:15:44,579
+essentially you can see that. So essentially to get the new solution I always take the
+
+539
+01:15:44,579 --> 01:15:51,180
+join of these elements along these two points. So okay I kept on saying meet of elements
+
+540
+01:15:52,100 --> 01:16:00,500
+but I am switching to saying join of elements now. Do not get confused. Duality. As long
+
+541
+01:16:00,500 --> 01:16:08,940
+as I am consistent I say meet or I say join it is the same thing. Do not get confused.
+
+542
+01:16:08,940 --> 01:16:13,220
+So actually in the data flow literature people were talking about computing in the other
+
+543
+01:16:13,220 --> 01:16:21,060
+direction actually going starting with top and going down and slightly newer there is
+
+544
+01:16:21,060 --> 01:16:24,900
+a framework of abstract interpretation where people do it sort of the other way. So I will
+
+545
+01:16:24,900 --> 01:16:30,580
+use I will consistently use the other notation where we always go up as we compute solution.
+
+546
+01:16:30,580 --> 01:16:38,539
+We will go up the chain. So I will talk about the I will only talk about the taking a join.
+
+547
+01:16:38,539 --> 01:16:44,260
+I will not talk about taking a meet. So even if I say meet please rephrase it to join.
+
+548
+01:16:44,260 --> 01:16:50,100
+It is just the same does not matter. I am only concerned with like one side of it. I
+
+549
+01:16:50,100 --> 01:16:54,460
+am only concerned with the semi lattice. I do not bother about if it is a upper semi
+
+550
+01:16:54,460 --> 01:17:03,220
+lattice or bottom semi lattice. So correspondingly I will use meet and join. So now so the next
+
+551
+01:17:03,220 --> 01:17:10,860
+thing is that so every time what is happening is remember the nature of our computation.
+
+552
+01:17:10,860 --> 01:17:18,500
+The nature of our computation was that I had this set of in and outs for each basic block
+
+553
+01:17:18,699 --> 01:17:23,979
+and I had this function which was a function corresponding to each of these elements and
+
+554
+01:17:23,979 --> 01:17:35,460
+every time I was computing the new element. So now so you guys said already said that
+
+555
+01:17:35,460 --> 01:17:40,979
+we are we follow this particular chain. We follow a chain. So this guy will only see
+
+556
+01:17:40,979 --> 01:17:46,220
+values in a certain chain. So why is that the case? Why is it happening that I will
+
+557
+01:17:46,220 --> 01:17:55,659
+only take values in that chain under what? Solution set cannot be monotonically increasing.
+
+558
+01:17:55,659 --> 01:18:08,220
+Something else has to be. How? Why? Why? Why are they lucky? Why are they on the chain?
+
+559
+01:18:08,220 --> 01:18:20,619
+What is what is making them beyond the chain? Why is it the case? So let us try to write
+
+560
+01:18:20,619 --> 01:18:30,740
+the solution here. The function that is coming here. What does this function look like? What
+
+561
+01:18:30,740 --> 01:18:35,500
+is this function? This is the in of a basic block. So how do I compute the in of a basic
+
+562
+01:18:35,500 --> 01:18:49,579
+block? I take a union of the predecessors of B and out of that. If I expand upon this
+
+563
+01:18:49,579 --> 01:19:02,300
+then what is out of B? Out of P? It is nothing but gen of P minus kill of P sorry in of P
+
+564
+01:19:02,300 --> 01:19:09,420
+minus kill of P plus gen of P. So if you think about the whole function that is happening
+
+565
+01:19:09,420 --> 01:19:14,420
+is it is basically two functions. One is this function which come to my transfer function
+
+566
+01:19:14,420 --> 01:19:33,380
+which essentially looks like out is equal to and my meet function or the join function
+
+567
+01:19:33,380 --> 01:19:41,380
+which joins the values. So my computation is happening under this transfer function.
+
+568
+01:19:41,380 --> 01:19:54,100
+Same with gen right? Gen also does not change. Only chain that changes is in and out. That
+
+569
+01:19:54,100 --> 01:20:03,180
+is fine but what can you say about the nature of this function now? Yeah that any function
+
+570
+01:20:03,180 --> 01:20:09,300
+should be always be the same on the same value. You are on the right track. Now think about
+
+571
+01:20:09,300 --> 01:20:17,380
+in terms of whatever definition we learnt. What type of function is this? No, no, no.
+
+572
+01:20:17,380 --> 01:20:26,659
+It is a order of assuming function. So if I add a new thing to in that is that can only be equal
+
+573
+01:20:26,659 --> 01:20:36,539
+to or greater than the previous out that I got. Because my kill and my gen sets are constant
+
+574
+01:20:36,739 --> 01:20:42,539
+for a given basic block they are constants. They do not change. So what can happen is if a new
+
+575
+01:20:42,539 --> 01:20:50,340
+definition sneaks into in so either my out remains the same if that gets killed let us say right or
+
+576
+01:20:50,340 --> 01:20:59,300
+it can increase because that new definition can also get inside this. So if the previous
+
+577
+01:20:59,300 --> 01:21:06,140
+output without the with the old value of in was let us say less than out the same will be preserved
+
+578
+01:21:06,140 --> 01:21:15,020
+even for the new values or the other way round whatever it is. And because there is a loop this
+
+579
+01:21:15,020 --> 01:21:21,820
+whole thing is so the whole so the total function that is reaching here for this computation is sort
+
+580
+01:21:21,820 --> 01:21:27,300
+of a you can think of that as a composition of these all the functions in the on that line.
+
+581
+01:21:27,300 --> 01:21:33,539
+So compositions of order preserving functions that is what we are sort of computing.
+
+582
+01:21:33,539 --> 01:21:42,859
+Number of loops into because every iteration of my while loop I do multiple updates of my basic
+
+583
+01:21:42,859 --> 01:21:50,539
+blocks like multiple basic blocks can get updated. No are you assuming order on the iteration of the
+
+584
+01:21:50,539 --> 01:22:01,659
+basic blocks the best order. So then what yes yes yes so no loop does not it should one shot it
+
+585
+01:22:01,659 --> 01:22:09,019
+should get terminate it should terminate. So let us pull this question so now if there is no loop
+
+586
+01:22:09,019 --> 01:22:18,699
+how many iterations of the while loop will be there. Two why two yes yes first move to compute
+
+587
+01:22:18,699 --> 01:22:24,340
+the values the second to check the values do not change. So the last iteration is always going to
+
+588
+01:22:24,340 --> 01:22:28,779
+the check loop which will just see that nothing changed okay I am good. So the flag will be set
+
+589
+01:22:28,779 --> 01:22:35,899
+flag will not get set and it will come out right two iterations. What if there is a loop then as
+
+590
+01:22:35,899 --> 01:22:43,340
+you said whatever got computed to the last that the bottom of the loop that will get propagated
+
+591
+01:22:43,340 --> 01:22:52,699
+to the head of the loop again. So very very very good point so essentially what it depends on is
+
+592
+01:22:53,179 --> 01:23:00,619
+something known as the loop depth. The loop depth looks like this so essentially it says that if
+
+593
+01:23:00,619 --> 01:23:07,619
+you have back edges what if you have sequence of such back edges then the first iteration one of
+
+594
+01:23:07,619 --> 01:23:13,500
+them will get fine but the second time whatever got propagated here will get propagated here and
+
+595
+01:23:13,500 --> 01:23:22,139
+the again the same thing will happen. So it depends on the loop depth and interestingly in
+
+596
+01:23:22,140 --> 01:23:28,500
+this case not on the size of the set of the definitions how many definitions are there.
+
+597
+01:23:28,500 --> 01:23:36,340
+Assuming that we are assuming that the updates on those sets are constant like the transfer
+
+598
+01:23:36,340 --> 01:23:47,300
+function I can apply in constant time right excellent really happy. So okay so now the
+
+599
+01:23:47,300 --> 01:23:54,659
+business is that we are here and so it looks like our function is a order preserving function
+
+600
+01:23:54,659 --> 01:24:01,140
+a monotonic function and we seem to be going along a chain right by that will happen right
+
+601
+01:24:01,140 --> 01:24:06,739
+because you are so okay. So can you see the connection of why we did all this business
+
+602
+01:24:06,739 --> 01:24:11,940
+why we talked about lattice theory because now you can put a lot more structure to the type of
+
+603
+01:24:11,940 --> 01:24:16,340
+computation that is happening. It does not look like that insane some weird computation that is
+
+604
+01:24:16,340 --> 01:24:21,060
+happening this actually has a lot of structure in it there is a very deep mathematical structure
+
+605
+01:24:21,060 --> 01:24:28,900
+to how the solution is be computed right. So these all we have answered very busy expressions
+
+606
+01:24:28,900 --> 01:24:35,500
+again you guys can figure it out so I will not bore you with this now. So what is the this thing
+
+607
+01:24:35,500 --> 01:24:42,420
+here it is the very similar thing so the set is the power set of the expressions right and you
+
+608
+01:24:42,420 --> 01:24:48,060
+have to think which ordering relation they are ordered now what is the bottom element.
+
+609
+01:24:48,060 --> 01:25:00,699
+So one more small thing maybe that will help you think and what did I initialize my lattice
+
+610
+01:25:00,699 --> 01:25:10,100
+with my solution with to begin with empty empty is what here the bottom of the lattice
+
+611
+01:25:10,100 --> 01:25:20,579
+so looks like what we are doing is initializing our solution with the bottom of the lattice
+
+612
+01:25:20,579 --> 01:25:31,660
+and applying some order preserving transfer function which looks to be giving me the best
+
+613
+01:25:31,659 --> 01:25:41,059
+solution I do not know why it happens looks like that is happening is not it ok.
+
+614
+01:25:41,059 --> 01:25:51,579
+So now let us talk about very busy expressions so very busy expressions just to make sure tell
+
+615
+01:25:51,579 --> 01:25:57,899
+you that this was not a fluke looks to be the pattern looks to be consistent a very
+
+616
+01:25:57,899 --> 01:26:01,659
+busy expression what was the lattice can you think about what the lattice would be.
+
+617
+01:26:01,659 --> 01:26:09,139
+So very busy expression was doing what it was trying to compute the it was a all path or a
+
+618
+01:26:09,139 --> 01:26:23,939
+any path solution all path so what should I initialize it with the universal set right and
+
+619
+01:26:24,939 --> 01:26:33,859
+then every time my solution will happen what will happen to the solution decrease right
+
+620
+01:26:33,859 --> 01:26:42,059
+because something will because of the intersection something will be thrown out right the transfer
+
+621
+01:26:42,059 --> 01:26:45,539
+function will kill something and something will reduce an intersection will throw that
+
+622
+01:26:45,539 --> 01:26:53,179
+part out in the for the next guy. So if I want to create a chain for this what would the chain
+
+623
+01:26:53,180 --> 01:27:00,579
+look like yes so it will start with the set of expressions now so we have this set of all
+
+624
+01:27:00,579 --> 01:27:21,340
+expressions then I will have the 3 3 yeah right something like this then I will have what this
+
+625
+01:27:21,340 --> 01:27:36,699
+guy will be what which what will be this element yeah so intersection of these two is what e 2
+
+626
+01:27:36,699 --> 01:27:46,340
+e 3 then so on and finally you will have the empty set here so now can so now your set is
+
+627
+01:27:46,340 --> 01:27:54,100
+the set of all expressions e 1 e 2 e n and what is my relation my ordering relation
+
+628
+01:27:54,100 --> 01:28:15,140
+hey look at it right so now I am doing my computation is on this lot of people don't
+
+629
+01:28:15,140 --> 01:28:19,180
+like this symbol actually I was little scared like writing it but you can and let us write it
+
+630
+01:28:19,180 --> 01:28:34,980
+yes yes so now do I see the same pattern again we initialize our computation with the bottom
+
+631
+01:28:34,980 --> 01:28:42,020
+of my lattice and keep on applying the transfer function which reaches a particular solution
+
+632
+01:28:42,020 --> 01:28:50,700
+and are all my other candidates all the other possible solutions are they over approximations
+
+633
+01:28:50,700 --> 01:28:59,300
+are my upper bound still in over approximations empty set is an over approximation so nothing
+
+634
+01:28:59,300 --> 01:29:07,500
+is busy don't do that optimization fine right so see there is so much of structure in all
+
+635
+01:29:07,500 --> 01:29:16,260
+these problems right so now it has become very simple matter of figuring out the lattice which
+
+636
+01:29:16,260 --> 01:29:20,180
+means figuring out the set over which I am doing this computation what what does my space of
+
+637
+01:29:20,180 --> 01:29:27,460
+solutions look like and how are they structured right by what operation are they structured and
+
+638
+01:29:27,460 --> 01:29:35,300
+just by telling by by just knowing that and figuring out the nature of my transfer function
+
+639
+01:29:35,300 --> 01:29:41,739
+is it a order preserving transfer function if that is the case I can simply say that the way
+
+640
+01:29:41,739 --> 01:29:47,900
+I should do this computation is initialize my computation at the bottom of the lattice
+
+641
+01:29:47,900 --> 01:29:53,659
+and keep on applying this order for the transfer function till you reach a solution any upper
+
+642
+01:29:53,659 --> 01:29:58,860
+bound on that is going to be an over approximation which says which you can as well take I don't care
+
+643
+01:29:58,859 --> 01:30:07,219
+so now there are few questions remaining one is that why does it happen that so first is that
+
+644
+01:30:07,219 --> 01:30:13,539
+for such a lattice is it given guaranteed that a solution would exist all the questions we were
+
+645
+01:30:13,539 --> 01:30:18,219
+posing yesterday the second is now you should not think about only these four problems we had talked
+
+646
+01:30:18,219 --> 01:30:23,659
+about two other problems yesterday we have talked about constant propagation and we have talked about
+
+647
+01:30:23,659 --> 01:30:30,340
+interval analysis right so we have even talked about other problems so for constant propagation
+
+648
+01:30:30,340 --> 01:30:43,899
+what would the lattice look like no constant to all constant where are the constants the set
+
+649
+01:30:43,899 --> 01:30:49,220
+was what what is the set of values I could have assigned to any location it could be either not
+
+650
+01:30:49,220 --> 01:30:56,340
+constant or don't know or the set of all constants 1 2 whatever right this was a set of values I was
+
+651
+01:30:56,340 --> 01:31:10,060
+working on right so how would what the lack what would the lattice for this look like I know I
+
+652
+01:31:10,060 --> 01:31:12,740
+know so what should the lattice look like what should the computation on the lattice look like
+
+653
+01:31:12,739 --> 01:31:23,260
+okay don't know people like don't know to be at the bottom because we initialize again to don't
+
+654
+01:31:23,260 --> 01:31:34,340
+know again you should actually so don't know then what to non-constant then don't know to constant
+
+655
+01:31:34,340 --> 01:31:48,579
+okay and constant to non-constant right but this is a hasher diagram right so we don't we get rid
+
+656
+01:31:48,579 --> 01:32:01,579
+of transit dependencies do you see a transit dependency here don't know to non-constant right
+
+657
+01:32:01,619 --> 01:32:07,260
+that is also represented by this particular relation right don't know to a constant to
+
+658
+01:32:07,260 --> 01:32:13,340
+don't know not constant so that implies that don't know to not constant will be related so I can get
+
+659
+01:32:13,340 --> 01:32:19,819
+rid of that right so my lattice essentially then looks like this I mean you guys are right
+
+660
+01:32:19,819 --> 01:32:24,579
+but it is just that my hasher diagram does not allow me to keep transit dependencies
+
+661
+01:32:32,579 --> 01:32:42,779
+this is my constant propagation lattice and remember we said we can make only two updates
+
+662
+01:32:42,779 --> 01:32:52,979
+at most worst case was it in terms of the lattice what is it it is the height of this lattice
+
+663
+01:32:52,979 --> 01:33:09,739
+so height of the lattice is the can you define it formally many on the lattice there is no
+
+664
+01:33:09,739 --> 01:33:18,619
+operation it is the length of the longest chain excellent right the height is the length of the
+
+665
+01:33:18,619 --> 01:33:26,539
+longest chain in the lattice right so looks to be that is the that is what was like telling
+
+666
+01:33:26,539 --> 01:33:35,779
+me how long you have to go and good good good good good so okay but one thing is that this is
+
+667
+01:33:35,779 --> 01:33:45,579
+a this is a constant propagation lattice for a single variable right so I will have this lattice
+
+668
+01:33:45,579 --> 01:33:50,819
+for some variable x similarly I will have another lattice for y and so on what will the
+
+669
+01:33:50,819 --> 01:34:00,019
+actual solution the lattice of the actual solution look like yeah so how do I get it
+
+670
+01:34:00,019 --> 01:34:14,739
+so initial will be all don't knows right right so one of them one constant becomes one other
+
+671
+01:34:14,779 --> 01:34:23,219
+don't knows remain this becomes can become two similarly some other guy can change so this is
+
+672
+01:34:23,219 --> 01:34:31,659
+essentially the product lattice of the lattices of the single variables how do you construct
+
+673
+01:34:31,659 --> 01:34:35,500
+the product lattice you basically take all possible combinations so you have you just
+
+674
+01:34:35,500 --> 01:34:42,619
+lay down the lattices for each of the variables separately x y z w and then take all combinations
+
+675
+01:34:42,619 --> 01:34:53,819
+right and when can you put a edge between two elements in that product lattice whenever there
+
+676
+01:34:53,819 --> 01:35:01,300
+is a corresponding edge for each of these cases each of the elements in the tuple then only is
+
+677
+01:35:01,300 --> 01:35:13,619
+that related like for instance like bottom bottom one bottom bottom and bottom one bottom
+
+678
+01:35:13,619 --> 01:35:19,860
+bottom bottom I don't know how many I put here one two three four five looks like it I am done
+
+679
+01:35:19,860 --> 01:35:29,779
+so so bottom is nothing but don't know I am just writing bottom so now are they related are these
+
+680
+01:35:29,779 --> 01:35:47,500
+two related huh why no no no so now if you not think I just talking about that these elements
+
+681
+01:35:47,500 --> 01:35:52,819
+in this forget the constant propagation problem now right think about the mathematical description
+
+682
+01:35:52,819 --> 01:35:57,380
+of these points so this is a point this is also a point they are they are both of them belong to
+
+683
+01:35:57,380 --> 01:36:04,020
+the set S right so these are two arbitrary points question is should we have a so this
+
+684
+01:36:04,020 --> 01:36:14,779
+is what I got by taking the product of five such component lattices so now the question is are do
+
+685
+01:36:14,779 --> 01:36:25,659
+these two elements relate can these two elements relate again again please don't think about the
+
+686
+01:36:25,659 --> 01:36:31,019
+problem so the function also is not in the in the this thing now I mean we don't even have the I'm
+
+687
+01:36:31,019 --> 01:36:34,779
+not even talking about the function right now what function what is the transform function I'm not
+
+688
+01:36:34,779 --> 01:36:39,739
+even talking about it I'm just saying that this is the space of our solutions right this is a
+
+689
+01:36:39,739 --> 01:36:46,099
+element of that solution solution space this is also an element of the solution space it's possible
+
+690
+01:36:46,099 --> 01:36:50,099
+that you get either that as a solution or this as a solution so I'm I'm just picking a set I'm
+
+691
+01:36:50,100 --> 01:36:56,180
+describing a lattice by describing a set and describing a relation on it right I'm not even
+
+692
+01:36:56,180 --> 01:37:01,220
+talking about what function we are using both of these are points in that space both of them
+
+693
+01:37:01,220 --> 01:37:08,020
+are elements of s now I want to say that this ordinate relation now what does that this order
+
+694
+01:37:08,020 --> 01:37:16,260
+relation look like now this s itself looks like multiple like an element corresponding to multiple
+
+695
+01:37:16,260 --> 01:37:24,220
+elements like whatever you would have got for s of x s of y s of z and so on right because it's
+
+696
+01:37:24,220 --> 01:37:28,619
+a product lattice you are allowed to pick elements from each of these things what will this order
+
+697
+01:37:28,619 --> 01:37:36,140
+relation look like this is a component by component ordering relation so this will say this is a
+
+698
+01:37:36,140 --> 01:37:43,820
+ordering on x ordering on y ordering on z something like that and the final ordering is if there is a
+
+699
+01:37:43,819 --> 01:37:54,899
+ordering established by all of them so here what is the problem that this one is larger than bottom
+
+700
+01:37:54,899 --> 01:38:03,739
+for the second component but here this bottom is smaller than this one so one of the relation
+
+701
+01:38:03,739 --> 01:38:13,019
+hits the other one misses so I cannot say that this is less than this right if all of them
+
+702
+01:38:13,020 --> 01:38:20,300
+consistently are less then I can say this whole element is less than this whole element so just
+
+703
+01:38:20,300 --> 01:38:24,900
+imagine this big lattice in your head I don't want to write it so the elements they look like
+
+704
+01:38:24,900 --> 01:38:33,660
+this and the bottom element is all bottoms the top element is all not constants why is that because
+
+705
+01:38:33,660 --> 01:38:39,220
+not constants to all of them will surely be bigger than not constant or any of them right so it will
+
+706
+01:38:39,220 --> 01:38:56,980
+surely be a superset of an upper bound of that got it so now let's again revisit this look at
+
+707
+01:38:56,980 --> 01:39:05,060
+this particular lattice this power lattice I got now this can be decomposed into lattices
+
+708
+01:39:05,060 --> 01:39:10,820
+corresponding to each definitions and lattice corresponding to each definition will be what
+
+709
+01:39:10,820 --> 01:39:18,060
+either it is true or it is false is given in the set or given is not in the set so this big lattice
+
+710
+01:39:18,060 --> 01:39:24,100
+is nothing but the power lattice of this right okay so I think we are getting too abstract so
+
+711
+01:39:24,100 --> 01:39:29,860
+what was a big vector a big vector was just represented that an element was there or the
+
+712
+01:39:29,859 --> 01:39:37,179
+element was not there the big vector was either 0 or 1 right so 0 is lesser than 1 so my lattice
+
+713
+01:39:37,179 --> 01:39:48,059
+is very simple my lattice is 0 and 1 that is my lattice for every definition di right now I can
+
+714
+01:39:48,059 --> 01:39:53,259
+simply get the power of the product lattice by picking zeros or one for the corresponding
+
+715
+01:39:53,259 --> 01:39:58,739
+definitions once I pick that that becomes one set that set will be part of this big lattice
+
+716
+01:39:58,739 --> 01:40:05,420
+somewhere and I can exactly use the same thing and the ordering is the subset relation is nothing
+
+717
+01:40:05,420 --> 01:40:12,059
+but that right key it has to be like either 0 or 1 of the corresponding elements like greater
+
+718
+01:40:12,059 --> 01:40:19,059
+than the corresponding elements right so you would also start thinking about them as like
+
+719
+01:40:19,059 --> 01:40:28,420
+component lattices what happens to them when they compose so on so there are some more interesting
+
+720
+01:40:28,420 --> 01:40:33,220
+things about it actually so actually the computation just happens of because it is a separable problem
+
+721
+01:40:33,220 --> 01:40:38,340
+the computation only happens on this component lattice almost in parallel for each of the
+
+722
+01:40:38,340 --> 01:40:43,539
+component lattices almost in parallel so actually you are not computing directly on this big
+
+723
+01:40:43,539 --> 01:40:50,980
+lattice you are actually computing on these binary lattices almost in parallel no almost
+
+724
+01:40:50,980 --> 01:40:56,859
+in parallel because and it is possible because it is a separable problem what happens in case
+
+725
+01:40:56,859 --> 01:41:01,099
+of constant propagation it was not a separable problem because it is not separable problem there
+
+726
+01:41:01,099 --> 01:41:07,659
+will be interaction across the lattices and that is why this product it is actually computing on
+
+727
+01:41:07,659 --> 01:41:11,579
+the product lattice and that is why the height of the lattice comes into the picture because it is
+
+728
+01:41:11,579 --> 01:41:16,460
+the height of the lattice and the number of variables that can also affect it right so the
+
+729
+01:41:16,460 --> 01:41:21,500
+so let us say there is a big dependence chain across a set of lot of variables so the there
+
+730
+01:41:21,500 --> 01:41:27,260
+is a now the first variable to stabilize will take three steps two steps that can affect the
+
+731
+01:41:27,260 --> 01:41:32,699
+second variable again it might take two steps might affect the third variable so it is a chain
+
+732
+01:41:32,699 --> 01:41:39,739
+on how many variables are there and and this power lattice can construct I mean has all of them the
+
+733
+01:41:39,739 --> 01:41:45,460
+height of the power lattice think about it it captures both of it so when we are doing
+
+734
+01:41:45,460 --> 01:41:49,500
+constant propagation we are actually computing on this power lattice not power lattice product
+
+735
+01:41:49,500 --> 01:41:56,579
+lattice okay so I think we will again go back to maths after this so but I see I hope you have
+
+736
+01:41:56,579 --> 01:42:00,899
+seen some connection between why we did all this business so there is such a beautiful structure
+
+737
+01:42:00,899 --> 01:42:05,659
+to the computation that we are doing right it has a completely beautiful mathematical description
+
+738
+01:42:05,659 --> 01:42:11,579
+of what we are doing look like complete ad hoc algorithm but no that is not true so I think I
+
+739
+01:42:11,579 --> 01:42:12,460
+can stop here
+

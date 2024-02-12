@@ -1,0 +1,53 @@
+ Technical Terms:
+
+* C++ Inheritance
+* Data Memory
+* Code Memory
+* Static Stack
+* Heap
+* Aloka Instruction
+* GEP Instruction
+* Store Instruction
+* Translating Virtual Function Calls
+* Internal Representation of a Class
+* Private Members
+* Public Members
+* This Pointer
+* Inheritance Hierarchy
+* Non-Virtual Functions
+* Virtual Functions
+* Pure Virtual Functions
+* Abstract Class
+* Virtual Function Table
+* Compile Time
+* Runtime
+* Indirect Calls
+* Direct Calls
+* Call Graph
+* Interprocedural Optimizations
+
+Explanation:
+
+* C++ Inheritance: A mechanism in C++ where one class can acquire the properties and characteristics of another class.
+* Data Memory and Code Memory: Separate regions in memory responsible for storing data and code, respectively.
+* Static Stack and Heap: Specific areas in memory for automatic and dynamic memory allocation.
+* Aloka Instruction: An LLVM IR instruction that allocates memory on the stack.
+* GEP Instruction: An LLVM IR instruction that computes a pointer to an element or a struct field, given a base pointer and offset.
+* Store Instruction: An LLVM IR instruction that writes a value to a memory location.
+* Translating Virtual Function Calls: Converting virtual function calls into direct function calls during code generation.
+* Internal Representation of a Class: The organized structure of class members (data and functions) in memory.
+* Private Members: Class members that are accessible only within the class.
+* Public Members: Class members that are accessible outside the class.
+* This Pointer: A hidden pointer to the current object, automatically passed as the first argument to non-static methods.
+* Inheritance Hierarchy: A tree-like structure representing relationships between parent and child classes.
+* Non-Virtual Functions: Member functions that perform the same action regardless of the object type.
+* Virtual Functions: Member functions that behave differently depending on the object type.
+* Pure Virtual Functions: Virtual functions without implementation, forcing derived classes to provide their own implementation.
+* Abstract Class: A class containing at least one pure virtual function, which cannot be instantiated.
+* Virtual Function Table: A table containing addresses of virtual functions, used to support polymorphism and dynamic dispatch.
+* Compile Time: The stage in which the source code is processed and transformed into machine code before execution.
+* Runtime: The stage during which the program is actively executing.
+* Indirect Calls: Function calls involving pointers or references, resolving to the target function during runtime.
+* Direct Calls: Function calls explicitly stating the target function, resolved during compile time.
+* Call Graph: A graphical representation of function calls and their interactions in a program.
+* Interprocedural Optimizations: Optimization techniques that analyze and transform multiple procedures simultaneously to improve performance.

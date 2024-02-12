@@ -1,0 +1,1680 @@
+1
+00:00:00,000 --> 00:00:13,400
+So, if you look at the previous example, if you see it as a flowchart, this is the flowchart
+
+2
+00:00:13,400 --> 00:00:23,719
+of that Fibonacci code. If you look at the flowchart, you say there is an if then else,
+
+3
+00:00:23,719 --> 00:00:38,399
+there is a nice loop. In this flowchart, there are a sequence of instructions here, where
+
+4
+00:00:38,399 --> 00:00:46,159
+there are no one is jumping in between and the control is not flowing anywhere out. The
+
+5
+00:00:46,159 --> 00:00:53,519
+control enters at the beginning, exits at the end. I will call such a sequence of instructions
+
+6
+00:00:53,520 --> 00:01:01,760
+as a basic block. Basic blocks has been already covered. I heard, I hear both yes and no.
+
+7
+00:01:01,760 --> 00:01:20,760
+Yes, who covered it? Shubhajit. Did you also learn how to build basic blocks? Fine. Perfect.
+
+8
+00:01:21,000 --> 00:01:29,439
+Have you also been, was dominator is also covered? Yes. Perfect. So, that saves me more time.
+
+9
+00:01:29,439 --> 00:01:39,600
+So, did Shubhajit cover loops, how to find loops using dominators? Natural loops.
+
+10
+00:01:39,600 --> 00:01:47,360
+Natural loops? Lovely. So, then I can jump, then I can jump. So, I will, what I was planning to
+
+11
+00:01:47,359 --> 00:01:58,000
+cover, half an hour or so, I will make it much faster. So, we have loops, sorry, we have from
+
+12
+00:01:58,000 --> 00:02:08,240
+the code, we can construct control flow graphs. So, what is a control flow graph? It is a graph
+
+13
+00:02:08,240 --> 00:02:18,280
+where the nodes are basic blocks and the edges indicate flow of control, right? Good.
+
+14
+00:02:18,280 --> 00:02:34,320
+And here is a question, if I build, so this is, so, given a sequence of code, we do whatever,
+
+15
+00:02:34,799 --> 00:02:39,280
+generate the IR and then do control flow analysis to get some graph like this. The question is,
+
+16
+00:02:39,280 --> 00:02:45,000
+can the control flow analysis expose control structures which are not obvious in the high
+
+17
+00:02:45,000 --> 00:02:50,919
+level code? In the high level code, it is not obvious, but it is more obvious in the,
+
+18
+00:02:50,919 --> 00:02:56,599
+the answer is yes, right? Because in the high level code, for instance, in this high level code,
+
+19
+00:02:56,599 --> 00:03:07,280
+this could have been the high level code, the loop is not obvious, right? So, you can have loops
+
+20
+00:03:07,280 --> 00:03:15,599
+constructed from if and go to's and so on, which are otherwise not, okay. Question, is it? Okay.
+
+21
+00:03:15,599 --> 00:03:26,359
+We already know that the CFG has a special entry and exit block and all that, okay. We know what
+
+22
+00:03:26,360 --> 00:03:36,560
+is the dominator, right? What is the dominator? If I dominate you, then the control starting
+
+23
+00:03:36,560 --> 00:03:47,200
+from the start to reach you must go through me, right? Okay. And then the, the dominator
+
+24
+00:03:47,199 --> 00:03:57,280
+relation is anti-symmetric, reflexive and transitive. Reflexive as in I dominate myself,
+
+25
+00:03:57,280 --> 00:04:07,799
+if I dominate you, you dominate him, then I dominate, that is transitive. If I dominate you,
+
+26
+00:04:07,800 --> 00:04:18,840
+you do not dominate me, that is anti-reflexive, okay. And we know how to compute the loops from
+
+27
+00:04:18,840 --> 00:04:27,040
+your dominators and you know how to compute the dominators as well, right? Was it covered?
+
+28
+00:04:27,040 --> 00:04:40,760
+How the dominators, how do you build dominators? Okay. Before you go to dominators, we talked
+
+29
+00:04:40,760 --> 00:04:48,960
+about basic block building using leaders. Yeah. And then we talked about, I mean, you said,
+
+30
+00:04:48,960 --> 00:04:54,480
+you already know about leaders and how to construct basic blocks using them. Let me ask a question.
+
+31
+00:04:54,480 --> 00:05:04,319
+If there are, if there is an if then else, I can build my CFG understands that. Does C
+
+32
+00:05:04,319 --> 00:05:20,759
+support something like exceptions? Exceptions, no. Sure.
+
+33
+00:05:20,759 --> 00:05:37,319
+No, the idea, what is an idea of exception? You install an exception handler, right? Like
+
+34
+00:05:37,319 --> 00:05:42,079
+when you have a tri-catch block, you are saying at the beginning of the tri, you are installing
+
+35
+00:05:42,079 --> 00:05:46,279
+a handler which is the catch block. You are saying anything that happens in this tri-block,
+
+36
+00:05:46,279 --> 00:05:57,079
+I will return back to the handler and that could be happening way deep inside a function call. So,
+
+37
+00:05:57,079 --> 00:06:03,159
+it is not just checking at that place. The point is how do you go to get back? So,
+
+38
+00:06:03,159 --> 00:06:13,319
+the short answer is C does have some way to handle exceptions, okay. Read about set jump
+
+39
+00:06:13,360 --> 00:06:19,199
+and long jump. Those who are interested, find out the set jump and long jump instructions in C.
+
+40
+00:06:19,199 --> 00:06:24,920
+Anyone heard of these two, these instructions? Yes.
+
+41
+00:06:24,920 --> 00:06:42,240
+Really? You use set jump and long jump? Okay, yeah. Tri-catch looks more high level.
+
+42
+00:06:42,240 --> 00:06:48,639
+Yeah, that looks more, I do not know. I find tri-catch to be more intuitive,
+
+43
+00:06:48,639 --> 00:06:54,000
+maybe because I started thinking of exceptions from there, but this is not terribly bad either,
+
+44
+00:06:54,000 --> 00:07:00,759
+okay. But nevertheless, read what these are. When you see a function call in your code,
+
+45
+00:07:00,759 --> 00:07:10,199
+right? You have built the, I have code for which I want to build the control flow graph. Every
+
+46
+00:07:10,199 --> 00:07:15,560
+instruction or rather every sequence of instructions become a basic block. If there is a function
+
+47
+00:07:15,560 --> 00:07:22,360
+call in between, what will happen? What, I mean, you see what I am saying, right? Say for instance,
+
+48
+00:07:22,360 --> 00:07:26,719
+in the previous, no I would not go there. I mean, let us say in some piece of the code here,
+
+49
+00:07:26,719 --> 00:07:38,079
+let us say I have a call. What will you do? Typically, we treat the call as a single
+
+50
+00:07:38,079 --> 00:07:44,399
+instruction. In the same basic block. I do not treat, I do not make a separate basic block for
+
+51
+00:07:44,399 --> 00:07:55,039
+it. It is easy to deal with, deal it that way. We have looked at this way, right? This call,
+
+52
+00:07:55,039 --> 00:08:01,479
+the control reached it from the previous instruction and its next instruction will get
+
+53
+00:08:01,480 --> 00:08:11,800
+the control after the call, okay. So, just a minor point, okay. In most cases, it is not considered
+
+54
+00:08:11,800 --> 00:08:18,160
+as a branch and return. It is considered just as a single instruction, okay. You already have done
+
+55
+00:08:18,160 --> 00:08:24,480
+control flow graph. You know what is the successor of a node, predecessor and all that, okay. You
+
+56
+00:08:24,480 --> 00:08:35,800
+know dominators. I wanted you to understand how, two things. Given dominators, how do you
+
+57
+00:08:35,800 --> 00:08:41,920
+identify, get the loops? You already know that. How to get the natural loops from a dominator?
+
+58
+00:08:41,920 --> 00:08:49,440
+Now, the question is how to get the dominator information? Has it been already covered? If yes,
+
+59
+00:08:49,440 --> 00:08:59,360
+I will not cover. Else, I will cover that. Not covered? Okay. Then, I will start from,
+
+60
+00:08:59,360 --> 00:09:15,120
+yeah. See, given the control flow graph, I want to compute the dominator information. Let us say,
+
+61
+00:09:15,120 --> 00:09:19,480
+I want to compute the dominator information of only the basic blocks. Once I have the
+
+62
+00:09:19,480 --> 00:09:25,720
+dominator information of basic blocks, the individual statements is trivial, right? Or,
+
+63
+00:09:25,720 --> 00:09:30,679
+I can, I will say, I will treat each statement as this individual basic block. Either way,
+
+64
+00:09:30,679 --> 00:09:36,679
+it is fine. Does not matter. Now, how do I compute the dominator information? Any thoughts? I will
+
+65
+00:09:36,679 --> 00:09:49,839
+give you a clue. The clue is, we will use this part. It is anti-symmetric, reflexive and transitive.
+
+66
+00:09:49,839 --> 00:09:59,199
+These properties we will use to compute the dominator information. There is one particular
+
+67
+00:09:59,200 --> 00:10:09,080
+node in your control flow graph whose dominator information you always know and that is entry.
+
+68
+00:10:09,080 --> 00:10:28,280
+Entry dominates whom? It dominates all. Exit dominates itself, only itself, right? Let us
+
+69
+00:10:29,000 --> 00:10:37,000
+use the first reflexive property. What does the reflexive property say? A dominates A. So,
+
+70
+00:10:37,000 --> 00:10:42,959
+I know. So, I can first, what I can do? For each node, I will say, okay, dominates, yes,
+
+71
+00:10:42,959 --> 00:10:53,959
+it dominates itself. Reflexive property, done. Okay. If I am a node and I have two successes,
+
+72
+00:10:53,960 --> 00:11:05,040
+right? What can I know about, or if I have one successor, why two? If I have a successor,
+
+73
+00:11:05,039 --> 00:11:25,559
+what if I know my dominators, okay? If I know, no sorry, A and B, okay? B is a successor of A.
+
+74
+00:11:25,559 --> 00:11:35,119
+If you know what B dominates, B dominates someone or a set, what do you know about A now?
+
+75
+00:11:35,119 --> 00:11:51,079
+Whatever A was dominating, that plus? Yes, make sense. Make sense. So, what I am saying,
+
+76
+00:11:51,080 --> 00:12:05,840
+first of all, each node dominates itself. Then, if A is a predecessor of B and B dominates a bunch
+
+77
+00:12:05,840 --> 00:12:13,920
+of nodes, then A will dominate all of those. And now that I know about A, what can I know,
+
+78
+00:12:14,639 --> 00:12:39,039
+its predecessor can include all of these. Make sense? Good. If B has multiple parents,
+
+79
+00:12:39,039 --> 00:12:58,439
+then what will happen? Good. So, now let us come to the, here is a block B.
+
+80
+00:13:09,039 --> 00:13:33,719
+Now, we are saying B1, if whatever B2 dominates, B1 will also dominate, whatever B3 dominates,
+
+81
+00:13:34,600 --> 00:13:59,680
+right? What about here? So, B4 may dominate, B4 may dominate a set, but will B5 dominate them?
+
+82
+00:13:59,679 --> 00:14:07,279
+No. No. Will B6 dominate them? No. So, now what is the property that, I mean,
+
+83
+00:14:07,279 --> 00:14:19,399
+that is kind of, what is happening here? I mean, what can I do to get the dominance information?
+
+84
+00:14:19,399 --> 00:14:31,679
+If B5, so what I am saying, if I know B2, B3, in this case I can compute that of B1. Here,
+
+85
+00:14:31,679 --> 00:14:42,159
+if I know B4, I cannot do for B5, B6, right? If I know, let us try the other way round now.
+
+86
+00:14:43,039 --> 00:14:57,199
+I know what? That B1 dominates a few, right? Or rather, B1 knows who is dominating B1. If
+
+87
+00:14:57,199 --> 00:15:07,079
+B1 knows who is dominating B1, can I know about B2? Yeah? Whoever is dominating B1 will also
+
+88
+00:15:07,200 --> 00:15:15,840
+dominate B2. Whoever is dominating B1 will also dominate? Good. Whoever is dominating B5,
+
+89
+00:15:15,840 --> 00:15:22,879
+are they guaranteed to dominate B4? Whoever is dominating B6, are they guaranteed to dominate
+
+90
+00:15:22,879 --> 00:15:36,920
+B4? No. But the dominators of B4 are included in B5's dominators. The dominators of B4 are
+
+91
+00:15:37,719 --> 00:15:46,360
+also included in B6. If I know the dominators of B5, if I know the dominators of B6, how do
+
+92
+00:15:46,360 --> 00:16:00,519
+I compute the dominators of B4? So, now if I know my dominators, then I can pass this information
+
+93
+00:16:00,519 --> 00:16:15,639
+to my children. My children, notes, will take the dominators of, take a intersection. What if there
+
+94
+00:16:15,639 --> 00:16:23,159
+is a loop? So, this says that my children depend on me. If there is a loop, I depend on my children,
+
+95
+00:16:24,120 --> 00:16:35,480
+my children depend upon me. What will happen? And this is where comes the beauty of iterative
+
+96
+00:16:35,480 --> 00:16:44,439
+data flow analysis. You would have heard this phrase already, right? Have you? No? Data flow analysis.
+
+97
+00:16:44,440 --> 00:16:58,360
+So, what we will do here? Here is a piece of algorithm. This algorithm, what it computes,
+
+98
+00:16:58,360 --> 00:17:17,400
+let us see. It computes the set of all dominators. It initializes the dominator of root to be just
+
+99
+00:17:17,400 --> 00:17:24,360
+the root. Then, for the rest of the guys, it initializes the dominators to be set of all nodes,
+
+100
+00:17:24,519 --> 00:17:36,679
+set of all nodes. And then, do not worry about the repeat until loop yet. Look at just this part.
+
+101
+00:17:36,679 --> 00:17:47,719
+What it does? It goes over every node. Find out the predecessor of the node. For each predecessor,
+
+102
+00:17:48,279 --> 00:17:56,279
+it says, hey, who are all your dominators? Let me take an intersection.
+
+103
+00:17:58,279 --> 00:18:05,319
+So, it finds out for each predecessor, it does an intersection. How does it compute the intersection?
+
+104
+00:18:06,039 --> 00:18:12,440
+It sets t equal to set of all nodes and keep taking t intersection, the dominator of p.
+
+105
+00:18:12,440 --> 00:18:21,400
+When I say this dominator, it is the current dominators. Initially, for each node, the dominator
+
+106
+00:18:21,400 --> 00:18:28,600
+is set of all nodes. So, initially, they will try to, if my predecessor's dominators have not
+
+107
+00:18:28,600 --> 00:18:35,960
+changed, I will take their intersection and still get the whole set. That is fine. After I do this,
+
+108
+00:18:35,960 --> 00:18:47,799
+after I have taken an intersection, what I will do? I will check the new set of dominators.
+
+109
+00:18:50,440 --> 00:18:54,440
+By the way, I will take the intersection and add myself. I have to add myself. I forgot about it.
+
+110
+00:18:56,519 --> 00:19:02,600
+This B5, B6, right? You will take the intersection of the dominators of B5 and B6
+
+111
+00:19:03,079 --> 00:19:15,719
+and then add B4. You are adding the same n here, t union n. What is this d? d is the new computed
+
+112
+00:19:17,719 --> 00:19:22,759
+dominators. You will check, is this d different from what my current value is?
+
+113
+00:19:23,480 --> 00:19:35,000
+If it has, if it is different, I will just say hey, I am changed. My dominator value has changed.
+
+114
+00:19:35,000 --> 00:19:40,359
+I will say change equal to true and say dominator, right? If it has not changed, no problem.
+
+115
+00:19:41,559 --> 00:19:50,680
+And now, I am doing for here to here. What did I do in one round? I took whatever the dominator
+
+116
+00:19:50,680 --> 00:19:59,000
+information I had and based on my parents information, my predecessor information,
+
+117
+00:19:59,000 --> 00:20:07,640
+I recomputed myself. Done? At the end of it, I will check has any node changed.
+
+118
+00:20:08,759 --> 00:20:18,440
+If any node has changed, you will repeat the same process. We will take an example.
+
+119
+00:20:19,080 --> 00:20:25,000
+Should we take? Yeah, let us take the example and then we will analyze the algorithm.
+
+120
+00:20:26,840 --> 00:20:33,559
+Let us take an example to convince ourselves, yes, this works for this example. Then we will
+
+121
+00:20:33,559 --> 00:20:42,200
+convince ourselves this actually works. This is something that should make all of you at
+
+122
+00:20:42,200 --> 00:20:51,319
+least be skeptical. Will this terminate? How many of you had this doubt? If none of you had
+
+123
+00:20:51,319 --> 00:20:58,120
+this doubt, yes, good. I am happy at least one had this doubt. Others did not have this doubt.
+
+124
+00:20:58,120 --> 00:21:06,840
+This is it will not. You already have studied fixed point analysis, right? So, now,
+
+125
+00:21:06,919 --> 00:21:13,240
+at the end of this example, we will then reason about why this will terminate. We will come to
+
+126
+00:21:13,240 --> 00:21:20,759
+that. Good. So, we will compute the dominators. Can you take on your in your text books or other
+
+127
+00:21:20,759 --> 00:21:30,279
+notebooks I mean, take this example and run the algorithm and compute the dominators.
+
+128
+00:21:30,279 --> 00:21:37,319
+So, we will initialize the, so write a nice simple table. I mean the way to do it would be
+
+129
+00:21:38,519 --> 00:21:47,559
+you can do a nice table here. B1, B2, why B1, B2? It should be entry as well, right?
+
+130
+00:21:49,319 --> 00:21:53,720
+So, in round one, you are computing the
+
+131
+00:22:00,279 --> 00:22:11,240
+dominators. Yeah. So, what will I initialize the dominators of each of them?
+
+132
+00:22:13,960 --> 00:22:22,599
+To their own self. No, no, sorry, root as entry and all others with the whole set. I will just
+
+133
+00:22:22,599 --> 00:22:41,079
+mark it as N here and then what I am doing? I am in this loop. In this loop,
+
+134
+00:22:41,079 --> 00:22:59,000
+let us pick for B1. B1, what will happen? B1 will take an intersection of all and entry. It will get
+
+135
+00:22:59,000 --> 00:23:21,480
+entry, right? Entry, then union with B1. Entry, B1 and then what will happen to B2? Entry,
+
+136
+00:23:21,640 --> 00:23:45,319
+B1, B2. Then what about B3? B4, B4 be careful, right? B4 has two predecessors, B3 and B6.
+
+137
+00:23:45,960 --> 00:23:54,439
+What is B3's dominator of information? I already have entry B1, B3 intersection with
+
+138
+00:23:56,359 --> 00:24:04,200
+the full set N. So, the intersection will give me entry B1, B3 and I will add B4.
+
+139
+00:24:07,480 --> 00:24:10,359
+So, why do not you finish it individually? The rest of the
+
+140
+00:24:11,079 --> 00:24:21,879
+table, once you are done with round 1, let me know. First round is over. So, at the end of
+
+141
+00:24:21,879 --> 00:24:27,959
+the first round, the value of change flag is true. So, we will go to the second round. Yeah,
+
+142
+00:24:27,960 --> 00:24:44,440
+continue with the second round. So, at the end of first round, so let me fill the table. Tell
+
+143
+00:24:44,440 --> 00:25:03,880
+me the names for this. What is the number for B5? Entry, yeah, louder. Entry, yeah, B1, B3, B4
+
+144
+00:25:03,880 --> 00:25:30,760
+and B5, okay. And B6? Entry, B1, B3, B4, B6, okay. And exit? Entry, B1 and exit.
+
+145
+00:25:34,280 --> 00:25:39,240
+Everyone got the same set? Anyone who got it different?
+
+146
+00:25:41,320 --> 00:25:47,240
+No? Okay, then we will go by Konbanega Kararpati, audience poll. Okay, next round,
+
+147
+00:25:49,560 --> 00:25:50,360
+anything is changing?
+
+148
+00:25:55,480 --> 00:25:56,760
+Did anyone say yes?
+
+149
+00:26:04,040 --> 00:26:06,920
+No change.
+
+150
+00:26:06,920 --> 00:26:08,920
+No change?
+
+151
+00:26:28,600 --> 00:26:32,040
+Did something change? Which one?
+
+152
+00:26:34,280 --> 00:26:41,640
+B4, what happened to that? B4 was entry, B1, B3, B4, right? Okay.
+
+153
+00:26:45,720 --> 00:26:52,760
+Now, B6 is getting added, is it? How is it getting added? Let us compute that of B4, no?
+
+154
+00:26:53,960 --> 00:26:58,600
+So, in the second next round, so for B4, who are the predecessors of B4?
+
+155
+00:27:00,760 --> 00:27:03,400
+B3 and B6, let us take the intersection of their dominatives.
+
+156
+00:27:04,680 --> 00:27:15,960
+What do you get if you take the intersection? Same? Nothing has changed? Okay, fine number?
+
+157
+00:27:17,640 --> 00:27:30,600
+Okay, anyone? Good. So, if you look at it, in this case, within one round, we could
+
+158
+00:27:30,679 --> 00:27:36,759
+get the same set. Okay, finished. Now, but in general, what is the guarantee that this will terminate?
+
+159
+00:27:49,959 --> 00:28:00,119
+At any, in every round, either the set remains the same or it reduces, okay, reduces by at
+
+160
+00:28:00,119 --> 00:28:07,959
+least one. We start with a finite number of elements.
+
+161
+00:28:18,439 --> 00:28:24,359
+You are reducing and finally, at most you will reach the empty set. So, this gives a guarantee of
+
+162
+00:28:24,599 --> 00:28:27,799
+termination. What is the complexity of this?
+
+163
+00:28:36,519 --> 00:28:37,000
+There is, sorry?
+
+164
+00:28:43,079 --> 00:28:49,240
+Okay, so we will do one by one. We will start with the, we will start with this,
+
+165
+00:28:49,960 --> 00:28:58,839
+what is the cost of this loop? How many predecessors can be there for a block? At most n,
+
+166
+00:28:59,400 --> 00:29:04,039
+order n and you are doing order n intersections. What is the cost of intersection?
+
+167
+00:29:10,599 --> 00:29:18,359
+It can be done under some circumstances constant, okay, but the more naive algorithm will take o n.
+
+168
+00:29:19,640 --> 00:29:25,799
+Okay, because sub, size of the set is o n. So, if I consider this as n square,
+
+169
+00:29:27,799 --> 00:29:34,200
+if intersection is one, it will be o n. If intersection is n, then it is n square. What
+
+170
+00:29:34,200 --> 00:29:39,640
+is the cost of this loop? What is the cost of this body here, dominated by this loop?
+
+171
+00:29:41,160 --> 00:29:48,599
+What is the cost of this one? o n times, so this is o n.
+
+172
+00:29:49,720 --> 00:29:58,599
+o n times o n square, which is o n cubed. Good. What is the cost of the repeat until now?
+
+173
+00:29:58,599 --> 00:30:22,839
+Perfect, perfect, perfect. So, to compute, so here is the key, right? If we want to compute
+
+174
+00:30:22,839 --> 00:30:29,480
+the complexity of the repeat until loop, we have to fall back on the termination condition.
+
+175
+00:30:30,599 --> 00:30:32,439
+What was the termination argument given by? Savit.
+
+176
+00:30:36,599 --> 00:30:42,039
+Savit. The termination argument given by Savit was at every point,
+
+177
+00:30:44,039 --> 00:30:51,079
+in every repeat until loop, at least one node's dominator information has changed by
+
+178
+00:30:52,839 --> 00:30:57,959
+at least one. So, for one node, how many times it may change in the worst case?
+
+179
+00:30:58,919 --> 00:31:05,000
+N times. N times. I have n nodes, so n square. So, this is o n to the power of
+
+180
+00:31:06,839 --> 00:31:13,720
+5. But in practice, how much time did it take? Just one round, much faster in general. So,
+
+181
+00:31:13,720 --> 00:31:23,240
+it is not as bad as it looks, right? Fine. So, once you know the dominator information,
+
+182
+00:31:23,240 --> 00:31:26,440
+once you compute this, you can now compute the loops.
+
+183
+00:31:31,079 --> 00:31:41,240
+Here, when I did this for each n in capital N, in the example, I started from entry B1, B2, B3, B4.
+
+184
+00:31:44,279 --> 00:31:50,360
+What if I had started from exit B5, B6, B4 and all that? Let us say, I started in the opposite
+
+185
+00:31:50,360 --> 00:31:59,880
+direction. Try it for just one round. Start from exit and do it. Start from, do the same thing like
+
+186
+00:31:59,880 --> 00:32:05,880
+what we are doing there on the board, but just start from exit. Just do, you do this,
+
+187
+00:32:06,840 --> 00:32:14,040
+take this as the starting point and then start filling from here and see how many rounds you
+
+188
+00:32:14,040 --> 00:32:21,160
+will take. Will it terminate in first round? Same. We will do the same initialization.
+
+189
+00:32:23,160 --> 00:32:31,640
+Take this initialization as same and just start from exit. Two questions. Will it still terminate?
+
+190
+00:32:32,600 --> 00:32:39,160
+Number two, will it still terminate within one round? How many rounds it may take, right?
+
+191
+00:32:41,800 --> 00:32:44,280
+But are you convinced that it will not terminate in the first round?
+
+192
+00:32:47,400 --> 00:32:53,480
+Intersection of? So, how many will get, how many will have dominators set to capital N?
+
+193
+00:32:53,480 --> 00:33:08,759
+All except entry and B1. So, the moral of the story is the order in which you choose the nodes
+
+194
+00:33:10,200 --> 00:33:15,720
+will have a practical, will have an impact on the actual execution time.
+
+195
+00:33:15,799 --> 00:33:20,600
+The order does not change the complexity of the algorithm.
+
+196
+00:33:22,759 --> 00:33:27,319
+The complexity is still O and 5, but the order makes a difference on
+
+197
+00:33:29,880 --> 00:33:36,360
+the actual execution time. And you will see that many of these iterative data flow analysis,
+
+198
+00:33:37,240 --> 00:33:41,319
+wherever they will say keep on doing till you reach a fixed point,
+
+199
+00:33:41,319 --> 00:33:46,679
+the order in which you do this makes a difference.
+
+200
+00:33:52,279 --> 00:34:01,319
+By the way, I hope you have noticed that here I am computing the dominator information of one node
+
+201
+00:34:01,319 --> 00:34:06,119
+and pushing it to its children or rather in this case the children are pulling it does not matter,
+
+202
+00:34:06,599 --> 00:34:14,440
+but the information is flowing top down. So, such analysis are called as top down analysis.
+
+203
+00:34:15,880 --> 00:34:22,279
+There are also bottom up analysis. Have you been exposed to any bottom up analysis already?
+
+204
+00:34:23,000 --> 00:34:26,359
+Which one? Liveness analysis.
+
+205
+00:34:27,079 --> 00:34:31,480
+I thought liveness analysis will be called in the low-level optimizations.
+
+206
+00:34:36,199 --> 00:34:43,639
+Oh, is it? Oh, very good. Then, please mention it to Govind. If he is doing register location,
+
+207
+00:34:44,440 --> 00:34:50,759
+he does not have to repeat this. So, this is a top down analysis,
+
+208
+00:34:51,880 --> 00:34:57,719
+liveness analysis is a backward analysis, this is a forward analysis, that is a backward analysis.
+
+209
+00:35:00,039 --> 00:35:04,199
+What I will do? You have been already exposed to natural loops.
+
+210
+00:35:04,199 --> 00:35:13,719
+So, can you give an example of a what when will I get a non-natural loop? Can you write a code
+
+211
+00:35:14,359 --> 00:35:24,839
+where I will have a non-natural loop? Code, write a piece of code which is which will lead to a
+
+212
+00:35:24,839 --> 00:35:32,359
+non-natural or unnatural loop whatever. Can you write a code which will give me natural loop?
+
+213
+00:35:34,519 --> 00:35:44,039
+Normal while any loop it. What about non-natural loop? Do whatever.
+
+214
+00:35:52,759 --> 00:35:56,359
+Should I write the code? You are telling the code, right? Yeah, wait and let me write it.
+
+215
+00:35:56,440 --> 00:36:02,200
+Just a minute. Yeah.
+
+216
+00:36:11,320 --> 00:36:15,079
+Else? Go to? Same.
+
+217
+00:36:15,880 --> 00:36:24,920
+Yeah. No, no, he says go to L1, both. How is it a, where is L1?
+
+218
+00:36:24,920 --> 00:36:30,760
+L1 is pointing just above.
+
+219
+00:36:37,720 --> 00:36:44,760
+Some condition.
+
+220
+00:36:54,920 --> 00:37:02,760
+Yeah.
+
+221
+00:37:02,760 --> 00:37:06,760
+Yeah.
+
+222
+00:37:15,960 --> 00:37:23,159
+Right. So, now in Java, can you get a loop using Java syntax without if then else,
+
+223
+00:37:23,159 --> 00:37:29,000
+sorry without if and go to, can you get a non-reducible loop?
+
+224
+00:37:39,399 --> 00:37:47,000
+Without go to's, can you get something like this?
+
+225
+00:37:47,000 --> 00:37:57,800
+Okay, the quick answer is no. And I mean do not worry about exceptions, but if you look at the
+
+226
+00:37:57,800 --> 00:38:03,079
+language Java, right, lot of people use it and you can write fairly complex programs,
+
+227
+00:38:03,079 --> 00:38:10,119
+but you do not have these non-natural loops. The moral of the story is the techniques that give you
+
+228
+00:38:10,759 --> 00:38:17,480
+let you handle, identify natural loops that is sufficient for a large set of programs.
+
+229
+00:38:19,559 --> 00:38:24,839
+It is not that oh we are using dominators, I cannot handle non-natural loops, hence it is not good,
+
+230
+00:38:25,639 --> 00:38:31,079
+not like that. Yes, you cannot handle non-natural loops, but it is okay.
+
+231
+00:38:31,079 --> 00:38:35,639
+You have large class of problems where you can only, people only write natural loops,
+
+232
+00:38:36,599 --> 00:38:44,359
+right. You can, you know go to's are not always so essential. Without go to's also,
+
+233
+00:38:44,359 --> 00:38:50,519
+you can write fairly large number of problems. Okay. What I will do, I was thinking I will stop
+
+234
+00:38:50,519 --> 00:38:56,599
+at 5.30, but I will slightly stretch it. Okay. We also started slightly late. Okay.
+
+235
+00:38:58,039 --> 00:39:05,239
+So, one of the uses of control flow analysis is to do control flow optimizations.
+
+236
+00:39:05,879 --> 00:39:11,799
+Okay. And one of the main goals in control flow optimizations is to produce longer basic blocks,
+
+237
+00:39:13,799 --> 00:39:21,799
+produce longer basic blocks. What is it good for?
+
+238
+00:39:35,639 --> 00:39:46,839
+Okay. But the complexity does not change much. I mean I guess I do not care much about the
+
+239
+00:39:46,839 --> 00:39:55,319
+complexity. The complexity still remains something like O n or something. See,
+
+240
+00:39:55,320 --> 00:40:06,680
+if I have longer basic blocks, I have few advantages, right. I can do within, I can do
+
+241
+00:40:06,680 --> 00:40:11,880
+lot of local optimizations. Within one basic block, if I am doing any optimization,
+
+242
+00:40:13,240 --> 00:40:17,240
+I can do fairly complex, very powerful optimization within one basic block.
+
+243
+00:40:17,880 --> 00:40:24,280
+Within one basic block, I, see if there are multiple, if I have one basic block here,
+
+244
+00:40:24,280 --> 00:40:29,800
+one basic block here, some structure like this, right, then you will keep taking intersection
+
+245
+00:40:29,800 --> 00:40:35,560
+whenever you are doing data flow analysis, right. So, you will be kind of losing some information
+
+246
+00:40:35,560 --> 00:40:41,000
+and so on, but if it is a long, longer basic block, you do not have, you have fewer jumps,
+
+247
+00:40:43,240 --> 00:40:49,880
+you have, you can do more local optimizations and you will see later that register location,
+
+248
+00:40:49,880 --> 00:40:54,599
+etc., you can do a better job when you have bigger basic blocks.
+
+249
+00:40:56,440 --> 00:41:04,920
+So, this is our goal and you can also get better ILP. That is, if you have a longer basic block,
+
+250
+00:41:06,680 --> 00:41:12,519
+those instructions can go in, you can kind of rearrange them, do a better scheduling to do
+
+251
+00:41:12,519 --> 00:41:16,840
+better instruction level parallelism, okay, pipelining, improve the pipelining.
+
+252
+00:41:16,840 --> 00:41:22,680
+If you have branches, then there will always be some issues, I mean, and the second goal of
+
+253
+00:41:22,680 --> 00:41:30,440
+control flow optimization is to reduce code size. We will see, okay. The first one, when I build
+
+254
+00:41:30,440 --> 00:41:38,840
+control flow graphs, the first optimization that comes for free is unreachable code elimination.
+
+255
+00:41:38,840 --> 00:41:49,320
+Yes. So, what I can do, I can start from the leaders, keep building my basic blocks,
+
+256
+00:41:50,280 --> 00:41:58,280
+whichever code is not part of anything, any of this, any node in my CFG, I can just
+
+257
+00:41:59,960 --> 00:42:08,120
+throw it away because that is unreachable. So, if I have some piece of code like this,
+
+258
+00:42:08,840 --> 00:42:25,960
+if some condition go to L1, right, or why if condition? I only go to L1 and I have S1 here.
+
+259
+00:42:29,800 --> 00:42:35,559
+So, I will take the code above, it will go to L1, that will be part of some basic block. From there,
+
+260
+00:42:35,559 --> 00:42:46,599
+there is an edge to S2. If this S1 is not part of any basic block, then it is automatically deleted.
+
+261
+00:42:48,360 --> 00:42:55,880
+So, control flow analysis gives me free unreachable code elimination pass, right.
+
+262
+00:42:56,840 --> 00:43:07,000
+Second, I want to see, now that I have this go to L1 here on S2, how will my basic block look like?
+
+263
+00:43:07,000 --> 00:43:14,200
+I have one basic block for this, I will call it as B0 and there is another basic block for this, which is B1.
+
+264
+00:43:14,519 --> 00:43:28,759
+If I have a basic block, which has a single predecessor, then I can merge the two. I do not need a jump,
+
+265
+00:43:30,439 --> 00:43:34,599
+right. So, this is called code straightening,
+
+266
+00:43:37,079 --> 00:43:42,199
+but when can I do it? Only if it has single predecessor, right.
+
+267
+00:43:44,199 --> 00:43:59,639
+So, if B0 has a single successor and this guy has a single predecessor, if this guy has multiple
+
+268
+00:43:59,639 --> 00:44:05,879
+successors, then I cannot straighten it. Similarly, if this guy has multiple predecessors,
+
+269
+00:44:06,519 --> 00:44:15,320
+then also I cannot straighten it, right. Any questions? Any doubts?
+
+270
+00:44:20,599 --> 00:44:29,000
+If simplification, let us say I have some pieces of code which are like this.
+
+271
+00:44:36,280 --> 00:44:49,160
+I have if condition then do this, else this, okay.
+
+272
+00:44:54,760 --> 00:44:59,800
+Let us say both the then and the else part are empty statements, what do I do?
+
+273
+00:45:00,360 --> 00:45:05,160
+Can I remove the whole if then else?
+
+274
+00:45:11,400 --> 00:45:19,000
+What is the question? I have some expression if E then somebody else somebody, let us say both of
+
+275
+00:45:19,000 --> 00:45:26,519
+them are no ops. How did they become no ops? May be because of some optimization that code got
+
+276
+00:45:27,159 --> 00:45:34,519
+thrown away. The user is unlikely to write if some condition then semicolon else semicolon, right.
+
+277
+00:45:35,559 --> 00:45:41,000
+Can, but unlikely. So, can I throw away the whole if then else? Yes.
+
+278
+00:45:45,000 --> 00:45:52,199
+Perfect. There may be some, so I can remove, so I can replace it with
+
+279
+00:45:52,199 --> 00:45:59,719
+E. If E is no op, then I can throw away no op. So, we can do one step at a time.
+
+280
+00:46:00,759 --> 00:46:08,279
+You replace this with E, some other pass will find that E is empty and throw it away. Make sense?
+
+281
+00:46:11,960 --> 00:46:15,480
+What if?
+
+282
+00:46:22,279 --> 00:46:34,519
+Why java does not allow arbitrary computation?
+
+283
+00:46:42,759 --> 00:46:47,399
+No, but java does allow a function called foo, if foo,
+
+284
+00:46:47,400 --> 00:46:53,000
+right. No, no, do not worry about it.
+
+285
+00:47:17,720 --> 00:47:27,480
+So, his question is when we are building the dominators, let us say there is one particular
+
+286
+00:47:27,480 --> 00:47:38,280
+node. We initialize the everything to n. Now, there is one node which has no, which is not
+
+287
+00:47:38,280 --> 00:47:44,280
+connected to start, which is not reachable from start, right. If it is not reachable from start,
+
+288
+00:47:44,920 --> 00:47:50,120
+we could probably, first thing we could do is do this. We could do unreachable code.
+
+289
+00:47:51,480 --> 00:47:56,600
+Any code which is not reachable from start, I can throw it away. So, one possibility is I will first
+
+290
+00:47:56,600 --> 00:48:04,760
+do this. Any basic block not reachable from start, I will throw it away. So, this is a code which is
+
+291
+00:48:04,760 --> 00:48:13,320
+part of some basic block, but it is not reachable from start. Throw it away. Second option, second
+
+292
+00:48:13,320 --> 00:48:19,080
+thing, let us say no, you did not do this optimization. You have a basic CFG where
+
+293
+00:48:20,840 --> 00:48:25,240
+it is a weird CFG in the sense it is not starting from entry. It has an entry and exit point,
+
+294
+00:48:25,240 --> 00:48:30,280
+but there are some nodes which are not connected. If you have such a code, first,
+
+295
+00:48:30,920 --> 00:48:34,680
+how that code came is separate issue. Then, you will have a node,
+
+296
+00:48:34,679 --> 00:48:46,599
+right. So, it will have a bunch of n. I mean it will have everybody has its dominator,
+
+297
+00:48:49,000 --> 00:48:55,639
+but you will probably throw it. I mean you would not use it for anything, right. So, yes, it is.
+
+298
+00:49:04,679 --> 00:49:26,039
+But you can say do I mean. So, his suggestion is when you are doing the dominator computation,
+
+299
+00:49:26,039 --> 00:49:42,599
+let me mark every node. Let me mark every node with no every node with initialize the dominator
+
+300
+00:49:42,599 --> 00:49:47,800
+information every node with n minus r, n minus root. And he says at the end if there is a node
+
+301
+00:49:47,800 --> 00:49:55,960
+whose dominator information is still n minus r, then that node can be thrown away because
+
+302
+00:49:56,760 --> 00:50:01,240
+every node should have been dominator. I mean should have root as the dominator.
+
+303
+00:50:01,240 --> 00:50:04,280
+If there is some node which does not have root as the dominator, then
+
+304
+00:50:07,320 --> 00:50:12,280
+that can also be done or I can just do a simple reachability, right. I can do simple BFS
+
+305
+00:50:13,240 --> 00:50:18,519
+or the CSG and do it without complicating the rest of it. There are multiple ways in which
+
+306
+00:50:20,120 --> 00:50:30,840
+it can be done. Here is to continue if I have a condition if let us say if some condition which
+
+307
+00:50:30,840 --> 00:50:35,640
+happens to be in our case if you remember I did some constant propagation because of which one of
+
+308
+00:50:35,640 --> 00:50:40,760
+them became one variable became a constant. And let us say I had some comparison that looked
+
+309
+00:50:40,760 --> 00:50:49,480
+like this. Initially it was a greater than 3, then s1 else s2. And what you found this to be a
+
+310
+00:50:49,480 --> 00:50:57,400
+constant which became 2 let us say. So now this constant value is false. Then what you can do?
+
+311
+00:51:00,200 --> 00:51:06,360
+You can throw away the s1 and just keep s2. You do not need the condition you can just keep the
+
+312
+00:51:06,360 --> 00:51:11,800
+s2. And similarly if it is always true you can keep the then part and throw away the
+
+313
+00:51:12,920 --> 00:51:16,680
+else part. Here is another type of example you will find.
+
+314
+00:51:21,480 --> 00:51:35,559
+If i greater than 3 in the then part you will see if i greater than no wait i
+
+315
+00:51:36,360 --> 00:51:54,039
+less than 2. If i greater than 3 in this piece of the code here I am taking if i less than 2.
+
+316
+00:51:54,039 --> 00:52:02,120
+You know that this condition is false because of the then condition. So if you have in nested
+
+317
+00:52:02,119 --> 00:52:09,960
+if conditions if the outer condition implies the inner condition or the outer condition
+
+318
+00:52:09,960 --> 00:52:15,639
+is guaranteed to implies the negation of the inner condition you can optimize away the inner
+
+319
+00:52:15,639 --> 00:52:26,920
+then or the else part. Here is a more a popular word that you will hear loop inversion.
+
+320
+00:52:32,279 --> 00:52:38,440
+What is it? It takes a while loop. What is the while loop? In while loop you check the
+
+321
+00:52:38,440 --> 00:52:45,239
+condition and enter. It transforms the while loop to a do while loop.
+
+322
+00:52:48,920 --> 00:52:58,920
+It transforms a while loop to a do while loop. What is the advantage?
+
+323
+00:53:02,119 --> 00:53:10,519
+Check. Sorry I could not hear sorry usual right.
+
+324
+00:53:10,519 --> 00:53:13,719
+The check condition that we have in while loop.
+
+325
+00:53:13,719 --> 00:53:17,159
+So that the check condition. Happens at the end now.
+
+326
+00:53:17,159 --> 00:53:26,920
+That instruction will execute one time less.
+
+327
+00:53:32,920 --> 00:53:39,799
+So in a while loop how many times do I check the condition? Let us say if I am checking
+
+328
+00:53:39,799 --> 00:53:47,799
+the condition k times in the do while loop you are saying I will check it one less time.
+
+329
+00:53:47,799 --> 00:53:52,039
+But is it equivalent? Let me ask you that question. Is while loop same as do while loop?
+
+330
+00:53:55,400 --> 00:53:58,119
+So how can I make a while loop equivalent to a do while loop?
+
+331
+00:54:02,119 --> 00:54:09,000
+First add a if. If you have a while loop if I have a while
+
+332
+00:54:11,799 --> 00:54:29,319
+es I transform it to if e do while e. If I know that this e is true for the first time.
+
+333
+00:54:29,960 --> 00:54:37,720
+Let us say this condition is i equal to 1 while i less than 100. Then you do not need to check
+
+334
+00:54:37,720 --> 00:54:43,800
+this if e. But if you do not then you have to keep the if e. Now my question is what is
+
+335
+00:54:43,800 --> 00:54:51,880
+the advantage of this code over this? I will be saving one go to statement.
+
+336
+00:54:51,880 --> 00:55:03,000
+Because in the while loop you will come back, check then decide whether to continue or not.
+
+337
+00:55:03,640 --> 00:55:17,960
+Here you will first check and then go back. So let us look at this. There is an additional
+
+338
+00:55:17,960 --> 00:55:27,400
+advantage. Let us look at this code. x equal to 3 while some condition s1 x equal to 4.
+
+339
+00:55:29,960 --> 00:55:47,240
+At this point is x a constant. Why not? While might or not execute. But if you know
+
+340
+00:55:48,920 --> 00:55:54,440
+that the condition is guaranteed to execute and you let us say you turn it into a do while loop.
+
+341
+00:55:56,199 --> 00:56:05,240
+Then if this was a do while loop do s1 x equal to 4 while some condition. You know that x will
+
+342
+00:56:05,240 --> 00:56:12,280
+is guaranteed to be a constant. So this turning this to a do while loop can have some side benefits
+
+343
+00:56:12,280 --> 00:56:22,600
+as well. So basically do while gives a guarantee that the loop is executed at least once.
+
+344
+00:56:26,840 --> 00:56:37,960
+The last thing we will. I think we have already talked about when we know that the loop condition
+
+345
+00:56:37,960 --> 00:56:43,400
+will hold we will throw away the if e. If we do not know we will keep the if e.
+
+346
+00:56:46,199 --> 00:56:52,039
+So what we looked at now? We looked at control flow analysis by building the control flow graph.
+
+347
+00:56:52,039 --> 00:56:56,920
+Both the advantages have to be mentioned on y e.
+
+348
+00:56:56,920 --> 00:57:01,559
+Or just simply negated by having the if because.
+
+349
+00:57:01,559 --> 00:57:05,159
+Because. Because the if will also add a block.
+
+350
+00:57:05,159 --> 00:57:08,679
+Good. And it will also. So if is a condition check.
+
+351
+00:57:09,719 --> 00:57:13,400
+You are checking and then entering. Here you are checking and entering.
+
+352
+00:57:13,400 --> 00:57:25,160
+Both are same. Let us say at the end of this loop what do you do? You will go back and then
+
+353
+00:57:25,160 --> 00:57:31,240
+check and if it is false you will come out. Here what happens you did you check and then
+
+354
+00:57:33,400 --> 00:57:42,680
+you do not go here to come back. Make sense right? Simple subtle point. Let us see right.
+
+355
+00:57:42,679 --> 00:58:00,679
+Let us let us write the steps here. E1 correct. S1 jump. E1 jump. Here what is it?
+
+356
+00:58:00,679 --> 00:58:24,519
+E1 then S1 then E and then I mean follow through. So it is kind of saving one or two jumps.
+
+357
+00:58:24,920 --> 00:58:28,360
+Saving one edge. One edge.
+
+358
+00:58:33,239 --> 00:58:39,079
+So the last while here also is a jump. So this follow through is conditional jump right.
+
+359
+00:58:39,719 --> 00:58:48,360
+So I can I can probably make it as conditional jump. Here also it is a conditional jump.
+
+360
+00:58:48,840 --> 00:58:55,480
+So one jump less. This jump.
+
+361
+00:58:59,160 --> 00:59:03,320
+This is same. In both the case this is a conditional jump. This is also conditional jump. Both are same.
+
+362
+00:59:06,840 --> 00:59:08,599
+Just you are saving one the last jump.
+
+363
+00:59:18,920 --> 00:59:20,200
+Why should I worry about one jump?
+
+364
+00:59:23,559 --> 00:59:32,360
+One jump here. What is this do while loop is inside a loop which is going over a million iterations.
+
+365
+00:59:33,720 --> 00:59:41,400
+Then this is million jumps you have saved. See those of you who are doing this
+
+366
+00:59:41,639 --> 00:59:48,760
+P1 P2 with small values of n you found no improvement. When you increased it you started
+
+367
+00:59:48,760 --> 00:59:58,680
+seeing more improvements right. So take care of your pennies. Your dollars or your paisas
+
+368
+00:59:59,480 --> 01:00:02,119
+and then your rupees and dollars will take care of themselves right.
+
+369
+01:00:02,119 --> 01:00:12,279
+Okay any questions? Any further questions? Okay in such a case I will summarize before we wind up.
+
+370
+01:00:13,960 --> 01:00:20,519
+We started today with introduction to optimizations compilers and optimizations. We
+
+371
+01:00:20,519 --> 01:00:25,960
+looked at constant propagation what it is. We looked at copy propagation what it is.
+
+372
+01:00:26,760 --> 01:00:33,720
+We looked at loop unrolling its benefits. We looked at loop invariant code motion.
+
+373
+01:00:35,320 --> 01:00:46,039
+We looked at strength reduction. Then we came to control flow analysis in the post launch session.
+
+374
+01:00:46,039 --> 01:00:52,599
+The control flow analysis we looked at basic block building which you guys already knew.
+
+375
+01:00:53,079 --> 01:01:02,360
+Then we looked at how to build dominators right. Then we looked at different optimizations we do by
+
+376
+01:01:04,279 --> 01:01:09,319
+after we build the control flow graph as part of control flow optimizations right.
+
+377
+01:01:09,319 --> 01:01:15,159
+There is one important control flow related optimization which is called which is based
+
+378
+01:01:15,159 --> 01:01:23,079
+on again control flow analysis which is called inlining okay. We will do it hopefully tomorrow
+
+379
+01:01:23,079 --> 01:01:36,759
+towards the end okay. Any questions before we wind up for the day? No? They would not like you.
+
+380
+01:01:39,639 --> 01:01:40,440
+Excellent question.
+
+381
+01:01:45,159 --> 01:01:59,399
+Correct. So the question is when you do loop unrolling you are increasing the body of the loop.
+
+382
+01:02:00,920 --> 01:02:07,319
+It may have an impact somewhere else. If you keep on unrolling why did we only unroll by 2 or 4 why
+
+383
+01:02:07,320 --> 01:02:25,559
+not 8 or 16 or 32 or full 100 right. How did the compiler decide how much to unroll? Any thoughts?
+
+384
+01:02:37,480 --> 01:02:56,039
+So do you know what are the factors that decide that? Yes so what size of the?
+
+385
+01:02:56,920 --> 01:02:57,400
+Cache.
+
+386
+01:02:58,519 --> 01:03:08,679
+Which cache? Size of the eye cache is important here. See if the loop body is fully within my eye cache
+
+387
+01:03:11,800 --> 01:03:20,599
+it is better but at the same time unrolling has its own benefits right. So because of unrolling
+
+388
+01:03:20,599 --> 01:03:26,360
+I get some benefits because of unrolling I am also filling in the I mean I may cross the
+
+389
+01:03:27,400 --> 01:03:31,799
+the loop body is not fully fitting within the eye cache I may have some penalty.
+
+390
+01:03:32,599 --> 01:03:44,920
+So now so that means you gain some you are losing some. Traditionally there is no agreement on what
+
+391
+01:03:44,920 --> 01:03:52,280
+is the golden formula or how big my loop unrolling can be. There is no such golden formula. People
+
+392
+01:03:52,280 --> 01:04:01,079
+do not agree. Then pretty much every compiler has their own group of experts who say okay this is
+
+393
+01:04:01,079 --> 01:04:06,200
+let us do this. They test it on a large set of benchmarks and say this looks good.
+
+394
+01:04:08,119 --> 01:04:14,360
+I mean it is kind of engineering and they do the engineering at a level that you will say how did
+
+395
+01:04:14,360 --> 01:04:20,599
+they arrive at this number k where that k could be your favorite random number 37 right. Not
+
+396
+01:04:20,599 --> 01:04:27,079
+37 but they say look do not go beyond this. Similarly for unrolling they say do not unroll
+
+397
+01:04:27,079 --> 01:04:33,720
+a function which will lead which will have more than some k number of instructions sorry do not
+
+398
+01:04:33,720 --> 01:04:41,559
+inline a function which has more than k number of instructions. Again this is I mean there is lot of
+
+399
+01:04:42,519 --> 01:04:47,880
+engineering expertise that gets in gets into it for different architectures for different
+
+400
+01:04:49,320 --> 01:04:57,079
+compilers that combination they have different sets right. But yes it is a very important point
+
+401
+01:04:57,079 --> 01:05:02,920
+that how much to unroll. They definitely will not unroll too much. What is too much there is
+
+402
+01:05:02,920 --> 01:05:07,480
+a clear understanding. What is the right thing there is no agreement yet. I mean because some
+
+403
+01:05:07,480 --> 01:05:12,679
+will say no I can do see because by unrolling my block has become bigger because of which I am
+
+404
+01:05:12,679 --> 01:05:17,000
+able to do better register allocation which will give me yes I am losing on iCache but I am getting
+
+405
+01:05:17,000 --> 01:05:25,800
+benefits somewhere else right. So there is a push and pull I am able to do better pipelining
+
+406
+01:05:25,800 --> 01:05:33,400
+because of unrolling great right because unrolling helps me do better instruction scheduling do
+
+407
+01:05:33,400 --> 01:05:40,599
+better software pipelining. So these things are kind of not so easy. So that is why so when
+
+408
+01:05:40,599 --> 01:05:47,320
+Shaujit mentioned about the decision tree basically what he is saying is people use some many complex
+
+409
+01:05:47,320 --> 01:05:59,720
+heuristics to compute what is right. So I do not have an easy answer what is the number but all I
+
+410
+01:05:59,719 --> 01:06:06,439
+can tell you is it is a complex problem and the factors that impact are iCache the fall the
+
+411
+01:06:07,639 --> 01:06:15,399
+impact on the register allocation the impact on what do you say pipelining and so on okay.
+
+412
+01:06:17,159 --> 01:06:22,679
+ILP instructional parallelism okay. Any other questions?
+
+413
+01:06:22,679 --> 01:06:33,000
+I still have an through even though I am tired I still have an through those who are those who
+
+414
+01:06:33,000 --> 01:06:35,639
+want to wait they can wait any questions on what we have covered.
+
+415
+01:06:45,159 --> 01:06:49,159
+I do not see why it cannot happen tomorrow unless
+
+416
+01:06:50,119 --> 01:06:52,920
+the critical mass says the same thing for tomorrow.
+
+417
+01:06:56,440 --> 01:06:58,519
+Well tomorrow will also be the same thing I think I mean I
+
+418
+01:07:01,879 --> 01:07:13,639
+tomorrow let us start at 5 30 or so if we start okay is that fine then okay we will
+
+419
+01:07:14,599 --> 01:07:19,159
+we will try to wind up tomorrow slightly early and talk about that.
+
+420
+01:07:20,679 --> 01:07:25,719
+Any other question before you wind up?
+

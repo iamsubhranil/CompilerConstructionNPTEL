@@ -1,0 +1,82 @@
+ **Basic Block Instruction Scheduling**:
+- Technique to improve CPU utilization by reordering instructions within a basic block.
+- Ensures all dependencies are maintained, improves ILP (Instructions Level Parallelism).
+
+**Cycle-Based Instruction Scheduling**:
+- Schedule ready operations in each cycle in decreasing priority order.
+- Keep scheduling operations from their earliest start time to maximum time.
+- Update resource allocation table as you go along.
+
+**Operation-Based Schedule**:
+- Select an operation with the highest priority and try to schedule it from its earliest start time.
+- Schedule the operation at the earliest possible time step where there is no resource conflict.
+- Mark the resources used by the schedule in the resource allocation table.
+
+**Resource Conflict Resolution**:
+- If there is a resource conflict, try to schedule the operation in a later cycle.
+- If the operation cannot be scheduled beyond its max time, resort to backtracking to resolve conflicts.
+
+**Backtracking**:
+- Undo previously scheduled operations to free up resources.
+- Change the successors’ earliest start time based on the newly scheduled operation.
+- Ensure predecessors are scheduled early enough to meet dependencies.
+
+**Global Instruction Scheduling**:
+- Performs scheduling beyond a single basic block considering control dependencies.
+- Trace scheduling, Super block scheduling, Hyper block scheduling are popular methods.
+
+**Trace Scheduling**:
+- Relies on profile-based information to optimize the frequently taken path (main trace).
+- Combines multiple basic blocks to form traces allowing cross-block scheduling.
+
+**Super Block Scheduling**:
+- Similar to trace scheduling but allows only single entrance and multiple exits.
+- Reduces bookkeeping overhead compared to trace scheduling.
+
+**Hyper Block Scheduling**:
+- Requires predicated execution hardware support.
+- Executes both paths of a branch instruction simultaneously with corresponding predicates.
+
+**Predicated Execution**:
+- Speculative execution of instructions based on conditions evaluated during runtime.
+- Prevents control dependencies resulting in improved scheduling flexibility.
+
+**Space Ordering Problem**:
+- Arises from interactions between instruction scheduling and register allocation.
+- Can lead to reduced scheduling opportunities or increased register pressure.
+
+**Pre-Pass Scheduling**:
+- Perform instruction scheduling first followed by register allocation.
+- Introduces potential spills requiring subsequent passes for scheduling.
+
+**Post-Pass Scheduling**:
+- Perform register allocation first followed by instruction scheduling.
+- Limits scheduling opportunities due to introduced anti- and output dependencies.
+
+**Software Pipelining**:
+- Instruction scheduling technique specifically designed for loops.
+- Overlaps instructions from different iterations to maximize instruction-level parallelism.
+
+**Prologue and Epilogue**:
+- Initial and final phases of a software pipeline schedule respectively.
+- Prologue handles startup overhead, epilogue manages cleanup tasks.
+
+**Kernel**:
+- Repetitive portion of a software pipeline schedule responsible for processing individual iterations.
+
+**Minimum Recurrence Value (MRI)**:
+- Determines the minimum initialization interval based on loop-carried dependencies.
+
+**Recurrence Minimum Initialization Interval (RMI)**:
+- Calculated based on the longest chain of loop-carried dependencies.
+
+**Operational Approach**:
+- Emulates loop execution under the machine model to detect patterns.
+
+**Periodic Scheduling Approach**:
+- Assumes a periodic schedule form for operations in consecutive iterations.
+- Simplifies scheduling analysis and reduces computational complexity.
+
+**Initialization Interval (II)**:
+- Defines the number of cycles between starting consecutive iterations.
+- Lower II leads to better performance, however, it must respect both RMI and resource MIIs.

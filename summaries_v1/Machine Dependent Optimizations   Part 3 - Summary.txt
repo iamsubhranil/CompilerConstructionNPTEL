@@ -1,0 +1,14 @@
+ Technical Terms:
+
+1. Directed Acyclic Graph (DAG): A directed graph consisting of finite nodes and directed edges, with no cycles, used to represent relationships between elements in a system.
+2. Basic Block: A straight-line piece of code without any jumps or branches, ending with a conditional or unconditional branch. Used in compiler optimization and static analysis.
+3. Common Sub-Expression Elimination (CSE): An optimization technique in computer science used to improve code execution speed by removing duplicate calculations in an expression.
+4. Expression Evaluation Order: The sequence in which subexpressions of a larger expression are evaluated, impacting code generation efficiency and potential bugs.
+5. Spilling: A compiler optimization technique involving saving register values to memory temporarily when running out of available registers for register allocation.
+6. Static Single Assignment Form (SSA): An intermediate representation of programs used in compiler optimization, characterized by the assignment of each variable to exactly one definition in a given scope.
+7. Operand: Input(s) or output(s) of an instruction in low-level programming languages or assembly language.
+8. Contiguous Evaluation: Performing code generation for a sub-tree entirely before processing sibling sub-trees, ensuring minimal register usage and avoiding unnecessary spills.
+9. Tree Pattern Matching: Technique used to match patterns against tree structures, allowing identification of relevant substructures for transformation or optimization purposes.
+10. Register Allocation: The process of assigning variables or values to processor registers during compilation, affecting code efficiency and performance.
+
+Understanding these terms helps clarify the process of constructing a DAG, determining evaluation order, and generating efficient code for a basic block in a compiler. Additionally, recognizing techniques such as common sub-expression elimination, contiguous evaluation, and tree pattern matching enables improved code generation and optimization. Familiarity with these concepts facilitates understanding advanced topics in compiler theory and practice.

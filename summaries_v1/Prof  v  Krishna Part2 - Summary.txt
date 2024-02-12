@@ -1,0 +1,39 @@
+ **Technical Terms:**
+
+* Loop unrolling
+* Strength reduction
+* Loop invariant code motion
+* Three-address code
+* Control flow analysis
+* Loop induction variable
+* Store and increment
+
+**Notes:**
+
+Loop Unrolling: A technique that reduces the number of loop iterations by duplicating the loop body. Helps improve performance and cache usage.
+
+Strength Reduction: An optimization technique that replaces costly operations, such as multiplication, with cheaper ones, such as addition or shifts.
+
+Loop Invariant Code Motion: A transformation that moves statements outside of a loop if their values don't change during loop iterations, reducing computational effort.
+
+Three-Address Code: Low-level intermediate representation consisting of instructions with at most three operands, allowing easy analysis and manipulation.
+
+Control Flow Analysis: Examines control structures in a program, determining the ordering and connections between various components such as loops, branches, and sequences.
+
+Loop Induction Variable: The variable controlling the number of iterations in a loop, commonly denoted as 'i', 'j', or 'k'.
+
+Store and Increment: An optimized instruction sequence combining a store operation followed by an increment of the stored value, often found in loops.
+
+In this lecture, the speaker discusses various optimizations and techniques for improving performance, specifically focusing on loop unrolling, strength reduction, and loop invariant code motion. These methods allow for better resource management, decreased computational requirements, and enhanced code readability.
+
+The instructor explains how to determine loop invariants and identifies opportunities for applying strength reduction and loop invariant code motion. Furthermore, the importance of understanding control flow analysis is highlighted as it enables developers to effectively examine and manipulate program control structures.
+
+Key aspects of the presented material include:
+
+1. Identifying loop invariants - finding expressions whose values remain constant during loop iterations.
+2. Applying strength reduction - substituting costly arithmetic operations with less demanding alternatives.
+3. Performing loop invariant code motion - moving loop-invariant calculations outside of the loop to minimize repeated computations.
+4. Recognizing loop induction variables - pinpointing the variable governing loop iterations.
+5. Implementing store and increment instructions - efficiently managing stores and subsequent updates to the stored values.
+
+These techniques serve as building blocks towards understanding and implementing more sophisticated compiler optimizations. Mastering these fundamentals contributes significantly to enhancing program performance and maintaining cleaner, more maintainable code.

@@ -1,0 +1,56 @@
+ **Software Pipelining**:
+```vbnet
+- Instruction scheduling for loops.
+- Reorders instructions within loop bodies to maximize instruction level parallelism (ILP).
+```
+**Instruction Scheduling**:
+```vbnet
+- Given an instruction sequence, reorder them to minimize execution time.
+- Preserve dependence constraints and resource constraints.
+- Minimize the number of stalls due to data and control hazards.
+- Expose independent instructions to processors for simultaneous execution.
+```
+**Dependence Constraints**:
+```vbnet
+- Data dependencies: True, Anti, Output dependencies.
+- Control dependencies: Conditional branches, calls, returns.
+```
+**Data Dependence Graph (DDG)**:
+```vbnet
+- Directed graph representing relationships between instructions.
+- Vertices = instructions; Edges = dependencies.
+- Helps identify legal instruction orders.
+```
+**Rank Functions**:
+```vbnet
+- Measure priority of instructions for scheduling purposes.
+- Examples: Latest Start Time - Earliest Start Time (LST-EST), Critical Path Length.
+```
+**List Scheduling Methods**:
+```vbnet
+- Operation-based vs Cycle-based scheduling.
+- Homogeneous vs Heterogeneous scheduling.
+- Greedy vs Lazy scheduling.
+- With/without Backtracking.
+- Static/Dynamic priority updates.
+```
+**Cycle-Based Scheduler**:
+```vbnet
+- Operates on a per-cycle basis.
+- Prioritizes and schedules ready instructions in each cycle.
+- Increases time step if no more instructions can be scheduled.
+- Checks for new ready instructions after each time step increment.
+```
+**Operation-Based Scheduler**:
+```vbnet
+- Works on finding feasible time slots for each instruction.
+- Guided by priority functions and dependence constraints.
+- Adjusts priority functions and resource availability dynamically.
+```
+**Register Allocation & Instruction Scheduling Interaction**:
+```vbnet
+- Register allocation affects false dependencies (Anti and Output).
+- False dependencies impact instruction scheduling choices.
+- Careful handling required for efficient instruction scheduling.
+```
+Confidence: 85%

@@ -1,0 +1,5728 @@
+1
+00:00:00,000 --> 00:00:09,720
+Okay, so good morning and welcome to session.
+
+2
+00:00:09,720 --> 00:00:13,080
+So we were looking at basic block instruction scheduling.
+
+3
+00:00:13,080 --> 00:00:17,879
+Yesterday we saw how cycle-based instruction scheduling works.
+
+4
+00:00:17,879 --> 00:00:20,760
+We had some trouble with the operation-based instruction scheduling.
+
+5
+00:00:20,760 --> 00:00:24,359
+I have now fixed that, so let's see how that works.
+
+6
+00:00:24,359 --> 00:00:29,240
+In cycle-based instruction scheduling what we have is that we have a ready list and we
+
+7
+00:00:29,239 --> 00:00:36,839
+go from time step t all the way till all the operations are scheduled and what we do is
+
+8
+00:00:36,839 --> 00:00:42,560
+that at each step we try to schedule one of the ready operations, one or more of the ready
+
+9
+00:00:42,560 --> 00:00:46,439
+operations depending on the availability of resources, right?
+
+10
+00:00:46,439 --> 00:00:52,480
+And then also we do this in the decreasing order of priority of these operations.
+
+11
+00:00:52,480 --> 00:00:59,200
+If once all the operations that can be scheduled in the current cycle are scheduled, we include
+
+12
+00:00:59,200 --> 00:01:03,960
+the cycle and then we also make sure that whichever other operations which have become
+
+13
+00:01:03,960 --> 00:01:09,600
+ready we will put them in the ready list, reorder them in terms of their priority and
+
+14
+00:01:09,600 --> 00:01:12,000
+we keep doing this every cycle.
+
+15
+00:01:12,000 --> 00:01:17,079
+So it's essentially going from time step 0 to all the way up to time step t and at every
+
+16
+00:01:17,079 --> 00:01:21,879
+time step you try to schedule all possible ready operations that are possible to be scheduled
+
+17
+00:01:21,879 --> 00:01:23,320
+in that cycle.
+
+18
+00:01:23,320 --> 00:01:28,120
+And as you construct the schedule you also maintain how many resources are being used
+
+19
+00:01:28,120 --> 00:01:29,640
+in each cycle.
+
+20
+00:01:29,640 --> 00:01:35,079
+So these resources which are being allocated for various cycles, that resource allocation
+
+21
+00:01:35,079 --> 00:01:41,080
+table is something that you maintain as you go towards, go in doing this schedule.
+
+22
+00:01:41,080 --> 00:01:43,800
+Now let's see how operation-based schedule works.
+
+23
+00:01:43,800 --> 00:01:47,520
+Operation-based schedule works in a slightly different way, okay?
+
+24
+00:01:47,520 --> 00:01:53,800
+So initially you start off with an empty schedule and then you compute the earliest start time
+
+25
+00:01:53,959 --> 00:01:59,359
+and latest start time of all the nodes v in that graph, right?
+
+26
+00:01:59,359 --> 00:02:06,479
+And once you have completed doing this, then what you do is that you first select an operation
+
+27
+00:02:06,479 --> 00:02:07,479
+with the highest priority, okay?
+
+28
+00:02:07,479 --> 00:02:14,240
+It could be at any cycle, but you first select that particular operation and you try to schedule
+
+29
+00:02:14,240 --> 00:02:19,960
+that operation from that operation's earliest time, EST or ASAP.
+
+30
+00:02:19,960 --> 00:02:23,199
+EST and ASAP are the same, right?
+
+31
+00:02:24,000 --> 00:02:27,679
+This is called as soon as possible time or earliest start time.
+
+32
+00:02:27,679 --> 00:02:34,199
+So I could have strictly speaking used EST, but yeah, maybe we should correct it, right?
+
+33
+00:02:34,199 --> 00:02:43,039
+So that this we will say as EST, okay?
+
+34
+00:02:43,039 --> 00:02:48,679
+So you start off that operation, I mean you try to schedule that operation starting from
+
+35
+00:02:48,679 --> 00:02:52,919
+its earliest start time to the maximum time, right?
+
+36
+00:02:52,919 --> 00:02:54,519
+So the next time could be a very large value.
+
+37
+00:02:54,519 --> 00:02:58,239
+So you try to keep scheduling these operations, right?
+
+38
+00:02:58,239 --> 00:03:03,879
+And then try to schedule it at that particular time step where there is no resource conflict
+
+39
+00:03:03,879 --> 00:03:05,919
+and then add this to the schedule.
+
+40
+00:03:05,919 --> 00:03:10,239
+Again as you construct the schedule, you maintain the resource allocation table like what we
+
+41
+00:03:10,239 --> 00:03:12,879
+discussed in the previous class, right?
+
+42
+00:03:12,879 --> 00:03:21,919
+Remember that you have a table of all resources, correct?
+
+43
+00:03:21,919 --> 00:03:28,599
+So maybe integer unit, floating point unit, load store unit, okay?
+
+44
+00:03:28,599 --> 00:03:34,759
+Time step 0, 1, 2 and so on.
+
+45
+00:03:34,759 --> 00:03:40,560
+So if you schedule an operation V, let's say at time step 2, then you mark that as
+
+46
+00:03:40,560 --> 00:03:45,399
+V depending on which function unit it is supposed to be using, correct?
+
+47
+00:03:45,399 --> 00:03:50,799
+Similarly, if the next operation is some U which is getting scheduled at time step 1
+
+48
+00:03:50,800 --> 00:03:55,439
+and let's say that's a load store unit, then you put it over there, right?
+
+49
+00:03:55,439 --> 00:04:00,280
+And as you keep doing this, you kind of mark all the resources that are being used.
+
+50
+00:04:00,280 --> 00:04:04,600
+So if there is any other operation, let's say, which also has to be scheduled at time
+
+51
+00:04:04,600 --> 00:04:10,560
+step 1 in the load store unit, then you find out that the load store unit is already busy.
+
+52
+00:04:10,560 --> 00:04:11,560
+You cannot schedule that.
+
+53
+00:04:11,560 --> 00:04:16,560
+If the load store unit is a pipelineed function unit, then you can schedule another operation
+
+54
+00:04:16,560 --> 00:04:20,519
+at time t plus 1 or t minus 1 wherever it is.
+
+55
+00:04:20,519 --> 00:04:26,799
+But if it is non-pipelined, then you have to wait at least until t plus k cycle, okay?
+
+56
+00:04:26,799 --> 00:04:28,839
+That's really how you do that, okay?
+
+57
+00:04:28,839 --> 00:04:34,319
+So once you schedule an operation, you check what is the time in which you have scheduled
+
+58
+00:04:34,319 --> 00:04:35,319
+this operation.
+
+59
+00:04:35,319 --> 00:04:40,759
+If the operation has been scheduled at its early, if the operation is scheduled beyond
+
+60
+00:04:40,759 --> 00:04:44,560
+the max time, that means that you are unable to schedule the operation.
+
+61
+00:04:44,560 --> 00:04:48,680
+That means that because you are trying to schedule other operation with the operation,
+
+62
+00:04:48,680 --> 00:04:51,720
+you are unable to fit it in, okay?
+
+63
+00:04:51,720 --> 00:04:56,079
+So what you need to do is that you need to do some backtracking, right?
+
+64
+00:04:56,079 --> 00:05:01,240
+Okay, I am not going to go into more details of this, but this backtracking also does a
+
+65
+00:05:01,240 --> 00:05:02,240
+lot of other things.
+
+66
+00:05:02,240 --> 00:05:07,439
+But for the time being, we'll simply say that backtracking takes care of all those complications,
+
+67
+00:05:07,439 --> 00:05:08,439
+right?
+
+68
+00:05:08,439 --> 00:05:15,280
+Okay, you are able to schedule, but you scheduled it beyond the earliest start time, right?
+
+69
+00:05:15,279 --> 00:05:20,399
+Then you also have to go and then change the successors' earliest start time because this
+
+70
+00:05:20,399 --> 00:05:22,759
+node has been scheduled a little later.
+
+71
+00:05:22,759 --> 00:05:25,159
+Those nodes can only start like that.
+
+72
+00:05:25,159 --> 00:05:26,719
+There is also one other step.
+
+73
+00:05:26,719 --> 00:05:30,959
+You also have to check all the predecessors to make sure that the predecessors which have
+
+74
+00:05:30,959 --> 00:05:33,519
+already been scheduled, correct?
+
+75
+00:05:33,519 --> 00:05:37,439
+This node has been scheduled early enough so that they will get the thing.
+
+76
+00:05:37,439 --> 00:05:43,119
+So for example, let us say that nodes v and u are already scheduled, and I am now scheduling
+
+77
+00:05:43,160 --> 00:05:48,000
+a node w which requires two units of latency, correct?
+
+78
+00:05:48,000 --> 00:05:55,000
+So let us assume that there is a node w and then there is, sorry, it has a dependency
+
+79
+00:05:59,519 --> 00:06:00,519
+to v, right?
+
+80
+00:06:00,519 --> 00:06:05,199
+And let us say that this has a latency of two cycles.
+
+81
+00:06:05,199 --> 00:06:11,280
+Now if w is scheduled in this time step, then there is a problem because v has already been
+
+82
+00:06:11,359 --> 00:06:17,359
+scheduled, w must have at least a latency of two cycles, correct?
+
+83
+00:06:17,359 --> 00:06:23,799
+And that two cycles if it is not met, right, then the schedule is an invalid schedule.
+
+84
+00:06:23,799 --> 00:06:25,839
+So that also needs to be checked.
+
+85
+00:06:25,839 --> 00:06:30,399
+In fact, the way in which it is checked, which I have not shown here, is that this max time
+
+86
+00:06:30,399 --> 00:06:35,279
+for each operation that you see here is actually appropriately chosen.
+
+87
+00:06:35,279 --> 00:06:38,959
+I didn't show because it is very complicated, right?
+
+88
+00:06:38,959 --> 00:06:43,560
+If no successors have been scheduled, then the max time can be anything.
+
+89
+00:06:43,560 --> 00:06:49,239
+But if a successor is scheduled, then that max time is actually successor schedule time
+
+90
+00:06:49,239 --> 00:06:51,120
+minus this execution time.
+
+91
+00:06:51,120 --> 00:06:54,079
+You cannot schedule it any more than that.
+
+92
+00:06:54,079 --> 00:06:58,120
+And then if you will come out, you will again try to do a backtracking.
+
+93
+00:06:58,120 --> 00:07:01,599
+So this is essentially how you do operation-based schedule.
+
+94
+00:07:01,599 --> 00:07:05,959
+That means that you have this table, resource allocation table, on which you try to put
+
+95
+00:07:05,959 --> 00:07:07,279
+these operations.
+
+96
+00:07:07,279 --> 00:07:12,919
+And as you keep putting these operations, you ensure that all the dependences are satisfied
+
+97
+00:07:12,919 --> 00:07:16,479
+as well as all the resource constraints are satisfied.
+
+98
+00:07:16,479 --> 00:07:22,779
+If you are violating anything, you try to go backtrack and then try to remove this operation
+
+99
+00:07:22,779 --> 00:07:24,919
+and schedule it in a later cycle.
+
+100
+00:07:24,919 --> 00:07:29,919
+If you try to schedule this in a later cycle, that might affect something else, okay?
+
+101
+00:07:29,919 --> 00:07:34,240
+That may have to be scheduled earlier or later or whatever it is, right?
+
+102
+00:07:34,240 --> 00:07:39,160
+So one has to look at all of those complications in the backtracking algorithm.
+
+103
+00:07:39,160 --> 00:07:43,879
+We will not go into the details of those things for the time being, okay?
+
+104
+00:07:43,879 --> 00:07:48,079
+That should give you a general idea of how the instruction scheduling works.
+
+105
+00:07:48,079 --> 00:07:53,000
+Again, the important point is that you want to make sure that all the dependence constraints
+
+106
+00:07:53,000 --> 00:07:56,879
+are satisfied and all the resource constraints are satisfied.
+
+107
+00:07:56,879 --> 00:07:57,879
+This is essentially what it is.
+
+108
+00:07:57,879 --> 00:08:01,439
+So try to fit this in this table so that these are satisfied.
+
+109
+00:08:01,560 --> 00:08:06,240
+There are several heuristic methods which try to accomplish this, okay?
+
+110
+00:08:06,240 --> 00:08:12,800
+Now let's see, let's go back to this particular example which we were seeing earlier, right?
+
+111
+00:08:12,800 --> 00:08:16,240
+And let's try to look at possible schedules for this.
+
+112
+00:08:16,240 --> 00:08:22,519
+In this particular graph, you can see that for each node, I have actually put the earliest
+
+113
+00:08:22,519 --> 00:08:26,759
+start time and the latest start time for them, right?
+
+114
+00:08:26,759 --> 00:08:29,920
+You can see that this is the critical path.
+
+115
+00:08:29,920 --> 00:08:35,080
+That is nodes add one, subtract two, multiply and add two.
+
+116
+00:08:35,080 --> 00:08:36,759
+That is the critical path.
+
+117
+00:08:36,759 --> 00:08:41,960
+All arcs have a latency of one cycle except when it is annotated.
+
+118
+00:08:41,960 --> 00:08:47,319
+So here the latency is three, here the latency is two, and so on, right?
+
+119
+00:08:47,319 --> 00:08:49,720
+But these are one, okay?
+
+120
+00:08:49,720 --> 00:08:54,480
+Now what I have done is I have computed the earliest start time as well as the latest
+
+121
+00:08:54,560 --> 00:08:57,080
+start time for all the nodes.
+
+122
+00:08:57,080 --> 00:09:00,279
+Now on the right hand side, I have shown you a schedule, right?
+
+123
+00:09:00,279 --> 00:09:03,080
+This is a valid schedule, okay?
+
+124
+00:09:03,080 --> 00:09:08,080
+Here again I have assumed one integer unit, one floating point unit, and one load store
+
+125
+00:09:08,080 --> 00:09:09,080
+unit, okay?
+
+126
+00:09:09,080 --> 00:09:12,399
+That's essentially what I have assumed.
+
+127
+00:09:12,399 --> 00:09:16,039
+Or you don't even have to think of it as a floating point unit if you want, just think
+
+128
+00:09:16,039 --> 00:09:18,680
+of it as a multiply unit, okay?
+
+129
+00:09:18,680 --> 00:09:20,680
+Three functional units, right?
+
+130
+00:09:20,680 --> 00:09:22,000
+This is the schedule.
+
+131
+00:09:22,000 --> 00:09:23,879
+Is this schedule correct?
+
+132
+00:09:23,879 --> 00:09:26,200
+Does it satisfy all the dependencies?
+
+133
+00:09:26,200 --> 00:09:27,200
+Quickly check.
+
+134
+00:09:27,200 --> 00:09:32,879
+Add one, subtract two, correct?
+
+135
+00:09:32,879 --> 00:09:37,600
+So this one cycle latency between them, that has been satisfied.
+
+136
+00:09:37,600 --> 00:09:41,879
+From subtract to multiply, there is one cycle latency that has been satisfied.
+
+137
+00:09:41,879 --> 00:09:45,600
+From multiply to add two, three cycle latency.
+
+138
+00:09:45,600 --> 00:09:51,879
+On the other side, add one to load one, there should be a one cycle latency, more than that,
+
+139
+00:09:51,879 --> 00:09:52,879
+okay?
+
+140
+00:09:52,879 --> 00:09:57,720
+And then from load one to add two, there should be two cycle latency, okay?
+
+141
+00:09:57,720 --> 00:10:01,080
+That has also been satisfied, okay?
+
+142
+00:10:01,080 --> 00:10:09,720
+Now this one, add three to load three, yes, sorry, load two, that has also been satisfied,
+
+143
+00:10:09,720 --> 00:10:10,720
+okay?
+
+144
+00:10:10,720 --> 00:10:13,720
+Now could we have done better, right?
+
+145
+00:10:13,720 --> 00:10:17,279
+Could we have done better?
+
+146
+00:10:17,279 --> 00:10:21,679
+So multiply to add is three cycles, so that is the latency.
+
+147
+00:10:21,679 --> 00:10:26,679
+So if this add is here, then this multiply here is fine, okay?
+
+148
+00:10:26,679 --> 00:10:33,679
+So you couldn't have finished earlier than seven cycles in this schedule, correct?
+
+149
+00:10:33,679 --> 00:10:41,799
+However, right, if I try to reschedule it such that add one, subtract two, multiply
+
+150
+00:10:41,799 --> 00:10:48,639
+and add two are scheduled at its earliest start time as well as its latest start time
+
+151
+00:10:48,639 --> 00:10:51,639
+because their values are same, then what happens?
+
+152
+00:10:51,639 --> 00:10:55,559
+Then I am able to finish it in five cycles.
+
+153
+00:10:55,559 --> 00:10:56,559
+Look at the previous schedule.
+
+154
+00:10:56,559 --> 00:11:02,399
+In the previous schedule, okay, right, in the previous schedule, add one was scheduled
+
+155
+00:11:02,399 --> 00:11:04,279
+at its earliest start time.
+
+156
+00:11:04,279 --> 00:11:05,279
+But what about subtract?
+
+157
+00:11:05,279 --> 00:11:09,159
+Subtract was scheduled beyond its earliest start time.
+
+158
+00:11:09,159 --> 00:11:10,159
+It is correct.
+
+159
+00:11:10,159 --> 00:11:11,159
+It is legal.
+
+160
+00:11:11,159 --> 00:11:12,159
+Nothing wrong in that.
+
+161
+00:11:12,159 --> 00:11:17,600
+But you are not going to get the best schedule, right?
+
+162
+00:11:17,600 --> 00:11:25,000
+So because subtract two was delayed, multiply was also delayed and then add two was delayed,
+
+163
+00:11:25,000 --> 00:11:26,000
+okay?
+
+164
+00:11:26,000 --> 00:11:28,399
+Why was subtract two delayed?
+
+165
+00:11:28,399 --> 00:11:34,519
+Subtract two was delayed because add three was scheduled in cycle one and add three is
+
+166
+00:11:34,519 --> 00:11:40,920
+a non-critical operation, operation which is not in the critical part, right?
+
+167
+00:11:40,920 --> 00:11:45,720
+But somehow we scheduled that operation and because we have scheduled add three, subtract
+
+168
+00:11:45,759 --> 00:11:48,639
+two could not go there because they both use the same function unit.
+
+169
+00:11:48,639 --> 00:11:50,120
+It is a resource constraint.
+
+170
+00:11:50,120 --> 00:11:55,240
+Therefore, subtract two went to cycle two and because subtract two went to cycle two,
+
+171
+00:11:55,240 --> 00:11:57,600
+you have a total of seven cycles.
+
+172
+00:11:57,600 --> 00:12:04,080
+Whereas in the next schedule, what we did was we scheduled add one, subtract two, multiply
+
+173
+00:12:04,080 --> 00:12:09,759
+and add two, all of them in their earliest start time, right?
+
+174
+00:12:09,759 --> 00:12:13,440
+And as soon as we have scheduled them in the earliest start time, we were able to get a
+
+175
+00:12:13,440 --> 00:12:16,880
+schedule which is of length six, okay?
+
+176
+00:12:16,880 --> 00:12:22,520
+The add three, which is a non-critical operation, could have been scheduled in time step two,
+
+177
+00:12:22,520 --> 00:12:26,840
+which is well within its earliest start time to latest start time.
+
+178
+00:12:26,840 --> 00:12:28,720
+It is between those values.
+
+179
+00:12:28,720 --> 00:12:33,480
+But last time we greedily scheduled this ahead and because of that, a critical operation
+
+180
+00:12:33,480 --> 00:12:35,600
+has to be pushed down.
+
+181
+00:12:35,600 --> 00:12:39,160
+So when you do instruction scheduling, the priority function is essentially supposed
+
+182
+00:12:39,160 --> 00:12:41,760
+to ensure these things, right?
+
+183
+00:12:41,759 --> 00:12:47,919
+And you should use priority functions which kind of help you do this, right?
+
+184
+00:12:47,919 --> 00:12:50,919
+That's really what it is, okay?
+
+185
+00:12:50,919 --> 00:12:56,720
+Okay, let's move on to the next topic, which is about global instruction scheduling.
+
+186
+00:12:56,720 --> 00:13:02,039
+So far what we have seen is that we have seen instruction scheduling within a basic block.
+
+187
+00:13:02,039 --> 00:13:07,159
+And when you do instruction scheduling within a basic block, the advantage you have is that
+
+188
+00:13:07,159 --> 00:13:08,000
+you have no problem.
+
+189
+00:13:08,000 --> 00:13:13,840
+The instruction can be moved anywhere within the basic block as long as it will be data
+
+190
+00:13:13,840 --> 00:13:16,600
+dependent, right?
+
+191
+00:13:16,600 --> 00:13:20,600
+But can you move an instruction beyond the basic block, right?
+
+192
+00:13:20,600 --> 00:13:22,360
+That's the question, okay.
+
+193
+00:13:22,360 --> 00:13:26,480
+We will actually discuss that when we have the control flow graph which is in the next
+
+194
+00:13:26,480 --> 00:13:27,320
+slide.
+
+195
+00:13:27,320 --> 00:13:31,360
+But before that, let's ask why do we want to do things which are beyond basic block?
+
+196
+00:13:31,360 --> 00:13:34,799
+Why not just limit ourselves to basic blocks, right?
+
+197
+00:13:34,799 --> 00:13:36,279
+That's the first two questions.
+
+198
+00:13:36,279 --> 00:13:39,279
+If we can do well within the basic block, then we are good.
+
+199
+00:13:39,279 --> 00:13:42,039
+Don't need to do anything more, correct?
+
+200
+00:13:42,039 --> 00:13:45,319
+But then we know that typically basic blocks are small.
+
+201
+00:13:45,319 --> 00:13:49,279
+They have about six to eight instructions or six to ten instructions.
+
+202
+00:13:49,279 --> 00:13:54,000
+So the opportunities that you have to move operations is actually limited.
+
+203
+00:13:54,000 --> 00:13:58,600
+In the other examples, we kind of nicely put things so that we still had some opportunities.
+
+204
+00:13:58,600 --> 00:14:00,799
+But in practice, this may not be the case.
+
+205
+00:14:00,799 --> 00:14:05,639
+And you may not be able to take care of all the stalls by doing reordering within the
+
+206
+00:14:05,639 --> 00:14:11,559
+basic block because typically some instructions like multiply or divide could take as many
+
+207
+00:14:11,559 --> 00:14:12,559
+as 32 cycles.
+
+208
+00:14:12,559 --> 00:14:17,240
+And when they take that many cycles, you need to have more instructions so that you can
+
+209
+00:14:17,240 --> 00:14:23,919
+reorder them to get whatever, you know, stall cycles that you have you can avoid, right?
+
+210
+00:14:23,919 --> 00:14:29,720
+So if you only limit yourself to basic block, then the opportunities that you have for scheduling
+
+211
+00:14:29,720 --> 00:14:32,480
+is kind of limited.
+
+212
+00:14:32,480 --> 00:14:35,759
+If you go beyond basic block, then it helps.
+
+213
+00:14:35,759 --> 00:14:36,759
+Okay?
+
+214
+00:14:36,759 --> 00:14:42,960
+So one way of increasing the basic block size is unrolling of loops.
+
+215
+00:14:42,960 --> 00:14:47,039
+When you unroll the loops, the basic block sizes increases, right?
+
+216
+00:14:47,039 --> 00:14:53,080
+But okay, we also want to do things which are beyond basic block so that you have more
+
+217
+00:14:53,080 --> 00:14:54,080
+opportunities.
+
+218
+00:14:54,080 --> 00:14:58,480
+But let's see what is the problem in trying to do something which is beyond the basic
+
+219
+00:14:58,480 --> 00:14:59,480
+block.
+
+220
+00:14:59,480 --> 00:15:00,480
+Let's take this example.
+
+221
+00:15:00,480 --> 00:15:01,680
+Again, it's a very simple example.
+
+222
+00:15:01,679 --> 00:15:06,599
+So you will still see only a few instructions, but in a real example, maybe there are more
+
+223
+00:15:06,599 --> 00:15:07,599
+instructions.
+
+224
+00:15:07,599 --> 00:15:09,439
+But we want to fit everything in a single slide.
+
+225
+00:15:09,439 --> 00:15:12,879
+We have to take it as small examples.
+
+226
+00:15:12,879 --> 00:15:13,879
+Okay.
+
+227
+00:15:13,879 --> 00:15:19,639
+Now here is the code for the program or the program segment which is on the left-hand
+
+228
+00:15:19,639 --> 00:15:20,639
+side.
+
+229
+00:15:20,639 --> 00:15:22,639
+Let's not worry about whether it's right or wrong.
+
+230
+00:15:22,639 --> 00:15:23,639
+It should be right.
+
+231
+00:15:23,639 --> 00:15:24,639
+Okay?
+
+232
+00:15:24,639 --> 00:15:27,639
+Or maybe there are some minor mistakes which you can fix it.
+
+233
+00:15:27,639 --> 00:15:28,639
+Right?
+
+234
+00:15:28,639 --> 00:15:31,639
+Now what do you see here?
+
+235
+00:15:32,600 --> 00:15:35,600
+A sequence of about 11 instructions.
+
+236
+00:15:35,600 --> 00:15:36,600
+Right?
+
+237
+00:15:36,600 --> 00:15:39,600
+How many basic blocks are here?
+
+238
+00:15:39,600 --> 00:15:40,600
+Okay.
+
+239
+00:15:40,600 --> 00:15:43,600
+One basic block?
+
+240
+00:15:43,600 --> 00:15:47,600
+More than one basic block.
+
+241
+00:15:47,600 --> 00:15:48,600
+Okay.
+
+242
+00:15:48,600 --> 00:15:49,600
+That's fine then.
+
+243
+00:15:49,600 --> 00:15:50,600
+Yeah.
+
+244
+00:15:50,600 --> 00:15:51,600
+So what's the difficulty?
+
+245
+00:15:51,600 --> 00:15:58,720
+So let's go from instruction I1, okay, all the way up to I6.
+
+246
+00:15:58,720 --> 00:16:01,360
+That is basic block, one basic block.
+
+247
+00:16:02,080 --> 00:16:03,080
+Then what happens?
+
+248
+00:16:03,080 --> 00:16:04,080
+I6 jumps to I9.
+
+249
+00:16:04,080 --> 00:16:05,080
+Okay.
+
+250
+00:16:05,080 --> 00:16:08,080
+So I9 must be sort of a basic block.
+
+251
+00:16:08,080 --> 00:16:09,080
+Okay.
+
+252
+00:16:09,080 --> 00:16:12,080
+And now let's look at between I6 and I9.
+
+253
+00:16:12,080 --> 00:16:14,080
+They are in the same basic block.
+
+254
+00:16:14,080 --> 00:16:16,080
+So that's another basic block.
+
+255
+00:16:16,080 --> 00:16:18,080
+I9 is a jump point.
+
+256
+00:16:18,080 --> 00:16:19,080
+Okay.
+
+257
+00:16:19,080 --> 00:16:24,080
+Oh, I must have missed a branch instruction somewhere over here.
+
+258
+00:16:24,080 --> 00:16:25,080
+Okay.
+
+259
+00:16:25,080 --> 00:16:26,080
+Yeah.
+
+260
+00:16:26,080 --> 00:16:27,080
+So I9, I10.
+
+261
+00:16:27,080 --> 00:16:28,080
+Okay.
+
+262
+00:16:28,080 --> 00:16:29,080
+So I9, I10.
+
+263
+00:16:29,080 --> 00:16:30,080
+Okay.
+
+264
+00:16:30,800 --> 00:16:39,800
+Should be a, yeah, I think that should, oh, let's just look at this.
+
+265
+00:16:39,800 --> 00:16:40,800
+Yeah.
+
+266
+00:16:40,800 --> 00:16:41,800
+Oh.
+
+267
+00:16:41,800 --> 00:16:44,800
+You people are not following me correctly.
+
+268
+00:16:44,800 --> 00:16:47,800
+So there is, this is the first basic block.
+
+269
+00:16:47,800 --> 00:16:50,800
+I missed this branch not equal.
+
+270
+00:16:50,800 --> 00:16:52,800
+This is the first basic block.
+
+271
+00:16:52,800 --> 00:16:59,800
+And then since it jumps to I7, from I2 to I7 or I2 to I6, there is another branch.
+
+272
+00:17:00,519 --> 00:17:01,519
+So there is another basic block.
+
+273
+00:17:01,519 --> 00:17:06,519
+Then I7 to I9 is a, sorry, I7, I8 is another basic block.
+
+274
+00:17:06,519 --> 00:17:08,519
+I9, there is a branch.
+
+275
+00:17:08,519 --> 00:17:10,519
+So there is another basic block.
+
+276
+00:17:10,519 --> 00:17:11,519
+Correct?
+
+277
+00:17:11,519 --> 00:17:12,519
+So there are four basic blocks.
+
+278
+00:17:12,519 --> 00:17:14,519
+I missed this branch not equal.
+
+279
+00:17:14,519 --> 00:17:15,519
+Okay.
+
+280
+00:17:15,519 --> 00:17:17,519
+So let's look at this code.
+
+281
+00:17:17,519 --> 00:17:18,519
+Right?
+
+282
+00:17:18,519 --> 00:17:21,519
+And then separate this out in terms of basic blocks.
+
+283
+00:17:21,519 --> 00:17:23,519
+Now it is clear.
+
+284
+00:17:23,519 --> 00:17:24,519
+Right?
+
+285
+00:17:24,519 --> 00:17:25,519
+So these two are one.
+
+286
+00:17:25,519 --> 00:17:28,519
+These two instructions are in basic block one.
+
+287
+00:17:29,240 --> 00:17:31,240
+These four are in another basic block.
+
+288
+00:17:31,240 --> 00:17:32,240
+Okay?
+
+289
+00:17:32,240 --> 00:17:33,240
+These two in basic block.
+
+290
+00:17:33,240 --> 00:17:35,240
+Why is I9 a separate basic block?
+
+291
+00:17:35,240 --> 00:17:38,240
+Where is the branch?
+
+292
+00:17:38,240 --> 00:17:39,240
+Yes.
+
+293
+00:17:39,240 --> 00:17:45,240
+So I9 is a labeled instruction and there can be a jump to I9.
+
+294
+00:17:45,240 --> 00:17:48,240
+Therefore, it is a sort of a new basic block.
+
+295
+00:17:48,240 --> 00:17:49,240
+Okay?
+
+296
+00:17:49,240 --> 00:17:50,240
+Correct.
+
+297
+00:17:50,240 --> 00:17:51,240
+Okay?
+
+298
+00:17:51,240 --> 00:17:55,240
+So this is how the control flow graph looks.
+
+299
+00:17:55,960 --> 00:17:59,960
+Now if you want to do basic block instruction scheduling, then essentially it means that
+
+300
+00:17:59,960 --> 00:18:02,960
+you try to do scheduling between these two instructions.
+
+301
+00:18:02,960 --> 00:18:05,960
+You try to do scheduling between these four instructions.
+
+302
+00:18:05,960 --> 00:18:08,960
+You try to do scheduling and so on and so forth.
+
+303
+00:18:08,960 --> 00:18:09,960
+Correct?
+
+304
+00:18:09,960 --> 00:18:13,960
+Can I move any of these instructions from here above this basic block?
+
+305
+00:18:13,960 --> 00:18:16,960
+In basic block scheduling, that is not possible.
+
+306
+00:18:16,960 --> 00:18:17,960
+Correct?
+
+307
+00:18:17,960 --> 00:18:21,960
+But if I need to do that, then I have to be careful.
+
+308
+00:18:21,960 --> 00:18:25,960
+So that's really what we are going to see next, which is what we call as global instruction
+
+309
+00:18:25,960 --> 00:18:26,960
+scheduling.
+
+310
+00:18:26,960 --> 00:18:27,960
+Okay.
+
+311
+00:18:27,960 --> 00:18:31,960
+Let's see what happens if I just tend to do, try to do basic block scheduling.
+
+312
+00:18:31,960 --> 00:18:32,960
+Correct?
+
+313
+00:18:32,960 --> 00:18:37,960
+So again, we will assume that there is a one stall cycle between a load instruction and
+
+314
+00:18:37,960 --> 00:18:43,960
+a subsequent add instruction or a subsequent instruction, which is dependent on that.
+
+315
+00:18:43,960 --> 00:18:49,960
+So between this load and this branch, there is going to be a one stall cycle delay.
+
+316
+00:18:49,960 --> 00:18:53,960
+And I can't do anything about it because I don't have any other instructions which I
+
+317
+00:18:53,960 --> 00:18:56,960
+can put within this basic block to do that.
+
+318
+00:18:56,960 --> 00:19:03,960
+Now the next four basic blocks, again there is a dependency from load to add.
+
+319
+00:19:03,960 --> 00:19:04,960
+Okay.
+
+320
+00:19:04,960 --> 00:19:11,960
+And then from add to store and then from store to no.
+
+321
+00:19:11,960 --> 00:19:13,960
+No, that's all.
+
+322
+00:19:13,960 --> 00:19:14,960
+Okay.
+
+323
+00:19:14,960 --> 00:19:15,960
+Right.
+
+324
+00:19:15,960 --> 00:19:17,960
+So that's the end of another basic block.
+
+325
+00:19:17,960 --> 00:19:20,960
+Let's just look at the basic block boundaries.
+
+326
+00:19:20,960 --> 00:19:22,960
+That makes it easy.
+
+327
+00:19:22,960 --> 00:19:23,960
+Okay.
+
+328
+00:19:23,960 --> 00:19:24,960
+Correct?
+
+329
+00:19:24,960 --> 00:19:26,960
+So this is the best schedule that you can do.
+
+330
+00:19:26,960 --> 00:19:31,960
+At best you can put the branch instruction in parallel with the store instruction.
+
+331
+00:19:31,960 --> 00:19:32,960
+Right?
+
+332
+00:19:32,960 --> 00:19:37,960
+So here you are not able to do any scheduling because there was a dependency.
+
+333
+00:19:37,960 --> 00:19:42,960
+And because of this dependency, you also have to incur a stall and you couldn't hide that
+
+334
+00:19:42,960 --> 00:19:44,960
+stall with any other instructions.
+
+335
+00:19:44,960 --> 00:19:49,960
+In the next case when you are doing the scheduling, because of this load and add instruction,
+
+336
+00:19:49,960 --> 00:19:57,960
+there is a stall and you couldn't really do anything except this two instructions scheduled
+
+337
+00:19:57,960 --> 00:19:58,960
+together.
+
+338
+00:19:58,960 --> 00:19:59,960
+Right?
+
+339
+00:19:59,960 --> 00:20:06,960
+Then in the next case you can actually do a move and store instructions in parallel.
+
+340
+00:20:06,960 --> 00:20:08,960
+But we have left this cycle blank.
+
+341
+00:20:08,960 --> 00:20:11,960
+I will come back to this why we have left this cycle blank.
+
+342
+00:20:11,960 --> 00:20:12,960
+Okay.
+
+343
+00:20:12,960 --> 00:20:14,960
+Leave that for the time being.
+
+344
+00:20:14,960 --> 00:20:20,960
+Then of course when I come to the merge block, correct that merge block is essentially having
+
+345
+00:20:20,960 --> 00:20:21,960
+these three instructions.
+
+346
+00:20:21,960 --> 00:20:23,960
+These two instructions are independent of each other.
+
+347
+00:20:23,960 --> 00:20:25,960
+I can do them in parallel.
+
+348
+00:20:25,960 --> 00:20:30,960
+Then there is a branch instruction which is dependent on this heighten instruction and
+
+349
+00:20:30,960 --> 00:20:32,960
+therefore I am doing this.
+
+350
+00:20:32,960 --> 00:20:33,960
+Okay.
+
+351
+00:20:33,960 --> 00:20:39,960
+So if I want to schedule this control flow graph or the instructions in this control
+
+352
+00:20:39,960 --> 00:20:44,960
+flow graph using basic block scheduling, I will do something like this.
+
+353
+00:20:44,960 --> 00:20:45,960
+Right?
+
+354
+00:20:45,960 --> 00:20:47,960
+And what does this really mean?
+
+355
+00:20:47,960 --> 00:20:52,960
+When I follow this graph, okay, so let me just go back.
+
+356
+00:20:52,960 --> 00:20:53,960
+Okay.
+
+357
+00:20:53,960 --> 00:20:55,960
+Let's just stay here.
+
+358
+00:20:55,960 --> 00:21:03,960
+So when I execute the then branch, I take this path, okay, and then from here I come
+
+359
+00:21:03,960 --> 00:21:05,960
+here and then complete.
+
+360
+00:21:05,960 --> 00:21:08,960
+So it should really be nine cycles.
+
+361
+00:21:08,960 --> 00:21:09,960
+Correct?
+
+362
+00:21:09,960 --> 00:21:15,960
+So you can just follow this one, two, three, four, five, six, seven, eight and nine cycles.
+
+363
+00:21:15,960 --> 00:21:21,960
+When I go through the else branch, it's going to take three cycles on this side plus two
+
+364
+00:21:21,960 --> 00:21:24,960
+cycles here and then two more cycles there.
+
+365
+00:21:24,960 --> 00:21:25,960
+So seven cycles.
+
+366
+00:21:25,960 --> 00:21:30,960
+So what I am going to call is that the then branch is going to take seven cycles and the
+
+367
+00:21:30,960 --> 00:21:34,960
+branch is going to take, sorry, the then branch is going to take nine cycles and the else
+
+368
+00:21:34,960 --> 00:21:36,960
+branch is going to take seven cycles.
+
+369
+00:21:36,960 --> 00:21:39,960
+This is the best that I could do.
+
+370
+00:21:39,960 --> 00:21:40,960
+Okay?
+
+371
+00:21:40,960 --> 00:21:46,960
+So we are unable to move instructions beyond the basic block because we are doing basic
+
+372
+00:21:46,960 --> 00:21:50,960
+block scheduling and this kind of limits what we can do.
+
+373
+00:21:50,960 --> 00:21:51,960
+Right?
+
+374
+00:21:51,960 --> 00:21:56,960
+So if you want to move instructions beyond basic blocks, then you have to make sure not
+
+375
+00:21:56,960 --> 00:22:01,960
+only the data dependencies are satisfied but also control dependencies are satisfied.
+
+376
+00:22:01,960 --> 00:22:02,960
+Okay?
+
+377
+00:22:02,960 --> 00:22:07,960
+Now what we will do is that we will try to form what are called regions or things which
+
+378
+00:22:10,960 --> 00:22:15,960
+are beyond basic block and then try to do instruction scheduling, but when you move
+
+379
+00:22:15,960 --> 00:22:21,960
+instructions beyond the basic block, you also ensure that the control dependencies are satisfied.
+
+380
+00:22:21,960 --> 00:22:26,960
+I will explain to you what I mean by this, okay, again using our example.
+
+381
+00:22:26,960 --> 00:22:29,960
+When you do global instruction scheduling, what all you need to take care of and what
+
+382
+00:22:29,960 --> 00:22:33,960
+are the different ways of doing global instruction scheduling.
+
+383
+00:22:33,960 --> 00:22:34,960
+Okay?
+
+384
+00:22:34,960 --> 00:22:39,960
+Now given that that you want to do beyond basic block scheduling, first of all, what should
+
+385
+00:22:39,960 --> 00:22:40,960
+be our objective?
+
+386
+00:22:40,960 --> 00:22:41,960
+Right?
+
+387
+00:22:41,960 --> 00:22:43,960
+Look at this instruction schedule.
+
+388
+00:22:43,960 --> 00:22:48,960
+If I want to do instruction scheduling and if I want to do global instruction scheduling,
+
+389
+00:22:48,960 --> 00:22:49,960
+what should be my objective?
+
+390
+00:22:49,960 --> 00:22:54,960
+My objective is that overall program execution time should be minimized, but then which is
+
+391
+00:22:58,960 --> 00:23:01,960
+what is overall program execution time?
+
+392
+00:23:01,960 --> 00:23:02,960
+Right?
+
+393
+00:23:02,960 --> 00:23:07,960
+Am I going to follow the then branch all the time or am I going to follow the else branch
+
+394
+00:23:08,960 --> 00:23:15,960
+all the time or am I going to follow either one of them and I do not know what is really
+
+395
+00:23:15,960 --> 00:23:16,960
+going to happen.
+
+396
+00:23:16,960 --> 00:23:17,960
+Correct?
+
+397
+00:23:17,960 --> 00:23:23,960
+Because if I let's say optimize on one side, right, and if the program takes the other
+
+398
+00:23:23,960 --> 00:23:28,960
+part, then I am going to be penalized, right, or if I optimize on the other side and it
+
+399
+00:23:28,960 --> 00:23:33,960
+takes this part, then also it is not a good thing, right?
+
+400
+00:23:33,960 --> 00:23:38,960
+So, what we want to do is that we want to make sure that the overall program execution
+
+401
+00:23:38,960 --> 00:23:39,960
+time is minimized.
+
+402
+00:23:39,960 --> 00:23:45,960
+So, typically when you try to do things like beyond basic block scheduling, you collect
+
+403
+00:23:46,960 --> 00:23:48,960
+information like profile information.
+
+404
+00:23:48,960 --> 00:23:53,960
+That profile information is often helpful for you to understand more often which path
+
+405
+00:23:53,960 --> 00:23:55,960
+is going to be taken.
+
+406
+00:23:55,960 --> 00:24:01,960
+Supposing I know that in this particular program, the path B1, B2, B4 is going to be more often
+
+407
+00:24:01,960 --> 00:24:05,960
+taken than the path B1, B3, B4.
+
+408
+00:24:05,960 --> 00:24:10,960
+Let's say this path is taken 80 percent of the time and this path is taken 20 percent
+
+409
+00:24:10,960 --> 00:24:11,960
+of the time.
+
+410
+00:24:11,960 --> 00:24:17,960
+Then I have an additional information which says that you can try to optimize your code
+
+411
+00:24:17,960 --> 00:24:23,960
+in such a way that the overall execution time is minimized assuming that B1, B2, B4 is going
+
+412
+00:24:23,960 --> 00:24:26,960
+to be taken 80 percent of the time.
+
+413
+00:24:26,960 --> 00:24:32,960
+That means that you will try to do your optimization such that the length of this path is minimized.
+
+414
+00:24:32,960 --> 00:24:36,960
+And when you try to do that, you wouldn't even mind if the length of the other path
+
+415
+00:24:36,960 --> 00:24:39,960
+is slightly increased, right?
+
+416
+00:24:39,960 --> 00:24:42,960
+That's really what you try to do.
+
+417
+00:24:42,960 --> 00:24:44,960
+So the idea, yeah.
+
+418
+00:24:44,960 --> 00:24:46,960
+Right, right.
+
+419
+00:24:46,960 --> 00:24:48,960
+Minimizing the...
+
+420
+00:24:48,960 --> 00:24:50,960
+Okay.
+
+421
+00:24:50,960 --> 00:24:52,960
+So the trick is the following, right?
+
+422
+00:24:52,960 --> 00:24:54,960
+So if you want to...
+
+423
+00:24:54,960 --> 00:24:56,960
+So let's say there are three possibilities.
+
+424
+00:24:56,960 --> 00:24:58,960
+Okay.
+
+425
+00:24:58,960 --> 00:25:00,960
+Let me just try to work out.
+
+426
+00:25:00,960 --> 00:25:01,960
+Okay.
+
+427
+00:25:01,960 --> 00:25:03,960
+So one possibility is what I want to do.
+
+428
+00:25:03,960 --> 00:25:05,960
+Right?
+
+429
+00:25:05,960 --> 00:25:07,960
+Let's say this path is taken 80 percent of the time.
+
+430
+00:25:07,960 --> 00:25:09,960
+This path is taken 20 percent of the time.
+
+431
+00:25:09,960 --> 00:25:15,960
+Now you're trying to say that, look, instead of trying to minimize the frequently taken
+
+432
+00:25:15,960 --> 00:25:19,960
+path, let's try to minimize the max of the both.
+
+433
+00:25:19,960 --> 00:25:21,960
+Okay.
+
+434
+00:25:21,960 --> 00:25:25,960
+So let's say that you want to minimize the maximum of the two paths.
+
+435
+00:25:25,960 --> 00:25:29,960
+So if you want to minimize the frequently taken path, let's try to minimize the max
+
+436
+00:25:29,960 --> 00:25:31,960
+of the both.
+
+437
+00:25:31,960 --> 00:25:33,960
+Sure, sure.
+
+438
+00:25:33,960 --> 00:25:35,960
+Okay.
+
+439
+00:25:35,960 --> 00:25:39,960
+If the profiling information is not reliable, then what you say would be useful.
+
+440
+00:25:39,960 --> 00:25:41,960
+Correct.
+
+441
+00:25:41,960 --> 00:25:43,960
+Correct.
+
+442
+00:25:43,960 --> 00:25:49,960
+But then just want you to understand that doing the maximum of the minimum...
+
+443
+00:25:49,960 --> 00:25:53,960
+Sorry, minimum of the maximum, right, is not always a good idea.
+
+444
+00:25:53,960 --> 00:25:55,960
+Okay.
+
+445
+00:25:55,960 --> 00:25:57,960
+So what do you want to optimize?
+
+446
+00:25:57,960 --> 00:25:59,960
+Tell me again.
+
+447
+00:25:59,960 --> 00:26:01,960
+You want to?
+
+448
+00:26:01,960 --> 00:26:03,960
+Minimize the maximum...
+
+449
+00:26:03,960 --> 00:26:09,960
+Minimize the max of path P1, P2.
+
+450
+00:26:09,960 --> 00:26:11,960
+This is what you want to optimize.
+
+451
+00:26:11,960 --> 00:26:13,960
+Correct?
+
+452
+00:26:13,960 --> 00:26:15,960
+Now let us say that if I...
+
+453
+00:26:15,960 --> 00:26:21,960
+When I do this, correct, it so happens that both sides turn out to be 88.
+
+454
+00:26:21,960 --> 00:26:25,960
+Correct?
+
+455
+00:26:25,960 --> 00:26:33,960
+Whereas what I could have done is that I could have done this side with five and this side
+
+456
+00:26:33,960 --> 00:26:37,960
+with eight or this side with even why eight?
+
+457
+00:26:37,960 --> 00:26:39,960
+Nine.
+
+458
+00:26:39,960 --> 00:26:41,960
+Worse than what you have done.
+
+459
+00:26:41,960 --> 00:26:43,960
+Correct?
+
+460
+00:26:43,960 --> 00:26:49,960
+Then as long as it is going to kind of follow this 80-20 rule, I would say that you should
+
+461
+00:26:49,960 --> 00:26:53,960
+follow this 80-20 rule, I would still be faster than you.
+
+462
+00:26:53,960 --> 00:26:55,960
+Right?
+
+463
+00:26:55,960 --> 00:26:59,960
+Yes, what you say is possible and those are all things that can be looked at, but there
+
+464
+00:26:59,960 --> 00:27:03,960
+are advantages as well as disadvantages.
+
+465
+00:27:03,960 --> 00:27:05,960
+Right?
+
+466
+00:27:05,960 --> 00:27:07,960
+Okay.
+
+467
+00:27:07,960 --> 00:27:09,960
+Now let's see...
+
+468
+00:27:09,960 --> 00:27:11,960
+Okay.
+
+469
+00:27:11,960 --> 00:27:15,960
+So our idea is to reduce the overall execution time of the program even if it means that
+
+470
+00:27:15,960 --> 00:27:17,960
+you are going to have a longer execution time.
+
+471
+00:27:17,960 --> 00:27:19,960
+Right?
+
+472
+00:27:19,960 --> 00:27:21,960
+And you may ask why one of the paths would have a longer execution time.
+
+473
+00:27:21,960 --> 00:27:25,960
+Because now you are going to move instructions beyond the basic block, you are going to go
+
+474
+00:27:25,960 --> 00:27:27,960
+across the boundaries.
+
+475
+00:27:27,960 --> 00:27:29,960
+Right?
+
+476
+00:27:29,960 --> 00:27:33,960
+So when I move some instructions across the boundaries, it may cause certain side effects.
+
+477
+00:27:33,960 --> 00:27:37,960
+And I may have to undo that side effect on the other side or I may have to recompute
+
+478
+00:27:37,960 --> 00:27:39,960
+something on the other side.
+
+479
+00:27:39,960 --> 00:27:43,960
+That might increase the number of instructions on the other side.
+
+480
+00:27:43,960 --> 00:27:45,960
+So that is why it would increase.
+
+481
+00:27:45,960 --> 00:27:47,960
+Okay?
+
+482
+00:27:47,960 --> 00:27:53,960
+And whenever you have this kind of control flow graph, not all paths are equally likely.
+
+483
+00:27:53,960 --> 00:27:57,960
+Some paths are going to be taken more often than the other.
+
+484
+00:27:57,960 --> 00:28:01,960
+And if such a situation exists, then doing this profile-based approach always helps.
+
+485
+00:28:01,960 --> 00:28:07,960
+If both paths are equally likely, then of course you have to choose a different strategy for
+
+486
+00:28:07,960 --> 00:28:09,960
+optimizing it.
+
+487
+00:28:09,960 --> 00:28:11,960
+Right?
+
+488
+00:28:11,960 --> 00:28:17,960
+So the first scheduling that we are going to discuss is the trace scheduling.
+
+489
+00:28:17,960 --> 00:28:23,960
+And in the trace scheduling, essentially you are going to rely on this profile-based information.
+
+490
+00:28:23,960 --> 00:28:29,960
+And using this profile-based information, you are going to optimize a path which is more often taken,
+
+491
+00:28:29,960 --> 00:28:33,960
+which is what is going to be called as the main trace.
+
+492
+00:28:33,960 --> 00:28:35,960
+And you are going to optimize that path.
+
+493
+00:28:35,960 --> 00:28:37,960
+The other path you will actually not worry so much about it.
+
+494
+00:28:37,960 --> 00:28:39,960
+Okay?
+
+495
+00:28:39,960 --> 00:28:45,960
+So the idea is to decrease the execution time of the path which is more often taken, which is what
+
+496
+00:28:45,960 --> 00:28:47,960
+we are going to call as the main trace.
+
+497
+00:28:47,960 --> 00:28:49,960
+Okay?
+
+498
+00:28:49,960 --> 00:28:51,960
+Thus the decision should favor more frequently executed path.
+
+499
+00:28:51,960 --> 00:28:53,960
+And here it is called the main trace.
+
+500
+00:28:53,960 --> 00:28:55,960
+Okay?
+
+501
+00:28:55,960 --> 00:28:57,960
+So let's see how this works.
+
+502
+00:28:57,960 --> 00:28:59,960
+We will again take the same program.
+
+503
+00:28:59,960 --> 00:29:01,960
+Right?
+
+504
+00:29:01,960 --> 00:29:03,960
+I will take the same profile information that we have.
+
+505
+00:29:03,960 --> 00:29:07,960
+So what I know is that this path is more often taken than the other path.
+
+506
+00:29:07,960 --> 00:29:11,960
+So this path is what we are going to call as the main trace.
+
+507
+00:29:11,960 --> 00:29:13,960
+The other one is the off trace.
+
+508
+00:29:13,960 --> 00:29:19,960
+So now what I will do is that the instructions which are in basic block B1, B2, B4,
+
+509
+00:29:19,960 --> 00:29:21,960
+I will allow them to move anywhere.
+
+510
+00:29:21,960 --> 00:29:23,960
+Right?
+
+511
+00:29:23,960 --> 00:29:29,960
+For example, if I allow this load to move to this B1, remember that it is writing into R3.
+
+512
+00:29:29,960 --> 00:29:33,960
+So if the other basic block is using R3, then I would have a wrong value.
+
+513
+00:29:33,960 --> 00:29:35,960
+Correct?
+
+514
+00:29:35,960 --> 00:29:37,960
+But in this case fortunately it is not.
+
+515
+00:29:37,960 --> 00:29:41,960
+So it is still okay to move this load to ahead of this.
+
+516
+00:29:41,960 --> 00:29:47,960
+Because you remember, I mean, recall that this load is loading a value into R3 register
+
+517
+00:29:47,960 --> 00:29:51,960
+and that R3 is not live in this basic block.
+
+518
+00:29:51,960 --> 00:29:53,960
+Correct?
+
+519
+00:29:53,960 --> 00:29:57,960
+R3 is not being used in basic block B3.
+
+520
+00:29:57,960 --> 00:30:01,960
+Therefore it is okay to move this load instruction ahead of this control flow.
+
+521
+00:30:01,960 --> 00:30:04,960
+You are not necessarily creating any side effect.
+
+522
+00:30:04,960 --> 00:30:05,960
+Okay?
+
+523
+00:30:05,960 --> 00:30:07,960
+Now what about this add instruction?
+
+524
+00:30:07,960 --> 00:30:09,960
+Can I move that also?
+
+525
+00:30:09,960 --> 00:30:11,960
+I can.
+
+526
+00:30:11,960 --> 00:30:18,960
+Because here, right, in B3, R4 is first defined.
+
+527
+00:30:18,960 --> 00:30:20,960
+Okay?
+
+528
+00:30:20,960 --> 00:30:22,960
+So that is also okay.
+
+529
+00:30:22,960 --> 00:30:24,960
+It is also not live in, in basic block B3.
+
+530
+00:30:24,960 --> 00:30:26,960
+Right?
+
+531
+00:30:26,960 --> 00:30:33,960
+So it is possible for me to in fact move both of these operations, right, beyond basic block B2 into B1.
+
+532
+00:30:33,960 --> 00:30:41,960
+And when I try to do that, okay, when I try to do that, I may be able to reduce the overall schedule length of this.
+
+533
+00:30:41,960 --> 00:30:46,960
+Similarly I can possibly move some instructions from B2 to B4 also.
+
+534
+00:30:46,960 --> 00:30:50,960
+Or some instructions from B4 to B2.
+
+535
+00:30:50,960 --> 00:30:56,960
+But when I move some instructions from B4 to B2, I have to be careful where I should jump from B3.
+
+536
+00:30:56,960 --> 00:30:58,960
+Correct?
+
+537
+00:30:58,960 --> 00:31:01,960
+Because these instructions have to be executed when you come through the path B3.
+
+538
+00:31:01,960 --> 00:31:07,960
+So those things need to be taken care of when you try to do the beyond basic block scheduling.
+
+539
+00:31:07,960 --> 00:31:13,960
+Again, going back, the trace scheduling, what it does is that it first identifies what is the main path,
+
+540
+00:31:13,960 --> 00:31:21,960
+which is the most frequently executed path, and tries to do instruction movement across the basic blocks in the main path.
+
+541
+00:31:21,960 --> 00:31:22,960
+Okay?
+
+542
+00:31:22,960 --> 00:31:24,960
+Right?
+
+543
+00:31:24,960 --> 00:31:28,960
+So there are conditional branches and transitions from other, okay.
+
+544
+00:31:28,960 --> 00:31:36,960
+So when you form this trace, what you can see is that, right, the trace has three basic blocks, right?
+
+545
+00:31:36,960 --> 00:31:44,960
+And you can see that from the middle of that base, middle of that trace, you can actually exit to some other basic block.
+
+546
+00:31:44,960 --> 00:31:49,960
+And similarly into the middle of a basic, into the middle of the trace, you can also jump in.
+
+547
+00:31:49,960 --> 00:31:50,960
+Right?
+
+548
+00:31:50,960 --> 00:31:57,960
+If I put the sequence of instructions from B1, B2, B4 together, then you can see that there is an exit from here,
+
+549
+00:31:57,960 --> 00:32:01,960
+from the middle of the block, and there is an entry into the middle of the trace.
+
+550
+00:32:01,960 --> 00:32:02,960
+Right?
+
+551
+00:32:02,960 --> 00:32:08,960
+So when we talk about a trace, the trace is no longer a single entrance, single exit piece of code.
+
+552
+00:32:08,960 --> 00:32:13,960
+It can have multiple exits. It can have side entrances also.
+
+553
+00:32:13,960 --> 00:32:14,960
+Correct?
+
+554
+00:32:14,960 --> 00:32:18,960
+That's really what we are trying to talk about here.
+
+555
+00:32:18,960 --> 00:32:19,960
+Okay.
+
+556
+00:32:19,960 --> 00:32:23,960
+These control flow transitions are ignored when you do the trace scheduling.
+
+557
+00:32:23,960 --> 00:32:29,960
+But as you move operations above or below the basic block, if they create any side effect, for example,
+
+558
+00:32:29,960 --> 00:32:37,960
+if they overwrite any live invariables, then you have to make sure that the semantics is preserved somehow or the other.
+
+559
+00:32:37,960 --> 00:32:38,960
+Right?
+
+560
+00:32:38,960 --> 00:32:39,960
+That is very important.
+
+561
+00:32:39,960 --> 00:32:47,960
+Similarly, if you move from the merge to above, you have to make sure that that value is appropriately reflected in the other basic block as well.
+
+562
+00:32:47,960 --> 00:32:48,960
+Okay?
+
+563
+00:32:49,960 --> 00:32:56,960
+So that kind of, you know, thing has to be taken care of while you do the scheduling.
+
+564
+00:32:56,960 --> 00:32:59,960
+Let's again look at how we can do this thing.
+
+565
+00:32:59,960 --> 00:33:01,960
+Take the same example.
+
+566
+00:33:01,960 --> 00:33:03,960
+Now you are only looking at the control flow graph.
+
+567
+00:33:03,960 --> 00:33:11,960
+Now what we will do is we will take these two instructions and then try to move them to basic block B1.
+
+568
+00:33:11,960 --> 00:33:12,960
+Okay?
+
+569
+00:33:12,960 --> 00:33:17,960
+As I mentioned earlier, instruction I3 is writing into R3.
+
+570
+00:33:17,960 --> 00:33:21,960
+Unfortunately for us, R3 is not live in this basic block.
+
+571
+00:33:21,960 --> 00:33:26,960
+So moving here will not really affect the semantics of this program.
+
+572
+00:33:26,960 --> 00:33:29,960
+The control flow graph, nothing really gets affected.
+
+573
+00:33:29,960 --> 00:33:32,960
+Similarly, R4 is not live in here.
+
+574
+00:33:32,960 --> 00:33:34,960
+R4 is being defined.
+
+575
+00:33:34,960 --> 00:33:39,960
+So I may do the add and then immediately I will overwrite by the move instruction.
+
+576
+00:33:39,960 --> 00:33:47,960
+That's okay because if I am coming on this path, I need to have R4 as my value when I come here.
+
+577
+00:33:47,960 --> 00:33:48,960
+Right?
+
+578
+00:33:48,960 --> 00:33:53,960
+So again, understand that the R4 value that you are using here, right?
+
+579
+00:33:53,960 --> 00:33:58,960
+The R4 value that you are using here, right?
+
+580
+00:33:58,960 --> 00:34:05,960
+Should be the R4 defined here if you are coming from this path.
+
+581
+00:34:05,960 --> 00:34:07,960
+Right?
+
+582
+00:34:07,960 --> 00:34:13,960
+Whereas if you are coming from this path, then it should be this R4.
+
+583
+00:34:13,960 --> 00:34:15,960
+Correct?
+
+584
+00:34:15,960 --> 00:34:21,960
+So by moving this R4 here, it's not really affecting the semantics because if the control takes this path,
+
+585
+00:34:21,960 --> 00:34:24,960
+R4 is again redefined.
+
+586
+00:34:24,960 --> 00:34:25,960
+Right?
+
+587
+00:34:25,960 --> 00:34:28,960
+And that value is what is going to be used here.
+
+588
+00:34:28,960 --> 00:34:36,960
+So we saw that these two instructions do not have any side effects if they are moved to basic block B1.
+
+589
+00:34:36,960 --> 00:34:38,960
+So they can be moved.
+
+590
+00:34:38,960 --> 00:34:43,960
+This movement of instructions is actually not dependent on the profile information.
+
+591
+00:34:43,960 --> 00:34:44,960
+Right?
+
+592
+00:34:44,960 --> 00:34:46,960
+This is actually based on the control flow graph.
+
+593
+00:34:46,960 --> 00:34:53,960
+Whether it goes through this path 80% of the time or it goes through this path 80% of the time, these instructions can be moved.
+
+594
+00:34:53,960 --> 00:35:02,960
+But let's say I move these two instructions here and this control flow is such that this path is taken 80% of the time.
+
+595
+00:35:02,960 --> 00:35:04,960
+Then what happens?
+
+596
+00:35:04,960 --> 00:35:11,960
+I execute these two add instructions every time when I am coming through this path, which is actually redundant,
+
+597
+00:35:11,960 --> 00:35:14,960
+which would have increased my execution time.
+
+598
+00:35:14,960 --> 00:35:15,960
+Right?
+
+599
+00:35:15,960 --> 00:35:17,960
+Semantically it is okay to move this.
+
+600
+00:35:17,960 --> 00:35:19,960
+That has nothing to do with the profile information.
+
+601
+00:35:19,960 --> 00:35:26,960
+But from a performance point of view, if I move these two instructions into this basic block, right,
+
+602
+00:35:26,960 --> 00:35:31,960
+my performance will be hit if the profile says that this path is going to be taken 80% of the time.
+
+603
+00:35:31,960 --> 00:35:38,960
+So that is why I am taking instructions from the most frequently executed basic block and I am trying to move them.
+
+604
+00:35:38,960 --> 00:35:40,960
+I am not trying to move instructions from here.
+
+605
+00:35:40,960 --> 00:35:41,960
+Right?
+
+606
+00:35:41,960 --> 00:35:42,960
+You got that.
+
+607
+00:35:42,960 --> 00:35:43,960
+Right?
+
+608
+00:35:43,960 --> 00:35:47,960
+So these two instructions can be moved to basic block B1.
+
+609
+00:35:47,960 --> 00:35:48,960
+Correct?
+
+610
+00:35:48,960 --> 00:35:51,960
+I think that's all that we are going to do in this particular example.
+
+611
+00:35:51,960 --> 00:35:58,960
+And then because you are going to put all of these basic blocks, I mean all of these instructions together in the trace,
+
+612
+00:35:58,960 --> 00:36:05,960
+after instruction I5 is executed, you are going to execute instruction I9, this control instruction is not really required.
+
+613
+00:36:05,960 --> 00:36:07,960
+I will show you where that is.
+
+614
+00:36:07,960 --> 00:36:08,960
+Okay?
+
+615
+00:36:08,960 --> 00:36:15,960
+And you will introduce one control instruction from here, which will actually go to the middle of this trace.
+
+616
+00:36:15,960 --> 00:36:17,960
+I will show you that over here.
+
+617
+00:36:17,960 --> 00:36:18,960
+Okay?
+
+618
+00:36:18,960 --> 00:36:22,960
+So this is how the reordered instruction looks like.
+
+619
+00:36:22,960 --> 00:36:25,960
+And this is the main trace that you can see.
+
+620
+00:36:25,960 --> 00:36:30,960
+Right?
+
+621
+00:36:30,960 --> 00:36:32,960
+So this is our main trace.
+
+622
+00:36:32,960 --> 00:36:45,960
+You can see that the load instruction, which was over here, has been moved to the first basic block because there is no dependency between any of these instructions, the load instruction.
+
+623
+00:36:45,960 --> 00:36:49,960
+It can be scheduled in parallel with the I1 instruction.
+
+624
+00:36:49,960 --> 00:36:50,960
+Okay?
+
+625
+00:36:50,960 --> 00:36:57,960
+Then there is a branch instruction and this dependency is being satisfied by scheduling this instruction over here.
+
+626
+00:36:57,960 --> 00:36:58,960
+Right?
+
+627
+00:36:58,960 --> 00:37:13,960
+So both, I mean, if you just go back here, this dependency between R3 to R3 and this dependency between this load to this branch instruction, both of them are satisfied with this one stall cycle in between.
+
+628
+00:37:13,960 --> 00:37:14,960
+Right?
+
+629
+00:37:14,960 --> 00:37:20,960
+And then of course you have executed the remaining instruction from basic block B2.
+
+630
+00:37:20,960 --> 00:37:24,960
+Then you have instructions from basic block B4.
+
+631
+00:37:24,960 --> 00:37:29,960
+Then after that you have instructions from basic block B3.
+
+632
+00:37:29,960 --> 00:37:30,960
+Right?
+
+633
+00:37:30,960 --> 00:37:32,960
+So now let's look at what happens to the control.
+
+634
+00:37:32,960 --> 00:37:34,960
+You execute this instruction.
+
+635
+00:37:34,960 --> 00:37:45,960
+And then if the branch condition is true, sorry, if the branch condition is true, that means that you are going to take the else branch, you will jump over here.
+
+636
+00:37:45,960 --> 00:37:48,960
+You will not execute the remaining instructions.
+
+637
+00:37:48,960 --> 00:37:54,960
+If the branch condition is false, of course you will execute the remaining instruction.
+
+638
+00:37:54,960 --> 00:38:01,960
+And after you come to the else branch, that is when the branch condition is false, you will try to execute these instructions.
+
+639
+00:38:01,960 --> 00:38:10,960
+But then after executing these two instructions which are from basic block B3, you have to go back to basic block B4, which is instruction I9.
+
+640
+00:38:10,960 --> 00:38:14,960
+So you have a branch I9 instruction over here, which takes you back here.
+
+641
+00:38:14,960 --> 00:38:16,960
+So that's really what it is.
+
+642
+00:38:16,960 --> 00:38:20,960
+So we have moved these two instructions from basic block B2 to B1.
+
+643
+00:38:20,960 --> 00:38:25,960
+And the main trace takes six cycles to execute.
+
+644
+00:38:25,960 --> 00:38:26,960
+Okay?
+
+645
+00:38:26,960 --> 00:38:32,960
+And this is the off trace, which is the path which is not most often taken.
+
+646
+00:38:32,960 --> 00:38:46,960
+So from instruction B3, I mean instruction I, or time step three, you jump to instruction over here, execute these two instructions, go back, execute those two instructions, and then come out.
+
+647
+00:38:46,960 --> 00:38:47,960
+Right?
+
+648
+00:38:47,960 --> 00:38:54,960
+Remember you are organizing this instruction sequences of basic block B1, B2, B3, B4.
+
+649
+00:38:54,960 --> 00:38:59,960
+Now you have done B1, B2, B4, and then B3.
+
+650
+00:38:59,960 --> 00:39:06,960
+You have also reversed the order so that frequently executed instructions which form the trace, right, are together.
+
+651
+00:39:06,960 --> 00:39:11,960
+So these are B4 blocks, right, from basic block B4.
+
+652
+00:39:11,960 --> 00:39:14,960
+Any questions?
+
+653
+00:39:14,960 --> 00:39:15,960
+Yeah.
+
+654
+00:39:15,960 --> 00:39:40,960
+You can use that kind of an information for branches you know it is more often taken.
+
+655
+00:39:40,960 --> 00:39:50,960
+And there are many other if statements also where you can say it is more often taken and less often not taken.
+
+656
+00:39:50,960 --> 00:40:05,960
+Can you give me some examples of a simple if condition which you will take less often?
+
+657
+00:40:05,960 --> 00:40:17,960
+So you write an if statement and you know that, right, it is unlikely to be taken or if it is taken something is bad.
+
+658
+00:40:17,960 --> 00:40:18,960
+Right?
+
+659
+00:40:18,960 --> 00:40:27,960
+You always put these assert statements, you always put, right, if something like this happens, right, then something bad has happened, I have to take care of that.
+
+660
+00:40:27,960 --> 00:40:28,960
+Right?
+
+661
+00:40:28,960 --> 00:40:31,960
+They are always often not taken.
+
+662
+00:40:31,960 --> 00:40:32,960
+Right?
+
+663
+00:40:32,960 --> 00:40:39,960
+Typically what you do is that when you want to do something like trace scheduling, you need to generate this profile information.
+
+664
+00:40:39,960 --> 00:40:52,960
+So for that particular piece of code, you run it on a set of sample inputs and then see for these sample inputs, right, which path is more often taken and which path is less taken.
+
+665
+00:40:52,960 --> 00:40:53,960
+Right?
+
+666
+00:40:53,960 --> 00:40:56,960
+That that information you always generate.
+
+667
+00:40:56,960 --> 00:40:57,960
+Go ahead.
+
+668
+00:40:57,960 --> 00:40:58,960
+No.
+
+669
+00:40:58,960 --> 00:41:07,960
+So you are asking whether I should only combine three or five or eight or something like that.
+
+670
+00:41:07,960 --> 00:41:18,960
+You want to actually combine them as big as a thing possible, which allows you to do, which allows, which gives you enough opportunities for you to do the trace scheduling.
+
+671
+00:41:18,960 --> 00:41:20,960
+Right?
+
+672
+00:41:21,960 --> 00:41:39,960
+In other words, what I am saying is that you try to form your trace in such a way that the probability of the trace is high enough and you have enough instructions in the trace so that you could do instruction scheduling.
+
+673
+00:41:39,960 --> 00:41:40,960
+Right?
+
+674
+00:41:40,960 --> 00:41:44,960
+So, so see, remember I showed you a very simple example of one if then else.
+
+675
+00:41:44,960 --> 00:41:45,960
+Right?
+
+676
+00:41:45,960 --> 00:41:49,960
+Now let us think of two if then else, one below the other.
+
+677
+00:41:49,960 --> 00:41:54,960
+Then how many paths do you have?
+
+678
+00:41:54,960 --> 00:41:55,960
+Four.
+
+679
+00:41:55,960 --> 00:41:58,960
+If you think of three, eight.
+
+680
+00:41:58,960 --> 00:41:59,960
+Right?
+
+681
+00:41:59,960 --> 00:42:04,960
+As you have a lot of paths, you have to think of three.
+
+682
+00:42:04,960 --> 00:42:05,960
+Four.
+
+683
+00:42:05,960 --> 00:42:08,960
+If you think of three, eight.
+
+684
+00:42:08,960 --> 00:42:09,960
+Right?
+
+685
+00:42:09,960 --> 00:42:11,960
+As you have more if then else together.
+
+686
+00:42:11,960 --> 00:42:12,960
+Right?
+
+687
+00:42:12,960 --> 00:42:13,960
+What is going to happen?
+
+688
+00:42:13,960 --> 00:42:19,960
+The probability of going through any one path is going to become lower and lower.
+
+689
+00:42:19,960 --> 00:42:20,960
+Correct?
+
+690
+00:42:20,960 --> 00:42:29,960
+So you can see, for example, now the question is, should I take two if then else and then form my trace or should I take five if then else and then form my trace?
+
+691
+00:42:29,960 --> 00:42:31,960
+Let us try to ask that question first.
+
+692
+00:42:31,960 --> 00:42:32,960
+Correct?
+
+693
+00:42:32,960 --> 00:42:33,960
+If I do two.
+
+694
+00:42:33,960 --> 00:42:34,960
+Right?
+
+695
+00:42:34,960 --> 00:42:40,960
+And let us say both of them has a good probability of certain paths, then by doing this probability
+
+696
+00:42:40,960 --> 00:42:45,960
+calculation, you can find out yes, still you will have, let us say in both cases 80, 80,
+
+697
+00:42:45,960 --> 00:42:49,960
+then still you will have one path which is 60 percent or 64 percent.
+
+698
+00:42:49,960 --> 00:42:50,960
+Right?
+
+699
+00:42:50,960 --> 00:42:54,960
+But if I go one more level, then one path which is 50 percent.
+
+700
+00:42:54,960 --> 00:42:56,960
+If I go one more level, 40 percent.
+
+701
+00:42:56,960 --> 00:42:57,960
+Right?
+
+702
+00:42:57,960 --> 00:42:59,960
+It keeps decreasing like that.
+
+703
+00:42:59,960 --> 00:43:00,960
+Right?
+
+704
+00:43:00,960 --> 00:43:05,960
+So beyond certain point, you are going to find that more or less all paths are of equal
+
+705
+00:43:05,960 --> 00:43:06,960
+thing.
+
+706
+00:43:06,960 --> 00:43:09,960
+Then you do not have the notion of the frequently executed path.
+
+707
+00:43:09,960 --> 00:43:15,960
+So you keep this notion as long as one path is more frequently executed than the other
+
+708
+00:43:15,960 --> 00:43:20,960
+path or a set of paths is more frequently executed than the other path and you try to
+
+709
+00:43:20,960 --> 00:43:21,960
+optimize.
+
+710
+00:43:21,960 --> 00:43:25,960
+But if you keep putting things together and together, you are now going to have a large
+
+711
+00:43:25,960 --> 00:43:29,960
+number of instructions, but you do not necessarily need that many instructions.
+
+712
+00:43:29,960 --> 00:43:36,960
+Typically, if you have about 60 or 80 instructions, that is more than enough for you to do any
+
+713
+00:43:36,960 --> 00:43:37,960
+instruction scheduling.
+
+714
+00:43:37,960 --> 00:43:39,960
+Beyond that, you do not need.
+
+715
+00:43:39,960 --> 00:43:44,960
+So, you keep collecting these basic blocks until you get, even 60 is actually very hard
+
+716
+00:43:44,960 --> 00:43:45,960
+to get.
+
+717
+00:43:45,960 --> 00:43:46,960
+Right?
+
+718
+00:43:46,960 --> 00:43:50,960
+Typically, when these people do beyond basic block scheduling, they are still talking in
+
+719
+00:43:50,960 --> 00:43:55,960
+the order of about 20 to 30 instructions and not more than that.
+
+720
+00:43:55,960 --> 00:43:59,960
+Beyond that, I think your path probability is going to become very, very low.
+
+721
+00:43:59,960 --> 00:44:00,960
+Right?
+
+722
+00:44:00,960 --> 00:44:02,960
+That is really what you talk about.
+
+723
+00:44:02,960 --> 00:44:03,960
+Right?
+
+724
+00:44:03,960 --> 00:44:04,960
+Any other questions?
+
+725
+00:44:04,960 --> 00:44:05,960
+Okay.
+
+726
+00:44:05,960 --> 00:44:10,960
+So, as I mentioned earlier, when you are moving these instructions beyond the basic block,
+
+727
+00:44:10,960 --> 00:44:13,960
+you have to make sure that they do not have any side effect.
+
+728
+00:44:13,960 --> 00:44:18,960
+If they have a side effect, then you have to produce the appropriate code on the other
+
+729
+00:44:18,960 --> 00:44:21,960
+side to ensure that it is satisfied.
+
+730
+00:44:21,960 --> 00:44:22,960
+Okay?
+
+731
+00:44:23,960 --> 00:44:28,960
+Now, I am not going to have an example for these side effects because I thought there
+
+732
+00:44:28,960 --> 00:44:30,960
+are too many things to cover that.
+
+733
+00:44:30,960 --> 00:44:31,960
+Okay?
+
+734
+00:44:31,960 --> 00:44:37,960
+The last point here is that we mentioned that the main trace takes six cycles and the off
+
+735
+00:44:37,960 --> 00:44:42,960
+trace takes five cycles, seven cycles in this particular example.
+
+736
+00:44:42,960 --> 00:44:43,960
+Okay?
+
+737
+00:44:43,960 --> 00:44:49,960
+Now, again, we will go back to the same point that this load has been moved, okay, ahead
+
+738
+00:44:49,960 --> 00:44:56,960
+of this branch and we said that it does not have a side effect in terms of R4 being, R3
+
+739
+00:44:56,960 --> 00:44:58,960
+being live in this basic block.
+
+740
+00:44:58,960 --> 00:44:59,960
+Okay?
+
+741
+00:44:59,960 --> 00:45:02,960
+Now, that is really what we are talking about.
+
+742
+00:45:02,960 --> 00:45:05,960
+When you want to move the load instruction ahead of the conditional branch, you have
+
+743
+00:45:05,960 --> 00:45:12,960
+to make sure that the destination register R3 should not be live in the other basic block,
+
+744
+00:45:12,960 --> 00:45:14,960
+off trace block.
+
+745
+00:45:14,960 --> 00:45:15,960
+Okay?
+
+746
+00:45:15,960 --> 00:45:21,960
+So, if it is, then some additional copy code has to be inserted here which ensures that
+
+747
+00:45:21,960 --> 00:45:24,960
+the old value of R3 is restored there.
+
+748
+00:45:24,960 --> 00:45:25,960
+Okay?
+
+749
+00:45:25,960 --> 00:45:26,960
+This is another interesting point.
+
+750
+00:45:26,960 --> 00:45:33,960
+When you move these instructions across, you may also end up having these additional problems
+
+751
+00:45:33,960 --> 00:45:34,960
+like exceptions.
+
+752
+00:45:34,960 --> 00:45:41,960
+Supposing, let's say, I move this instruction and this load causes a page fault, right?
+
+753
+00:45:42,960 --> 00:45:47,960
+Maybe this condition was if pointer not equal to null, correct?
+
+754
+00:45:47,960 --> 00:45:50,960
+And here you are trying to dereference that pointer.
+
+755
+00:45:50,960 --> 00:45:53,960
+Now, by speculatively moving this, what you have done?
+
+756
+00:45:53,960 --> 00:45:57,960
+You have done what you are not supposed to have done, correct?
+
+757
+00:45:57,960 --> 00:46:03,960
+So, when you do this kind of a speculative code motion, right, these kinds of problems
+
+758
+00:46:03,960 --> 00:46:09,960
+could happen and you probably require some support from the architecture as well that
+
+759
+00:46:09,960 --> 00:46:16,960
+for such speculative code motion, right, the exceptions need to be handled in a special
+
+760
+00:46:16,960 --> 00:46:17,960
+way.
+
+761
+00:46:17,960 --> 00:46:18,960
+Okay?
+
+762
+00:46:18,960 --> 00:46:21,960
+Again, we will not get into the details of this in this lecture, right?
+
+763
+00:46:21,960 --> 00:46:26,960
+But if those things are not there, then moving instructions like load across the conditional
+
+764
+00:46:26,960 --> 00:46:28,960
+branches would be a problem.
+
+765
+00:46:28,960 --> 00:46:29,960
+Okay?
+
+766
+00:46:29,960 --> 00:46:30,960
+You have to understand that.
+
+767
+00:46:30,960 --> 00:46:35,960
+Moving add is okay as long as the destination register is not live in.
+
+768
+00:46:35,960 --> 00:46:41,960
+But again, you can say that add might cause, let's say, an arithmetic exception, right?
+
+769
+00:46:41,960 --> 00:46:49,960
+You are trying to add or multiply or something, then let's say that some error has happened.
+
+770
+00:46:49,960 --> 00:46:54,960
+Again, if an error happens, there is a speculative code motion, then there is a way by which
+
+771
+00:46:54,960 --> 00:46:56,960
+it has to be handled.
+
+772
+00:46:56,960 --> 00:46:57,960
+Okay?
+
+773
+00:46:57,960 --> 00:47:03,960
+So, let's move on to another type of beyond basic block scheduling, which is what is called
+
+774
+00:47:03,960 --> 00:47:05,960
+a super block scheduling.
+
+775
+00:47:05,960 --> 00:47:06,960
+Okay?
+
+776
+00:47:06,960 --> 00:47:15,960
+Now, what we saw in the, what we saw in trace scheduling is that trace is a block which
+
+777
+00:47:15,960 --> 00:47:17,960
+consists of a sequence of instructions.
+
+778
+00:47:17,960 --> 00:47:22,960
+It can have multiple entry points.
+
+779
+00:47:22,960 --> 00:47:25,960
+It can have multiple exit points, right?
+
+780
+00:47:25,960 --> 00:47:30,960
+So basically, the structure of a basic block which is single entrance, single exit, we
+
+781
+00:47:30,960 --> 00:47:35,960
+have completely removed it and then said it can have multiple entrances and multiple
+
+782
+00:47:35,960 --> 00:47:36,960
+exits.
+
+783
+00:47:36,960 --> 00:47:37,960
+Okay?
+
+784
+00:47:37,960 --> 00:47:42,960
+Because of this multiple entrances, yeah, not, yeah, more because of this multiple exits,
+
+785
+00:47:42,960 --> 00:47:47,960
+it has to do a lot of bookkeeping work to do the, to keep the code correct.
+
+786
+00:47:47,960 --> 00:47:48,960
+Okay?
+
+787
+00:47:48,960 --> 00:47:53,960
+So, there was an alternative proposal which instead of saying having multiple entrances
+
+788
+00:47:53,960 --> 00:48:00,960
+and multiple exits, allow only, right, single entrance and multiple exits, right?
+
+789
+00:48:00,960 --> 00:48:09,960
+So, super block is again a sequence of basic blocks put together, okay, that has a single
+
+790
+00:48:09,960 --> 00:48:12,960
+entry but multiple exits, right?
+
+791
+00:48:12,960 --> 00:48:19,960
+Let's see how that works and because of that, okay, you are, I mean, certain bookkeeping
+
+792
+00:48:19,960 --> 00:48:24,960
+activities which were required to be done in trace scheduling need not have to be done,
+
+793
+00:48:24,960 --> 00:48:25,960
+okay?
+
+794
+00:48:25,960 --> 00:48:31,960
+But again, formation of super blocks creates additional optimization opportunities and
+
+795
+00:48:31,960 --> 00:48:35,960
+you form super blocks again using some kind of a profile information.
+
+796
+00:48:35,960 --> 00:48:36,960
+Okay?
+
+797
+00:48:36,960 --> 00:48:39,960
+Let's again take the same example, right?
+
+798
+00:48:39,960 --> 00:48:48,960
+Let's take the same example and let's assume that this path is more often taken, right?
+
+799
+00:48:48,960 --> 00:48:51,960
+This path is more often taken, right?
+
+800
+00:48:51,960 --> 00:48:58,960
+If I want to form a super block involving B1, B2 and B4, correct, and this path is not
+
+801
+00:48:58,960 --> 00:49:04,960
+taken, I can exit from B1 because multiple exits are allowed but I can't enter back
+
+802
+00:49:04,960 --> 00:49:07,960
+into the super block, correct?
+
+803
+00:49:07,960 --> 00:49:12,960
+So, what I need to do is because I can't enter into the super block, I will actually replicate
+
+804
+00:49:12,960 --> 00:49:17,960
+this basic block B4 two times which is what is called tail duplication, right?
+
+805
+00:49:17,960 --> 00:49:22,960
+So, here is how you do tail duplication, right?
+
+806
+00:49:22,960 --> 00:49:28,960
+The same control flow graph, now B4 is copied into B4 prime, correct?
+
+807
+00:49:28,960 --> 00:49:34,960
+And now this part forms super block and this is the other set of basic block.
+
+808
+00:49:34,960 --> 00:49:39,960
+In fact, you could have formed one super block like this and another super block like this.
+
+809
+00:49:39,960 --> 00:49:40,960
+That's also fine.
+
+810
+00:49:40,960 --> 00:49:42,960
+In fact, what happened, sorry, not even super block.
+
+811
+00:49:42,960 --> 00:49:47,960
+In fact, now what happens is because after B3 only B4 is being executed, these two will
+
+812
+00:49:47,960 --> 00:49:50,960
+be merged as a single basic block, correct?
+
+813
+00:49:50,960 --> 00:49:53,960
+These two will be merged as a single basic block.
+
+814
+00:49:53,960 --> 00:49:59,960
+So, you have one super block here and then one basic block here and then in both cases
+
+815
+00:49:59,960 --> 00:50:02,960
+you kind of enter back into this, right?
+
+816
+00:50:02,960 --> 00:50:05,960
+So, this is essentially what is called tail duplication.
+
+817
+00:50:05,960 --> 00:50:07,960
+Tail duplication means what?
+
+818
+00:50:07,960 --> 00:50:09,960
+Again, it duplicates code.
+
+819
+00:50:09,960 --> 00:50:14,960
+So, there is a cost that is involved in that, but then it makes certain things simpler,
+
+820
+00:50:14,960 --> 00:50:15,960
+okay?
+
+821
+00:50:15,960 --> 00:50:21,960
+Now, if I, once I form the super block, if I try to do the scheduling for this, this
+
+822
+00:50:21,960 --> 00:50:22,960
+is exactly what will happen.
+
+823
+00:50:22,960 --> 00:50:28,960
+Again, I have moved the load instruction from B1, sorry, from B2 to B1 and I have scheduled
+
+824
+00:50:28,960 --> 00:50:32,960
+them exactly the same way that I have scheduled in my trace scheduling.
+
+825
+00:50:32,960 --> 00:50:38,960
+Then there is my store instruction and now I can actually put the other instructions
+
+826
+00:50:38,960 --> 00:50:39,960
+together.
+
+827
+00:50:39,960 --> 00:50:45,960
+Remember earlier I was, I had to put ITEN separately because there was a side entrance
+
+828
+00:50:45,960 --> 00:50:46,960
+which was coming in.
+
+829
+00:50:46,960 --> 00:50:51,960
+Now, because there is no side entrance, I can even aggressively schedule ITEN one step
+
+830
+00:50:51,960 --> 00:50:52,960
+earlier.
+
+831
+00:50:52,960 --> 00:50:56,960
+So, overall this will only take five cycles, right?
+
+832
+00:50:56,960 --> 00:51:01,960
+And then when I don't take the super block path, when I go for the after trace path,
+
+833
+00:51:01,960 --> 00:51:07,960
+I jump from this branch instruction straight away to here and here I have put single basic
+
+834
+00:51:07,960 --> 00:51:10,960
+block of all the instructions, right?
+
+835
+00:51:10,960 --> 00:51:14,960
+And then again it branches back to instruction I1, okay?
+
+836
+00:51:14,960 --> 00:51:20,960
+So, essentially it's a moving of instructions and you can see that there is a single, I
+
+837
+00:51:20,960 --> 00:51:27,960
+mean, a single entry, but two exits, one exit from here, another exit from here, two exits,
+
+838
+00:51:27,960 --> 00:51:28,960
+okay?
+
+839
+00:51:28,960 --> 00:51:36,960
+And this is again for the other block from here you branch back to this one.
+
+840
+00:51:36,960 --> 00:51:40,960
+The main trace takes five cycles, the super block.
+
+841
+00:51:40,960 --> 00:51:45,960
+This is the instruction which was moved compared to the trace scheduling and the other one
+
+842
+00:51:45,960 --> 00:51:47,960
+takes six, five.
+
+843
+00:51:47,960 --> 00:51:50,960
+So, we were able to schedule things better.
+
+844
+00:51:50,960 --> 00:51:55,960
+So, both trace scheduling and super block scheduling relies on the fact that some path
+
+845
+00:51:55,960 --> 00:52:00,960
+is more often taken than the other path and you have information about it.
+
+846
+00:52:00,960 --> 00:52:03,960
+Sometimes this information may not be available, right?
+
+847
+00:52:03,960 --> 00:52:08,960
+Sometimes the information available tells that both paths are equally likely.
+
+848
+00:52:08,960 --> 00:52:14,960
+Sometimes it may also be the case that, well, this basic block B2 and basic block B3, the
+
+849
+00:52:14,960 --> 00:52:18,960
+then and else blocks, have exactly one-one instruction each, right?
+
+850
+00:52:18,960 --> 00:52:20,960
+That is also possible.
+
+851
+00:52:20,960 --> 00:52:21,960
+Very small basic blocks.
+
+852
+00:52:21,960 --> 00:52:26,960
+A few instructions may not be one, maybe one or two or three or whatever it is, right?
+
+853
+00:52:26,960 --> 00:52:28,960
+Can we do something in those cases?
+
+854
+00:52:28,960 --> 00:52:32,960
+Can we come up with a better scheduling method in those cases, right?
+
+855
+00:52:33,960 --> 00:52:37,960
+For that we are, okay, let's skip this slide because this talks about how to enlarge the
+
+856
+00:52:37,960 --> 00:52:39,960
+super block.
+
+857
+00:52:39,960 --> 00:52:43,960
+Again, you know about these techniques like loop unrolling and other things.
+
+858
+00:52:43,960 --> 00:52:48,960
+So, the third global scheduling method that we are going to talk about is what is called
+
+859
+00:52:48,960 --> 00:52:50,960
+hyper block scheduling.
+
+860
+00:52:50,960 --> 00:52:55,960
+In hyper block scheduling, essentially, you do hyper block scheduling if you don't have
+
+861
+00:52:55,960 --> 00:53:01,960
+the profile information or if the profile information takes both paths are equally likely
+
+862
+00:53:01,960 --> 00:53:07,960
+or the profile, I mean, or the control flow graph is such that the then block and the
+
+863
+00:53:07,960 --> 00:53:09,960
+else block have very few instructions.
+
+864
+00:53:09,960 --> 00:53:14,960
+In order for you to do hyper block scheduling, you need to have certain hardware support.
+
+865
+00:53:14,960 --> 00:53:16,960
+We'll talk about that, right?
+
+866
+00:53:16,960 --> 00:53:22,960
+So, again, as I said, both branches are equally likely, okay?
+
+867
+00:53:22,960 --> 00:53:27,960
+So, the kind of hardware support that you need for this is what is called predicated
+
+868
+00:53:27,960 --> 00:53:29,960
+execution, right?
+
+869
+00:53:29,960 --> 00:53:33,960
+So, how many of you know about predicated execution?
+
+870
+00:53:33,960 --> 00:53:35,960
+One, two, three.
+
+871
+00:53:35,960 --> 00:53:39,960
+How many of you have heard conditional move instruction?
+
+872
+00:53:39,960 --> 00:53:43,960
+That is predicated execution, right?
+
+873
+00:53:43,960 --> 00:53:45,960
+Conditional move instruction is predicated execution.
+
+874
+00:53:45,960 --> 00:53:48,960
+I'll show you what it is in the next slide, okay?
+
+875
+00:53:48,960 --> 00:53:55,960
+So, let's look at this particular example before we go to our bigger example, okay?
+
+876
+00:53:55,960 --> 00:54:00,960
+So, here I have a branch equal instruction, right?
+
+877
+00:54:00,960 --> 00:54:05,960
+And then an add instruction in the then block and a subtract instruction in the else block.
+
+878
+00:54:05,960 --> 00:54:09,960
+And then, of course, a branch here to come back and then merge point.
+
+879
+00:54:09,960 --> 00:54:11,960
+Again, simple control flow graph, okay?
+
+880
+00:54:11,960 --> 00:54:17,960
+But the then branch and the else branch each have only one instruction, right?
+
+881
+00:54:17,960 --> 00:54:24,960
+Now, if I have predicated execution, then what I do is that instead of doing a branch
+
+882
+00:54:24,960 --> 00:54:29,960
+instruction here, I will set a predicate instruction, set predicate instruction.
+
+883
+00:54:29,960 --> 00:54:32,960
+That will only set the predicate blocks.
+
+884
+00:54:32,960 --> 00:54:39,960
+Then I will execute both the instructions in the then branch and the else branch with
+
+885
+00:54:39,960 --> 00:54:42,960
+the respective predicates.
+
+886
+00:54:42,960 --> 00:54:47,960
+And then I will come back and execute the merge instruction.
+
+887
+00:54:47,960 --> 00:54:50,960
+So, let's see what that is, okay?
+
+888
+00:54:50,960 --> 00:54:56,960
+So, instead of the branch instruction, I replace it by a set equal instruction, which
+
+889
+00:54:56,960 --> 00:54:58,960
+sets the predicate P1.
+
+890
+00:54:58,960 --> 00:54:59,960
+So, what are we testing?
+
+891
+00:54:59,960 --> 00:55:03,960
+If you are testing R1 is equal to R2 branch to out 1.
+
+892
+00:55:03,960 --> 00:55:08,960
+Instead of that, I say set predicate P1 if R1 is equal to R2.
+
+893
+00:55:08,960 --> 00:55:11,960
+And if P1 is true, what should I do?
+
+894
+00:55:11,960 --> 00:55:14,960
+I should execute the subtract instruction.
+
+895
+00:55:14,960 --> 00:55:18,960
+If P1 is false, I should execute the add instruction.
+
+896
+00:55:18,960 --> 00:55:23,960
+So, I am going to say do the add instruction if not of P1.
+
+897
+00:55:23,960 --> 00:55:26,960
+Do the subtract instruction if P1.
+
+898
+00:55:26,960 --> 00:55:31,960
+But in practice, what is going to happen is that this sequence of instructions or all
+
+899
+00:55:31,960 --> 00:55:34,960
+of them are going to be executed, right?
+
+900
+00:55:34,960 --> 00:55:40,960
+The meaning for if P1 here is not execute this instruction if P1 is true.
+
+901
+00:55:40,960 --> 00:55:45,960
+It is actually execute this instruction, execute this instruction.
+
+902
+00:55:45,960 --> 00:55:50,960
+If P1 is true, write the result value in R7.
+
+903
+00:55:50,960 --> 00:55:55,960
+If not of P1 is true, write the result value in R4.
+
+904
+00:55:55,960 --> 00:56:00,960
+In other words, in predicated execution, what you are doing is that you are performing the
+
+905
+00:56:00,960 --> 00:56:06,960
+operation, whether you write the result in the destination or not depends on your predicate
+
+906
+00:56:06,960 --> 00:56:07,960
+value.
+
+907
+00:56:07,960 --> 00:56:11,960
+That is why it is called predicated execution, right?
+
+908
+00:56:11,960 --> 00:56:12,960
+Okay?
+
+909
+00:56:12,960 --> 00:56:13,960
+Again, let me repeat this.
+
+910
+00:56:14,960 --> 00:56:19,960
+What we have done is that we have replaced the branch instruction with a set predicate
+
+911
+00:56:19,960 --> 00:56:20,960
+instruction.
+
+912
+00:56:20,960 --> 00:56:22,960
+That only sets the predicate.
+
+913
+00:56:22,960 --> 00:56:29,960
+Then, the instructions from the then branch as well as the else branch are included, but
+
+914
+00:56:29,960 --> 00:56:32,960
+with appropriate predicates.
+
+915
+00:56:32,960 --> 00:56:38,960
+And what this predicate tells is that, okay, execute this instruction, write the result
+
+916
+00:56:38,960 --> 00:56:42,960
+in the destination register if P1 is true.
+
+917
+00:56:42,960 --> 00:56:49,960
+Execute this subtraction, execute this add instruction, write the value in R4 if predicate
+
+918
+00:56:49,960 --> 00:56:51,960
+of P1 is false.
+
+919
+00:56:51,960 --> 00:56:53,960
+That is what it says, right?
+
+920
+00:56:53,960 --> 00:57:01,960
+The meaning of this is execute, do the write back stage only if the predicate is true.
+
+921
+00:57:01,960 --> 00:57:06,960
+See, if your instruction fetch decode, execute, everything you will do.
+
+922
+00:57:06,960 --> 00:57:13,960
+Only write back is done or not done depending on the predicate condition, right?
+
+923
+00:57:13,960 --> 00:57:19,960
+If the predicate is false, then this essentially amounts to doing no op.
+
+924
+00:57:19,960 --> 00:57:24,960
+You perform the operation, but you are not going to write the result in the destination
+
+925
+00:57:24,960 --> 00:57:26,960
+location, right?
+
+926
+00:57:26,960 --> 00:57:27,960
+Okay.
+
+927
+00:57:27,960 --> 00:57:29,960
+Now, yes, Chris.
+
+928
+00:57:29,960 --> 00:57:30,960
+Good.
+
+929
+00:57:30,960 --> 00:57:31,960
+Okay.
+
+930
+00:57:31,960 --> 00:57:34,960
+Somebody else can answer the question.
+
+931
+00:57:34,960 --> 00:57:37,960
+Why would this be good?
+
+932
+00:57:37,960 --> 00:57:38,960
+Okay.
+
+933
+00:57:38,960 --> 00:57:49,960
+Before we see why would this be good, let us see what this has done, right?
+
+934
+00:57:49,960 --> 00:57:56,960
+On the left-hand side, you have a control flow graph with four basic blocks, each having
+
+935
+00:57:56,960 --> 00:57:58,960
+one or two instructions.
+
+936
+00:57:58,960 --> 00:58:03,960
+What do you have on the right-hand side?
+
+937
+00:58:03,960 --> 00:58:08,960
+What is, how many basic blocks are there on the right-hand side?
+
+938
+00:58:08,960 --> 00:58:09,960
+One.
+
+939
+00:58:09,960 --> 00:58:12,960
+Only one basic block, correct?
+
+940
+00:58:12,960 --> 00:58:19,960
+In other words, what you have done is your control dependences are now turned into data
+
+941
+00:58:19,960 --> 00:58:20,960
+dependences, right?
+
+942
+00:58:20,960 --> 00:58:24,960
+And because you have removed those control dependences, you have actually made everything
+
+943
+00:58:24,960 --> 00:58:29,960
+as a single basic block, correct?
+
+944
+00:58:29,960 --> 00:58:32,960
+Now, assume that you are allowed to, you are actually doing this.
+
+945
+00:58:32,960 --> 00:58:37,960
+You are not going to do this if you can only execute one instruction every cycle, right?
+
+946
+00:58:37,960 --> 00:58:39,960
+Then it is not going to make sense.
+
+947
+00:58:39,960 --> 00:58:44,960
+I have the capability to execute multiple instructions, right?
+
+948
+00:58:44,960 --> 00:58:51,960
+And I have enough hardware resources and I want to do aggressive instruction scheduling.
+
+949
+00:58:51,960 --> 00:58:56,960
+That is why I went beyond and then said, okay, even though you may not be executing both
+
+950
+00:58:56,960 --> 00:59:02,960
+of this, I will still try to execute both as long as the overall execution time is minimized,
+
+951
+00:59:02,960 --> 00:59:03,960
+correct?
+
+952
+00:59:03,960 --> 00:59:09,960
+So, I will do this only if my overall execution time is minimized, correct?
+
+953
+00:59:09,960 --> 00:59:11,960
+This is not instruction schedule.
+
+954
+00:59:11,960 --> 00:59:14,960
+These are the sequences of instruction.
+
+955
+00:59:14,960 --> 00:59:29,960
+Same function is also, oh, yes, different function unit, yeah, yeah.
+
+956
+00:59:29,960 --> 00:59:32,960
+But what if I have two integer function unit, right?
+
+957
+00:59:32,960 --> 00:59:37,960
+So, you will do that only if it is profitable to you, not otherwise, okay?
+
+958
+00:59:37,960 --> 00:59:41,960
+Always make sure that we will do this only if it is profitable, correct?
+
+959
+00:59:41,960 --> 00:59:47,960
+But then, yes, there are, you go for all of these things because you have more functional units
+
+960
+00:59:47,960 --> 00:59:50,960
+and you have fewer instructions to fill them.
+
+961
+00:59:50,960 --> 00:59:53,960
+You want to reduce the stalls, et cetera, et cetera, okay?
+
+962
+00:59:53,960 --> 00:59:54,960
+That's the reason.
+
+963
+00:59:54,960 --> 01:00:00,960
+Again, we will show that in the context of our hyper block scheduling how it helps, right?
+
+964
+01:00:00,960 --> 01:00:01,960
+Okay.
+
+965
+01:00:01,960 --> 01:00:04,960
+So, again, back to our example.
+
+966
+01:00:04,960 --> 01:00:09,960
+Now, let's assume that both of these branches are executed more or less the same time.
+
+967
+01:00:09,960 --> 01:00:15,960
+Here I have assumed 65, 35, but you could have put any other value also, correct?
+
+968
+01:00:15,960 --> 01:00:23,960
+Now, we can say that you set the guard appropriately and this set of instructions, they are all executed.
+
+969
+01:00:23,960 --> 01:00:29,960
+The result values are written in the destination register if the guard is true.
+
+970
+01:00:29,960 --> 01:00:32,960
+Similarly, on this side, these instructions are executed,
+
+971
+01:00:32,960 --> 01:00:38,960
+but the result value is set in the destination register if the guard is false, right?
+
+972
+01:00:38,960 --> 01:00:42,960
+Sorry, again, whatever is the guard, the guard is true.
+
+973
+01:00:42,960 --> 01:00:44,960
+I shouldn't say guard is false, right?
+
+974
+01:00:44,960 --> 01:00:47,960
+P1 is false, but the guard is true.
+
+975
+01:00:47,960 --> 01:00:51,960
+Of course, this branch instruction can be eliminated because now what you are going to do is that
+
+976
+01:00:51,960 --> 01:00:55,960
+you are going to treat this whole thing as a basic block, right?
+
+977
+01:00:55,960 --> 01:00:59,960
+The moment you try to do predicated execution for this, right,
+
+978
+01:00:59,960 --> 01:01:04,960
+these are going to be predicated by P1, these are going to be predicated by not of P1,
+
+979
+01:01:04,960 --> 01:01:08,960
+then all of these so-called how many instructions?
+
+980
+01:01:08,960 --> 01:01:14,960
+So, 4 plus 4, 8 plus 3, 11 instructions all put together will be a single basic block.
+
+981
+01:01:14,960 --> 01:01:18,960
+Of course, this might be knocked off because it's not required, right?
+
+982
+01:01:18,960 --> 01:01:21,960
+So, let's see what happens, okay?
+
+983
+01:01:21,960 --> 01:01:25,960
+So, we have the load instruction, right?
+
+984
+01:01:25,960 --> 01:01:29,960
+And here, of course, I have speculatively moved the load instruction,
+
+985
+01:01:29,960 --> 01:01:33,960
+and here is where I am setting the predicate,
+
+986
+01:01:33,960 --> 01:01:37,960
+and then these instructions are executed, okay, based on the predicate.
+
+987
+01:01:37,960 --> 01:01:46,960
+You can see I5, I8, I7, and yeah, those are the instructions which are executed based on the predicate, okay?
+
+988
+01:01:46,960 --> 01:01:49,960
+Of course, these are the instructions from the merge point,
+
+989
+01:01:49,960 --> 01:01:54,960
+so they have to be executed irrespective of whether P1 is true or false.
+
+990
+01:01:54,960 --> 01:02:00,960
+But now, I have scheduled them such that both paths take exactly on the 6th cycle, right?
+
+991
+01:02:00,960 --> 01:02:04,960
+In the earlier case, it was 5 and 7 or 5 and 6 or whatever it is.
+
+992
+01:02:04,960 --> 01:02:14,960
+Now, I have done this, and of course, it's also the case that we do not know which path is going to be more authentic, right?
+
+993
+01:02:14,960 --> 01:02:21,960
+So, this is another mechanism by which you can do instruction scheduling beyond basic block, okay?
+
+994
+01:02:21,960 --> 01:02:31,960
+Now, we will also talk a little bit about the space ordering problem which we have been referring to yesterday when we talked about register allocation, right?
+
+995
+01:02:31,960 --> 01:02:37,960
+So, when you try to do instruction scheduling, instruction scheduling aggressively tries to move instructions
+
+996
+01:02:37,960 --> 01:02:46,960
+so that your stalls are kind of taken care of and instructions are scheduled in parallel, right?
+
+997
+01:02:46,960 --> 01:02:53,960
+And as you move these instructions up and down, you are essentially increasing or decreasing the live ranges, right?
+
+998
+01:02:53,960 --> 01:03:02,960
+And if register allocation is going to be done subsequently, then what happens is that it might have so happened that you would have stretched some of the live ranges.
+
+999
+01:03:02,960 --> 01:03:10,960
+And because you have stretched some of these live ranges, okay, you will have more conflict in your register allocation.
+
+1000
+01:03:10,960 --> 01:03:19,960
+That's possible, right? But if you first try to do register allocation and then do instruction scheduling, if you do register allocation,
+
+1001
+01:03:19,960 --> 01:03:24,960
+then all registers have, I mean all instructions have their registers already assigned, right?
+
+1002
+01:03:24,960 --> 01:03:28,960
+And because remember we saw an example yesterday, right?
+
+1003
+01:03:28,960 --> 01:03:35,960
+Because you are trying to reuse the same register, you would have created anti- and output dependencies.
+
+1004
+01:03:35,960 --> 01:03:40,960
+Now anti- and output dependencies prevent you to move your instructions beyond those points.
+
+1005
+01:03:40,960 --> 01:03:44,960
+So, you will have less opportunities when you do instruction scheduling.
+
+1006
+01:03:44,960 --> 01:03:53,960
+So, this is the conflict or interaction that happens between register allocation and instruction scheduling, right?
+
+1007
+01:03:53,960 --> 01:04:00,960
+More often than not, you typically do instruction scheduling first and then register allocation, right?
+
+1008
+01:04:00,960 --> 01:04:04,960
+This is typically what is called pre-pass scheduling, okay?
+
+1009
+01:04:04,960 --> 01:04:08,960
+And when you do pre-pass scheduling, instruction scheduling is done first.
+
+1010
+01:04:08,960 --> 01:04:16,960
+It may increase the register pressure and therefore your register allocator might end up doing more space, right?
+
+1011
+01:04:16,960 --> 01:04:21,960
+On the other hand, if you do post-pass scheduling, right?
+
+1012
+01:04:21,960 --> 01:04:24,960
+Register allocation is done first, right?
+
+1013
+01:04:24,960 --> 01:04:31,960
+It will introduce anti- and output dependencies and that will limit the opportunities for instruction scheduling.
+
+1014
+01:04:31,960 --> 01:04:36,960
+One other thing is that when you do this instruction scheduling first, right?
+
+1015
+01:04:36,960 --> 01:04:38,960
+Now you have introduced some spill code.
+
+1016
+01:04:38,960 --> 01:04:42,960
+The spill code also needs to be scheduled, correct?
+
+1017
+01:04:42,960 --> 01:04:47,960
+So, you will do one other pass subsequently of instruction scheduling just to take care of that.
+
+1018
+01:04:47,960 --> 01:04:50,960
+Only those spilled instructions should be rescheduled, okay?
+
+1019
+01:04:50,960 --> 01:04:56,960
+There are also proposals which kind of integrate this register allocation and instruction scheduling.
+
+1020
+01:04:56,960 --> 01:04:59,960
+Trying to do both of these things somewhat together.
+
+1021
+01:04:59,960 --> 01:05:05,960
+It is possible to do that and there are several proposals which try to do that as well.
+
+1022
+01:05:05,960 --> 01:05:14,960
+Okay, let me give you an example of how these things kind of interfere with each other in this particular case, right?
+
+1023
+01:05:14,960 --> 01:05:20,960
+So, let's look at the program on the left-hand side, right?
+
+1024
+01:05:20,960 --> 01:05:27,960
+Actually, it should have been better if you have come from the right-hand side to the left-hand side, but let's, okay?
+
+1025
+01:05:27,960 --> 01:05:34,960
+So, let's say if I do instruction scheduling first and I have achieved this schedule, right?
+
+1026
+01:05:34,960 --> 01:05:39,960
+Now you can find out that since this is a basic block, you can say that, right?
+
+1027
+01:05:39,960 --> 01:05:45,960
+It's like register requirement is five, right?
+
+1028
+01:05:45,960 --> 01:05:47,960
+Its register requirement is five.
+
+1029
+01:05:47,960 --> 01:05:53,960
+But if I have done register allocation first and moved instructions around a little bit, okay?
+
+1030
+01:05:53,960 --> 01:06:01,960
+I could have got this and then subsequently if I have done instruction scheduling, I could have got this schedule.
+
+1031
+01:06:01,960 --> 01:06:06,960
+And in this schedule, I will only require four registers, right?
+
+1032
+01:06:06,960 --> 01:06:13,960
+So, again it depends on, you know, how these things work out and there is nothing which can say that this is better than the other.
+
+1033
+01:06:13,960 --> 01:06:19,960
+In some applications, it may turn out to be, you know, doing instruction scheduling earlier is better.
+
+1034
+01:06:19,960 --> 01:06:28,960
+In certain other applications or programs, it might so happen that doing register allocation first would be better than the, better than doing instruction scheduling first.
+
+1035
+01:06:28,960 --> 01:06:35,960
+But in general, people have found doing instruction scheduling first as a more appropriate option, okay?
+
+1036
+01:06:35,960 --> 01:06:41,960
+Now we are going to move on to the next topic, which is software pipelining, right?
+
+1037
+01:06:41,960 --> 01:06:45,960
+Software pipelining is again another instruction scheduling technique.
+
+1038
+01:06:45,960 --> 01:06:49,960
+It's an instruction scheduling technique for loops, right?
+
+1039
+01:06:49,960 --> 01:06:55,960
+And for now, we will actually assume that the loop body is a single basic block, right?
+
+1040
+01:06:55,960 --> 01:06:59,960
+So, we are essentially going to have a control flow graph which is like this.
+
+1041
+01:06:59,960 --> 01:07:04,960
+I have a control which is coming in, loop body, which I execute.
+
+1042
+01:07:04,960 --> 01:07:08,960
+I iterate several times and then I come out.
+
+1043
+01:07:08,960 --> 01:07:16,960
+Now, if I do only basic block scheduling, forget for the time being about the other global instruction scheduling that we talked about,
+
+1044
+01:07:16,960 --> 01:07:24,960
+they are not relevant here because if you try to look at it, right, you have only one basic block here and that's going to be repeatedly executed.
+
+1045
+01:07:24,960 --> 01:07:30,960
+You try to move these instructions outside of this basic block, you are going outside of the loop.
+
+1046
+01:07:31,960 --> 01:07:33,960
+So, that is not going to make sense here.
+
+1047
+01:07:33,960 --> 01:07:42,960
+Global instruction scheduling like trace scheduling or, you know, super block scheduling isn't going to help if you have a single basic block, right?
+
+1048
+01:07:42,960 --> 01:07:50,960
+We will come to some more complicated examples if time permits a little later, but for the time being, we will only worry about single basic block, right?
+
+1049
+01:07:50,960 --> 01:07:54,960
+So, none of the techniques that we have talked about earlier is going to help.
+
+1050
+01:07:54,960 --> 01:07:57,960
+Anything that we can do is only basic block scheduling.
+
+1051
+01:07:57,960 --> 01:08:00,960
+But basic block scheduling has its own limitations.
+
+1052
+01:08:00,960 --> 01:08:05,960
+So, let us see what we can do, right, and how we can improve this.
+
+1053
+01:08:05,960 --> 01:08:09,960
+Again, we will look at it from an example point of view, right?
+
+1054
+01:08:09,960 --> 01:08:11,960
+So, this code is familiar.
+
+1055
+01:08:11,960 --> 01:08:17,960
+Something similar to it is what you have been doing in your lab assignments, correct?
+
+1056
+01:08:17,960 --> 01:08:24,960
+A of I is equal to A of I plus S and I want to do it n times, okay?
+
+1057
+01:08:24,960 --> 01:08:26,960
+So, this is the assembly code for this.
+
+1058
+01:08:26,960 --> 01:08:32,960
+This is actually the MIPS or 10,000 assembly code or MIPS assembly sequence, right?
+
+1059
+01:08:32,960 --> 01:08:34,960
+You have the load, add, and so on.
+
+1060
+01:08:34,960 --> 01:08:36,960
+Again, we saw the same example even yesterday, right?
+
+1061
+01:08:36,960 --> 01:08:39,960
+The same set of instructions, right?
+
+1062
+01:08:39,960 --> 01:08:45,960
+Now, this is the data dependency graph for this example.
+
+1063
+01:08:45,960 --> 01:08:50,960
+Let us try to understand the data dependency graph a little bit here, right?
+
+1064
+01:08:50,960 --> 01:08:59,960
+So, again as before, nodes represent instructions and arcs between nodes represent dependencies.
+
+1065
+01:08:59,960 --> 01:09:02,960
+Those parts are very simple, right?
+
+1066
+01:09:02,960 --> 01:09:06,960
+So, you can see that there is a dependency from the load instruction to the add instruction
+
+1067
+01:09:06,960 --> 01:09:12,960
+because F naught, which is, right, stored by the, I mean, which is the result destination of load
+
+1068
+01:09:12,960 --> 01:09:15,960
+is what is being used by the add instruction.
+
+1069
+01:09:15,960 --> 01:09:20,960
+Similarly, there is a dependency from the add instruction to the store instruction and so on.
+
+1070
+01:09:20,960 --> 01:09:22,960
+Now, let us look at this add instruction.
+
+1071
+01:09:22,960 --> 01:09:24,960
+What does this add instruction do?
+
+1072
+01:09:24,960 --> 01:09:27,960
+This add instruction is essentially incrementing the pointer.
+
+1073
+01:09:27,960 --> 01:09:34,960
+And the same add instruction is being used in the, sorry, the same R1 register is being used
+
+1074
+01:09:34,960 --> 01:09:38,960
+in the subsequent load instruction, right, as the pointer.
+
+1075
+01:09:38,960 --> 01:09:49,960
+That means that there is a dependency from this add instruction to the load instruction in the next iteration, correct?
+
+1076
+01:09:49,960 --> 01:09:55,960
+That dependency is actually what is being shown here by this green arc.
+
+1077
+01:09:55,960 --> 01:10:01,960
+And this circle here, dot here, essentially says that this is a loop carried dependency.
+
+1078
+01:10:01,960 --> 01:10:09,960
+That means that the value produced by the ith instruction, ith iteration is actually going to be used in the i plus one iteration.
+
+1079
+01:10:09,960 --> 01:10:17,960
+We formally define loop carried dependencies subsequently today, but for the time being, this definition is good enough, right?
+
+1080
+01:10:17,960 --> 01:10:22,960
+Similarly, if you look at the add instruction, it is dependent on itself, right?
+
+1081
+01:10:22,960 --> 01:10:27,960
+The value produced in the previous iteration is what is going to be used in the current iteration.
+
+1082
+01:10:27,960 --> 01:10:32,960
+The same is also true for the subtract instruction, right?
+
+1083
+01:10:32,960 --> 01:10:35,960
+I think yes, okay.
+
+1084
+01:10:35,960 --> 01:10:39,960
+And also for the store instruction, remember, right?
+
+1085
+01:10:39,960 --> 01:10:44,960
+Add to store, there is a dependency because store also uses the same pointer, right?
+
+1086
+01:10:44,960 --> 01:10:51,960
+So, after I increment the pointer, the incremented pointer value is going to be used by the load instruction.
+
+1087
+01:10:51,960 --> 01:11:01,960
+So, after I increment the pointer, the incremented pointer value is going to be used by the load instruction, store instruction, and also the add instruction in the next iteration.
+
+1088
+01:11:01,960 --> 01:11:09,960
+So, all of these dependencies that are there in the green are loop carried dependencies, right?
+
+1089
+01:11:09,960 --> 01:11:12,960
+Similarly, there is a loop carried dependency for subtract.
+
+1090
+01:11:12,960 --> 01:11:16,960
+This dependency, all of you understand, correct?
+
+1091
+01:11:16,960 --> 01:11:19,960
+Any questions?
+
+1092
+01:11:19,960 --> 01:11:28,960
+Of course, we will again put the latency values, associated latency values with the nodes, and I will only write the values which are greater than one, right?
+
+1093
+01:11:28,960 --> 01:11:32,960
+If I do not write anything, it is equal to, okay?
+
+1094
+01:11:32,960 --> 01:11:34,960
+Any questions?
+
+1095
+01:11:34,960 --> 01:11:36,960
+This is a data dependency graph.
+
+1096
+01:11:36,960 --> 01:11:39,960
+When we talk, yeah, you have a question, yeah, sorry, yeah.
+
+1097
+01:11:39,960 --> 01:11:44,960
+Loop carried dependency from add to, why is it there, is it?
+
+1098
+01:11:44,960 --> 01:11:48,960
+What does the add instruction do?
+
+1099
+01:11:48,960 --> 01:11:53,960
+No, no, in this particular case, what is it trying to do?
+
+1100
+01:11:53,960 --> 01:12:00,960
+It adds the value of r1 with 8 and puts it back into r1.
+
+1101
+01:12:00,960 --> 01:12:15,960
+So, the value produced by this add instruction in the ith iteration is what is going to be used by the same add instruction in the i plus 1th iteration, isn't it?
+
+1102
+01:12:15,960 --> 01:12:17,960
+Any other questions?
+
+1103
+01:12:17,960 --> 01:12:27,960
+Okay, so when we talk about software pipelining, we always talk about this instruction sequence and constructing the data dependency graph.
+
+1104
+01:12:27,960 --> 01:12:39,960
+And because this is a basic block which is going to be repeatedly executed, you are going, this is a basic block inside a loop, you are essentially going to see some amount of loop carried dependency.
+
+1105
+01:12:39,960 --> 01:12:43,960
+It is always going to be that, okay?
+
+1106
+01:12:43,960 --> 01:12:49,960
+In this case, okay, you can also see that there is a cycle in the graph, right?
+
+1107
+01:12:49,960 --> 01:12:53,960
+For example, you can see that there is a cycle like this.
+
+1108
+01:12:53,960 --> 01:12:55,960
+This is a self-loop, right?
+
+1109
+01:12:55,960 --> 01:12:58,960
+There are no other cycles other than these two self-loops.
+
+1110
+01:12:58,960 --> 01:13:06,960
+But in some other case, there could be a cycle involving multiple instructions or operations.
+
+1111
+01:13:06,960 --> 01:13:19,960
+Okay, now if you try to do basic block scheduling for this loop, assuming again one integer function unit, one floating point function unit, and one load source function unit, right?
+
+1112
+01:13:19,960 --> 01:13:26,960
+Again, the latencies that we are assuming are similar to what we have assumed yesterday, two and three cycles, right?
+
+1113
+01:13:26,960 --> 01:13:30,960
+Then this is the schedule that you produce, right?
+
+1114
+01:13:30,960 --> 01:13:50,960
+There is a load instruction, the dependent add instruction is delayed by one cycle, the dependent store instruction is delayed by two cycles, there is a subtract, and there is an add, and there is a branch, right?
+
+1115
+01:13:50,960 --> 01:13:55,960
+Now, because it is a basic block instruction scheduling, right?
+
+1116
+01:13:55,960 --> 01:14:07,960
+The next iteration can only happen after the first iteration is over, because I cannot move any of these instructions beyond this boundary.
+
+1117
+01:14:07,960 --> 01:14:14,960
+So, in this case, each iteration takes six cycles to complete, right?
+
+1118
+01:14:14,960 --> 01:14:26,960
+Even though I have many functional units, and I can issue multiple instructions together, I still take six cycles, which is actually six instructions all put together, correct?
+
+1119
+01:14:26,960 --> 01:14:28,960
+That's really what I was able to do.
+
+1120
+01:14:28,960 --> 01:14:34,960
+Okay, now we'll do the known technique.
+
+1121
+01:14:34,960 --> 01:14:37,960
+Supposing I unroll the loop twice, right?
+
+1122
+01:14:37,960 --> 01:14:42,960
+And then try to do the scheduling, what would happen, right?
+
+1123
+01:14:42,960 --> 01:14:49,960
+This is the unrolled version, again you can see two load operations, two add operations, two store operations, and so on.
+
+1124
+01:14:49,960 --> 01:15:01,960
+But these control operations like this integer add and subtract, and branch, they were executed only once, and these are appropriately adjusted, like what we have seen earlier, right?
+
+1125
+01:15:01,960 --> 01:15:06,960
+Yesterday we saw five times unrolled version, this is a two times unrolled version, right?
+
+1126
+01:15:06,960 --> 01:15:15,960
+Now, if you schedule this sequence of instructions for the same architecture, then this is what you're going to get, right?
+
+1127
+01:15:15,960 --> 01:15:26,960
+Again, the two load instructions, the floating point add instructions, which are dependent on them, the dependencies are satisfied, then the store instructions, right?
+
+1128
+01:15:26,960 --> 01:15:36,960
+So, this essentially gives you that the basic block scheduling of the unrolled loop is seven cycles.
+
+1129
+01:15:36,960 --> 01:15:42,960
+But now it is seven cycles for two iterations or 3.5 cycles per iteration.
+
+1130
+01:15:42,960 --> 01:15:50,960
+So, from six cycles we have actually come down to a 3.5, right?
+
+1131
+01:15:50,960 --> 01:15:57,960
+If we have unrolled it more number of times, would it have helped? Unroll it three times.
+
+1132
+01:15:57,960 --> 01:16:07,960
+What would it be? Somebody can quickly do the calculation. If I unroll it three times, then it would have taken nine cycles for three iterations, that is three.
+
+1133
+01:16:07,960 --> 01:16:12,960
+Unroll it four times.
+
+1134
+01:16:12,960 --> 01:16:22,960
+It would take two more, right? It would take ten cycles. Why ten cycles?
+
+1135
+01:16:22,960 --> 01:16:35,960
+If I unroll it four times, right, there will be four loads and four loads, four adds and four stores.
+
+1136
+01:16:35,960 --> 01:16:45,960
+Will it be ten cycles or will it be eight cycles? I cannot do it in eight cycles, right?
+
+1137
+01:16:45,960 --> 01:16:57,960
+Can I? Okay, you can try that. You can try to see whether you can do it in eight cycles, right, or whether you take nine cycles to do that or ten cycles.
+
+1138
+01:16:57,960 --> 01:17:04,960
+Okay, but I will show you a method where I can take two cycles per iteration on an average, right?
+
+1139
+01:17:04,960 --> 01:17:13,960
+So, this is essentially how you do unrolled loop, basic block scheduling and still you can achieve something, right?
+
+1140
+01:17:13,960 --> 01:17:24,960
+Essentially when you do basic block scheduling, you are limited by the fact that, right, the iterations of one loop is not overlapped with anything.
+
+1141
+01:17:24,960 --> 01:17:30,960
+So, here the iterations of the unrolled loop, right, is not overlapping with anything else.
+
+1142
+01:17:30,960 --> 01:17:41,960
+Now, let us take the same example, right, without unrolling, what I will do is that I will allow these instructions to overlap across iterations.
+
+1143
+01:17:41,960 --> 01:17:48,960
+That means that, as I mentioned earlier, software pipelining is an instruction scheduling for loops.
+
+1144
+01:17:48,960 --> 01:17:51,960
+It is actually a scheduling which is beyond basic blocks.
+
+1145
+01:17:51,960 --> 01:17:57,960
+That means that you are going to actually allow movement of instructions beyond basic blocks, right?
+
+1146
+01:17:57,960 --> 01:18:01,960
+Where is the basic block boundary? Here is where the basic block boundary is.
+
+1147
+01:18:01,960 --> 01:18:09,960
+Now, let me put the next iteration two cycles later, right?
+
+1148
+01:18:09,960 --> 01:18:16,960
+Again, I am satisfying the dependences. Okay, I am satisfying the dependences that are there.
+
+1149
+01:18:16,960 --> 01:18:19,960
+And I am making sure all my resource constraints are also satisfied.
+
+1150
+01:18:19,960 --> 01:18:24,960
+Okay, there is still I have to worry about this add instruction to load instruction dependency.
+
+1151
+01:18:24,960 --> 01:18:27,960
+I will somehow take care of that. We know how to take care of that.
+
+1152
+01:18:27,960 --> 01:18:32,960
+By essentially using appropriate offsets, we can actually relax that dependency.
+
+1153
+01:18:32,960 --> 01:18:35,960
+But other than that, you are okay, right?
+
+1154
+01:18:35,960 --> 01:18:41,960
+And so, I can introduce one more iteration, right, in the overlapped manner, right?
+
+1155
+01:18:41,960 --> 01:18:43,960
+People follow, right?
+
+1156
+01:18:43,960 --> 01:18:47,960
+So, what I have done is that this is the schedule for the first iteration.
+
+1157
+01:18:47,960 --> 01:18:52,960
+The schedule for the next iteration, I do not wait for the first iteration to be complete.
+
+1158
+01:18:52,960 --> 01:18:56,960
+I kind of overlap with it. And I overlap it after one cycle.
+
+1159
+01:18:56,960 --> 01:19:00,960
+That means starting from cycle two, I kind of overlap.
+
+1160
+01:19:00,960 --> 01:19:04,960
+And I do a similar thing for the third iteration as well.
+
+1161
+01:19:04,960 --> 01:19:13,960
+Now, look at the instructions which are in cycle four and cycle five, right?
+
+1162
+01:19:13,960 --> 01:19:17,960
+That has all the instructions in the iteration.
+
+1163
+01:19:17,960 --> 01:19:22,960
+I have one load instruction, one add instruction, one store instruction,
+
+1164
+01:19:22,960 --> 01:19:28,960
+one integer add, one integer subtract, and the branch naughty, right?
+
+1165
+01:19:28,960 --> 01:19:33,960
+In other words, what this has come is that this is essentially the sequence of operations
+
+1166
+01:19:33,960 --> 01:19:37,960
+that need to be performed within a loop, right?
+
+1167
+01:19:37,960 --> 01:19:42,960
+But I am performing, let us say, the load for the ith iteration,
+
+1168
+01:19:42,960 --> 01:19:50,960
+the add for the i minus oneth iteration, and the store for the i minus second iteration, right?
+
+1169
+01:19:50,960 --> 01:19:56,960
+Instead of performing the load for a of i, sorry, I am performing the load of a of i,
+
+1170
+01:19:56,960 --> 01:20:01,960
+the add for a of i minus one, and the store of a of i minus two.
+
+1171
+01:20:01,960 --> 01:20:05,960
+That is really what is happening here, right?
+
+1172
+01:20:05,960 --> 01:20:12,960
+Now, if I keep repeating that n minus two times, then I would have done all the iteration,
+
+1173
+01:20:12,960 --> 01:20:17,960
+because for the first two iterations, I have done the load here, right?
+
+1174
+01:20:17,960 --> 01:20:23,960
+I will do one add before this and one add after this, right?
+
+1175
+01:20:23,960 --> 01:20:27,960
+And similarly, I will do two stores after this,
+
+1176
+01:20:27,960 --> 01:20:32,960
+and I will remove this unnecessary instruction that are not required, okay?
+
+1177
+01:20:32,960 --> 01:20:37,960
+So, my software pipeline kernel is essentially this, okay,
+
+1178
+01:20:37,960 --> 01:20:45,960
+with those instructions as the prologue and these instructions as the epilogue, correct?
+
+1179
+01:20:45,960 --> 01:20:50,960
+We will come to how exactly to do this and then see this with all the register values, etc., etc.,
+
+1180
+01:20:50,960 --> 01:20:53,960
+in the next few minutes, right?
+
+1181
+01:20:53,960 --> 01:20:58,960
+So, you are trying to unroll the loop and write a schedule, you are able to get certain things,
+
+1182
+01:20:58,960 --> 01:21:04,960
+but now what I have done is without unrolling the loop, without having multiple load instructions, right?
+
+1183
+01:21:04,960 --> 01:21:10,960
+I have only one set of instructions within the loop, right?
+
+1184
+01:21:10,960 --> 01:21:13,960
+I was able to get the same thing.
+
+1185
+01:21:13,960 --> 01:21:18,960
+This is essentially what is software pipeline schedule, right?
+
+1186
+01:21:18,960 --> 01:21:24,960
+Okay, so here we are able to execute each iteration in two cycles,
+
+1187
+01:21:24,960 --> 01:21:29,960
+and we were overlapping instructions from different iterations in this kernel,
+
+1188
+01:21:29,960 --> 01:21:33,960
+and this part is called the prologue and this part is called epilogue.
+
+1189
+01:21:33,960 --> 01:21:36,960
+Unwanted instructions are kind of removed from here, right?
+
+1190
+01:21:36,960 --> 01:21:43,960
+But these add instructions, this add instruction is required because this is the remaining add that you are supposed to do,
+
+1191
+01:21:43,960 --> 01:21:46,960
+and these store instructions are required.
+
+1192
+01:21:46,960 --> 01:21:52,960
+So, you can add again depending on whether the value of R1 is live after the loop or not, right?
+
+1193
+01:21:52,960 --> 01:21:54,960
+They may be required.
+
+1194
+01:21:54,960 --> 01:22:00,960
+So, the only thing that we are worried about is how do we adjust the index register appropriately.
+
+1195
+01:22:00,960 --> 01:22:02,960
+We will worry about that as we go back.
+
+1196
+01:22:02,960 --> 01:22:09,960
+Okay, so here is the same code, okay, with all the register values and other things shown.
+
+1197
+01:22:09,960 --> 01:22:15,960
+So, you can verify whether it is right or wrong, okay, and if there is some problem, you can adjust it appropriately, right?
+
+1198
+01:22:21,960 --> 01:22:27,960
+So, what you can see here is that I have taken a different set of min,
+
+1199
+01:22:27,960 --> 01:22:34,960
+that I started off from four here, I have started off from three or something, but other than that it is the same.
+
+1200
+01:22:34,960 --> 01:22:38,960
+So, you can look at these two instructions and you will see the same, right?
+
+1201
+01:22:38,960 --> 01:22:40,960
+Okay.
+
+1202
+01:22:40,960 --> 01:22:45,960
+So, another way of viewing this is as follows, right?
+
+1203
+01:22:45,960 --> 01:22:52,960
+Let us again look at it without looking at the resources because earlier we looked at it in this form, you know,
+
+1204
+01:22:52,960 --> 01:22:56,960
+each one corresponds to one resource and what operation is going in that resource.
+
+1205
+01:22:56,960 --> 01:23:04,960
+So, the time being let us not worry about the resource and then put all operations in iteration 0, one below the other.
+
+1206
+01:23:04,960 --> 01:23:11,960
+Iteration 1 was started two cycles later and iteration 2 was started two cycles later.
+
+1207
+01:23:11,960 --> 01:23:16,960
+And we have formed the software pipeline kernel, right?
+
+1208
+01:23:16,960 --> 01:23:24,960
+Now, as you keep executing this, eventually what this means is that you are essentially
+
+1209
+01:23:24,960 --> 01:23:36,960
+executing the ith iteration of load, i minus 1th iteration of floating point add and i minus second iteration of store in the software pipeline kernel, right?
+
+1210
+01:23:36,960 --> 01:23:39,960
+That is essentially what you are trying to execute.
+
+1211
+01:23:39,960 --> 01:23:44,960
+Similarly, the subtract is for the i minus 1th iteration and the add is for the i minus second iteration.
+
+1212
+01:23:44,960 --> 01:23:55,960
+So, the load and store, the load and store registers have to use the appropriate index values so that they are not, I mean, so that they are correct, okay?
+
+1213
+01:23:55,960 --> 01:24:05,960
+So, to summarize, okay, if you are doing basic block scheduling, this is essentially what you are doing, right?
+
+1214
+01:24:05,960 --> 01:24:07,960
+Each iteration is scheduled.
+
+1215
+01:24:07,960 --> 01:24:14,960
+Maybe there is some point until which the parallelism picks up and then after that it ramps down.
+
+1216
+01:24:14,960 --> 01:24:19,960
+Similarly, ramp up and ramp down because you have only so many instructions in the basic block.
+
+1217
+01:24:19,960 --> 01:24:24,960
+You have to first generate those values, use those values and then the iteration has to end.
+
+1218
+01:24:24,960 --> 01:24:28,960
+So, it is typically having a ramp up and a ramp down phase.
+
+1219
+01:24:28,960 --> 01:24:34,960
+When you unroll the loop and schedule, you are essentially avoiding this in between ramp up and ramp down.
+
+1220
+01:24:34,960 --> 01:24:41,960
+If I am unrolling it two or two times, then this can be kind of avoided because I have now twice as many instructions.
+
+1221
+01:24:41,960 --> 01:24:45,960
+I can reschedule and I will have fewer ramp ups and ramp downs.
+
+1222
+01:24:45,960 --> 01:24:49,960
+If I am doing software pipelining, this is what I am doing, right?
+
+1223
+01:24:49,960 --> 01:24:56,960
+I ramp up once and then I have a continuous stream of parallelism and then I ramp down in the end.
+
+1224
+01:24:56,960 --> 01:25:00,960
+Pictorially, this is what it means, right?
+
+1225
+01:25:00,960 --> 01:25:07,960
+So, typically compilers would try to do software pipelining, especially for VLIW processors,
+
+1226
+01:25:07,960 --> 01:25:12,960
+where the instruction level parallelism has to be exposed by the compiler, right?
+
+1227
+01:25:12,960 --> 01:25:13,960
+Good.
+
+1228
+01:25:13,960 --> 01:25:16,960
+So, now this is all fine.
+
+1229
+01:25:16,960 --> 01:25:19,960
+We saw these examples, right?
+
+1230
+01:25:19,960 --> 01:25:25,960
+And we could have just finished with those examples and then said that is a summary slide that nicely summarizes everything.
+
+1231
+01:25:25,960 --> 01:25:27,960
+We can go home.
+
+1232
+01:25:27,960 --> 01:25:30,960
+But we are compiler writers, right?
+
+1233
+01:25:30,960 --> 01:25:34,960
+Which means that we have to generate those software pipeline schedules.
+
+1234
+01:25:34,960 --> 01:25:36,960
+How do we do that, right?
+
+1235
+01:25:36,960 --> 01:25:40,960
+Let us try to talk about that in the next 20-25 minutes, right?
+
+1236
+01:25:40,960 --> 01:25:49,960
+Again, when you do instruction scheduling, the instruction scheduling has to satisfy all the dependences, okay?
+
+1237
+01:25:49,960 --> 01:25:53,960
+And it has to satisfy all the resource constraints.
+
+1238
+01:25:53,960 --> 01:25:59,960
+Now, so dependences from one iteration to a later iteration is also possible,
+
+1239
+01:25:59,960 --> 01:26:05,960
+which is what we called as the loop carry dependences that also needs to be satisfied, okay?
+
+1240
+01:26:05,960 --> 01:26:12,960
+We need to kind of identify this repetitive pattern so that kernel can be executed, okay?
+
+1241
+01:26:12,960 --> 01:26:19,960
+When you have this software pipeline schedule, we have an initial phase which is what we call as the prologue
+
+1242
+01:26:19,960 --> 01:26:23,960
+and then we have a final phase which is what we call as the epilogue.
+
+1243
+01:26:23,960 --> 01:26:27,960
+This in between phase where we are repeatedly executing this instruction,
+
+1244
+01:26:27,960 --> 01:26:31,960
+which is actually the loop part is what we are going to call as the kernel.
+
+1245
+01:26:31,960 --> 01:26:37,960
+And the length of the kernel essentially tells you your throughput of the software pipeline schedule.
+
+1246
+01:26:37,960 --> 01:26:44,960
+In this case, it has a, I mean it takes two cycles to execute one iteration, right?
+
+1247
+01:26:44,960 --> 01:26:50,960
+So, this is what you are going to call as the initiation interval, right?
+
+1248
+01:26:50,960 --> 01:26:54,960
+Initiation interval because that is the delay between each iteration, right?
+
+1249
+01:26:54,960 --> 01:27:02,960
+Every iteration starts after I-I cycles or initiation interval cycles or two cycles in this particular example, right?
+
+1250
+01:27:02,960 --> 01:27:06,960
+So, keep that in mind because that is important for the throughput.
+
+1251
+01:27:06,960 --> 01:27:12,960
+If I have started these two iterations, let us say four cycles apart, then my initiation interval is four.
+
+1252
+01:27:12,960 --> 01:27:16,960
+If I have started it one cycle apart, my initiation interval is one.
+
+1253
+01:27:16,960 --> 01:27:20,960
+Smaller the value, higher is my throughput.
+
+1254
+01:27:20,960 --> 01:27:27,960
+So, the problem here is that we want to construct the software pipeline schedule.
+
+1255
+01:27:27,960 --> 01:27:30,960
+That is given a weighted dependence graph.
+
+1256
+01:27:30,960 --> 01:27:34,960
+We want to derive a legal schedule which is time optimal.
+
+1257
+01:27:34,960 --> 01:27:38,960
+That means has minimum initiation interval.
+
+1258
+01:27:38,960 --> 01:27:43,960
+And that schedule also should obey the resource constraint for the machine.
+
+1259
+01:27:43,960 --> 01:27:46,960
+Again, this problem is an NP-complete problem.
+
+1260
+01:27:46,960 --> 01:27:51,960
+So, we will only use some heuristics to derive this, right?
+
+1261
+01:27:51,960 --> 01:28:00,960
+So, the schedule is said to be legal if it satisfies the resource constraint and the dependence constraint, including loop carry dependences.
+
+1262
+01:28:00,960 --> 01:28:03,960
+Now, again what is time optimal?
+
+1263
+01:28:03,960 --> 01:28:07,960
+We say it is time optimal if there is no other schedule which is faster than that.
+
+1264
+01:28:07,960 --> 01:28:18,960
+And in the case of a software pipeline schedule, right, the speed of that schedule or the execution time of the schedule is defined by its initiation interval.
+
+1265
+01:28:18,960 --> 01:28:28,960
+So, a schedule is said to be time optimal if its initiation interval is lower than or equal to any other legal schedule for that loop, right?
+
+1266
+01:28:28,960 --> 01:28:34,960
+Because that is the lowest possible that you can achieve, okay?
+
+1267
+01:28:34,960 --> 01:28:44,960
+So, now let us find out before we construct the software pipeline schedule, let us find out that how do we identify what should be the initiation interval?
+
+1268
+01:28:44,960 --> 01:28:49,960
+Somehow in our examples by magic, we took the value 2 and it worked out.
+
+1269
+01:28:49,960 --> 01:28:51,960
+Why did not we try 1?
+
+1270
+01:28:51,960 --> 01:28:53,960
+Why did not we try 3?
+
+1271
+01:28:53,960 --> 01:28:57,960
+3 of course is not interesting because 2 itself gave a good answer.
+
+1272
+01:28:57,960 --> 01:28:59,960
+So, there is no point trying 3, right?
+
+1273
+01:28:59,960 --> 01:29:03,960
+But what would have happened if you have used a value of 1?
+
+1274
+01:29:03,960 --> 01:29:06,960
+Would we be able to do a schedule for that?
+
+1275
+01:29:06,960 --> 01:29:08,960
+We should try that, right?
+
+1276
+01:29:08,960 --> 01:29:17,960
+But let us say in general for a given loop or for a given DDG, what limits the initiation interval, okay?
+
+1277
+01:29:17,960 --> 01:29:18,960
+There are two things.
+
+1278
+01:29:18,960 --> 01:29:20,960
+One is the data dependence.
+
+1279
+01:29:20,960 --> 01:29:23,960
+Another is the resource constraint.
+
+1280
+01:29:23,960 --> 01:29:31,960
+So, the data dependence limits the initiation interval and we are going to call that value as the recurrence MII.
+
+1281
+01:29:31,960 --> 01:29:35,960
+So, this is because this loop carry dependences are there in the loop.
+
+1282
+01:29:35,960 --> 01:29:38,960
+They are going to limit it in some sense.
+
+1283
+01:29:38,960 --> 01:29:47,960
+Similarly, because you have limited number of resources, there is going to be a recurrence minimum value which is called recurrence MII, right?
+
+1284
+01:29:47,960 --> 01:29:50,960
+That is also going to limit the initiation interval.
+
+1285
+01:29:50,960 --> 01:29:54,960
+We will give you an example of these two things as we go by, right?
+
+1286
+01:29:54,960 --> 01:30:01,960
+Of course, the minimum initiation interval that you can have should be the maximum of these two things, right?
+
+1287
+01:30:01,960 --> 01:30:04,960
+Whichever one is higher, that is the one that you are going to take.
+
+1288
+01:30:04,960 --> 01:30:14,960
+And any initiation interval, legal initiation interval that you have for the loop has to be greater than or equal to MII, okay?
+
+1289
+01:30:14,960 --> 01:30:15,960
+All right.
+
+1290
+01:30:15,960 --> 01:30:28,960
+If I i is equal to MII or if you find an I i such that there is no other schedule which has initiation interval lower than that I i, then it is time-optimized, okay?
+
+1291
+01:30:28,960 --> 01:30:31,960
+Now, there are again two approaches for doing software pipelining.
+
+1292
+01:30:31,960 --> 01:30:37,960
+One is called the operational approach and the other one is called the periodic scheduling approach.
+
+1293
+01:30:37,960 --> 01:30:38,960
+We will see both of them.
+
+1294
+01:30:38,960 --> 01:30:43,960
+Again, there are many methods which follow either one of these approaches, okay?
+
+1295
+01:30:43,960 --> 01:30:51,960
+Let me try to go to, let us just talk about recurrence MII first and then say why it matters, right?
+
+1296
+01:30:51,960 --> 01:30:57,960
+So, I will give you an example because this example that you see in the next slide may not be a good example.
+
+1297
+01:30:57,960 --> 01:31:08,960
+So, let us look at a simple graph, something like this, right?
+
+1298
+01:31:08,960 --> 01:31:14,960
+And let us assume all the edges have a weight of one, okay?
+
+1299
+01:31:14,960 --> 01:31:18,960
+And this is a loop carried dependency.
+
+1300
+01:31:18,960 --> 01:31:24,960
+So, basically I have three operations A, B, C, right?
+
+1301
+01:31:24,960 --> 01:31:28,960
+B is dependent on A, C is dependent on B, right?
+
+1302
+01:31:28,960 --> 01:31:35,960
+And A is dependent on C, but from the previous iteration, correct?
+
+1303
+01:31:35,960 --> 01:31:49,960
+So, supposing I have a situation like this, then can you tell me how fast can I schedule these operations for this loop if you have infinite resources?
+
+1304
+01:31:49,960 --> 01:31:53,960
+That is the question, right?
+
+1305
+01:31:53,960 --> 01:31:57,960
+Each one of these operations take one cycle, right?
+
+1306
+01:31:57,960 --> 01:32:01,960
+How fast can you schedule these three operations?
+
+1307
+01:32:01,960 --> 01:32:07,960
+Even if you can overlap whatever extent that is possible, you have unlimited resources, etc., etc.
+
+1308
+01:32:07,960 --> 01:32:16,960
+So, let us see. First I schedule A. I have to schedule B only after A finishes the execution.
+
+1309
+01:32:16,960 --> 01:32:23,960
+Similarly, I have to schedule C only after A finishes the execution.
+
+1310
+01:32:23,960 --> 01:32:30,960
+Now, what about the next A? Could I have started it immediately after the first A or along with the first A?
+
+1311
+01:32:30,960 --> 01:32:37,960
+Could I have started the second iteration of A at cycle one, cycle two or cycle three?
+
+1312
+01:32:37,960 --> 01:32:41,960
+No. When is the earliest that I can start that?
+
+1313
+01:32:41,960 --> 01:32:45,960
+After C, correct?
+
+1314
+01:32:45,960 --> 01:32:48,960
+Then B, then C, right?
+
+1315
+01:32:48,960 --> 01:32:52,960
+So, now what is happening?
+
+1316
+01:32:52,960 --> 01:32:59,960
+You have a minimum interval of three. Why was that happening?
+
+1317
+01:32:59,960 --> 01:33:05,960
+Because of this dependency, this dependent loop, correct?
+
+1318
+01:33:05,960 --> 01:33:12,960
+So, no matter how many resources you have, if there is a loop, right?
+
+1319
+01:33:12,960 --> 01:33:22,960
+And that loop has a single loop carried dependency, then you will not be able to start this earlier than that, right?
+
+1320
+01:33:22,960 --> 01:33:28,960
+Now, right? Okay.
+
+1321
+01:33:28,960 --> 01:33:33,960
+It may be a little difficult for you to work it out, but let us see whether this works out.
+
+1322
+01:33:33,960 --> 01:33:38,960
+If I have a loop carried dependency of two, what does that mean?
+
+1323
+01:33:38,960 --> 01:33:52,960
+It essentially means that A of i is dependent on C of i minus, sorry, C of i minus two, correct?
+
+1324
+01:33:52,960 --> 01:33:57,960
+Not C of i minus one, but C of i minus two.
+
+1325
+01:33:57,960 --> 01:34:01,960
+If it is loop carried dependency of one, it is, right?
+
+1326
+01:34:01,960 --> 01:34:12,960
+If the loop carried dependency is equal to one, then it is A of i is equal to C of i minus one.
+
+1327
+01:34:12,960 --> 01:34:20,960
+Whereas, if the dependency is two, it is i minus two.
+
+1328
+01:34:20,960 --> 01:34:25,960
+Now, if I have C of i minus two, then what happens to my schedule?
+
+1329
+01:34:25,960 --> 01:34:29,960
+I can do A, I can do B, I can do C.
+
+1330
+01:34:29,960 --> 01:34:32,960
+Now, what about my next A?
+
+1331
+01:34:32,960 --> 01:34:43,960
+I could have started anywhere because A of i plus two only depends on this C.
+
+1332
+01:34:43,960 --> 01:34:46,960
+A of i plus one does not depend on this C.
+
+1333
+01:34:46,960 --> 01:34:51,960
+So, let us say if the previous C was here, correct?
+
+1334
+01:34:51,960 --> 01:34:56,960
+Then I could have started my next A right here itself, right?
+
+1335
+01:34:56,960 --> 01:35:00,960
+Then I could have started it in any of these places, okay?
+
+1336
+01:35:00,960 --> 01:35:11,960
+Pictorially showing this is going to be difficult, but you will see that this value is going to be something like three by two, which is one and a half, okay?
+
+1337
+01:35:11,960 --> 01:35:21,960
+If you had four operations or let us say if this has a latency of two cycles, then what happens is that you will have two such things being scheduled.
+
+1338
+01:35:21,960 --> 01:35:25,960
+So, what happens is that in four cycles you have two iterations.
+
+1339
+01:35:25,960 --> 01:35:28,960
+That means that i i is two, right?
+
+1340
+01:35:28,960 --> 01:35:32,960
+So, that is essentially what this particular thing is saying.
+
+1341
+01:35:32,960 --> 01:35:44,960
+That whenever you have a cycle, sum up all the values of the latencies of all the nodes and divide it by the number of loop carry dependencies across all of the arcs.
+
+1342
+01:35:44,960 --> 01:35:54,960
+So, let us now go to what is called the minimum recurrence value, recurrence i i value, M R i, minimum recurrence, recurrence M i i, right?
+
+1343
+01:35:54,960 --> 01:35:59,960
+Recurrence minimum initiation interval, okay?
+
+1344
+01:35:59,960 --> 01:36:01,960
+So, okay.
+
+1345
+01:36:01,960 --> 01:36:03,960
+So, that is recurrence M i i.
+
+1346
+01:36:03,960 --> 01:36:13,960
+Resource M i i is calculated depending on the number of operations that you have and how many of them are pipelined and how many of them are non-pipelined and so on, okay?
+
+1347
+01:36:13,960 --> 01:36:17,960
+Again in this example, recurrence M i i is calculated.
+
+1348
+01:36:17,960 --> 01:36:23,960
+You only have self loops and because all of these self loops are one cycle long, correct?
+
+1349
+01:36:23,960 --> 01:36:27,960
+Your recurrence M i i is one, right?
+
+1350
+01:36:27,960 --> 01:36:28,960
+Okay.
+
+1351
+01:36:28,960 --> 01:36:31,960
+So, this is as far as recurrence M i i is concerned.
+
+1352
+01:36:31,960 --> 01:36:33,960
+Let us see how resource M i i is calculated.
+
+1353
+01:36:33,960 --> 01:36:42,960
+Resource M i i is calculated based on the fact that how many operations you have in the loop and how many functional units you have, right?
+
+1354
+01:36:42,960 --> 01:36:50,960
+Supposing let us say I have three operations and only one function unit, then in each one of those cycles I have to execute those three operations.
+
+1355
+01:36:50,960 --> 01:36:55,960
+So, my minimum resource M i i will be 3 divided by 1, right?
+
+1356
+01:36:55,960 --> 01:37:05,960
+Let us say if I have six operations and let us say I have three functional units, then I could have scheduled it in two cycles.
+
+1357
+01:37:05,960 --> 01:37:18,960
+So, resource M i i essentially tells you what is your minimum i i from a resource perspective, whereas recurrence M i i told you what should be the minimum value from a recurrence or a loop perspective.
+
+1358
+01:37:18,960 --> 01:37:24,960
+So, these are the two values which are going to kind of determine what your i i is going to be.
+
+1359
+01:37:24,960 --> 01:37:31,960
+Let us not worry too much about this non-pipelined function unit because it is a little bit more complicated.
+
+1360
+01:37:31,960 --> 01:37:36,960
+So, again I calculate the resource M i i for different functional units in my program.
+
+1361
+01:37:36,960 --> 01:37:42,960
+Remember that there is one load and one store operation and there is a single load store function unit.
+
+1362
+01:37:42,960 --> 01:37:46,960
+So, 2 divided by 1 is 2.
+
+1363
+01:37:46,960 --> 01:37:50,960
+Similarly, there is one floating point operation, one functional unit.
+
+1364
+01:37:50,960 --> 01:38:00,960
+So, it is 1, whereas for integer there are two operations and one function unit are for 2 and for branch there is one operation and one function unit it is 1.
+
+1365
+01:38:00,960 --> 01:38:10,960
+So, the minimum resource M i i is the minimum across all of these functional units and sorry it is a maximum across all of these functional units and that is essentially 2.
+
+1366
+01:38:10,960 --> 01:38:18,960
+And your minimum i i is essentially the maximum of recurrence M i i and resource M i i which is also 2.
+
+1367
+01:38:18,960 --> 01:38:24,960
+So, that is why you are able to construct a schedule with a initiation interval of 2.
+
+1368
+01:38:24,960 --> 01:38:30,960
+If you have tried with an initiation interval of 1, you would not have been able to schedule it.
+
+1369
+01:38:30,960 --> 01:38:36,960
+Why? Because you have only one of each of these functional units, right?
+
+1370
+01:38:36,960 --> 01:38:41,960
+But you had 6 operations. Obviously, you could not schedule all of them, right?
+
+1371
+01:38:41,960 --> 01:38:49,960
+So, that essentially tells you how to set your minimum initiation interval, okay?
+
+1372
+01:38:49,960 --> 01:38:59,960
+Now, in order for you to construct a schedule, what you need to do is that you will start off with a value of i i which is equal to minimum initiation interval.
+
+1373
+01:38:59,960 --> 01:39:03,960
+And then try to obtain a schedule for that particular i i.
+
+1374
+01:39:03,960 --> 01:39:07,960
+If it works out for you, good, then you got the schedule.
+
+1375
+01:39:07,960 --> 01:39:15,960
+If not, if you are not able to do the schedule, then you will increment your i i and keep trying, okay, right?
+
+1376
+01:39:16,960 --> 01:39:25,960
+In the first approach, what we do is that we have the operational approach where we try to emulate the loop execution under the machine model
+
+1377
+01:39:25,960 --> 01:39:28,960
+and then try to see whether a pattern emerges, okay?
+
+1378
+01:39:28,960 --> 01:39:31,960
+This is a kind of a slightly difficult approach.
+
+1379
+01:39:31,960 --> 01:39:44,960
+I keep trying to schedule these operations as and when they can be scheduled and then kind of see whether for certain overlaps, whether it gives me a pattern, okay?
+
+1380
+01:39:44,960 --> 01:39:56,960
+This was tried very early in the late 80s, but there is a more efficient approach which is what we call as the periodic scheduling approach.
+
+1381
+01:39:56,960 --> 01:39:59,960
+And we will try to understand this approach better, okay?
+
+1382
+01:39:59,960 --> 01:40:09,960
+What happens in a periodic scheduling approach is that remember that in our schedule, right, every operation is scheduled in some time step, correct?
+
+1383
+01:40:09,960 --> 01:40:14,960
+And then the same operation is scheduled in the next iteration after how many cycles?
+
+1384
+01:40:14,960 --> 01:40:23,960
+Let us say the load was scheduled in time step 3, the load for let us say iteration i was scheduled in time step 3.
+
+1385
+01:40:23,960 --> 01:40:27,960
+What about the same load instruction in times in iteration i plus 1?
+
+1386
+01:40:27,960 --> 01:40:32,960
+It will be after you remember the schedule, right?
+
+1387
+01:40:32,960 --> 01:40:39,960
+So, we had so you remember in our schedule, right, we had the load instruction, right?
+
+1388
+01:40:39,960 --> 01:40:41,960
+And this was our kernel.
+
+1389
+01:40:41,960 --> 01:40:47,960
+Let us say if this is t equal to 3 and this corresponds to iteration 2, correct?
+
+1390
+01:40:47,960 --> 01:40:53,960
+Then we can say that the load for the second iteration is scheduled at time step 3.
+
+1391
+01:40:53,960 --> 01:40:59,960
+My question is what would be the time step in which load for iteration 3 is scheduled?
+
+1392
+01:41:02,960 --> 01:41:06,960
+5, right?
+
+1393
+01:41:06,960 --> 01:41:09,960
+Because it is going to be scheduled after two intervals.
+
+1394
+01:41:09,960 --> 01:41:11,960
+So, it is going to be 5.
+
+1395
+01:41:11,960 --> 01:41:14,960
+The next iteration is going to be 7 and so on.
+
+1396
+01:41:14,960 --> 01:41:26,960
+So, if I know when this load, right, if the load, okay, for the 0th iteration, if it is scheduled at time step t naught, correct?
+
+1397
+01:41:26,960 --> 01:41:37,960
+The load for the i-th iteration is going to be scheduled at this, isn't it?
+
+1398
+01:41:37,960 --> 01:41:39,960
+Because 0th iteration is scheduled at t naught.
+
+1399
+01:41:39,960 --> 01:41:42,960
+First iteration will be at t naught plus ii.
+
+1400
+01:41:42,960 --> 01:41:44,960
+Second will be at t naught plus 2ii.
+
+1401
+01:41:44,960 --> 01:41:47,960
+Third will be at t naught plus 3ii and so on.
+
+1402
+01:41:47,960 --> 01:41:53,960
+This schedule form is what is called the periodic schedule form.
+
+1403
+01:41:53,960 --> 01:41:56,960
+And that is really what you are going to use, okay?
+
+1404
+01:41:56,960 --> 01:42:00,960
+Let us see that in the next example, in the same example, right?
+
+1405
+01:42:00,960 --> 01:42:12,960
+So, the schedule for the i-th iteration, right, the schedule for the i-th iteration of node v is going to be at time ii, which is initiation interval,
+
+1406
+01:42:12,960 --> 01:42:18,960
+multiplied by the iteration count plus the scheduled time of the 0th iteration.
+
+1407
+01:42:18,960 --> 01:42:22,960
+That is really what it is, okay?
+
+1408
+01:42:22,960 --> 01:42:31,960
+Now, you can see that the i plus 1th iteration and the i-th iteration are exactly ii cycles of what?
+
+1409
+01:42:31,960 --> 01:42:32,960
+That is fine.
+
+1410
+01:42:32,960 --> 01:42:42,960
+Now, in our examples, these are the scheduled times of initial iteration or iteration 0 for the various operations.
+
+1411
+01:42:42,960 --> 01:42:49,960
+And for example, if you are interested in calculating what is the scheduled time of the floating point add instruction in cycle 1,
+
+1412
+01:42:49,960 --> 01:42:55,960
+it is basically 2 times 1 plus whatever is the initial scheduled time plus 2 is equal to 4.
+
+1413
+01:42:55,960 --> 01:42:59,960
+Or if you want to find out what is the fourth iteration, something like that.
+
+1414
+01:42:59,960 --> 01:43:06,960
+So, we are going to make use of this particular, right, form of scheduling.
+
+1415
+01:43:06,960 --> 01:43:12,960
+That means that all operations, right, are going to be scheduled exactly, I mean all operations.
+
+1416
+01:43:13,960 --> 01:43:14,960
+Let me put it this way.
+
+1417
+01:43:14,960 --> 01:43:21,960
+Different instances of the same operation for successive iterations are going to be scheduled ii cycles of what, right?
+
+1418
+01:43:21,960 --> 01:43:25,960
+That is basically what we call as the periodic schedule form, okay?
+
+1419
+01:43:25,960 --> 01:43:29,960
+We will just do this slide and then probably take a break after that.
+
+1420
+01:43:29,960 --> 01:43:33,960
+So, what we are going to do is that initially we have to calculate mii.
+
+1421
+01:43:33,960 --> 01:43:36,960
+mii is the minimum initiation interval.
+
+1422
+01:43:36,960 --> 01:43:41,960
+This it turns depends on recurrence mii and resource mii, right?
+
+1423
+01:43:41,960 --> 01:43:46,960
+So, the maximum of recurrence mii and resource mii is what is your mii.
+
+1424
+01:43:46,960 --> 01:43:51,960
+So, you start off with that mii as your ii, right?
+
+1425
+01:43:51,960 --> 01:43:54,960
+And then you try to schedule the operations, right?
+
+1426
+01:43:54,960 --> 01:44:00,960
+And you schedule the operations assuming that it is in the periodic schedule form, right?
+
+1427
+01:44:00,960 --> 01:44:07,960
+If you are able to schedule the operation, right, you go to the next operation and then keep scheduling.
+
+1428
+01:44:07,960 --> 01:44:16,960
+If you are unable to schedule, then what you do is that you remove some already scheduled operations and then try to reschedule this operation.
+
+1429
+01:44:16,960 --> 01:44:24,960
+If you have tried this a number of times and you are still unsuccessful, then you go back, increment your ii and try to do the schedule.
+
+1430
+01:44:24,960 --> 01:44:28,960
+So, this is the overall picture of doing software pipelining.
+
+1431
+01:44:28,960 --> 01:44:35,960
+We will go into the exact way by which it is done in certain schedules after we come back from the break.
+
+1432
+01:44:37,960 --> 01:44:39,960
+Thank you.
+

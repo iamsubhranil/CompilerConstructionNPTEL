@@ -1,0 +1,15 @@
+ **Exam Notes - Data Flow Analysis**:
+
+1. *Liveness Analysis*: Finds whether a variable is used or defined in the future at a given program point. Helps in Dead Code Elimination.
+2. *Reaching Definitions*: Figures out which definitions reach a specific program point. Used in Constant Propagation and Dead Code Elimination.
+3. *Available Expressions*: Computes which expressions are available at a given program point, i.e., have been evaluated along all incoming paths.
+4. *Very Busy Expressions*: Identifies frequently computed expressions throughout the program. Useful in reducing code size.
+5. *Direction*: Analyses move either forward (Reaching Definitions, Available Expressions) or backward (Liveness Analysis, Very Busy Expressions).
+6. *Meet Operator*: Combines data flow facts based on direction: Union (forward), Intersection (backward).
+7. *Gen and Kill Sets*: Generate and kill sets represent how data flow facts evolve.
+8. *Transfer Functions*: Accumulate data flow facts; usually differ among various analyses but share a common structure.
+9. *Fixed Point Iteration*: Solves the data flow analysis problem by repeatedly applying the transfer function to nodes until convergence.
+10. *Universal Set Initialization*: Depends on the analysis. May involve initializing with empty or full sets.
+11. *Unified Model*: Goal to create a generic data flow analysis model that accommodates varying transfer functions, meet operators, and initializations.
+
+Understanding these concepts helps in developing efficient compilers and understanding the underlying principles of modern programming languages. Familiarity with these techniques facilitates implementing advanced optimizations and improving software reliability.

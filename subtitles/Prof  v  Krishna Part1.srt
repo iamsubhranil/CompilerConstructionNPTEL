@@ -1,0 +1,2276 @@
+1
+00:00:00,000 --> 00:00:13,040
+My name is Krishna and this is the second year I am coming here for the ACM summer school.
+
+2
+00:00:13,040 --> 00:00:18,839
+Last year we had a great time. I hope I will have something similar here. So, we will be
+
+3
+00:00:18,839 --> 00:00:22,559
+talking about introduction to, we will be talking about optimizations and high level
+
+4
+00:00:22,559 --> 00:00:29,000
+optimizations and I was seeing what Malay was covering. They are pretty kind of advanced
+
+5
+00:00:29,000 --> 00:00:33,399
+stuff and I am happy to see lot of you are nodding and so that means you guys are all
+
+6
+00:00:33,399 --> 00:00:39,159
+in great shape. I will start with a bit of high level overview that I am sure you have
+
+7
+00:00:39,159 --> 00:00:41,519
+already done it.
+
+8
+00:00:41,519 --> 00:00:50,480
+So you can think of the whole compiler business as there are some, what is a compiler? What
+
+9
+00:00:50,480 --> 00:00:54,879
+is a compiler? What you are saying is a word. What I have asked is a noun. You are saying
+
+10
+00:00:55,080 --> 00:01:05,200
+what does a compiler do? What is a compiler? So you can rephrase it. Translate. You give
+
+11
+00:01:05,200 --> 00:01:11,280
+me another word. So what does it translate? It is a tool, right? It is a translator. It
+
+12
+00:01:11,280 --> 00:01:22,800
+translates what? To? Machine level language. It has to be always machine level language.
+
+13
+00:01:22,799 --> 00:01:34,000
+It should always lower the level of abstraction. If I take a, just to make it maybe slightly
+
+14
+00:01:34,000 --> 00:01:39,159
+kind of those who are sleeping. Let us say I will take my input is an assembly code and
+
+15
+00:01:39,159 --> 00:01:51,359
+I want to generate Java code or C code. Would that be a compiler? Yes sir, yes, no. Okay,
+
+16
+00:01:51,840 --> 00:02:03,879
+good. You have heard of this thing called interpreter? What is the interpreter? It interprets
+
+17
+00:02:03,879 --> 00:02:14,319
+the single line of code. It executes line by? Aha. So now I, so let us take our traditional
+
+18
+00:02:14,319 --> 00:02:19,599
+understanding of a compiler, right? It takes source code and outputs, machine coded. How
+
+19
+00:02:19,599 --> 00:02:31,079
+is the machine code executed? Line by line. But you do not call that interpreter, right?
+
+20
+00:02:31,079 --> 00:02:40,519
+Do you? Why do you call one guy interpreter, one guy the compiled code is executed but
+
+21
+00:02:41,360 --> 00:02:50,360
+like say list code or say python code you call it interpreted. Why? What is the difference?
+
+22
+00:02:50,360 --> 00:02:57,360
+Yeah, let us do one thing. There are multiple people who are very anxious. Let us just raise
+
+23
+00:02:57,360 --> 00:03:12,280
+hands. Interpreter has to generate something called a byte code. An interpreter generates
+
+24
+00:03:12,280 --> 00:03:29,800
+byte code, is it? What is your name? Rishabh. So Rishabh, where did you hear this word byte
+
+25
+00:03:29,800 --> 00:03:40,159
+code? In what context? Sorry? Correct. So in what context did you hear the word byte code?
+
+26
+00:03:40,159 --> 00:03:58,599
+So it is some low. But the, by the way, the interpreter does not generate or does not
+
+27
+00:03:58,599 --> 00:04:03,879
+have to generate a byte code, okay? Byte code is some IR. So for instance, you hear this
+
+28
+00:04:04,439 --> 00:04:10,519
+code typically in the context of languages like Java, right? So when you do Java C, it
+
+29
+00:04:10,519 --> 00:04:17,519
+takes Java code and generates the byte code. And then the byte code is interpreted. Why
+
+30
+00:04:17,519 --> 00:04:28,519
+do not we call it executed? Why do you call it interpreted? What is the difference? Yeah.
+
+31
+00:04:28,519 --> 00:04:46,120
+If we need an, let us call it instead of abstraction, let us call it if we need a
+
+32
+00:04:46,120 --> 00:04:54,359
+software tool in between to execute, then we call it interpreted, right? So that is
+
+33
+00:04:54,359 --> 00:04:58,240
+the whole idea. So there is not much difference between interpretation and execution. We say
+
+34
+00:04:58,960 --> 00:05:05,960
+execution and the hardware executes it. When a software instead executes the same code,
+
+35
+00:05:05,960 --> 00:05:13,639
+okay, or evaluates the same code, we call it interpretation, right? Okay. So when we
+
+36
+00:05:13,639 --> 00:05:19,960
+take a, when we say a compiler, a compiler takes some source code and outputs some other
+
+37
+00:05:19,960 --> 00:05:26,720
+code. But typically most of the compilers we deal with, they deal with some source code
+
+38
+00:05:26,720 --> 00:05:33,720
+of high level language and generate machine code. Yeah.
+
+39
+00:05:33,720 --> 00:05:44,720
+Aha. Good. So the question is when there is already a compiler, why think about interpretation?
+
+40
+00:05:44,720 --> 00:05:56,600
+There are things an interpreter can do that a compiler cannot. Can you guess what? See,
+
+41
+00:05:56,600 --> 00:06:00,160
+I like these questions, you know, because for every question I will answer by another
+
+42
+00:06:00,160 --> 00:06:07,640
+question. But yeah, it is a very good question, right? What is your name?
+
+43
+00:06:07,640 --> 00:06:10,640
+Fahad. Fahad. Yeah. So the question is if there is
+
+44
+00:06:10,640 --> 00:06:14,040
+a compiler, why think about interpreters? Or if there is an interpreter, why think of
+
+45
+00:06:14,040 --> 00:06:19,240
+compilers? And I said because an interpreter can do things that a compiler cannot.
+
+46
+00:06:20,240 --> 00:06:26,240
+Debugging simpler. Yeah.
+
+47
+00:06:26,240 --> 00:06:34,240
+Aha. How? Because executing line by line, I mean, the
+
+48
+00:06:34,240 --> 00:06:43,240
+interpreter stops. So you know that that line or the line before it has finished. Whereas
+
+49
+00:06:43,240 --> 00:06:47,840
+the interpreter is ready to go to place back what exactly went wrong.
+
+50
+00:06:47,840 --> 00:06:52,280
+Not entirely right. So if you are running, we are using a debugger.
+
+51
+00:06:52,280 --> 00:06:58,160
+Inside BDD is a... You need some way to stop the execution or
+
+52
+00:06:58,160 --> 00:07:04,439
+pause the execution, right? So there is something more fundamental about an interpreter. So
+
+53
+00:07:04,439 --> 00:07:10,759
+a compiler does not have something that an interpreter has. Both of them need the program,
+
+54
+00:07:10,759 --> 00:07:16,039
+right? But besides that, the compiler has, does not have something that the interpreter
+
+55
+00:07:16,039 --> 00:07:20,360
+has. User input.
+
+56
+00:07:20,360 --> 00:07:29,360
+User input. So given a program, the compiler generates an executable without knowing what
+
+57
+00:07:29,360 --> 00:07:36,000
+the input can be, the user input. An interpreter has that. As a result, it can do more things.
+
+58
+00:07:36,000 --> 00:07:43,000
+So there are advantages of having an interpreter. Okay? And as a matter of fact, when you design
+
+59
+00:07:45,680 --> 00:07:52,680
+a language, invariably the first thing you have, you design keeping an interpreter in
+
+60
+00:07:52,680 --> 00:07:59,680
+mind. Because every language construct needs a semantics. And that semantics is given...
+
+61
+00:08:00,240 --> 00:08:05,000
+I mean, think of the... You design an interpreter at some level. And then you say, hey, no,
+
+62
+00:08:05,000 --> 00:08:09,759
+I would like to have an A.out for this. You say, I will generate a compiler. But there
+
+63
+00:08:09,759 --> 00:08:15,959
+are languages which... I mean, there are languages who say, like, we want only an interpreter
+
+64
+00:08:15,959 --> 00:08:22,959
+because we get more advantages of it. Right? Any questions? Now, I will ask a question.
+
+65
+00:08:25,600 --> 00:08:32,600
+I gave you an advantage of an interpreter. Then why not only keep an interpreter?
+
+66
+00:08:35,000 --> 00:08:42,000
+No, no. Interpreter need not actually generate an executable file. Right? For instance, I
+
+67
+00:08:43,879 --> 00:08:50,879
+can... Let me answer this. For instance, I could take... Pick any language of your choice.
+
+68
+00:08:50,879 --> 00:08:57,879
+C, C++, Java, any code of that. And actually interpret it technically line by line. Right?
+
+69
+00:08:58,879 --> 00:09:05,879
+So, I do not have to generate machine code. Because I already have an interpreter whose
+
+70
+00:09:09,320 --> 00:09:13,200
+job is to take a statement and whatever the statement should do. Think of it this way.
+
+71
+00:09:13,200 --> 00:09:18,879
+When you look at a code, in your mind you are running it as an interpreter. Right? Okay.
+
+72
+00:09:18,879 --> 00:09:25,879
+So now, what can a compiler do? My... I mean, for example, I can write a code
+
+73
+00:09:27,879 --> 00:09:30,840
+which is... So, portability is less of an issue with an interpreter. Right? Because
+
+74
+00:09:30,840 --> 00:09:34,559
+the high level code now can be sent anywhere and all you need is an interpreter being running
+
+75
+00:09:34,559 --> 00:09:41,559
+there. It needs an interpreter. Okay. What is your name? Badri. So, Badri is making an
+
+76
+00:09:47,159 --> 00:09:51,720
+interesting point. He is saying, if you need an interpreter, the interpreter has to go
+
+77
+00:09:51,720 --> 00:09:58,720
+to... You need an interpreter on every machine. If I want to send you a small a.out, you still
+
+78
+00:09:59,399 --> 00:10:05,120
+need the big interpreter running. So, that is a good point. Right? But let us say I have
+
+79
+00:10:05,120 --> 00:10:10,399
+an interpreter everywhere. For every hardware, one interpreter has been given. For every
+
+80
+00:10:10,399 --> 00:10:15,399
+language, an interpreter has been given. See, now if I have different languages, I will
+
+81
+00:10:15,399 --> 00:10:21,399
+come to you. If I have different languages, for each language I will give you an interpreter.
+
+82
+00:10:21,399 --> 00:10:28,399
+But if you have... Yeah. There was a question. Okay. This is a misconception. Your name?
+
+83
+00:10:31,399 --> 00:10:38,399
+Yes. So, what yes said is a common misconception that the interpreter looks at one instruction
+
+84
+00:10:39,679 --> 00:10:46,279
+at a time. Now, the interpreter can execute one at a time, but it need not look at only
+
+85
+00:10:46,279 --> 00:10:53,279
+one instruction. Right? Why it should only look at one? It is a perceived handicap.
+
+86
+00:10:55,559 --> 00:10:59,120
+An interpreter can technically look at the whole code, do something and then execute
+
+87
+00:10:59,120 --> 00:11:06,120
+one instruction at a time. As a matter of fact, there are interpreters which... For
+
+88
+00:11:07,639 --> 00:11:13,240
+instance, how many of you have heard this language called Java? Right? In Java, when
+
+89
+00:11:13,240 --> 00:11:20,240
+you run the code Java a dot class, what does it do? It supposedly interprets. Why interpreting
+
+90
+00:11:23,200 --> 00:11:29,440
+if it finds a certain piece of code is executed too many times? This piece is executed lot
+
+91
+00:11:29,440 --> 00:11:36,440
+of times. Let me do something smart for this. Let me either generate, let me generate the
+
+92
+00:11:36,560 --> 00:11:42,280
+equivalent machine code for this compile or do some optimizations for this. That can be
+
+93
+00:11:42,280 --> 00:11:49,280
+done. Right? No, something else that an interpreter has a drawback, serious drawback about. Yeah.
+
+94
+00:11:50,520 --> 00:11:57,520
+Correct. Correct. Excellent point. Your name? Savit. Savit said, you can write a code and
+
+95
+00:12:07,200 --> 00:12:14,200
+interpreter is one more software. Right? And now this software has to additionally run.
+
+96
+00:12:17,000 --> 00:12:24,000
+So the interpretation makes it slower. Right? So interpreter code can be slower. Then people
+
+97
+00:12:24,160 --> 00:12:31,160
+will say, okay fine, if it, the whichever part runs a lot of times, let me on the fly
+
+98
+00:12:32,120 --> 00:12:37,199
+compile it and make it run fast. But even that compilation time gets added to your execution
+
+99
+00:12:37,199 --> 00:12:44,199
+time. When you interpret some code, that is what your, is the execution of the code. If
+
+100
+00:12:44,959 --> 00:12:51,959
+interpreter is taking time, then your code is taking time. So one gives you additional
+
+101
+00:12:53,360 --> 00:12:58,319
+opportunities to do optimizations because it has the inputs, but it has the overheads
+
+102
+00:12:58,320 --> 00:13:04,480
+of interpretation. So there is a nice pull and push. So different language designers
+
+103
+00:13:04,480 --> 00:13:10,000
+choose different options. We can talk more about it later. But when an interpreter or
+
+104
+00:13:10,000 --> 00:13:17,000
+a compiler invariably do things like this, they take the source code. From the source
+
+105
+00:13:17,080 --> 00:13:21,560
+code, they do something and either if it is an interpreter, they will actually execute
+
+106
+00:13:21,560 --> 00:13:28,080
+it. But if the interpreter has a JIT compiler, just-in-time compiler or normal GCC type of
+
+107
+00:13:28,080 --> 00:13:32,080
+compiler, they generate machine code. But typically we can think of as a front end
+
+108
+00:13:32,080 --> 00:13:38,120
+and the back end. Okay? From the front end, you take the source code, generate the IR
+
+109
+00:13:38,120 --> 00:13:45,120
+and give it to back end. Right? IR stands for intermediate representation. Why do we
+
+110
+00:13:45,520 --> 00:13:52,520
+need an IR? Any guesses? Enhance the portability of, to run on different back ends. Can you,
+
+111
+00:13:53,519 --> 00:14:00,519
+you are using, I think, the right set of words, but probably they are connected not correctly.
+
+112
+00:14:01,559 --> 00:14:08,559
+Can you, so the IR, the question is why do we need an IR? If there are m languages and
+
+113
+00:14:08,960 --> 00:14:15,960
+n architectures, if I want to make for all the combinations, okay, so was this, someone
+
+114
+00:14:15,960 --> 00:14:22,960
+discussed this standard m cross n? Very good. So, now the question is, if we have this m
+
+115
+00:14:25,440 --> 00:14:31,519
+languages and n architectures, we will say, hey, let us have, let us trans, write all
+
+116
+00:14:31,519 --> 00:14:38,519
+this to one IR, from one IR have many back ends. Right? So, the IR, if I have only one
+
+117
+00:14:39,480 --> 00:14:44,240
+language and one, that is a good point, but if I have only one language and one architecture,
+
+118
+00:14:44,240 --> 00:14:49,240
+why do I still need an IR? Why not in the same language? I mean, why do I need an IR?
+
+119
+00:14:49,240 --> 00:14:54,240
+That is the question. I mean, it is like additional work, right? I want to generate code. I am
+
+120
+00:14:54,240 --> 00:14:57,840
+saying, no, no, first I will do one set of compilation. This is also a compiler, right?
+
+121
+00:14:57,840 --> 00:15:01,440
+This is also a compiler. So, I am saying, hey, to build this bigger compiler, let me
+
+122
+00:15:01,440 --> 00:15:07,240
+build a smaller compiler. Why I cannot do optimizations on this? This word, why I will
+
+123
+00:15:07,240 --> 00:15:11,240
+keep asking and I expect that you will keep asking. Whatever I say, there should be a
+
+124
+00:15:11,240 --> 00:15:13,240
+reason why. What is your name?
+
+125
+00:15:13,240 --> 00:15:14,240
+Dhaval.
+
+126
+00:15:14,240 --> 00:15:20,240
+Dhaval. I will keep asking your name. Even if I ask, please do not mind. I have a very
+
+127
+00:15:20,240 --> 00:15:27,240
+poor memory. So, Dhaval, what you said is interesting that to do some optimizations,
+
+128
+00:15:27,240 --> 00:15:30,240
+certain things may not be visible in the higher level code. Can you give an example?
+
+129
+00:15:30,240 --> 00:15:48,240
+So, for example, a loop, a loop in higher level just a false statement. You might not
+
+130
+00:15:48,240 --> 00:15:49,240
+see any way of optimizing this any further. Whereas, in a primitive implementation, you
+
+131
+00:15:49,240 --> 00:15:50,240
+might see, this thing is happening multiple times within that loop. Why not say optimizations?
+
+132
+00:15:50,240 --> 00:15:52,279
+Very interesting. So, it is actually the other way around, I thought. The loops are more
+
+133
+00:15:52,279 --> 00:15:55,279
+visible in the higher level code than a lower level code.
+
+134
+00:15:55,279 --> 00:15:57,879
+Can you find the expression for that?
+
+135
+00:15:58,519 --> 00:16:03,439
+This is a good point. This is one of the good points. Let us say, in the high level code,
+
+136
+00:16:03,439 --> 00:16:11,879
+I have one operator called plus 1. If I do a plus 1, I need some instruction at lower
+
+137
+00:16:11,879 --> 00:16:18,360
+level to either optimize it. I have some way to do, let us say, some fast way to do plus
+
+138
+00:16:19,360 --> 00:16:29,960
+1. Now, in high level, how can you express plus 1? Either something like a plus 1 or
+
+139
+00:16:29,960 --> 00:16:36,159
+a plus plus. Now, if you, in the high level code, I do not know whether it is plus 1 or
+
+140
+00:16:36,159 --> 00:16:42,039
+plus plus. If I keep the high level syntax as it is, in the back end, you need an optimizer
+
+141
+00:16:42,039 --> 00:16:49,039
+to handle plus plus and plus 1. You have many such examples of syntactic sugars, right?
+
+142
+00:16:53,519 --> 00:16:57,959
+If you want to keep your back end, which is a much more complex piece, what you want to
+
+143
+00:16:57,959 --> 00:17:04,960
+do? You want to let it handle a smaller set of syntax. As you, whoever has covered IR,
+
+144
+00:17:05,359 --> 00:17:10,799
+you would see that that syntax is much smaller compared to the syntax of the high level code.
+
+145
+00:17:10,799 --> 00:17:17,799
+So, to make the back end life easier, we first generate an IR whose syntax is simpler. So,
+
+146
+00:17:19,440 --> 00:17:26,440
+the front end maps legal code to IR, legal code to IR. Should I, okay. The back end maps
+
+147
+00:17:32,759 --> 00:17:39,759
+the IR to the target machine. And this IR helps, that it can help, as you said, simplifies
+
+148
+00:17:39,759 --> 00:17:46,759
+retargeting m cross n, m front ends, n back ends. It keeps the back end simpler and allows
+
+149
+00:17:47,400 --> 00:17:53,960
+many front ends, okay. And typically, you make many passes over the IR. We understand
+
+150
+00:17:53,960 --> 00:18:00,960
+this part, okay. A rough statement you can make that the code in the front end is, the
+
+151
+00:18:02,079 --> 00:18:08,039
+passes in the front end are simpler or have been dealt with very well so far. Most of
+
+152
+00:18:08,039 --> 00:18:14,639
+the work that is done in the current research world is all in the back end, okay. And the,
+
+153
+00:18:14,639 --> 00:18:21,639
+but the back end problems, many are known to be undecidable. Some are known to be hard
+
+154
+00:18:25,599 --> 00:18:32,599
+as in NP hard and in that range. So, the many of them are approximations, okay. Our focus
+
+155
+00:18:33,599 --> 00:18:40,599
+is some part of the back end, okay. Our focus is some part of the, just this back end part.
+
+156
+00:18:42,159 --> 00:18:49,159
+We would not touch anything on the front end, okay. Good. So, you have seen this seven pass
+
+157
+00:18:50,240 --> 00:18:55,319
+compiler, right. So, what we will do, we will not, I mean, we will not look at the front
+
+158
+00:18:55,319 --> 00:19:01,559
+end parts, whose job is to recognize the tokens and so on. So, this is the front end part
+
+159
+00:19:01,720 --> 00:19:07,399
+and the back end part has these three phases. What we will do, we will, of the seven, we
+
+160
+00:19:07,399 --> 00:19:14,119
+will focus on machine independent optimizations, okay. One order set. And if we require some
+
+161
+00:19:14,119 --> 00:19:21,119
+other phases in between, we will go there, okay.
+
+162
+00:19:23,000 --> 00:19:28,720
+Just let us take it for one more fun question. Let us say, you pick a production compiler
+
+163
+00:19:28,720 --> 00:19:35,720
+say like GCC, right, or HPC compiler. I am sure it will hold for something like even
+
+164
+00:19:35,720 --> 00:19:42,720
+NVIDIA C compiler. So, if I divide here, right, four phases here, three phases here, which
+
+165
+00:19:42,720 --> 00:19:49,720
+phase has more lines of code you think? The code generator. Intermediate code generator.
+
+166
+00:19:49,720 --> 00:19:56,720
+If you just divide the back end and front end, it so turns out the back end code is
+
+167
+00:20:04,319 --> 00:20:09,319
+far, far more than the front end code. The older the compiler, the bigger the back end
+
+168
+00:20:09,319 --> 00:20:14,440
+is. Because once the front end is settled, you do not touch much. You keep on adding
+
+169
+00:20:14,440 --> 00:20:21,440
+more and more optimizations. So, the intermediate code generator is not touched much. You have
+
+170
+00:20:23,640 --> 00:20:30,640
+it, it remains that way, okay. Fine. Our goal is to look at optimization. When we say optimization,
+
+171
+00:20:33,000 --> 00:20:37,640
+what do we mean by it? Most of the time, when we say optimization, it means produce fast
+
+172
+00:20:37,640 --> 00:20:44,640
+code. But is it, when we say optimization, is it optimum? We are not talking about optimum.
+
+173
+00:20:50,600 --> 00:20:57,600
+We are not, okay. We are talking about some notion of optimality. Many of the times, the
+
+174
+00:20:57,600 --> 00:21:04,600
+problems are hard and it so turns out, if I have N optimizations, if I apply all N,
+
+175
+00:21:07,640 --> 00:21:14,160
+there is no guarantee that the code will be faster. There are times when if you apply
+
+176
+00:21:14,160 --> 00:21:20,680
+two optimizations together, the generated code could be slower. Ideally, we do not want
+
+177
+00:21:20,680 --> 00:21:27,680
+it that way, but it may. So, keep, so have that thing in the back of your mind, okay.
+
+178
+00:21:28,680 --> 00:21:35,680
+So, when we say an optimization in more general sense, it is a transformation which is expected
+
+179
+00:21:35,960 --> 00:21:42,960
+to improve the program. But when we say improve, what do you mean? It could be execution time.
+
+180
+00:21:49,640 --> 00:21:56,640
+What else can it improve? Space, what else? Power consumption, what else? Size of the
+
+181
+00:21:56,640 --> 00:22:03,640
+code. Why do I care for size of the code? It is a good point. If I want to send the
+
+182
+00:22:12,880 --> 00:22:17,880
+code over the network, the smaller the code better. If I do not want to send it over the
+
+183
+00:22:17,880 --> 00:22:24,880
+network, is there a reason why I may need, why I may want a small piece of code? Perfect.
+
+184
+00:22:26,759 --> 00:22:33,759
+That is a more regular, more common need for compilers that can optimize for size. Let
+
+185
+00:22:35,000 --> 00:22:42,000
+us say you have a pacemaker or you have a small watch or a small sensor, right. There
+
+186
+00:22:47,960 --> 00:22:54,960
+you may have very small pieces of memory to hold the code. The answer is yes and no. It
+
+187
+00:22:55,680 --> 00:23:02,680
+depends on the program, right. If I have a program that does not do dynamic memory allocation,
+
+188
+00:23:03,960 --> 00:23:10,960
+right. I can easily write tons and tons of programs that do know dynamic memory allocation.
+
+189
+00:23:15,240 --> 00:23:21,240
+And for instance, here is something, right. Let us say I am doing, I want to compute primes,
+
+190
+00:23:21,799 --> 00:23:28,799
+right. All I need to do is keep on. So, that does not require too much, I mean this most
+
+191
+00:23:29,160 --> 00:23:33,799
+naive thing is keep on dividing forever, right.
+
+192
+00:23:33,799 --> 00:23:40,799
+So, now the question is when we are talking about the code that may run on a sensor, what
+
+193
+00:23:43,279 --> 00:23:50,279
+type of code it is? So, in those codes, you normally do not require too much of dynamic
+
+194
+00:23:50,279 --> 00:23:56,200
+memory. As a matter of fact, the code that have to run on sensors, they have to have
+
+195
+00:23:56,200 --> 00:24:03,200
+certain guarantees that they will not need more than certain amount of memory including
+
+196
+00:24:03,279 --> 00:24:09,680
+dynamic, runtime memory. Let us say it has a recursion. The recursion will not unfold
+
+197
+00:24:09,680 --> 00:24:13,480
+beyond element. Think of it this way. Let us say I have a code which is running on my
+
+198
+00:24:13,480 --> 00:24:20,000
+pacemaker, right. Suddenly it has taken so much memory that it says sorry, out of memory.
+
+199
+00:24:20,720 --> 00:24:27,720
+So, it is a very important question that many, some of these software vendors have to worry
+
+200
+00:24:32,079 --> 00:24:37,519
+about. So, when we say improved code, we are talking about improved not optimum or even
+
+201
+00:24:37,519 --> 00:24:43,799
+optimal. Sometimes it may produce worse code, but our hope is that the speed ups can be
+
+202
+00:24:44,159 --> 00:24:51,159
+starting from some small delta to some large factor, okay. In general, it is even undecidable
+
+203
+00:24:54,159 --> 00:25:01,159
+whether in most cases a given optimization will give you improvement, okay. I do not
+
+204
+00:25:01,160 --> 00:25:14,759
+like this. You should ask why. We are saying it optimization. I am saying it will not improve
+
+205
+00:25:14,759 --> 00:25:21,759
+and none of you are even asking why. Does not it bother you? Sorry? But what am I saying?
+
+206
+00:25:21,759 --> 00:25:28,759
+You pick any optimization of your choice. Pick any optimization of your choice. Even
+
+207
+00:25:34,879 --> 00:25:40,879
+then I am saying there is no guarantee. Let us say dead code elimination. I am saying
+
+208
+00:25:40,879 --> 00:25:45,879
+you eliminate dead code. There is a chance that the code may lead to worse performance.
+
+209
+00:25:45,880 --> 00:25:52,880
+I am making a very strong statement. It should shake up your sleep and say, no, this guy
+
+210
+00:25:53,120 --> 00:26:00,120
+is either stupid or we do not know something which he is talking about. Yes, yes. Do you
+
+211
+00:26:05,320 --> 00:26:09,320
+see what I am saying? I am making a very strong statement. Take an optimization that you think,
+
+212
+00:26:09,879 --> 00:26:16,519
+I mean dead code elimination. I think even then there may be some cases because of dead
+
+213
+00:26:16,519 --> 00:26:23,519
+code elimination the code is running, taking more time. Okay, no, you are saying you are
+
+214
+00:26:23,519 --> 00:26:30,519
+going further ahead. You are taking my statement as a given, but I am asking, question my statement.
+
+215
+00:26:31,519 --> 00:26:38,279
+Good. It depends on the program we are considering. So can you give an example where because of
+
+216
+00:26:38,279 --> 00:26:45,279
+dead code elimination my code may run slower. I did dead code elimination, but now my code
+
+217
+00:26:46,720 --> 00:26:53,720
+runs slower. It may not happen most of the time, but there may be some cases. See what
+
+218
+00:26:58,200 --> 00:27:05,200
+I am saying? I cannot give guarantee for all the scenarios. Let us say there was a memory
+
+219
+00:27:05,960 --> 00:27:12,240
+fetch. I removed it. I avoided the memory fetch because of which you would assume that
+
+220
+00:27:12,240 --> 00:27:19,240
+it should run faster, but now it is running slower. Why? Good point, right? So what he
+
+221
+00:27:19,240 --> 00:27:23,880
+is saying? The dead code is doing something that is useful to me. It could be bringing
+
+222
+00:27:23,880 --> 00:27:30,880
+in something to the cache. It could be changing the layout of my instruction cache. It could
+
+223
+00:27:31,880 --> 00:27:38,880
+be prefetching something and dead code is just one example. It turns out there are so
+
+224
+00:27:41,440 --> 00:27:48,440
+many factors in play. There is cache. There is hard disk. There is like our friend was
+
+225
+00:27:48,620 --> 00:27:55,620
+talking about the pipelining, how things are there, how things are organized in the pipeline.
+
+226
+00:27:56,179 --> 00:28:01,059
+We do not have any optimal solutions for any of these problems. Individually each of these
+
+227
+00:28:01,059 --> 00:28:08,059
+problems are too hard. Now your question, if there is no guarantee for any of these,
+
+228
+00:28:09,139 --> 00:28:14,619
+why should I even use them? Why should we sit in this air conditioning room and learn
+
+229
+00:28:14,619 --> 00:28:21,619
+about this? Right? Good and those chances are very high. Right? The chances are very
+
+230
+00:28:25,859 --> 00:28:30,859
+high. So when you walk on the street, is there a guarantee that you will cross the road?
+
+231
+00:28:30,859 --> 00:28:37,859
+The chances are high. Even on police streets the chances are high. Right? So the point
+
+232
+00:28:41,459 --> 00:28:48,459
+is most of the time we will, the optimizations most of the time you have. I mean those are
+
+233
+00:28:48,739 --> 00:28:54,779
+the popular optimizations and most of the time you get better performance. Right? And
+
+234
+00:28:54,899 --> 00:29:01,899
+he asked another question. What if you do not do? What if you do not do? If you do not
+
+235
+00:29:03,339 --> 00:29:10,339
+do any optimizations, the impact, I mean the programs, I mean the optimizations give you
+
+236
+00:29:11,619 --> 00:29:18,619
+speed ups which are unimaginable otherwise on this day. The handwritten code, it is very
+
+237
+00:29:19,619 --> 00:29:26,619
+hard to optimize large pieces of code just by hand. I mean here is the deal. When you
+
+238
+00:29:30,139 --> 00:29:37,139
+touch, do you have a phone or do you have a laptop? When you open an app, you have a
+
+239
+00:29:37,899 --> 00:29:44,899
+choice. An unoptimized code that takes 20 seconds to just load the app and an optimized
+
+240
+00:29:45,900 --> 00:29:52,900
+code that takes 1 second to load the app. Which one will you use? And when I said 20
+
+241
+00:29:53,259 --> 00:30:00,259
+seconds to 1, I was being very kind to the unoptimized code. The optimizations give you
+
+242
+00:30:01,220 --> 00:30:08,220
+so much benefits. You just cannot ignore it. Fine. So it is not just dead code elimination.
+
+243
+00:30:08,220 --> 00:30:15,220
+Even some simple things like algebraic simplification. If you know that multiplication by 2 is same
+
+244
+00:30:24,019 --> 00:30:30,019
+as left shift. Left shift is faster than multiplication. Even then there is no guarantee that it will
+
+245
+00:30:30,019 --> 00:30:37,019
+improve the performance. It may lead to some other hazard somewhere, someone else waiting
+
+246
+00:30:38,019 --> 00:30:45,019
+for you, some other impact on cache. The typical goals of the optimization code are speed,
+
+247
+00:30:46,019 --> 00:30:53,019
+space and power, energy and so on. And the interesting part, A does not imply B, B does
+
+248
+00:30:55,099 --> 00:31:02,099
+not imply C. If you optimize for speed, it may increase the space, it may increase the
+
+249
+00:31:02,899 --> 00:31:09,899
+size. If you optimize for one, it may impact the other one. Beautiful, right? So which
+
+250
+00:31:12,299 --> 00:31:19,299
+one matters? But I am saying I cannot give you all. Dependent on? Depends on the end
+
+251
+00:31:19,299 --> 00:31:26,299
+user. Depends on the specific target you have in mind. Traditionally when we say optimization,
+
+252
+00:31:36,419 --> 00:31:43,419
+we talk about speed. We will mostly focus on speed in our discussion. Sometimes when
+
+253
+00:31:44,420 --> 00:31:51,420
+you optimize for A, it may also optimize for B. Sometimes. For example, how does this thing
+
+254
+00:31:57,340 --> 00:32:02,940
+called loop unrolling? So loop unrolling is nothing but let us say I have a loop that
+
+255
+00:32:02,940 --> 00:32:09,940
+goes from say 1 to 100. I will repeat the body say 5 times and execute loop from 1 to
+
+256
+00:32:09,940 --> 00:32:16,940
+20. I do not need to jump back after every iteration. So it is faster but my size has
+
+257
+00:32:21,580 --> 00:32:28,580
+increased. Now when I say look there are optimizations, some optimizations may because one optimization
+
+258
+00:32:28,579 --> 00:32:35,579
+some other optimization may get impacted and optimizations may take time and so on.
+
+259
+00:32:45,379 --> 00:32:50,259
+Or tomorrow you want to come up with your own optimization. In all these things you
+
+260
+00:32:50,259 --> 00:32:57,259
+keep asking whatever the optimization I am coming up with, is it worth it? And I am not
+
+261
+00:32:58,579 --> 00:33:03,139
+going to answer that. Then you will ask which optimization should I focus on or what should
+
+262
+00:33:03,139 --> 00:33:10,139
+I optimize? If you are optimizing for speed, you optimize that part which takes more time,
+
+263
+00:33:10,699 --> 00:33:16,699
+whichever is your bottleneck. So in the code which part takes more time? Typically loops
+
+264
+00:33:16,699 --> 00:33:23,699
+take more time. So make sure you optimize loops. In the code you know that the memory
+
+265
+00:33:23,700 --> 00:33:30,700
+access is slower, much slower compared to CPU. So what is the typical memory to register
+
+266
+00:33:36,860 --> 00:33:43,860
+access ratio? How much are in now NVIDIA machines? So it is kind of in the order of 10 CPUs,
+
+267
+00:33:53,700 --> 00:34:00,220
+sometimes even hundreds of times. If the register is X, register access is X then it
+
+268
+00:34:00,220 --> 00:34:07,220
+is kind of if it is prefetched in the cache and all that it is kind of in tens and if
+
+269
+00:34:09,940 --> 00:34:15,599
+it is kind of further away from memory then it can keep on increasing. So memory access
+
+270
+00:34:15,599 --> 00:34:20,619
+are bad so you want to improve your register allocation so that as many things possible
+
+271
+00:34:20,619 --> 00:34:27,019
+you have you keep them in the registers. Then instruction scheduling we will come to this
+
+272
+00:34:27,019 --> 00:34:31,619
+later. Instruction scheduling is basically saying in which order you want the instructions
+
+273
+00:34:31,619 --> 00:34:38,619
+to execute so that they run fast. And the choice of optimizations not only depend upon
+
+274
+00:34:41,619 --> 00:34:48,619
+our goal of speed and so on, they also depend upon the input program. For instance if there
+
+275
+00:34:50,619 --> 00:34:56,460
+is a program it is an OO program, object oriented program. How about object orientation?
+
+276
+00:34:56,460 --> 00:35:02,299
+All of you? Great. Some optimizations like inlining can be very important. Can you guess
+
+277
+00:35:02,299 --> 00:35:09,299
+why? What is inlining? Function inlining? Anyone? Whenever there is a call, wherever
+
+278
+00:35:12,380 --> 00:35:19,380
+you see a call you replace that call with the function. Did any, has it been already
+
+279
+00:35:19,380 --> 00:35:25,099
+covered inlining? No, right? But you have heard of it. Very good. So why is inlining
+
+280
+00:35:25,099 --> 00:35:32,099
+very important for object oriented programs? Any guesses?
+
+281
+00:35:32,900 --> 00:35:39,900
+Typically when you see this magenta colored text in my, when I teach back in my school
+
+282
+00:35:41,180 --> 00:35:46,660
+when students answer this question they get half a mark. This half a marks are out of
+
+283
+00:35:46,659 --> 00:35:53,460
+the 100. So without attending any exam you can start earning marks. But these questions
+
+284
+00:35:53,460 --> 00:36:00,460
+are also very difficult to answer. Not easy. You have to think. Yes.
+
+285
+00:36:01,460 --> 00:36:08,460
+Inheritance. Okay.
+
+286
+00:36:08,980 --> 00:36:15,980
+Copy of? All of them, let us say at least will have
+
+287
+00:36:20,380 --> 00:36:27,380
+access to those features. Yeah. Jumping back. What do you mean by jumping back? In the parent
+
+288
+00:36:27,380 --> 00:36:34,380
+class let us say. Yeah. When they go back there? One minute, let me finish. Today at
+
+289
+00:36:34,380 --> 00:36:41,380
+the end of the class, whenever the class ends, will those of you who are interested,
+
+290
+00:36:41,380 --> 00:36:48,380
+I can spend a bit of time on how object oriented programs get translated. How they get, how
+
+291
+00:36:48,380 --> 00:36:55,380
+they run. You do not go to up up up. You do not do that. You do not have to. It is
+
+292
+00:36:55,380 --> 00:37:22,780
+a common, see it is how we see it. When we look at the code we say okay is the function
+
+293
+00:37:22,780 --> 00:37:27,660
+defined in my class? No. Then go to the parent class. If it is not there, go to the parent
+
+294
+00:37:27,660 --> 00:37:34,660
+class. It is so transferred it is not implemented that way. I am happy you brought it up. Remind
+
+295
+00:37:34,660 --> 00:37:39,780
+me at the end of the class we will talk about it. If you have any, I do not want to hold
+
+296
+00:37:39,780 --> 00:37:45,180
+up everyone when they are completely tired. So those who are asking questions they can
+
+297
+00:37:45,180 --> 00:37:52,180
+stay longer. Okay. Yeah. Why do we need, why is inlining very important for OO programs?
+
+298
+00:37:52,780 --> 00:38:18,860
+No, yeah, yeah, hands up. So what you are saying is if we inline, if you do not inline,
+
+299
+00:38:19,860 --> 00:38:27,180
+call. So I have to push my local variables onto the stack. Go, start executing there.
+
+300
+00:38:27,180 --> 00:38:33,380
+Come back, undo and all that. I mean pop up from the stack and all that. Good. But that
+
+301
+00:38:33,380 --> 00:38:43,380
+is true for every time you inline. Why only OO? What you said holds the advantage of inlining.
+
+302
+00:38:44,380 --> 00:38:51,380
+I am saying why when I said OO programs inlining is important, why OO programs inlining is
+
+303
+00:38:51,500 --> 00:38:58,500
+more important, very important? Multiple objects of the same class. Okay. Not sure. Not sure.
+
+304
+00:39:06,260 --> 00:39:12,619
+By the way, just one second. Those of you who are using the laptop to anything other
+
+305
+00:39:12,619 --> 00:39:19,619
+than take notes, I strongly suggest please close the laptops. Because some of you may
+
+306
+00:39:20,380 --> 00:39:27,380
+be, do you have internet here? Yeah, so some of you may be using it for different purposes
+
+307
+00:39:28,299 --> 00:39:35,299
+and it does two harms. One, to yourself that you are probably missing out not on the lecture
+
+308
+00:39:37,219 --> 00:39:41,819
+but an interesting discussion and questions that your friends are bringing up. And number
+
+309
+00:39:41,820 --> 00:39:48,820
+two, you are distracting your neighbors. If you are taking notes or typing notes, that
+
+310
+00:39:48,820 --> 00:39:55,820
+is perfectly fine. Why do we need inlining in OO programs?
+
+311
+00:40:03,140 --> 00:40:10,140
+We call up methods often even in C programs or do we do more in OO programs?
+
+312
+00:40:12,380 --> 00:40:19,380
+Small things, good point. Small things like what?
+
+313
+00:40:19,380 --> 00:40:26,380
+Perfect. See in object oriented languages, you have this typical thing of encapsulation.
+
+314
+00:40:32,500 --> 00:40:37,620
+Some private variables here, some variables which are hidden inside an object somewhere.
+
+315
+00:40:37,619 --> 00:40:44,619
+You do not directly write to the field. You say okay, do a set, do a get. Even it is a
+
+316
+00:40:44,619 --> 00:40:51,619
+very tiny method like our friend said, I have to store all of it, do a jump, return it immediately.
+
+317
+00:40:55,500 --> 00:41:02,380
+Looks like a lot of overheads. So inlining is very important. So if you have some language
+
+318
+00:41:02,380 --> 00:41:07,099
+corresponding to that language, you will do, you will make sure certain type of optimizations
+
+319
+00:41:07,099 --> 00:41:14,099
+are there. If you have code the programs where you write lot of recursive, where lot of recursive
+
+320
+00:41:19,699 --> 00:41:26,699
+functions, then you want to definitely have something called tail call optimization. Heard
+
+321
+00:41:26,699 --> 00:41:33,699
+of this thing called tail call optimization? What is that? Yes, what is tail call?
+
+322
+00:41:33,699 --> 00:41:40,699
+Tail call is the call which is present at the end of the function. After that I have
+
+323
+00:41:44,939 --> 00:41:51,939
+nothing more to do. So when there is a tail call, why should I make a call? Every time
+
+324
+00:41:51,939 --> 00:41:57,739
+there is a call, I have to save and then do something more and then come back, pop back
+
+325
+00:41:57,739 --> 00:42:04,739
+and now if there is a tail call, I can directly jump there. It can be a simple jump. And then
+
+326
+00:42:04,739 --> 00:42:11,739
+at the end of the tail call, I do not need to return to me. You can return to my caller.
+
+327
+00:42:15,619 --> 00:42:21,899
+You can even think of an optimization where recursion can be replaced with loops. Those
+
+328
+00:42:21,900 --> 00:42:28,900
+of you who care, every, but even the recursion and loops are equivalent. There is no difference
+
+329
+00:42:29,579 --> 00:42:35,940
+in terms of power. So when we talk about optimizations, there are three types of optimizations you
+
+330
+00:42:35,940 --> 00:42:40,860
+can overall think of. One is local optimizations which are within basic block. What is a basic
+
+331
+00:42:40,860 --> 00:42:46,539
+block? It is a sequential piece of, it is a code where there are no jumps in between.
+
+332
+00:42:46,539 --> 00:42:51,619
+So you can think of local optimizations, intra procedural, that is you optimize within one
+
+333
+00:42:51,619 --> 00:42:57,219
+procedure and do not know anything about other procedures or inter procedural optimizations
+
+334
+00:42:57,219 --> 00:43:04,219
+which impact across procedures. You can even think of optimizations based on their positioning.
+
+335
+00:43:06,619 --> 00:43:13,619
+High level optimizations or low level optimizations. High level optimizations is optimizations which
+
+336
+00:43:13,619 --> 00:43:20,619
+are based on the program structure and typically they are done first in the optimization chain.
+
+337
+00:43:20,779 --> 00:43:27,779
+Most of these high level optimizations are machine independent. You have low level optimizations
+
+338
+00:43:28,299 --> 00:43:32,619
+which are typically called the mid or low level which work on mid and low level IR.
+
+339
+00:43:32,619 --> 00:43:39,619
+They do not need much of the program structure. I think Gowind is covering low level optimizations.
+
+340
+00:43:39,619 --> 00:43:46,619
+That is coming up next. I mean later and I will be covering on high level optimizations.
+
+341
+00:43:51,059 --> 00:43:56,420
+So a brief this thing between machine independent and machine dependent optimizations. These
+
+342
+00:43:56,420 --> 00:44:02,339
+machine independent optimizations, they are applicable across a broad range of machines.
+
+343
+00:44:02,339 --> 00:44:08,380
+So if I am saying optimization, this is applicable not just on machine X but maybe a class of
+
+344
+00:44:08,460 --> 00:44:15,460
+machines. Not necessarily the whole world but much broader. I mean I could think of
+
+345
+00:44:17,539 --> 00:44:23,860
+some code. Let us say there is some code which is executed very frequently. I move it to
+
+346
+00:44:23,860 --> 00:44:30,860
+a less frequently executed code. That is machine independent. I removing redundant code, right.
+
+347
+00:44:31,260 --> 00:44:38,260
+Dead code elimination. Dead code elimination can be done at many phases but a high level.
+
+348
+00:44:42,099 --> 00:44:45,660
+The machine independent optimization sometimes themselves may not do much but they will create
+
+349
+00:44:45,660 --> 00:44:50,980
+opportunities for the machine dependent part. We will come to that. The machine dependent
+
+350
+00:44:50,980 --> 00:44:56,860
+optimizations typically they capitalize on machine specific properties. So they improve
+
+351
+00:44:56,860 --> 00:45:01,140
+the mapping of IR onto machine. They can reduce the strength of the instructions, use
+
+352
+00:45:01,140 --> 00:45:08,140
+more efficient instructions which are given by a specific hardware, right. You can think
+
+353
+00:45:08,820 --> 00:45:15,820
+of using exotic hardware instructions to take advantage of the hardware properties, right.
+
+354
+00:45:17,059 --> 00:45:24,059
+For instance, maybe this distinction between high level and low level is not always there.
+
+355
+00:45:26,860 --> 00:45:33,860
+It is always very clear. There are some optimizations. One may say is it here or here. For instance,
+
+356
+00:45:34,660 --> 00:45:41,260
+replace multiply with shift and adds, right. If you see a multiplication, replacing with
+
+357
+00:45:41,260 --> 00:45:48,260
+adds you can do it at the high level code itself, right. Because I mean this is, some
+
+358
+00:45:48,900 --> 00:45:53,180
+of these are on the border line. So there is no hard and fast rule but overall you get
+
+359
+00:45:53,179 --> 00:46:00,179
+an idea, okay. Fine. So before we go into a high level optimization, what we are saying?
+
+360
+00:46:01,739 --> 00:46:07,980
+We want to design an optimization which should have certain properties. What are the desirable
+
+361
+00:46:07,980 --> 00:46:14,980
+properties? The code should be at least as good as a handwritten assembly code, okay.
+
+362
+00:46:15,980 --> 00:46:22,980
+It should be stable, robust performance. What is the stable performance? You done some optimization.
+
+363
+00:46:24,260 --> 00:46:28,860
+It should not happen that you toss a coin, okay, heads. Today it will run fast, tails
+
+364
+00:46:28,860 --> 00:46:35,860
+it will run slow, right. The optimization should work consistently. So every time you
+
+365
+00:46:37,139 --> 00:46:43,139
+run you should get some consistent performance. Ideally, you should design optimization that
+
+366
+00:46:43,139 --> 00:46:49,539
+will take advantage of all the hardware specialties and give, take advantage all of them and generate
+
+367
+00:46:49,539 --> 00:46:55,579
+very efficient code. It should, if there is some weakness of the architecture, the optimization
+
+368
+00:46:55,579 --> 00:47:02,579
+should be able to hide that. The optimization should support a broad range of languages
+
+369
+00:47:04,259 --> 00:47:11,259
+and it should be very fast. And the good news is most of the time, most of the time, most
+
+370
+00:47:13,420 --> 00:47:20,420
+of the optimizations draw, they do not do all of them. They may do A not B, they may
+
+371
+00:47:20,460 --> 00:47:26,779
+do C not D, okay. So it is okay. So it is okay to have, I mean sometimes the optimizations
+
+372
+00:47:26,779 --> 00:47:32,019
+take slightly more time. They may not be doing all of them. So that is desirable properties.
+
+373
+00:47:32,019 --> 00:47:39,019
+There is a required property of every optimization. Can you guess what it is? Correctness. What
+
+374
+00:47:39,019 --> 00:47:46,019
+do you mean by correctness? Perfect. So the required property is the generated code of
+
+375
+00:47:48,980 --> 00:47:55,980
+the after optimization should and do you think the GCC code that you use, all of you GCC
+
+376
+00:47:55,980 --> 00:48:02,980
+are some, any compiler of your choice, right? Do you think it produces the correct code?
+
+377
+00:48:15,740 --> 00:48:22,740
+Let me add a word on top of it, always. Sir, in the example that you have, in the example
+
+378
+00:48:26,980 --> 00:48:33,980
+that you have, okay. So you do not like GCC. How about Intel's ICC or our sponsor NVIDIA's
+
+379
+00:48:40,380 --> 00:48:47,380
+NVCC, the CUDA compiler, right? So by the way, it is nothing to do with Intel, NVIDIA
+
+380
+00:48:47,380 --> 00:48:54,380
+or HP, HP, GCC. This is code written by someone, right? The code may also have bugs, but what
+
+381
+00:49:02,860 --> 00:49:07,740
+we in general say is that most of the optimizations, at least in theory, they should be semantic
+
+382
+00:49:07,740 --> 00:49:13,340
+preserving. Actual implementation, they are written by people like you and me or may be
+
+383
+00:49:13,340 --> 00:49:20,340
+much smarter in case of some companies, right? But still there may be bugs, but modular bugs,
+
+384
+00:49:22,740 --> 00:49:28,420
+we want that they should be semantic preserving, right? Okay.
+
+385
+00:49:28,420 --> 00:49:35,420
+So we will continue with our, this thing, sorry, when we say semantic preserving, how
+
+386
+00:49:36,420 --> 00:49:43,420
+do we guarantee that it is semantic preserving? Yes, correct. But the compiler does not run
+
+387
+00:49:45,180 --> 00:49:52,180
+the code. The compiler takes some code, optimizes and gives you an output. How can the compiler
+
+388
+00:49:53,740 --> 00:50:00,740
+be sure that the optimization it is doing is right? Sorry, we can? Good, let us keep
+
+389
+00:50:01,739 --> 00:50:08,739
+that part. For whatever the input given, right? But the input, now the input can be any random
+
+390
+00:50:11,939 --> 00:50:18,939
+input, right? I mean, given, so what you are saying is there is some understanding of what
+
+391
+00:50:21,379 --> 00:50:28,379
+the, I mean, some classes of the inputs. How the program will behave for this input? The
+
+392
+00:50:28,539 --> 00:50:34,099
+output program should behave similarly. So the compiler at some level should understand
+
+393
+00:50:34,099 --> 00:50:41,099
+the input program as well, right? And that is where comes the branch of program analysis.
+
+394
+00:50:41,140 --> 00:50:47,099
+The compiler has to analyze the program, make some sense out of it. So you will see that
+
+395
+00:50:47,099 --> 00:50:54,099
+for optimizations, you will always need, you always have a phase which will analyze the
+
+396
+00:50:54,099 --> 00:51:01,099
+program. It has to understand the program. Once it understands the program, it can do
+
+397
+00:51:01,339 --> 00:51:08,339
+some optimizations, right? Let us take an example. Here is a piece of
+
+398
+00:51:10,259 --> 00:51:17,259
+code that says if condition, I am writing to A, B, else AC. If the compiler wants to
+
+399
+00:51:17,260 --> 00:51:24,260
+figure out which variables are assigned in this piece of the code, right? It has to go
+
+400
+00:51:28,300 --> 00:51:35,300
+through the code and understand, right? Now this understanding can vary. There are different
+
+401
+00:51:35,380 --> 00:51:42,380
+types of analysis. One of the, have you already been told about may analysis and must analysis?
+
+402
+00:51:43,059 --> 00:51:50,059
+No? Good. So in this piece of the code, do you know which branch may be taken? No. The
+
+403
+00:51:52,460 --> 00:51:58,460
+compiler cannot know. But if the compiler wants to figure out which, let us say there
+
+404
+00:51:58,460 --> 00:52:05,460
+are four variables I have A, B, C, D. And now the compiler wants to know which variables
+
+405
+00:52:05,700 --> 00:52:12,099
+may be assigned in this part of the code. Because any code that is variable which is
+
+406
+00:52:12,099 --> 00:52:16,779
+not assigned or used, I may throw it away, right? But to throw it away, I need to know
+
+407
+00:52:16,779 --> 00:52:23,219
+which variables are, which variables may be used. So in this part of the code, which variable
+
+408
+00:52:23,219 --> 00:52:30,219
+may be used? A, B or C. But is there a guarantee that all A, B, C will be used? No. Why? Because
+
+409
+00:52:34,579 --> 00:52:39,099
+the compiler does not know anything about the condition. So there is something called
+
+410
+00:52:39,099 --> 00:52:46,099
+a may analysis which tells information like which may be assigned, which code may, which
+
+411
+00:52:48,299 --> 00:52:55,299
+part of the code may be accessed, which part of the code may be executed, right? If I look
+
+412
+00:52:59,019 --> 00:53:04,819
+at this part of the code and ask you a question, which variable is guaranteed to be accessed,
+
+413
+00:53:04,820 --> 00:53:11,820
+must be accessed? A. So that is the must information. So there are two broad classification of
+
+414
+00:53:15,980 --> 00:53:22,980
+the analysis, may analysis where we say whatever we infer that will hold at least on some path,
+
+415
+00:53:25,860 --> 00:53:32,860
+rather it may hold on some path. It may, it may, let us say before this code there is
+
+416
+00:53:33,500 --> 00:53:40,500
+some division A equal to B by C and C is all, sorry X equal to Y by Z. Z is always 0. So
+
+417
+00:53:40,500 --> 00:53:47,500
+you will never execute this part of the code. So module all that. So the may analysis is
+
+418
+00:53:52,300 --> 00:53:58,700
+the analysis holds on at least some data path, whatever I understand, within whatever I can
+
+419
+00:53:58,699 --> 00:54:05,699
+understand it may hold. The must analysis says the analysis information will hold across
+
+420
+00:54:07,619 --> 00:54:14,619
+all paths. We will use this understanding to do more optimization. But remember the
+
+421
+00:54:16,419 --> 00:54:23,419
+idea of may and must. What is the opposite of may analysis?
+
+422
+00:54:28,939 --> 00:54:35,939
+So let us take the, let us say I have four variables A, B, C, D. Definitely not or must
+
+423
+00:54:36,460 --> 00:54:43,460
+not. So the opposite of may analysis is must not. So if you, if you complete some information
+
+424
+00:54:44,299 --> 00:54:50,659
+that says may, the negation of it will give you must not. So if you have A, B, C, D variables
+
+425
+00:54:50,659 --> 00:54:57,659
+and you ask this question, which variable must not be assigned in this part of the code?
+
+426
+00:54:58,939 --> 00:55:05,939
+The code it is D. What is the opposite of must analysis? Never is it? So let us look
+
+427
+00:55:19,619 --> 00:55:26,619
+at this way. What is the negation of, what is the negation of this one? Which of the
+
+428
+00:55:27,099 --> 00:55:33,380
+variables must be assigned? A, what is the negation of this? B, C, D. So what is the
+
+429
+00:55:33,380 --> 00:55:40,380
+question you will ask whose answer is B, C, D? Which variables may not be assigned? Which
+
+430
+00:55:46,579 --> 00:55:53,579
+variables may not be assigned?
+
+431
+00:55:56,619 --> 00:56:03,619
+We will take an example which is called as constant propagation. It is one of the most
+
+432
+00:56:08,059 --> 00:56:12,539
+popular optimizations you can think of, I mean which is there in text and is used. We
+
+433
+00:56:12,539 --> 00:56:17,859
+will use that to understand this may and must have been. So what is the idea of constant
+
+434
+00:56:17,859 --> 00:56:24,859
+propagation? Let us say there is some piece of the code whose value is known to be constant.
+
+435
+00:56:26,699 --> 00:56:33,699
+Then why should you execute it at run time? You take that piece of the code or that expression.
+
+436
+00:56:33,940 --> 00:56:39,619
+We will call that expression as a constant expression. So I need to find out what is
+
+437
+00:56:39,619 --> 00:56:46,619
+the constant expression and replace that constant expression with that constant. So here is
+
+438
+00:56:47,980 --> 00:56:54,980
+a piece of code. Look at this piece of code and tell me what all constants are.
+
+439
+00:56:56,940 --> 00:57:03,940
+Do you see any constants at all? Clearly there are constant literals 1, 2, 3 and all that.
+
+440
+00:57:07,739 --> 00:57:14,739
+I is equal to 1 is used here and there is here. So I is a constant our friend says.
+
+441
+00:57:16,460 --> 00:57:23,460
+So if I is a constant what I can do? Replace the occurrence. So I can replace the occurrence
+
+442
+00:57:27,019 --> 00:57:34,019
+of I with its constant value. So what will happen to this code? Let us see. Can I use
+
+443
+00:57:44,339 --> 00:57:51,339
+this board? I will be using this and this together. No I think it is better I write
+
+444
+00:57:51,340 --> 00:57:59,340
+it here. It is more fun writing it here. Hello.
+
+445
+00:58:21,340 --> 00:58:28,340
+So which one are we replacing now? So you are saying we do not need this. Every occurrence
+
+446
+00:58:37,500 --> 00:58:44,500
+of I I will replace with 1. So we eliminated one constant expression. What else anyone?
+
+447
+00:58:44,500 --> 00:58:51,500
+J. What about J? It is always 2. So first of all I need to replace this is a constant
+
+448
+00:59:00,739 --> 00:59:06,340
+expression. I will replace it with 2 and now I have J equal to 2. What do I do? Wherever
+
+449
+00:59:06,340 --> 00:59:13,340
+every occurrence of J I will replace with 2 and then I will replace it with 2. So I
+
+450
+00:59:14,500 --> 00:59:21,500
+replace it with 2 and then what do I do? A of 2 is a constant and then I replace it
+
+451
+00:59:28,739 --> 00:59:35,739
+with 2 and then K is a constant. Now what happens? I have a piece of code. If the name
+
+452
+00:59:44,500 --> 00:59:51,500
+is J, what else whose body is empty? I can even throw this off. I am doing an assignment
+
+453
+00:59:53,940 --> 01:00:00,940
+to an array. I am not using any other element. So you are left with a function that returns
+
+454
+01:00:06,659 --> 01:00:13,659
+2. Now we have the function is throw away the function call and return add put 2. Nice
+
+455
+01:00:14,900 --> 01:00:21,019
+right? And guess what? A compiler can do quite a bit of these things. The programmer has
+
+456
+01:00:21,019 --> 01:00:25,539
+written the code because there are some initial code. See initial code was using B right?
+
+457
+01:00:25,539 --> 01:00:32,539
+It can inline this piece of code as well. It so turns out even if you do not inline
+
+458
+01:00:34,380 --> 01:00:41,380
+some of these things can be done. Handling these arrays is bit tricky otherwise the rest
+
+459
+01:00:42,380 --> 01:00:49,380
+of the things we can do pretty well. You will actually do it. Just give it some time. If
+
+460
+01:00:55,140 --> 01:01:02,140
+you guys are excited about doing it manually, I think you would get lot more kind of excitement
+
+461
+01:01:03,140 --> 01:01:10,140
+that this can actually be done automatically. I mean there is some conditional code. Just
+
+462
+01:01:10,619 --> 01:01:17,619
+look at this code. It does not look like you can throw away the whole code right?
+
+463
+01:01:19,980 --> 01:01:26,980
+So now what we are saying is that is what is constant propagation right? We will take
+
+464
+01:01:26,980 --> 01:01:33,980
+in constant propagation there are different variations we will look at. One which is called
+
+465
+01:01:33,980 --> 01:01:40,980
+why only constant propagation? In general analysis you can think of flow sensitive and
+
+466
+01:01:42,460 --> 01:01:46,420
+flow insensitive. What is flow sensitive? Let us look at this. Here is another piece
+
+467
+01:01:46,420 --> 01:01:53,420
+of code. In this piece of code I have some condition setting abc and I have print abc
+
+468
+01:01:54,219 --> 01:02:01,219
+else abc and print abc. Now the question is are abc constants?
+
+469
+01:02:03,980 --> 01:02:10,980
+Is the value of a constant in the program? Is the value of b a constant in the program?
+
+470
+01:02:15,500 --> 01:02:22,500
+Is the value of c a constant in the program? Yes c is constant both of these. So the answers
+
+471
+01:02:25,059 --> 01:02:32,059
+you have given is you have given me the constantness or constant information about the
+
+472
+01:02:33,980 --> 01:02:40,980
+flow take variable throughout the function. But what if I ask you at this line is a a
+
+473
+01:02:44,699 --> 01:02:51,699
+constant? At this line is a a constant. So now what I am saying you are now distinguishing
+
+474
+01:02:56,460 --> 01:03:03,460
+between different program points the information at different program points.
+
+475
+01:03:04,619 --> 01:03:11,219
+First when we said a is a constant what we wanted is a constant across the program. Now
+
+476
+01:03:11,219 --> 01:03:18,219
+we are saying is a constant at that point. Make sense? So now flow sensitive analysis
+
+477
+01:03:21,420 --> 01:03:28,139
+will give you information which can hold at different program points. Flow insensitive
+
+478
+01:03:28,139 --> 01:03:33,659
+it should hold at every program point. It does not depend upon whether you take the
+
+479
+01:03:33,659 --> 01:03:40,659
+then branch or the else branch. Similar to flow sensitive and flow insensitive you can
+
+480
+01:03:41,699 --> 01:03:48,699
+also have context sensitive and context insensitive. What do we mean by that? Here is a piece of
+
+481
+01:03:48,940 --> 01:03:55,940
+code that uses two functions foo and bar. Foo takes an argument x and returns x. Bar
+
+482
+01:03:55,940 --> 01:04:02,940
+does x square and returns. Now I have a equal to foo 2, b equal to foo
+
+483
+01:04:03,980 --> 01:04:10,980
+3, c equal to bar 2, d equal to bar 2. Now the question are ABCD constants? Is a a constant?
+
+484
+01:04:23,259 --> 01:04:30,259
+Let us ask this question. Is this x a constant? Does foo always return a constant value?
+
+485
+01:04:34,659 --> 01:04:41,659
+What value does foo return? Let me repeat the question. The values that you may tell
+
+486
+01:04:45,299 --> 01:04:52,299
+me has to be an integer value or do not know. Let me ask this question again. Does foo return
+
+487
+01:04:54,899 --> 01:05:01,899
+a constant integer value or we do not know?
+
+488
+01:05:03,659 --> 01:05:10,659
+We do not know. It may return 2 or 3 since it is not a single constant value. What about
+
+489
+01:05:11,420 --> 01:05:18,420
+bar? We know because bar takes. In this program we know. Now if I do intra procedural analysis,
+
+490
+01:05:18,420 --> 01:05:25,420
+if I look at one procedure at a time and do not look at any other code, when I look at
+
+491
+01:05:33,900 --> 01:05:38,900
+a equal to foo, I say I do not know anything about foo. It must be returning some non-constant.
+
+492
+01:05:38,900 --> 01:05:45,900
+B equal to foo, I do not know anything what foo does. But if I do intra procedural, I
+
+493
+01:05:46,780 --> 01:05:53,780
+can look at other functions. When I look at other functions, what options do I have? When
+
+494
+01:05:56,539 --> 01:06:03,539
+I do, when I look at this function foo, one option is every time there is a call, I go
+
+495
+01:06:04,260 --> 01:06:11,260
+analyze foo and come back. So here is a call to foo. I will go here, analyze this function
+
+496
+01:06:12,220 --> 01:06:19,220
+and give you answer 2. So here it returned a constant. Here again I will go here, it
+
+497
+01:06:19,220 --> 01:06:23,940
+will return 3. Here again I will call bar, I will analyze bar and come back. I will say
+
+498
+01:06:23,940 --> 01:06:30,940
+it returns a constant 4. Here it returns a constant 4 and all constants. So how many
+
+499
+01:06:30,980 --> 01:06:37,980
+times you have to analyze the function? Four times in this case. In general how many times
+
+500
+01:06:38,420 --> 01:06:45,420
+I may have to analyze the function? In this scheme of things. What is your name? Yes.
+
+501
+01:06:54,500 --> 01:07:01,019
+So yes said something to a question. My question was if I am analyzing a function every time
+
+502
+01:07:01,019 --> 01:07:08,019
+there is a call, yes said if there are n calls then I will analyze the function n times.
+
+503
+01:07:13,380 --> 01:07:20,380
+How many of you agree? How many of you disagree? Those of you disagree why? Will it be more
+
+504
+01:07:20,380 --> 01:07:27,380
+or less? You are saying it is less. Why? Because what I am saying is here itself there are
+
+505
+01:07:36,940 --> 01:07:41,940
+two calls to foo. I have analyzed foo twice. So if there are n calls I will analyze it
+
+506
+01:07:41,940 --> 01:07:48,940
+at least n times. That is very clear.
+
+507
+01:07:50,380 --> 01:07:57,380
+So what you are saying if I have already analyzed the function bar with the same inputs why
+
+508
+01:08:01,140 --> 01:08:07,780
+should I reanalyze it? But I did not go to that level yet. I am saying if I tell you
+
+509
+01:08:07,780 --> 01:08:13,860
+that I have to analyze a function every time there is a call and if in the program you
+
+510
+01:08:13,860 --> 01:08:20,860
+see there are n calls to foo how many times will you analyze foo? And he said n. How many
+
+511
+01:08:21,100 --> 01:08:28,100
+of you agree that it will be n? Now you have more supporters. So your support base is increasing.
+
+512
+01:08:30,460 --> 01:08:37,460
+What is the if statement? Yes, the scheme is that. The scheme is that we will analyze
+
+513
+01:08:43,859 --> 01:08:48,059
+foo. No, let us not worry about the input. Let us say we have no way to know the inputs.
+
+514
+01:08:48,059 --> 01:08:52,819
+All I am doing is whenever there is a call I will go to that function and come back.
+
+515
+01:08:52,819 --> 01:08:59,259
+So I am saying how many times will I go to that function and come back? Yes sir there
+
+516
+01:08:59,259 --> 01:09:06,259
+are n calls. I will do n times. How many of you agree? What is your name? No, no not Adhvith.
+
+517
+01:09:06,260 --> 01:09:13,260
+Praful. Praful what do you think? N times. Why n times? Now I am making a statement.
+
+518
+01:09:27,699 --> 01:09:34,699
+It can call exponential times, exponential number of times. So I am saying that if I
+
+519
+01:09:36,260 --> 01:09:43,260
+have n, if the program size is n, I may have order of 2 to the power of n. Is it possible?
+
+520
+01:09:43,260 --> 01:09:50,260
+Yes. No, let us not. All I am doing is I am looking at the call. Every time there is a
+
+521
+01:09:50,260 --> 01:09:57,260
+call, I will just go there. I will analyze that function and come back. So I am not looking
+
+522
+01:09:57,260 --> 01:10:04,260
+at variables let us say. You are saying if the function is calling itself, then it is
+
+523
+01:10:28,260 --> 01:10:31,500
+going to be infinite loop. Then it may keep on calling itself, it will keep on visiting
+
+524
+01:10:31,500 --> 01:10:38,500
+itself. So that will go into infinite loop. Let us say we are avoiding recursion to keep
+
+525
+01:10:39,380 --> 01:10:46,380
+it simple. Very good point. So in recursion, how do you handle recursion? That is a difficult
+
+526
+01:10:46,500 --> 01:10:53,500
+task but let us say we are not going to recursion for the time being. There is no recursion.
+
+527
+01:10:57,260 --> 01:11:04,260
+You are trying to fit the answer. No, do not try to fit the answer to. Yes, guys.
+
+528
+01:11:04,260 --> 01:11:12,260
+Power set is it? Power set is it? Yes.
+
+529
+01:11:35,260 --> 01:11:42,260
+I am not really sure how I can map it to power set but here should I give the answer? No,
+
+530
+01:11:47,260 --> 01:11:54,260
+right? Let me make your life simpler. No if conditions, no recursion. No, I did not say
+
+531
+01:11:56,780 --> 01:11:58,260
+that.
+
+532
+01:11:58,260 --> 01:12:05,260
+No, sorry what are you saying again? There must be a water bottle here that I was using.
+
+533
+01:12:10,659 --> 01:12:16,579
+Must have been this guy. I am trying to understand so you have to complete the sentence. So those
+
+534
+01:12:16,579 --> 01:12:23,579
+who have not answered so far, give it a try. Those who have not spoken so far, you have
+
+535
+01:12:28,260 --> 01:12:35,260
+to complete the sentence. What is your name? Sushrath. Beautiful name. Yes, Sushrath. What
+
+536
+01:12:36,940 --> 01:12:43,940
+do you think? Did you understand the question? No, let us say we always analyze the function.
+
+537
+01:12:48,619 --> 01:12:55,420
+I am just saying, I am keeping life simple. Sure, do consider. Give me an example. Make
+
+538
+01:12:55,420 --> 01:13:02,420
+an example. Example, example. So those of you who are trying to come up with a scheme,
+
+539
+01:13:03,020 --> 01:13:10,020
+the best way is to write a small example in your textbook if you can come up with an example.
+
+540
+01:13:12,220 --> 01:13:19,220
+Sorry, sorry. They know if blocks.
+
+541
+01:13:25,420 --> 01:13:32,420
+Do not worry about the input. If you do not like it, let us say that it takes no arguments.
+
+542
+01:13:34,940 --> 01:13:41,940
+I am just being deliberately making it ridiculously simple.
+
+543
+01:13:41,939 --> 01:13:48,939
+Then, actually it is so simple. I do not think we should spend more time on this. It is a
+
+544
+01:14:01,219 --> 01:14:08,219
+pattern that once you know, you know. Yes.
+
+545
+01:14:11,939 --> 01:14:18,939
+Good. When will such a thing happen? When will that happen? So, your name? Rishabh said,
+
+546
+01:14:22,979 --> 01:14:28,419
+to analyze, I will complete the analysis of one function only if I have analyzed some
+
+547
+01:14:28,419 --> 01:14:35,419
+other functions. When will that happen? Good. One cause the other. Then, what will happen?
+
+548
+01:14:35,940 --> 01:14:42,940
+Let us take this example. Very simple example. I have function f1 that calls f2 twice. I
+
+549
+01:14:51,180 --> 01:14:58,180
+have code f2 that calls f3. How many times? Twice. I have f3 which calls f, no our friend
+
+550
+01:14:58,180 --> 01:15:05,180
+Fu there. How many times will I analyze Fu? Right? So, twice, four times. So, if it is
+
+551
+01:15:28,380 --> 01:15:35,380
+you keep on increasing it will be 4, 8, 16. So, doing context sensitive analysis is going
+
+552
+01:15:37,220 --> 01:15:44,220
+to be very expensive. It is going to be super expensive. There is one more thing that is
+
+553
+01:15:46,060 --> 01:15:53,060
+going to be pretty hard is when you are sitting in a lecture and the guy who is giving the
+
+554
+01:15:53,660 --> 01:16:00,660
+lecture had a very heavy breakfast. He does not feel very hungry, but are you guys hungry?
+
+555
+01:16:02,660 --> 01:16:08,700
+Yes. So, what is the scenario? How far can I see? I mean this is a good logical point
+
+556
+01:16:08,700 --> 01:16:15,700
+to stop. We can continue further, but if you think these guys should go for lunch and they
+
+557
+01:16:16,340 --> 01:16:22,860
+should. So, you should thank him then. Then, what time do we meet back? Okay. So, we will
+
+558
+01:16:23,420 --> 01:16:28,420
+meet back. Before we go, let us quickly summarize what we did now. Let us try to recall. We
+
+559
+01:16:28,420 --> 01:16:35,420
+came, we started with a brief overview of compilation process. We discussed about compilers,
+
+560
+01:16:36,979 --> 01:16:42,859
+interpreters, IR and all that. We looked at what are the important characteristics of
+
+561
+01:16:42,859 --> 01:16:49,859
+optimizations. We understood the desirable properties of optimizations and what is required
+
+562
+01:16:49,859 --> 01:16:56,859
+for them. We looked at flow sensitive, flow insensitive, context sensitive, context insensitive.
+
+563
+01:16:57,979 --> 01:17:04,979
+What do these terms mean? We understood what is may information and must information. So,
+
+564
+01:17:07,939 --> 01:17:14,139
+let us keep this somewhere in our stack of our cache of things. We will come back and
+
+565
+01:17:14,140 --> 01:17:21,140
+continue the discussion. This kind of brings to the introduction of the introduction to
+
+566
+01:17:21,539 --> 01:17:28,539
+optimization part. We will go into a very interesting example of what all optimizations
+
+567
+01:17:28,860 --> 01:17:35,860
+can do. If you thought this example was exciting, wait for the next example. So, we will meet
+
+568
+01:17:36,819 --> 01:17:43,819
+after the lunch. Any questions so far? No? I thought you will ask when will you leave
+
+569
+01:17:51,299 --> 01:17:53,819
+us? See you soon.
+

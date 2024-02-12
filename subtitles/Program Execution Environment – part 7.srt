@@ -1,0 +1,2468 @@
+1
+00:00:00,000 --> 00:00:08,160
+So, I think we can start.
+
+2
+00:00:08,160 --> 00:00:14,519
+So, just to recap what we did just before the lunch.
+
+3
+00:00:14,519 --> 00:00:22,199
+The fundamental idea of PIC was to essentially ensure that the relocations which would otherwise
+
+4
+00:00:22,199 --> 00:00:28,359
+appear on tech section are moved into the data section right and GOT holds the address
+
+5
+00:00:28,359 --> 00:00:35,759
+and essentially what you do is you get the address of GOT using the relative addressing.
+
+6
+00:00:35,759 --> 00:00:37,200
+This is what we saw.
+
+7
+00:00:37,200 --> 00:00:41,799
+Now assignment.
+
+8
+00:00:41,799 --> 00:00:47,519
+What you should do is you have already written this shared library which had this code right.
+
+9
+00:00:47,519 --> 00:00:56,840
+So, let us write a client code for it and let us print the address of GBL variable which
+
+10
+00:00:56,840 --> 00:01:02,040
+is defined in the shared library and address of another global variable which is defined
+
+11
+00:01:02,040 --> 00:01:10,120
+in the program and see if you see something unexpected.
+
+12
+00:01:10,120 --> 00:01:22,879
+So, before we actually get to that can someone first tell me what is the expected thing.
+
+13
+00:01:23,159 --> 00:01:25,959
+So for example, where is var stored?
+
+14
+00:01:25,959 --> 00:01:31,719
+Var in this myprog.c where is it stored?
+
+15
+00:01:31,719 --> 00:01:33,719
+Data section or BSS right.
+
+16
+00:01:33,719 --> 00:01:40,199
+So, the address will be according to the memory map which we saw right.
+
+17
+00:01:40,199 --> 00:01:50,039
+Where is GBL stored?
+
+18
+00:01:50,040 --> 00:01:54,200
+Where is GBL stored?
+
+19
+00:01:54,200 --> 00:02:00,560
+GBL is defined by the shared library.
+
+20
+00:02:00,560 --> 00:02:15,520
+So, where is GBL stored?
+
+21
+00:02:15,520 --> 00:02:28,920
+Will it be in the data section of myprog.c of myprog.c or should it be somewhere in the
+
+22
+00:02:28,920 --> 00:02:37,640
+memory mapped region of libmy.so right.
+
+23
+00:02:37,640 --> 00:02:42,320
+So wherever shared library is loaded somewhere within that is what we expect.
+
+24
+00:02:42,319 --> 00:02:45,719
+Now try to run this code and see what happens.
+
+25
+00:02:45,719 --> 00:02:52,039
+So we expect address of var to be in the data section and address of GBL somewhere far away
+
+26
+00:02:52,039 --> 00:02:59,560
+from it right.
+
+27
+00:02:59,560 --> 00:03:05,039
+Why 8 bytes different?
+
+28
+00:03:05,039 --> 00:03:08,199
+I mean are you observing difference of 8 bytes.
+
+29
+00:03:08,199 --> 00:03:19,159
+So someone is observing the difference between address of GBL and address of var is 8 bytes.
+
+30
+00:03:19,159 --> 00:03:33,719
+Is that logical?
+
+31
+00:03:34,280 --> 00:03:39,199
+Is anyone observing GBL is in the somewhere far region which might be in the memory mapped
+
+32
+00:03:39,199 --> 00:03:51,000
+region?
+
+33
+00:03:51,000 --> 00:03:56,919
+Can you look at the process map and see where is the memory mapped region where libmy.so
+
+34
+00:03:56,919 --> 00:04:11,519
+is loaded.
+
+35
+00:04:11,519 --> 00:04:14,959
+So let us look at this I have the code.
+
+36
+00:04:14,959 --> 00:04:20,680
+So I have this code which is doing the same thing.
+
+37
+00:04:20,680 --> 00:04:23,680
+I am printing the address of this.
+
+38
+00:04:23,720 --> 00:04:51,079
+Now I will add a scan of here so we can examine the process.
+
+39
+00:04:51,159 --> 00:04:59,279
+I run this program and I actually see very small difference between the two.
+
+40
+00:04:59,279 --> 00:05:16,959
+Now if I examine the process map I do see that libmy.so was loaded but it was at some
+
+41
+00:05:17,039 --> 00:05:25,319
+address f c something something.
+
+42
+00:05:25,319 --> 00:05:30,799
+And I do see there is some data section here which is read write.
+
+43
+00:05:30,799 --> 00:05:39,319
+So var is somewhere close to that and for some reason GBL is also very close to that.
+
+44
+00:05:39,319 --> 00:05:42,039
+So what really happened?
+
+45
+00:05:42,040 --> 00:05:48,800
+So somehow GBL variable which was actually supposed to be in the shared library is also
+
+46
+00:05:48,800 --> 00:05:54,040
+loaded in the data section.
+
+47
+00:05:54,040 --> 00:05:59,600
+Does everyone at least confirm that this is what we are observing?
+
+48
+00:05:59,600 --> 00:06:02,640
+Now any theories of why this happened?
+
+49
+00:06:03,639 --> 00:06:13,439
+Shouldn't we be seeing some address close to this region where the library was loaded?
+
+50
+00:06:13,439 --> 00:06:22,039
+Ideally that is where it should be.
+
+51
+00:06:22,039 --> 00:06:32,560
+The reason this happens is because the a.out which is produced is executable.
+
+52
+00:06:32,560 --> 00:06:35,800
+It is not relocatable.
+
+53
+00:06:35,800 --> 00:06:47,639
+Now what happens is when this code is linked into a.out there is no idea to the linker
+
+54
+00:06:47,639 --> 00:06:52,279
+and compiler where GBL is going to come from.
+
+55
+00:06:52,279 --> 00:06:56,840
+And they cannot change the text section of this with additional relocation because it
+
+56
+00:06:56,840 --> 00:06:59,500
+is supposed to be the finalized thing.
+
+57
+00:06:59,500 --> 00:07:04,259
+So how will the address of GBL be obtained?
+
+58
+00:07:04,259 --> 00:07:08,019
+Is everyone clear about the problem which I am trying to describe?
+
+59
+00:07:08,019 --> 00:07:14,699
+So a.out which is produced which contains the code of main is already finalized.
+
+60
+00:07:14,699 --> 00:07:20,819
+It shouldn't be having any additional relocations to be processed.
+
+61
+00:07:20,819 --> 00:07:27,019
+But GBL itself is not known because GBL will come from some library.
+
+62
+00:07:27,019 --> 00:07:34,039
+So what compilers and linkers do is they do something called as a copy relocation.
+
+63
+00:07:34,039 --> 00:07:48,379
+So if you look at a.out you will see a relocation called as R386 copy from GBL.
+
+64
+00:07:48,939 --> 00:07:58,060
+So what this relocation is going to do is whenever the shared library is loaded and
+
+65
+00:07:58,060 --> 00:08:03,579
+wherever that address of the GBL in the shared library is it is going to copy content of
+
+66
+00:08:03,579 --> 00:08:09,779
+that into the data section of the executable.
+
+67
+00:08:09,779 --> 00:08:14,339
+And that's how it will work and all the subsequent references of GBL will actually be from the
+
+68
+00:08:14,339 --> 00:08:16,300
+data section.
+
+69
+00:08:16,300 --> 00:08:23,379
+So although data was owned by the shared library it actually got copied into the data section
+
+70
+00:08:23,379 --> 00:08:27,900
+of the executable.
+
+71
+00:08:27,900 --> 00:08:36,820
+And that's why you observe that GBL is actually close to your normal variables.
+
+72
+00:08:36,820 --> 00:08:40,220
+Is it clear?
+
+73
+00:08:40,220 --> 00:08:46,700
+Now we saw how to do data references.
+
+74
+00:08:46,700 --> 00:08:53,259
+We saw how shared libraries compiled with position independent code to refer to data.
+
+75
+00:08:53,259 --> 00:08:55,300
+But what about functions?
+
+76
+00:08:55,300 --> 00:09:01,560
+So let's say this is my shared library code and foo is calling bar.
+
+77
+00:09:01,560 --> 00:09:06,660
+Now again just like the problem we had with data we have the same problem.
+
+78
+00:09:06,659 --> 00:09:12,000
+That means address of bar may be different when the bar is actually loaded in context
+
+79
+00:09:12,000 --> 00:09:15,219
+of some process.
+
+80
+00:09:15,219 --> 00:09:24,339
+So do we need to do anything for function calls also?
+
+81
+00:09:24,339 --> 00:09:29,079
+Any idea?
+
+82
+00:09:29,079 --> 00:09:32,379
+Remember the calls were already relative.
+
+83
+00:09:32,379 --> 00:09:38,379
+So when foo called bar the call instruction didn't take the absolute address of bar.
+
+84
+00:09:38,379 --> 00:09:41,879
+It took the relative address of the bar.
+
+85
+00:09:41,879 --> 00:09:47,939
+So by that logic we shouldn't need to do anything for the functions.
+
+86
+00:09:47,939 --> 00:09:52,419
+But we need to do something.
+
+87
+00:09:52,419 --> 00:09:55,259
+And symbol resolution is a problem.
+
+88
+00:09:55,259 --> 00:10:00,700
+So your assignment is to tell me what happens in this case.
+
+89
+00:10:00,700 --> 00:10:06,980
+So let's say I have a shared library which has bar which is defined and I have myproc.c
+
+90
+00:10:06,980 --> 00:10:11,340
+which also defines bar.
+
+91
+00:10:11,340 --> 00:10:15,900
+If this was normal code what will happen?
+
+92
+00:10:15,900 --> 00:10:22,040
+If this was myproc.c and main.c what will happen?
+
+93
+00:10:22,040 --> 00:10:28,220
+Why will there be error?
+
+94
+00:10:28,340 --> 00:10:33,300
+So function with the same signature.
+
+95
+00:10:33,300 --> 00:10:36,019
+In terms of linker why it's an error?
+
+96
+00:10:36,019 --> 00:10:38,060
+What we saw yesterday?
+
+97
+00:10:38,060 --> 00:10:39,279
+Correct.
+
+98
+00:10:39,279 --> 00:10:43,399
+So function definitions were treated as strong symbol.
+
+99
+00:10:43,399 --> 00:10:46,220
+Whatever we learned yesterday.
+
+100
+00:10:46,220 --> 00:10:52,779
+Now what is the expected output in this case?
+
+101
+00:10:52,779 --> 00:10:54,420
+Linker should raise error.
+
+102
+00:10:54,419 --> 00:11:00,779
+At what point will it raise error?
+
+103
+00:11:00,779 --> 00:11:03,339
+At what point will it raise error?
+
+104
+00:11:03,339 --> 00:11:10,919
+Will it be at creation time creating executable or will it be at load time?
+
+105
+00:11:10,919 --> 00:11:15,500
+Can you try and tell me when does the error come?
+
+106
+00:11:15,500 --> 00:11:38,340
+Try the exact same case and tell me what is the error you get at whatever time?
+
+107
+00:11:38,340 --> 00:11:41,340
+What is the error you got?
+
+108
+00:11:41,340 --> 00:11:52,259
+Try with m32.
+
+109
+00:11:52,259 --> 00:11:56,460
+Sorry?
+
+110
+00:11:56,460 --> 00:11:58,259
+No error.
+
+111
+00:11:58,259 --> 00:12:06,720
+So some people are saying they are not getting any error.
+
+112
+00:12:06,720 --> 00:12:11,980
+So what is the actual output?
+
+113
+00:12:11,980 --> 00:12:24,920
+How did 10 come?
+
+114
+00:12:24,919 --> 00:12:42,059
+Anyone got the error?
+
+115
+00:12:42,059 --> 00:12:46,459
+So there is some warning but not an error.
+
+116
+00:12:46,459 --> 00:12:52,980
+So the resolution rules for dynamic shared libraries are slightly more interesting than
+
+117
+00:12:52,980 --> 00:12:54,639
+what we learned yesterday.
+
+118
+00:12:54,639 --> 00:13:00,360
+So what we had learned yesterday was if there are two strong symbols there is a problem.
+
+119
+00:13:00,360 --> 00:13:03,559
+But that is not true when it comes to shared libraries.
+
+120
+00:13:03,559 --> 00:13:12,159
+In shared libraries the functions or anything can be overridden by other things.
+
+121
+00:13:12,159 --> 00:13:18,679
+So for example if you write a function called malloc in your program and call malloc it
+
+122
+00:13:18,679 --> 00:13:21,659
+is not the lipsys malloc which will get called.
+
+123
+00:13:21,659 --> 00:13:25,299
+It will be your malloc which will get called.
+
+124
+00:13:25,299 --> 00:13:31,019
+So there is some preference to the client code to override something which was defined
+
+125
+00:13:31,019 --> 00:13:34,139
+in the shared library.
+
+126
+00:13:34,139 --> 00:13:35,980
+Does that make sense?
+
+127
+00:13:35,980 --> 00:13:43,699
+There is slightly more convoluted things where if there was a libmy.so and libmy1.so and
+
+128
+00:13:43,699 --> 00:13:47,339
+they had conflicting definition, client did not do anything.
+
+129
+00:13:47,340 --> 00:13:51,420
+So let us say bar was actually defined in some other SO file.
+
+130
+00:13:51,420 --> 00:13:56,100
+Then it will depend on the order in which things get loaded and the later one gets the
+
+131
+00:13:56,100 --> 00:13:57,899
+preference.
+
+132
+00:13:57,899 --> 00:14:04,820
+So it is kind of hard to figure out exactly which one got used.
+
+133
+00:14:04,820 --> 00:14:21,260
+Now if you make bar static from libmy.so then this will not happen because when you
+
+134
+00:14:21,260 --> 00:14:26,500
+say something is static it cannot be overridden by someone else.
+
+135
+00:14:26,500 --> 00:14:34,540
+So this principle applies to only things which are visible outside the shared library.
+
+136
+00:14:34,539 --> 00:14:39,059
+Whatever is not visible outside shared library cannot be overridden by others.
+
+137
+00:14:39,059 --> 00:14:44,779
+But whatever is visible outside a shared library can be overridden by other.
+
+138
+00:14:44,779 --> 00:14:52,179
+For that matter even if you define a gbl variable it will get overridden with the one which
+
+139
+00:14:52,179 --> 00:14:56,659
+you have in the program.
+
+140
+00:14:56,659 --> 00:14:59,980
+Does that make sense?
+
+141
+00:14:59,980 --> 00:15:05,860
+Now function calls for this reason, now imagine what happens.
+
+142
+00:15:05,860 --> 00:15:14,060
+So if you had foo calling bar and you are compiling a dso can you really replace this
+
+143
+00:15:14,060 --> 00:15:22,740
+call with the relative address of bar which was defined in the SO.
+
+144
+00:15:22,740 --> 00:15:24,379
+Did everyone get my question?
+
+145
+00:15:24,379 --> 00:15:33,059
+So the question is now that you know these rules when you are trying to generate libmy.so
+
+146
+00:15:33,059 --> 00:15:39,939
+can this function call actually call this bar function using the relative address of
+
+147
+00:15:39,939 --> 00:15:43,720
+the bar.
+
+148
+00:15:43,720 --> 00:15:49,220
+So will the call instruction generated for this statement will be called of something
+
+149
+00:15:50,220 --> 00:15:58,460
+to find the address of this bar.
+
+150
+00:15:58,460 --> 00:16:09,460
+So if you look at this so let us look at the shared library code.
+
+151
+00:16:09,460 --> 00:16:17,660
+So I have this code let me try to compile it.
+
+152
+00:16:17,659 --> 00:16:23,219
+For now I will just remove fpick so it looks simpler.
+
+153
+00:16:23,219 --> 00:16:41,019
+Now if I look at obj dump and if I go to foo it is not generating actually call to bar
+
+154
+00:16:41,019 --> 00:16:42,539
+using the relative address.
+
+155
+00:16:42,659 --> 00:16:50,779
+It is generating a relocation for it and why was that done is because I do not know that
+
+156
+00:16:50,779 --> 00:16:56,879
+this is the exact bar which will get called because it might get overridden.
+
+157
+00:16:56,879 --> 00:17:11,500
+Now if I do this static let me make this function static.
+
+158
+00:17:11,500 --> 00:17:22,380
+Now if I look at the dump I actually see call to the bar.
+
+159
+00:17:22,380 --> 00:17:23,460
+Does that make sense?
+
+160
+00:17:23,460 --> 00:17:29,140
+So when it was not static what happened is there was a possibility that someone could
+
+161
+00:17:29,140 --> 00:17:31,779
+overwrite this definition of bar.
+
+162
+00:17:31,779 --> 00:17:38,220
+That is why compiler could not generate code which will directly call this bar.
+
+163
+00:17:38,220 --> 00:17:46,940
+So it has to generate a relocation and as soon as I make it static then it starts using
+
+164
+00:17:46,940 --> 00:17:50,819
+relative addressing and directly calls bar.
+
+165
+00:17:50,819 --> 00:17:56,339
+Now since there was a relocation generated we have the same problem which we had with
+
+166
+00:17:56,339 --> 00:18:03,900
+data because the text section will get changed based on address of bar which might have overridden
+
+167
+00:18:03,900 --> 00:18:07,339
+it.
+
+168
+00:18:07,339 --> 00:18:23,619
+So we have to do something with function calls just like we were doing for data.
+
+169
+00:18:23,619 --> 00:18:31,419
+All calls to functions which might be overridden which means any function which might be exported
+
+170
+00:18:31,419 --> 00:18:33,099
+out of the shared library.
+
+171
+00:18:33,099 --> 00:18:39,000
+But if you make something static in the shared library and you call that function that means
+
+172
+00:18:39,000 --> 00:18:41,500
+you are saying it is bound statically.
+
+173
+00:18:41,500 --> 00:18:46,699
+So static you can think of it as bound statically so I always know it is always going to call
+
+174
+00:18:46,699 --> 00:18:49,639
+this instance and not any other instance.
+
+175
+00:18:49,639 --> 00:18:55,599
+When it was not static then there is a possibility that someone can override its definition in
+
+176
+00:18:55,599 --> 00:18:58,179
+which case I do not know address of that.
+
+177
+00:18:58,259 --> 00:19:05,259
+That is why I had to generate relocation just like we do for data.
+
+178
+00:19:05,259 --> 00:19:07,539
+So we have to do something for this.
+
+179
+00:19:07,539 --> 00:19:09,799
+So what can we do?
+
+180
+00:19:09,799 --> 00:19:11,740
+Same thing right.
+
+181
+00:19:11,740 --> 00:19:17,580
+Just like for every address we stored its address in got we will do the same thing for
+
+182
+00:19:17,580 --> 00:19:23,299
+every function you create an entry in got and you use that.
+
+183
+00:19:23,419 --> 00:19:31,899
+So call will actually be load the address of function from got and go to that address.
+
+184
+00:19:31,899 --> 00:19:33,779
+So we can do the same thing.
+
+185
+00:19:33,779 --> 00:19:47,059
+Now unfortunately this is not efficient for functions because unlike variables remember
+
+186
+00:19:47,059 --> 00:19:53,220
+typically when you are writing any shared library for example is there any variable
+
+187
+00:19:53,220 --> 00:20:00,799
+which you do use from libc or you use only functions from libc.
+
+188
+00:20:00,799 --> 00:20:07,179
+So libc has bunch of things how many times you had to use a variable which was defined
+
+189
+00:20:07,179 --> 00:20:09,279
+in libc.
+
+190
+00:20:09,279 --> 00:20:13,460
+How many times you had to do extern int of some variable which you are using and that
+
+191
+00:20:13,860 --> 00:20:18,180
+variable was defined in libc.
+
+192
+00:20:18,180 --> 00:20:19,700
+Almost never right.
+
+193
+00:20:19,700 --> 00:20:25,220
+The purpose of libraries is to provide interfaces which mostly will be through functions and
+
+194
+00:20:25,220 --> 00:20:27,519
+not data right.
+
+195
+00:20:27,519 --> 00:20:31,000
+Now what is the problem with got?
+
+196
+00:20:31,000 --> 00:20:39,360
+Remember every reference which needs to happen to that variable goes via additional indirection
+
+197
+00:20:39,359 --> 00:20:45,679
+because we have to first get the address of got then look at the address of that variable
+
+198
+00:20:45,679 --> 00:20:46,939
+and get it.
+
+199
+00:20:46,939 --> 00:20:53,959
+So every time if you do this there is considerable overhead added for every reference right which
+
+200
+00:20:53,959 --> 00:20:59,479
+may not be the best thing for functions because functions are very common in dso's which will
+
+201
+00:20:59,479 --> 00:21:07,279
+be cross referenced in the client code and you don't want every call to go via this indirection.
+
+202
+00:21:07,279 --> 00:21:09,159
+Does that make sense?
+
+203
+00:21:09,160 --> 00:21:13,259
+So we do something more for this.
+
+204
+00:21:13,259 --> 00:21:20,560
+And one other thing is this thing that library may actually define thousands of functions
+
+205
+00:21:20,560 --> 00:21:28,759
+but only some of them are used right and if you put their addresses in got you have to
+
+206
+00:21:28,759 --> 00:21:32,340
+do something which will populate that address at load time.
+
+207
+00:21:32,340 --> 00:21:37,920
+So once the loader is loading the program it has to resolve all the references and resolve
+
+208
+00:21:38,000 --> 00:21:44,279
+all the relocations and if there are thousand functions in the library it has to patch at
+
+209
+00:21:44,279 --> 00:21:51,120
+least thousand relocations even though when most of the common times you are using just
+
+210
+00:21:51,120 --> 00:21:54,480
+printf and scanf right.
+
+211
+00:21:54,480 --> 00:22:00,000
+So there is lot of work which is happening at load time which could be useless.
+
+212
+00:22:00,000 --> 00:22:01,700
+Is this clear to everyone?
+
+213
+00:22:01,700 --> 00:22:03,080
+So there are two problems.
+
+214
+00:22:03,079 --> 00:22:11,399
+One is there could be too many functions right and second is we have to resolve all the functions
+
+215
+00:22:11,399 --> 00:22:18,399
+which may not be the best thing because not all of them will get used.
+
+216
+00:22:18,399 --> 00:22:19,919
+So we have to do something lazily.
+
+217
+00:22:19,919 --> 00:22:25,599
+We don't want to do something prematurely when the application starts.
+
+218
+00:22:25,599 --> 00:22:28,939
+That is the idea which we are trying to go against.
+
+219
+00:22:28,940 --> 00:22:32,660
+So that is where something called as PLT comes in.
+
+220
+00:22:32,660 --> 00:22:35,940
+Processor linkage table.
+
+221
+00:22:35,940 --> 00:22:40,460
+So this is again one more level of indirection.
+
+222
+00:22:40,460 --> 00:22:47,420
+So what happens is whenever you want to call a function you don't simply call the function
+
+223
+00:22:47,420 --> 00:22:49,320
+directly.
+
+224
+00:22:49,320 --> 00:22:52,940
+You call something in the PLT.
+
+225
+00:22:52,940 --> 00:22:58,779
+So you can think that every function has a PLT entry just like every variable had a GOT
+
+226
+00:22:59,619 --> 00:23:00,619
+entry.
+
+227
+00:23:00,619 --> 00:23:04,259
+Every function has a PLT entry and PLT entry is not data.
+
+228
+00:23:04,259 --> 00:23:07,700
+PLT entry is actually code.
+
+229
+00:23:07,700 --> 00:23:08,700
+Executable code.
+
+230
+00:23:08,700 --> 00:23:11,180
+So PLT does not hold data.
+
+231
+00:23:11,180 --> 00:23:13,980
+PLT holds code.
+
+232
+00:23:13,980 --> 00:23:21,339
+And what is going to happen is when you go to the PLT it will actually get the address
+
+233
+00:23:21,339 --> 00:23:23,700
+from the GOT.
+
+234
+00:23:23,700 --> 00:23:26,899
+So for every function you do two things.
+
+235
+00:23:26,900 --> 00:23:35,100
+You create a PLT entry and you also create a GOT entry.
+
+236
+00:23:35,100 --> 00:23:42,700
+Now when you are doing the call you call the PLT entry into the function of that function.
+
+237
+00:23:42,700 --> 00:23:50,300
+The PLT entry of that function is going to look up the address from GOT.
+
+238
+00:23:50,300 --> 00:23:55,620
+And then it is going to call the resolver which will try to actually resolve the function
+
+239
+00:23:55,699 --> 00:23:56,899
+call.
+
+240
+00:23:56,899 --> 00:23:59,859
+And that is the special entry called PLT L0.
+
+241
+00:23:59,859 --> 00:24:08,699
+So PLT L0 is actually some code from dynamic linker which is going to do the symbol resolution.
+
+242
+00:24:08,699 --> 00:24:10,359
+Now what happens is this.
+
+243
+00:24:10,359 --> 00:24:18,459
+When you call the function first time you will first call the PLT of that.
+
+244
+00:24:18,460 --> 00:24:25,740
+That will essentially try to get the GOT and this address which is stored here is actually
+
+245
+00:24:25,740 --> 00:24:31,579
+address of the next instruction.
+
+246
+00:24:31,579 --> 00:24:36,140
+So what will happen is when you get this address and you call that address you will actually
+
+247
+00:24:36,140 --> 00:24:40,340
+come to the next instruction only.
+
+248
+00:24:40,340 --> 00:24:47,500
+And this will call the resolver which is PLT 0 and something will happen.
+
+249
+00:24:47,539 --> 00:24:49,619
+But is this clear up to this stage?
+
+250
+00:24:49,619 --> 00:24:57,400
+So what is happening is first time we are calling PLT of that function that calls the
+
+251
+00:24:57,400 --> 00:25:01,579
+that gets the address from the GOT.
+
+252
+00:25:01,579 --> 00:25:06,619
+But GOT actually holds the address of the next instruction only.
+
+253
+00:25:06,619 --> 00:25:15,180
+So GOT will come back to the next instruction and call the resolver.
+
+254
+00:25:15,180 --> 00:25:16,859
+Is this clear?
+
+255
+00:25:16,859 --> 00:25:19,859
+Now some magic happens after the first call.
+
+256
+00:25:19,859 --> 00:25:26,059
+So what resolver is going to do is resolver is going to change the address in the GOT
+
+257
+00:25:26,059 --> 00:25:31,539
+to actually point to the function.
+
+258
+00:25:31,539 --> 00:25:38,299
+So GOT will be modified after the first call to that function.
+
+259
+00:25:38,299 --> 00:25:46,099
+And GOT now will start having the actual address of the function.
+
+260
+00:25:46,099 --> 00:25:49,639
+Now let us imagine what happens for the second call.
+
+261
+00:25:49,639 --> 00:25:55,219
+So when you do the second call we come to here and when we get the address from GOT
+
+262
+00:25:55,219 --> 00:26:02,779
+we actually get the address of the function and we start executing the function.
+
+263
+00:26:02,779 --> 00:26:10,279
+So what happened is first time when the function was called we did not know the address.
+
+264
+00:26:10,279 --> 00:26:15,539
+So we called the resolver.
+
+265
+00:26:15,539 --> 00:26:21,059
+After resolver is done figuring out the address of the function it over wrote the address
+
+266
+00:26:21,059 --> 00:26:26,019
+in the GOT and said now this is the address of the function.
+
+267
+00:26:26,019 --> 00:26:31,740
+So next time when you call the same function again you actually have the address of the
+
+268
+00:26:31,740 --> 00:26:35,079
+function in GOT.
+
+269
+00:26:35,079 --> 00:26:36,079
+Is this clear?
+
+270
+00:26:36,079 --> 00:26:38,339
+This is kind of bit complicated.
+
+271
+00:26:38,339 --> 00:26:44,619
+But the fundamental principles you have to remember is we do not want to populate GOT
+
+272
+00:26:44,699 --> 00:26:50,579
+the application start time because that involves lot of overhead.
+
+273
+00:26:50,579 --> 00:26:56,459
+So what we do is we say that GOT holds initially address of a resolver function which is going
+
+274
+00:26:56,459 --> 00:27:00,979
+to find out where the address of the function is.
+
+275
+00:27:00,979 --> 00:27:06,139
+And once resolver is done it is going to update that address and say now here is the actual
+
+276
+00:27:06,139 --> 00:27:07,139
+function.
+
+277
+00:27:07,139 --> 00:27:12,859
+So every subsequent call is actually going to happen faster.
+
+278
+00:27:12,859 --> 00:27:19,839
+It still is going through PLT but it does not do any other things.
+
+279
+00:27:19,839 --> 00:27:25,599
+So what did we achieve with this is essentially we do not have to populate GOT completely.
+
+280
+00:27:25,599 --> 00:27:30,000
+So we are populating GOT lazily.
+
+281
+00:27:30,000 --> 00:27:37,219
+And then after the first call overhead is paid all the subsequent calls are faster because
+
+282
+00:27:37,219 --> 00:27:40,019
+they directly get the address of the function.
+
+283
+00:27:40,740 --> 00:27:48,139
+So after resolver after resolver it will come to if you overwrite the address and then comes
+
+284
+00:27:48,139 --> 00:27:49,139
+to function.
+
+285
+00:27:49,139 --> 00:27:50,139
+Correct.
+
+286
+00:27:50,139 --> 00:27:51,139
+Correct.
+
+287
+00:27:51,139 --> 00:27:56,379
+So what resolver is doing is it is trying to figure out what is the address of the function
+
+288
+00:27:56,379 --> 00:28:01,420
+and once it is done figuring out the address it will overwrite the GOT and then start executing
+
+289
+00:28:01,420 --> 00:28:07,900
+that address.
+
+290
+00:28:07,900 --> 00:28:10,980
+Is this clear?
+
+291
+00:28:10,980 --> 00:28:17,300
+So this allows us to get position independent function calls also.
+
+292
+00:28:17,300 --> 00:28:24,940
+So no matter where a function is loaded it can be called and PLT again you can see PLT
+
+293
+00:28:24,940 --> 00:28:30,700
+is the executable code and GOT is the data.
+
+294
+00:28:30,700 --> 00:28:36,580
+So PLT can still be shared across processes because it just bunch of code.
+
+295
+00:28:36,579 --> 00:28:41,779
+What is the things which are changing are still in the GOT only.
+
+296
+00:28:41,779 --> 00:28:45,699
+We are not changing anything in the PLT.
+
+297
+00:28:45,699 --> 00:28:52,659
+So the code section is completely shared including the code which is present in the PLT only
+
+298
+00:28:52,659 --> 00:28:57,000
+GOT is modified.
+
+299
+00:28:57,000 --> 00:29:01,500
+Any questions on this?
+
+300
+00:29:01,500 --> 00:29:06,500
+Sorry.
+
+301
+00:29:06,500 --> 00:29:10,460
+Resolvers job is essentially to figure out which symbol to pick up.
+
+302
+00:29:10,460 --> 00:29:14,140
+So for example if there are multiple foos which one to pick up according to the rules
+
+303
+00:29:14,140 --> 00:29:21,420
+for dynamic shared libraries.
+
+304
+00:29:21,420 --> 00:29:29,839
+So it is part of the linker code which figures out when there are two symbols what to do.
+
+305
+00:29:29,839 --> 00:29:32,439
+So what are the pros and cons of PIC?
+
+306
+00:29:32,439 --> 00:29:39,199
+So one is obviously pro is you are able to get shared libraries by which you can share
+
+307
+00:29:39,199 --> 00:29:40,240
+the text section.
+
+308
+00:29:40,240 --> 00:29:45,579
+You do not have to kind of duplicate the text section.
+
+309
+00:29:45,579 --> 00:29:52,359
+The cons is obviously you have some runtime overhead because you have GOTs and other things.
+
+310
+00:29:52,359 --> 00:29:55,399
+Everything goes through at least one level of indirection.
+
+311
+00:29:56,400 --> 00:30:01,560
+Every reference at least goes through one GOT reference and in case of function after
+
+312
+00:30:01,560 --> 00:30:04,080
+first call one PLT reference.
+
+313
+00:30:04,080 --> 00:30:11,519
+So there are some overheads and every variable and every function which is defined actually
+
+314
+00:30:11,519 --> 00:30:13,220
+needs to have a GOT entry.
+
+315
+00:30:13,220 --> 00:30:15,720
+So GOT can actually be very large.
+
+316
+00:30:15,720 --> 00:30:21,880
+So that will take some space in your program when it is running.
+
+317
+00:30:21,880 --> 00:30:22,880
+Does that make sense?
+
+318
+00:30:23,840 --> 00:30:28,720
+That is why when you are writing shared libraries it is very important for you to know which
+
+319
+00:30:28,720 --> 00:30:34,720
+things are actually needed to be exposed outside shared library and which things are needed
+
+320
+00:30:34,720 --> 00:30:36,480
+just for the internal thing.
+
+321
+00:30:36,480 --> 00:30:42,960
+So for example printf might be using bunch of utility routines for doing its own operation
+
+322
+00:30:42,960 --> 00:30:47,680
+but those can be marked static and as soon as they are marked static they do not need
+
+323
+00:30:47,680 --> 00:30:51,640
+a PLT entry or a GOT entry.
+
+324
+00:30:51,640 --> 00:30:57,759
+That is why it is very important to tag your functions to respect the visibility because
+
+325
+00:30:57,759 --> 00:31:04,200
+it enables compiler to do more optimizations and linker to do more optimizations like this.
+
+326
+00:31:04,200 --> 00:31:08,480
+Is it clear?
+
+327
+00:31:08,480 --> 00:31:14,280
+Now whatever we saw so far was what happened in Linux x86.
+
+328
+00:31:14,280 --> 00:31:20,120
+Now obviously when you are designing new architectures you want to see what are the common things
+
+329
+00:31:20,279 --> 00:31:29,039
+which happened in the old architecture and improve hardware support for some of the things.
+
+330
+00:31:29,039 --> 00:31:38,359
+So one of the things which x86-64 architecture adds is it adds relative data addressing.
+
+331
+00:31:38,359 --> 00:31:46,039
+So this trick which we were doing that we had to call to a dummy instruction and get
+
+332
+00:31:46,200 --> 00:31:56,680
+from the stack is no longer needed on x86-64 because x86-64 allows you to do current instruction
+
+333
+00:31:56,680 --> 00:32:01,720
+plus minus something to access the data.
+
+334
+00:32:01,720 --> 00:32:10,960
+So x86-64 supports PC relative addressing and some of the support for PIC gets simplified
+
+335
+00:32:10,960 --> 00:32:14,399
+because of that.
+
+336
+00:32:14,400 --> 00:32:21,840
+So it requires essentially fewer instructions because you don't have to do that dummy call.
+
+337
+00:32:21,840 --> 00:32:30,080
+One other thing which x86-64 enforces at least GCC is it forces you to create shared libraries
+
+338
+00:32:30,080 --> 00:32:31,800
+using FPIC only.
+
+339
+00:32:31,800 --> 00:32:36,000
+So you cannot create a shared library without FPIC.
+
+340
+00:32:36,000 --> 00:32:41,759
+Remember before we got into FPIC we were trying to create shared library which had relocations
+
+341
+00:32:41,759 --> 00:32:43,759
+on the text section.
+
+342
+00:32:43,759 --> 00:32:48,079
+So x86-64 Linux implementation does not allow you to do that.
+
+343
+00:32:48,079 --> 00:32:53,279
+So you have to compile your shared libraries using FPIC.
+
+344
+00:32:53,279 --> 00:32:59,680
+How many of you have heard of a term called as code models?
+
+345
+00:32:59,680 --> 00:33:03,240
+Anyone?
+
+346
+00:33:03,240 --> 00:33:09,000
+So code model is essentially set of things.
+
+347
+00:33:09,839 --> 00:33:11,400
+Correct.
+
+348
+00:33:11,400 --> 00:33:12,799
+Somewhat yeah.
+
+349
+00:33:12,799 --> 00:33:21,599
+So essentially what happens is whenever compiler is generating code it assumes some code model.
+
+350
+00:33:21,599 --> 00:33:29,400
+Now what happens is typically you can think of code model as something which describes
+
+351
+00:33:29,400 --> 00:33:34,119
+how far addresses you can access from instructions.
+
+352
+00:33:34,119 --> 00:33:41,879
+Now by default x86-64 supports PC relative addressing and the way things are supported
+
+353
+00:33:41,879 --> 00:33:44,239
+is the displacement can be 32 bits.
+
+354
+00:33:44,239 --> 00:33:49,919
+So you should be able to reference anything from current instruction which lies above
+
+355
+00:33:49,919 --> 00:33:53,919
+2 GB or below 2 GB.
+
+356
+00:33:53,919 --> 00:34:01,199
+Now what happens if you have data which does not fit in 2 GB?
+
+357
+00:34:01,279 --> 00:34:04,559
+Then you cannot use PC relative addressing.
+
+358
+00:34:04,559 --> 00:34:05,559
+Let us try that.
+
+359
+00:34:05,559 --> 00:34:18,759
+Let us say I have
+
+360
+00:34:18,960 --> 00:34:38,960
+Let us say I have ARR which is of 1 GB and I am trying to access it now in the program.
+
+361
+00:34:38,960 --> 00:34:58,880
+It worked.
+
+362
+00:34:58,880 --> 00:35:01,680
+And it printed something.
+
+363
+00:35:01,680 --> 00:35:22,519
+I mean it should have printed.
+
+364
+00:35:22,519 --> 00:35:27,360
+So it printed some garbage stuff.
+
+365
+00:35:27,360 --> 00:35:53,920
+Now let me try to increase this to 2 GB.
+
+366
+00:35:53,920 --> 00:35:57,800
+It still worked.
+
+367
+00:35:57,800 --> 00:36:16,039
+Let me make it 3 GB.
+
+368
+00:36:16,039 --> 00:36:21,039
+Still worked.
+
+369
+00:36:21,039 --> 00:36:40,039
+This is 7 GB.
+
+370
+00:39:40,039 --> 00:40:07,159
+Okay.
+
+371
+00:40:07,159 --> 00:40:10,679
+So GCC is actually realizing it is absolute address.
+
+372
+00:40:10,679 --> 00:40:34,159
+Let us try.
+
+373
+00:40:34,159 --> 00:40:35,679
+I think I will need to try it.
+
+374
+00:40:35,679 --> 00:40:39,879
+But essentially what I was expecting sorry for going on detour.
+
+375
+00:40:39,879 --> 00:40:45,440
+But essentially what happens is since it supports PC relative addressing what happens is you
+
+376
+00:40:45,440 --> 00:40:51,119
+can refer to the data from the code section which falls within the 2 GB range.
+
+377
+00:40:51,119 --> 00:40:55,639
+Now for some reason GCC is realizing it is going far away and it is actually using absolute
+
+378
+00:40:55,639 --> 00:40:56,639
+address.
+
+379
+00:40:56,639 --> 00:40:59,480
+I do not know how to force it to use relative address.
+
+380
+00:41:00,280 --> 00:41:04,240
+But since you were using relative address and if your data does not fit then what will
+
+381
+00:41:04,240 --> 00:41:09,880
+actually happen is it will not be able to figure out it will not be able to reference
+
+382
+00:41:09,880 --> 00:41:13,639
+that data using the PC relative addressing.
+
+383
+00:41:13,639 --> 00:41:20,199
+And that is supposed to be the default code model where you always use data which will
+
+384
+00:41:20,199 --> 00:41:22,079
+fit within the 2 GB range.
+
+385
+00:41:22,079 --> 00:41:28,099
+But if that does not happen then compiler and linker cannot figure out how to do this.
+
+386
+00:41:28,219 --> 00:41:34,259
+And that is where you need to actually change the code model to use large addresses where
+
+387
+00:41:34,259 --> 00:41:38,059
+it can actually be more than 2 GB.
+
+388
+00:41:38,059 --> 00:41:43,380
+And then it will actually use slightly slower code to reference data than using relative
+
+389
+00:41:43,380 --> 00:41:47,219
+addressing.
+
+390
+00:41:47,219 --> 00:41:54,339
+Now one of the things which we said was one of the advantages of one of the problems with
+
+391
+00:41:54,420 --> 00:42:00,860
+static libraries was that if there is a bug in static library once it is fixed you have
+
+392
+00:42:00,860 --> 00:42:07,980
+to tell all of your customers to recompile and relink their application.
+
+393
+00:42:07,980 --> 00:42:09,340
+How does DSO solve this?
+
+394
+00:42:09,340 --> 00:42:12,660
+So we said that DSO is going to solve this problem.
+
+395
+00:42:12,660 --> 00:42:18,019
+But so far whatever we have seen does not solve that problem because what we so far
+
+396
+00:42:18,019 --> 00:42:24,699
+learned is just how to load DSO that does not say how to actually distribute a bug fixed
+
+397
+00:42:24,699 --> 00:42:25,699
+DSO.
+
+398
+00:42:25,699 --> 00:42:29,619
+And how does it ensure that client does not have to change?
+
+399
+00:42:29,619 --> 00:42:32,619
+Correct.
+
+400
+00:42:32,619 --> 00:42:37,420
+So that would do it.
+
+401
+00:42:37,420 --> 00:42:45,820
+The problem which happens is there are cases where so when you fix something so let us
+
+402
+00:42:45,820 --> 00:42:50,980
+say you have mylib.so.
+
+403
+00:42:50,980 --> 00:42:57,380
+So what will happen is mylib.so someone has mylib.so then how do you know whether it is
+
+404
+00:42:57,380 --> 00:42:58,380
+fixed or not?
+
+405
+00:42:58,380 --> 00:43:03,539
+So you want to version your SO saying this is version 1, this is version 2, this is version
+
+406
+00:43:03,539 --> 00:43:09,180
+3 and you can tell your customer please use version 3 to get this bug fixed.
+
+407
+00:43:09,180 --> 00:43:13,460
+So you need something to say that this is the version of mySO.
+
+408
+00:43:13,460 --> 00:43:20,940
+So what happens is each DSO has something called as a SO name and a real name.
+
+409
+00:43:20,940 --> 00:43:25,460
+So SO name is what is actually used by the linker.
+
+410
+00:43:25,460 --> 00:43:30,460
+So whenever I say libmy.so this is SO name.
+
+411
+00:43:30,460 --> 00:43:35,179
+So whenever linker wants to load a library it will look at the SO name.
+
+412
+00:43:35,179 --> 00:43:40,460
+But the physical name of the file which is stored in the file system may not be actually
+
+413
+00:43:40,460 --> 00:43:41,460
+that.
+
+414
+00:43:41,460 --> 00:43:49,019
+It could actually be libmy.so.something.
+
+415
+00:43:49,019 --> 00:43:55,019
+So typically you will always see every SO file has dot some numbers.
+
+416
+00:43:55,019 --> 00:44:01,360
+So those are the actual names of those files but that is not the SO name which is actually
+
+417
+00:44:01,360 --> 00:44:05,539
+used by the linker for loading.
+
+418
+00:44:05,539 --> 00:44:11,179
+And what typically you do is you create a symbolic link between the SO name file to
+
+419
+00:44:11,179 --> 00:44:13,380
+the real file.
+
+420
+00:44:13,380 --> 00:44:20,500
+So what allows this you to do is programs the client code whenever it needs to say that
+
+421
+00:44:20,500 --> 00:44:24,659
+I want this library they always refer to the SO name.
+
+422
+00:44:24,659 --> 00:44:27,659
+They do not refer to the actual file name.
+
+423
+00:44:27,739 --> 00:44:35,859
+And you as an author of the library can ship a new version and client can create a SIM
+
+424
+00:44:35,859 --> 00:44:39,420
+link to that and it will start working.
+
+425
+00:44:39,420 --> 00:44:41,659
+Does that make sense?
+
+426
+00:44:41,659 --> 00:44:49,940
+So just to show you so if you look at ldd a dot out which we were seeing.
+
+427
+00:44:49,940 --> 00:44:59,340
+So this libvdso.so this you can think of it as the SO name.
+
+428
+00:44:59,340 --> 00:45:06,420
+The dot one is actually the so if you look at the actual file the actual file name is
+
+429
+00:45:06,420 --> 00:45:07,619
+this.
+
+430
+00:45:07,619 --> 00:45:15,220
+But what loader when it needs to load it only uses the SO name which is up to this point.
+
+431
+00:45:15,219 --> 00:45:20,659
+So if I get a new version with dot two I will simply put it and the same code without any
+
+432
+00:45:20,659 --> 00:45:25,819
+changes will start using that file.
+
+433
+00:45:25,819 --> 00:45:30,559
+Does that make sense?
+
+434
+00:45:30,559 --> 00:45:39,339
+So if you look at redelf it actually shows what all libraries you need.
+
+435
+00:45:39,380 --> 00:45:44,860
+So if I do redelf dash da dot out it shows all the libraries which are needed by this
+
+436
+00:45:44,860 --> 00:45:49,300
+program.
+
+437
+00:45:49,300 --> 00:45:57,100
+So if I do redelf dash da dot out it shows bunch of things and some of the entries you
+
+438
+00:45:57,100 --> 00:46:00,440
+can see are something called as needed.
+
+439
+00:46:00,440 --> 00:46:07,200
+So needed are the set of shared libraries which are needed for this program to start.
+
+440
+00:46:07,199 --> 00:46:13,639
+So these are the ones which will actually be loaded by the loader as part of the application
+
+441
+00:46:13,639 --> 00:46:15,039
+startup type.
+
+442
+00:46:15,039 --> 00:46:19,279
+So when the application starts the loader is going to look at what all is marked as
+
+443
+00:46:19,279 --> 00:46:25,599
+needed in this executable and it is going to load all those shared libraries.
+
+444
+00:46:25,599 --> 00:46:27,519
+Does that make sense?
+
+445
+00:46:27,519 --> 00:46:33,119
+Now we had seen something like what happens in the loader earlier.
+
+446
+00:46:33,119 --> 00:46:38,079
+There was start which called libc start and ultimately called main.
+
+447
+00:46:38,079 --> 00:46:44,039
+Now that we have shared libraries also learned how does the thing happens.
+
+448
+00:46:44,039 --> 00:46:49,639
+So what needs to happen is the loader will look at all the segments which were marked
+
+449
+00:46:49,639 --> 00:46:50,639
+as pt load.
+
+450
+00:46:50,639 --> 00:46:56,699
+Pt load were the segments which were present in the executable which needed to be mapped
+
+451
+00:46:56,699 --> 00:47:01,239
+into the memory map which was code segment data segment and so on.
+
+452
+00:47:01,239 --> 00:47:05,639
+So loader looks at all the segments which were pt load and loads them.
+
+453
+00:47:05,639 --> 00:47:10,079
+There is a field in the elf called as interrupt.
+
+454
+00:47:10,079 --> 00:47:13,199
+You can see that here.
+
+455
+00:47:13,199 --> 00:47:27,839
+So if I print the program headers for a file I see something like this interrupt which
+
+456
+00:47:28,840 --> 00:47:35,480
+the program interpreter ld linux x86 64 something something.
+
+457
+00:47:35,480 --> 00:47:40,960
+So this is actually the dynamic linker.
+
+458
+00:47:40,960 --> 00:47:45,480
+So this SO file actually has code for dynamic linker.
+
+459
+00:47:45,480 --> 00:47:52,900
+So what this is saying to the loader is once you are starting to execute this program please
+
+460
+00:47:52,900 --> 00:47:59,400
+call this guy to do the further processing.
+
+461
+00:47:59,400 --> 00:48:06,940
+So what loader will simply do is once it starts executing the binary it will call and once
+
+462
+00:48:06,940 --> 00:48:13,760
+it is done mapping the pt load segments it will call this guy ld linux or whatever we
+
+463
+00:48:13,760 --> 00:48:18,420
+saw in the 64 bit variant and this is the dynamic linker.
+
+464
+00:48:18,420 --> 00:48:26,500
+Dynamic linker is going to look at all the things which were marked as dded which I showed
+
+465
+00:48:26,500 --> 00:48:35,039
+you in the previous slide from the executable and start loading all those libraries.
+
+466
+00:48:35,039 --> 00:48:42,720
+And then kernel will essentially get the exec system call and will start transferring control
+
+467
+00:48:42,720 --> 00:48:45,960
+to the actual program execution.
+
+468
+00:48:45,960 --> 00:48:47,280
+Does that make sense?
+
+469
+00:48:47,280 --> 00:48:53,860
+So what happened is essentially when the program starts running in the kernel, kernel is first
+
+470
+00:48:53,860 --> 00:48:57,820
+going to look at there is something called as interrupt specified so I will call that
+
+471
+00:48:57,820 --> 00:49:00,220
+guy.
+
+472
+00:49:00,220 --> 00:49:06,340
+That guy which is the dynamic linker is going to call is going to look at whatever was marked
+
+473
+00:49:06,340 --> 00:49:11,460
+as needed in the executable and load all those shared libraries.
+
+474
+00:49:11,460 --> 00:49:16,060
+And then all the segments will be loaded from the program and then the program execution
+
+475
+00:49:16,059 --> 00:49:32,279
+start will be starting from underscore start function.
+
+476
+00:49:32,279 --> 00:49:43,299
+No then you get that error that could not load shared library.
+
+477
+00:49:43,300 --> 00:49:49,460
+So what will happen is so it you have to realize at what point that event happened.
+
+478
+00:49:49,460 --> 00:49:54,519
+So let's say dynamic linker is looking at the needed list.
+
+479
+00:49:54,519 --> 00:50:01,180
+So when it looks at the first needed entry so let's say that was a.so it loaded that.
+
+480
+00:50:01,180 --> 00:50:06,500
+Now before it went to further you deleted b.so which was also needed.
+
+481
+00:50:06,500 --> 00:50:13,440
+So when linker actually goes to needed and b.so is not present it is going to cry out.
+
+482
+00:50:13,440 --> 00:50:20,739
+Once it is start loading and if it has loaded and then you delete then it also doesn't
+
+483
+00:50:20,739 --> 00:50:21,739
+matter.
+
+484
+00:50:21,739 --> 00:50:29,179
+So the timing has to be precise where linker is not fully done loading yet and you deleted
+
+485
+00:50:29,179 --> 00:50:30,179
+something.
+
+486
+00:50:30,179 --> 00:50:31,179
+I don't know what will happen.
+
+487
+00:50:31,179 --> 00:50:47,539
+Correct the entire.so will be loaded.
+
+488
+00:50:47,539 --> 00:50:53,980
+If it was already in physical memory you still need to load it by load in this context mean
+
+489
+00:50:53,980 --> 00:50:59,019
+you have to set up the virtual addresses where it will be loaded to point to that.
+
+490
+00:50:59,860 --> 00:51:04,019
+You have to create physically more space into the RAM.
+
+491
+00:51:04,019 --> 00:51:11,259
+It just means that you have to create mapping that these virtual addresses hold this portion
+
+492
+00:51:11,259 --> 00:51:16,980
+of the.so physically it may be backed in this same copy which was already present.
+
+493
+00:51:16,980 --> 00:51:27,900
+I will come to that.
+
+494
+00:51:27,900 --> 00:51:29,460
+But that is a good point.
+
+495
+00:51:29,460 --> 00:51:35,420
+So now does everyone at least understood whatever we have covered so far.
+
+496
+00:51:35,420 --> 00:51:41,760
+Now obviously you don't want to pay application start.
+
+497
+00:51:41,760 --> 00:51:48,720
+So for example if you are using printf or if you are using some shared library function
+
+498
+00:51:48,720 --> 00:51:51,240
+only for very small amount of time.
+
+499
+00:51:51,240 --> 00:51:58,160
+Do you really want to pay for the entire load for the entire duration.
+
+500
+00:51:58,160 --> 00:52:06,360
+So what happens is when you have loaded the d.so that was loaded by the loader or dynamic
+
+501
+00:52:06,360 --> 00:52:13,360
+linker and that remains loaded for the entire duration of the program.
+
+502
+00:52:13,360 --> 00:52:18,840
+So that no matter how frequently you use it versus don't use it.
+
+503
+00:52:18,840 --> 00:52:23,000
+Once you have said I need this it will get loaded and it will remain for lifetime of
+
+504
+00:52:23,000 --> 00:52:24,000
+the application.
+
+505
+00:52:24,000 --> 00:52:29,480
+Now that obviously may not be the best case specially for very large application you may
+
+506
+00:52:29,480 --> 00:52:31,760
+do some processing in chunks.
+
+507
+00:52:31,760 --> 00:52:37,080
+Like for example if you look at game itself or any other such large application it may
+
+508
+00:52:37,080 --> 00:52:42,140
+require some functionality for some specific duration within the application.
+
+509
+00:52:42,140 --> 00:52:46,880
+Once you are done using that functionality you may say I don't want this functionality
+
+510
+00:52:46,880 --> 00:52:52,400
+now because you are done with whatever needed to be done.
+
+511
+00:52:52,400 --> 00:52:58,160
+So that's where applications can actually call dynamic linker.
+
+512
+00:52:58,159 --> 00:53:04,519
+So far we saw loader calling dynamic linker at the application start time but there are
+
+513
+00:53:04,519 --> 00:53:11,480
+ways in which application can call dynamic linker.
+
+514
+00:53:11,480 --> 00:53:13,420
+And what is the interface obviously.
+
+515
+00:53:13,420 --> 00:53:15,799
+So there is a function called as dlopen.
+
+516
+00:53:15,799 --> 00:53:20,079
+How many of you had heard of this function.
+
+517
+00:53:20,079 --> 00:53:24,539
+So there is a function called dlopen which you can call from your C program.
+
+518
+00:53:24,539 --> 00:53:30,340
+It takes a file name as the argument which is the file name of the .so which you want
+
+519
+00:53:30,340 --> 00:53:33,219
+to load.
+
+520
+00:53:33,219 --> 00:53:40,539
+And it takes a flag which says at what point the resolution should happen.
+
+521
+00:53:40,539 --> 00:53:46,739
+So whether do you want to do as soon as the file is opened do you want to do symbol resolution
+
+522
+00:53:46,739 --> 00:53:54,259
+or you want to do symbol resolution lazily as things are being used from that library.
+
+523
+00:53:54,260 --> 00:54:01,620
+So for example if you say rtld now so what will dynamic linker do it will go and resolve
+
+524
+00:54:01,620 --> 00:54:03,780
+all the symbols.
+
+525
+00:54:03,780 --> 00:54:07,980
+No matter whether you use them don't use them at this point everything will be resolved
+
+526
+00:54:07,980 --> 00:54:13,260
+and all the subsequent references will be fast because you don't have to re resolve
+
+527
+00:54:13,260 --> 00:54:14,440
+them.
+
+528
+00:54:14,440 --> 00:54:19,740
+If you say rtld lazy then linker will simply map it into your virtual address space will
+
+529
+00:54:19,740 --> 00:54:22,140
+not do any resolution.
+
+530
+00:54:22,139 --> 00:54:26,940
+And once you call something then it will say oh I don't know its address so let me resolve
+
+531
+00:54:26,940 --> 00:54:32,179
+first and then come back.
+
+532
+00:54:32,179 --> 00:54:45,900
+It's a file it's not file path it's the library name.
+
+533
+00:54:46,660 --> 00:54:53,860
+So you have to say where to locate so as a programmer at build time you have to tell
+
+534
+00:54:53,860 --> 00:54:56,260
+where to look for shared libraries.
+
+535
+00:54:56,260 --> 00:55:01,539
+Whether those shared libraries are loaded by the loader or by loaded by your application.
+
+536
+00:55:01,539 --> 00:55:08,079
+LD library path again as usual keeps working.
+
+537
+00:55:08,079 --> 00:55:14,700
+Now once you have loaded it how will you call a function because you can't say now refer
+
+538
+00:55:14,699 --> 00:55:19,739
+to variable gbl because it was never referenced in your program.
+
+539
+00:55:19,739 --> 00:55:26,460
+So there is another API called dl sim which is from this dso which was opened give me
+
+540
+00:55:26,460 --> 00:55:32,339
+address of this symbol.
+
+541
+00:55:32,339 --> 00:55:37,099
+And you get the handle and then you use that address.
+
+542
+00:55:37,099 --> 00:55:47,019
+Once you are done you can do dl close which will close the.
+
+543
+00:55:47,019 --> 00:55:54,019
+You can think of it like this that it gives you a handle to a symbol which you requested
+
+544
+00:55:54,019 --> 00:55:55,019
+and then you can use that.
+
+545
+00:55:55,019 --> 00:55:59,179
+I have an example which shows how to use this.
+
+546
+00:55:59,179 --> 00:56:03,539
+And then there is dl error which will say whether anything happened I mean anything
+
+547
+00:56:03,539 --> 00:56:06,500
+went wrong in the whole process.
+
+548
+00:56:06,579 --> 00:56:10,980
+Now you can see that you have control over when to open the shared library and when to
+
+549
+00:56:10,980 --> 00:56:17,619
+close it and you can do this as often as you want and for as shorter or as longer duration
+
+550
+00:56:17,619 --> 00:56:20,099
+of the time during your application.
+
+551
+00:56:20,099 --> 00:56:24,139
+No loader will not do.
+
+552
+00:56:24,139 --> 00:56:30,139
+I will come to that.
+
+553
+00:56:30,139 --> 00:56:37,579
+But essentially when you are saying so the entries which are used via dl open will not
+
+554
+00:56:37,579 --> 00:56:41,379
+have dt needed in the else.
+
+555
+00:56:41,379 --> 00:56:49,339
+So remember we saw something like there is something called as needed.
+
+556
+00:56:49,339 --> 00:56:53,619
+This word generated by compiler or during the assembly process.
+
+557
+00:56:53,619 --> 00:56:56,639
+So this says I need lib dot so.
+
+558
+00:56:56,639 --> 00:57:01,199
+What loader is going to do is it is going to load all the shared libraries which had
+
+559
+00:57:01,199 --> 00:57:03,079
+this flag.
+
+560
+00:57:03,079 --> 00:57:11,879
+Any library which is only dl opened and not statically linked at build time by statically
+
+561
+00:57:11,879 --> 00:57:21,960
+link I mean was linked at the time of creation of executable will not have this flag.
+
+562
+00:57:21,960 --> 00:57:28,920
+What you are so think of it this way that wl path etc which you are giving is only to
+
+563
+00:57:28,920 --> 00:57:32,480
+say that this is where shared libraries live.
+
+564
+00:57:32,480 --> 00:57:36,920
+It does not say all the shared libraries are needed depending on the references which you
+
+565
+00:57:36,920 --> 00:57:45,559
+are doing the shared libraries will be marked as needed.
+
+566
+00:57:45,559 --> 00:57:48,280
+So this is the sample code.
+
+567
+00:57:48,280 --> 00:57:57,360
+So I have I am doing dl open of some library and I am saying lazily if there is any error
+
+568
+00:57:57,360 --> 00:57:59,360
+I check it.
+
+569
+00:57:59,360 --> 00:58:05,840
+Otherwise I say give me handle of a function called as of a symbol called advec and I store
+
+570
+00:58:05,840 --> 00:58:14,960
+it in advec and advec has this prototype and I simply call it as a function and I get now
+
+571
+00:58:14,960 --> 00:58:24,119
+advec is not real lib vector dot so will not be loaded until the application actually starts
+
+572
+00:58:24,119 --> 00:58:27,119
+execute.
+
+573
+00:58:27,119 --> 00:58:34,880
+Correct and we can we can see that.
+
+574
+00:58:34,880 --> 00:58:36,400
+So let us see that.
+
+575
+00:58:36,400 --> 00:58:58,840
+So let us say I take this code.
+
+576
+00:58:58,840 --> 00:59:26,240
+Now for simplicity I will say this is.
+
+577
+01:01:56,239 --> 01:02:16,799
+Is everyone clear what happened here now if we do ldd ldd does not say I need lib my dot
+
+578
+01:02:16,800 --> 01:02:19,440
+so and you can actually see it in action.
+
+579
+01:02:19,440 --> 01:02:33,420
+So let us try to debug this code.
+
+580
+01:02:33,420 --> 01:03:00,579
+So I will put a break point on main.
+
+581
+01:03:00,579 --> 01:03:08,599
+So now the program has started but it has not yet done dl open.
+
+582
+01:03:08,599 --> 01:03:16,699
+Now let us switch back to this.
+
+583
+01:03:16,699 --> 01:03:24,199
+So we have this is the memory map of a dot out.
+
+584
+01:03:25,059 --> 01:03:31,579
+my dot so here.
+
+585
+01:03:31,579 --> 01:03:36,819
+Let me execute this.
+
+586
+01:03:36,819 --> 01:03:41,079
+Let me re-examine the map.
+
+587
+01:03:41,079 --> 01:03:44,399
+You can see lib my dot so now.
+
+588
+01:03:44,399 --> 01:03:50,079
+So it was actually loaded when it was needed.
+
+589
+01:03:50,079 --> 01:03:54,519
+And if you do the same thing with the earlier examples we were trying where it was kind
+
+590
+01:03:54,519 --> 01:03:58,400
+of linked at compile time that this is needed.
+
+591
+01:03:58,400 --> 01:04:09,299
+Then you need and you will see at the program startup itself it is already loaded.
+
+592
+01:04:09,299 --> 01:04:15,920
+So those are calls to the dynamic linker which is part of OS in some sense.
+
+593
+01:04:15,920 --> 01:04:24,280
+Yes so internally it will do some system calls to get to that.
+
+594
+01:04:24,280 --> 01:04:36,760
+It is not a libc feature.
+
+595
+01:04:36,760 --> 01:04:42,639
+So that kind of concludes most of the things which I had with respect to the surrounding
+
+596
+01:04:42,639 --> 01:04:47,079
+environment.
+
+597
+01:04:47,079 --> 01:04:56,039
+So just to kind of recap what we saw so far was how function calls were done.
+
+598
+01:04:56,039 --> 01:05:02,159
+And if you look at function calls who played major roles in getting function calls working.
+
+599
+01:05:02,159 --> 01:05:04,960
+Which component compiler.
+
+600
+01:05:04,960 --> 01:05:10,159
+So most of the magic for function call was done by compilers.
+
+601
+01:05:10,159 --> 01:05:13,719
+Then we went into details of object files.
+
+602
+01:05:13,719 --> 01:05:19,539
+The creation of object file was essentially job of assembler.
+
+603
+01:05:19,539 --> 01:05:25,399
+Then we looked at linker which was its own thing and it had its own quirky rules of how
+
+604
+01:05:25,399 --> 01:05:27,799
+to do things.
+
+605
+01:05:27,799 --> 01:05:32,879
+Then we looked in the morning we started off with libraries where we saw how to create
+
+606
+01:05:32,879 --> 01:05:36,920
+libraries and what are the additional features of linkers.
+
+607
+01:05:36,920 --> 01:05:43,599
+Then we went into virtual memory and processes and how when something is running on the system
+
+608
+01:05:43,599 --> 01:05:48,920
+what is the view of that to the actual processor and the resources.
+
+609
+01:05:48,920 --> 01:05:55,480
+Then we looked into the dynamic linking including position independent code and this.
+
+610
+01:05:55,480 --> 01:05:59,920
+So that kind of covers most of the things which I wanted to talk about.
+
+611
+01:05:59,960 --> 01:06:07,119
+The remaining session is all about how various language features are implemented.
+
+612
+01:06:07,119 --> 01:06:14,019
+What all happens when you do something in your C language or C++ language.
+
+613
+01:06:14,019 --> 01:06:18,220
+What all happens across the stack to make it work.
+
+614
+01:06:18,220 --> 01:06:20,920
+Now I don't have any slides for these.
+
+615
+01:06:20,920 --> 01:06:23,680
+I was bit lazy to actually prepare them.
+
+616
+01:06:23,680 --> 01:06:26,400
+But I wanted this to be more interactive.
+
+617
+01:06:26,400 --> 01:06:28,440
+That's why I have not kind of put fixed slides.
+

@@ -1,0 +1,5 @@
+ Compiler optimization aims to improve the performance of a program without altering its functionality. Control flow analysis is a crucial aspect of optimization, involving the construction of control flow graphs (CFG) to represent the flow of control in a program. Each node in a CFG represents a basic block, a sequence of instructions with no jumps within it. Edges in a CFG connect basic blocks and indicate the flow of control.
+
+Dominator analysis is a fundamental component of control flow analysis, determining the dominance relations among blocks. Dominators play a vital role in finding loops and extracting natural loops from a CFG. Unreachable code elimination is a beneficial outcome of control flow analysis, discarding code segments that are not part of any execution path.
+
+Control flow optimization focuses on generating larger basic blocks, offering several advantages, including improved local optimizations, enhanced instruction-level parallelism (ILP), and better pipelining. Techniques employed in control flow optimization include code straightening, simplification, and loop inversion.

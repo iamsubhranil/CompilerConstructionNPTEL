@@ -1,0 +1,4904 @@
+1
+00:00:00,000 --> 00:00:14,320
+What did you try?
+
+2
+00:00:14,320 --> 00:00:16,280
+Printing the L feather.
+
+3
+00:00:16,280 --> 00:00:17,280
+What did you try?
+
+4
+00:00:17,280 --> 00:00:24,320
+Did anyone try to do the assignment where you had to correlate the symbols with the
+
+5
+00:00:24,320 --> 00:00:29,359
+data in this data section?
+
+6
+00:00:29,359 --> 00:00:33,399
+Were you able to do that?
+
+7
+00:00:33,399 --> 00:00:38,159
+But that is something which I would suggest you do that because what will happen is that
+
+8
+00:00:38,159 --> 00:00:43,920
+is actually the crux of how to interpret elf structure and if you are able to do that you
+
+9
+00:00:43,920 --> 00:00:51,239
+will have thorough understanding of how the information in elf is organized properly.
+
+10
+00:00:51,239 --> 00:00:57,439
+So just to recap yesterday right what all we kind of did we kind of covered lot of things
+
+11
+00:00:57,439 --> 00:00:58,480
+yesterday.
+
+12
+00:00:58,479 --> 00:01:03,359
+So we started off with how function calls are implemented right.
+
+13
+00:01:03,359 --> 00:01:10,200
+Do you still remember all the things stack, caller save, callee saved registers?
+
+14
+00:01:10,200 --> 00:01:13,759
+What else we studied in function calls?
+
+15
+00:01:43,760 --> 00:01:57,800
+Yeah.
+
+16
+00:01:57,800 --> 00:02:03,320
+So essentially we kind of talked in detail about how function calls are implemented,
+
+17
+00:02:03,320 --> 00:02:09,439
+how object files are organized, what is the structure of object file and then we covered
+
+18
+00:02:10,000 --> 00:02:16,120
+some aspects of linking in terms of how linker merges the two things, why does it need to
+
+19
+00:02:16,120 --> 00:02:21,039
+relocate some of the stuff because assembler may not have all the information during assembly
+
+20
+00:02:21,039 --> 00:02:28,000
+time of addresses of various symbols and then things like addend and so on right.
+
+21
+00:02:28,000 --> 00:02:31,879
+Now before we kind of start I will just give an example because I think that might be a
+
+22
+00:02:31,879 --> 00:02:34,800
+simpler one to understand relocation.
+
+23
+00:02:34,800 --> 00:02:40,800
+So let us say so we yesterday were trying to see there is something like minus 4 which
+
+24
+00:02:40,800 --> 00:02:45,840
+kind of complicated the entire story of why things are that way in terms of so if you
+
+25
+00:02:45,840 --> 00:02:57,560
+recollect so we had this relocation which had this R386 PC32 and if we did OBJ dump
+
+26
+00:02:57,719 --> 00:03:07,479
+this the value here was some minus 4 which kind of complicated I was trying to explain
+
+27
+00:03:07,479 --> 00:03:12,199
+it but I do not know how easier it was to convey but I will try to give a simpler example
+
+28
+00:03:12,199 --> 00:03:14,319
+which will make things bit more clear.
+
+29
+00:03:14,319 --> 00:03:25,920
+So let us say I have an array and let us say I have a pointer to it which holds address
+
+30
+00:03:25,919 --> 00:03:33,159
+of 0th element of the array which is essentially same as saying it points to ARR right.
+
+31
+00:03:33,159 --> 00:03:52,279
+Now let us say I do this and so before this program is going to run somehow
+
+32
+00:03:52,280 --> 00:03:55,520
+PTR needs to hold address of ARR right.
+
+33
+00:03:55,520 --> 00:04:14,280
+We saw this is achieved by doing the relocation.
+
+34
+00:04:14,280 --> 00:04:30,959
+So we see that OBJ dump dash D dash dash section so reloc.hold holds something this is the
+
+35
+00:04:30,959 --> 00:04:39,639
+content of the array right and this is the PTR sorry this is the PTR right and you see
+
+36
+00:04:39,639 --> 00:04:42,920
+it had 0s so it does not actually hold anything.
+
+37
+00:04:42,920 --> 00:04:49,680
+Now if we actually add this flag it says that this needs to be changed so that these 32
+
+38
+00:04:49,680 --> 00:04:53,439
+bits need to be changed with address of ARR.
+
+39
+00:04:53,439 --> 00:05:02,120
+So what this relocation is telling linker is change 32 bits here with the value of ARR
+
+40
+00:05:02,120 --> 00:05:07,000
+does that make sense and what linker will do is once it is done assigning address to
+
+41
+00:05:07,000 --> 00:05:12,280
+ARR whatever is that address linker will simply substitute it here.
+
+42
+00:05:12,279 --> 00:05:21,879
+Now let us say instead of ARR I do ARR of 1.
+
+43
+00:05:21,879 --> 00:05:27,759
+So what I am saying is PTR actually points to ARR of 1 that means it is actually pointing
+
+44
+00:05:27,759 --> 00:05:32,319
+to ARR plus 4 in terms of byte address right.
+
+45
+00:05:32,319 --> 00:05:36,719
+So how do I represent this what should be the symbol here because there is no symbol
+
+46
+00:05:36,719 --> 00:05:41,639
+called ARR of 4 right.
+
+47
+00:05:41,959 --> 00:05:50,839
+So that is where the addend come into picture so now if I compile this program and if I
+
+48
+00:05:50,839 --> 00:06:08,120
+look at the OBJ dump sorry it is actually exactly same but this value is actually 4
+
+49
+00:06:08,120 --> 00:06:09,680
+it is not 0.
+
+50
+00:06:09,720 --> 00:06:16,840
+So what linker is going to do is first use this so in nutshell linker is using the original
+
+51
+00:06:16,840 --> 00:06:23,680
+content which was there and adding that to the symbol does that make sense.
+
+52
+00:06:23,680 --> 00:06:30,519
+So linker will not simply replace these bits linker will use these bits plus the symbol
+
+53
+00:06:30,519 --> 00:06:34,199
+and whatever is the computed value that is what it is going to put.
+
+54
+00:06:34,199 --> 00:06:41,240
+So in context of code what that minus 4 was representing is add this value first before
+
+55
+00:06:41,240 --> 00:06:44,639
+you patch the address of the symbol.
+
+56
+00:06:44,639 --> 00:06:51,480
+So relocation is essentially function of couple of things one is address which needs to be
+
+57
+00:06:51,480 --> 00:06:57,800
+modified in this case it is address 14 in the data section right.
+
+58
+00:06:57,920 --> 00:07:05,560
+The exact content which needs to be modified that is given by this offset the relocation
+
+59
+00:07:05,560 --> 00:07:14,680
+symbol is saying what it needs to be patched with the content of this is saying what should
+
+60
+00:07:14,680 --> 00:07:22,080
+be added to this address before actually patching the value and this R38632 etcetera is the
+
+61
+00:07:22,080 --> 00:07:26,240
+relocation operation and it could be slightly more complicated than this.
+
+62
+00:07:26,240 --> 00:07:31,400
+This one is fairly simple which is saying simply take 32 bits of the content and put
+
+63
+00:07:31,400 --> 00:07:37,439
+it here but there could be much more complicated relocations.
+
+64
+00:07:37,439 --> 00:07:39,400
+Does that make sense?
+
+65
+00:07:39,400 --> 00:07:44,040
+So that is where we kind of stopped yesterday and in between we also saw things around strong
+
+66
+00:07:44,040 --> 00:07:49,560
+symbols weak symbols how they are treated by linker and all the quirks which come out
+
+67
+00:07:49,560 --> 00:07:51,680
+of that behavior.
+
+68
+00:07:51,680 --> 00:07:55,840
+So today we will look into static libraries.
+
+69
+00:07:55,839 --> 00:08:02,079
+The static libraries the primary reason we need to support that is remember why we were
+
+70
+00:08:02,079 --> 00:08:07,259
+writing source code in multiple files and why we had linker can anyone recall that point
+
+71
+00:08:07,259 --> 00:08:15,879
+why we had that?
+
+72
+00:08:15,879 --> 00:08:20,919
+So we had couple of reasons for separate compilation and one of the other reasons was being able
+
+73
+00:08:20,919 --> 00:08:23,199
+to distribute your code right.
+
+74
+00:08:23,199 --> 00:08:28,279
+Now let us say you have created some utilities so let us say you have build a collection
+
+75
+00:08:28,279 --> 00:08:32,700
+of programs which do various data structures implementation right.
+
+76
+00:08:32,700 --> 00:08:37,919
+So you have linked list you have binary tree you have graphs you have whatever other data
+
+77
+00:08:37,919 --> 00:08:40,000
+structures like heap and other things.
+
+78
+00:08:40,000 --> 00:08:44,039
+So let us say you have built a collection of such programs and you want to share it
+
+79
+00:08:44,039 --> 00:08:46,899
+with your friend right.
+
+80
+00:08:47,899 --> 00:08:54,019
+say linked list dot c tree dot c graph dot c heap dot c and so on and you will put compile
+
+81
+00:08:54,019 --> 00:08:57,340
+all of them to their dot o files right.
+
+82
+00:08:57,340 --> 00:09:03,340
+Now to be able to use that I need to have access to dot o right.
+
+83
+00:09:03,340 --> 00:09:09,120
+So let us say I am the client user of your data structure library I need to get somehow
+
+84
+00:09:09,120 --> 00:09:12,220
+the linked list dot o which you have created.
+
+85
+00:09:12,220 --> 00:09:15,220
+Similarly I need to get tree dot o right.
+
+86
+00:09:15,220 --> 00:09:21,460
+Now one way you can distribute your code to the users is you can give all of the dot
+
+87
+00:09:21,460 --> 00:09:26,580
+o's to them saying that this is linked list dot o this is tree dot o this is x y dot o
+
+88
+00:09:26,580 --> 00:09:28,340
+and so on right.
+
+89
+00:09:28,340 --> 00:09:40,940
+What are the problems with that?
+
+90
+00:09:40,940 --> 00:09:47,140
+What is happening is you have created a discrete collection of various things and user might
+
+91
+00:09:47,140 --> 00:09:52,340
+have many more such things because user will need imagine if for printf you got one dot
+
+92
+00:09:52,340 --> 00:09:57,180
+o for scanf you got one dot o for something else you got one dot o and so on right.
+
+93
+00:09:57,180 --> 00:10:03,280
+So it is a mess to manage for you also to distribute something that way is a problem
+
+94
+00:10:03,280 --> 00:10:06,900
+it does not form a logical collection of something right.
+
+95
+00:10:06,900 --> 00:10:08,020
+Does that make sense?
+
+96
+00:10:08,059 --> 00:10:11,659
+So that is where static libraries come into picture.
+
+97
+00:10:11,659 --> 00:10:19,299
+So essentially static libraries is a collection of various object files.
+
+98
+00:10:19,299 --> 00:10:27,939
+So instead of giving multiple dot o's separately you can put all of them together and share
+
+99
+00:10:27,939 --> 00:10:29,139
+with the user.
+
+100
+00:10:29,139 --> 00:10:36,000
+So user just needs to have data structure lib dot a or something like that and everything
+
+101
+00:10:36,000 --> 00:10:38,159
+will be put inside that.
+
+102
+00:10:38,159 --> 00:10:45,679
+So on linux typically these files are stored in a format called archive.
+
+103
+00:10:45,679 --> 00:10:50,759
+And essentially what linker will do is linker just like it accepts the object file as the
+
+104
+00:10:50,759 --> 00:10:51,759
+input.
+
+105
+00:10:51,759 --> 00:10:57,259
+So what linker was doing so far is it was getting sample dot o x y z dot o and so on
+
+106
+00:10:57,259 --> 00:11:02,759
+and link them together linker can also take a dot a file as the input and do whatever
+
+107
+00:11:02,759 --> 00:11:04,960
+it was doing earlier with a dot o.
+
+108
+00:11:04,960 --> 00:11:10,920
+So it is as if linker was given multiple dot o's together on command line.
+
+109
+00:11:10,920 --> 00:11:15,160
+So how do you create a static library?
+
+110
+00:11:15,160 --> 00:11:21,800
+So there is a utility called ar just like you had gcc there is a utility called ar to
+
+111
+00:11:21,800 --> 00:11:29,280
+which you can give multiple object files and it will produce a dot a file.
+
+112
+00:11:29,280 --> 00:11:34,740
+And this is the dot a file which contains all of the dot o's which you have given.
+
+113
+00:11:34,820 --> 00:11:37,220
+And this is the command in which you can actually do it.
+
+114
+00:11:37,220 --> 00:11:44,259
+So if you do ar rs whatever is your name of the library now the typical convention on
+
+115
+00:11:44,259 --> 00:11:52,500
+linux is to have lib as the prefix then whatever name you want to give like lib data structure
+
+116
+00:11:52,500 --> 00:11:58,879
+or lib graph or lib math or whatever you want to call it it is typically prefixed with
+
+117
+00:11:58,879 --> 00:12:00,379
+lib.
+
+118
+00:12:00,379 --> 00:12:07,019
+So lib whatever is your name dot a and then list of objects which you want to put that
+
+119
+00:12:07,019 --> 00:12:10,059
+put into that archive.
+
+120
+00:12:10,059 --> 00:12:15,179
+So once you give this it will create a library.
+
+121
+00:12:15,179 --> 00:12:21,059
+Now one of the interesting aspect is just like you have separate compilation.
+
+122
+00:12:21,059 --> 00:12:29,399
+So you do not want to recreate bigger archive again and again if you modify something.
+
+123
+00:12:29,399 --> 00:12:37,000
+So let us say you had created an archive and you found some bug in say tree dot o you
+
+124
+00:12:37,000 --> 00:12:38,659
+do not want to recreate it.
+
+125
+00:12:38,659 --> 00:12:43,779
+So what archive utility allows it allows you to do incremental updates where you can replace
+
+126
+00:12:43,779 --> 00:12:48,639
+only one of the objects.
+
+127
+00:12:48,639 --> 00:12:50,519
+And how do you use the static library?
+
+128
+00:12:50,519 --> 00:12:53,620
+Let us say you have created something.
+
+129
+00:12:53,620 --> 00:13:00,919
+So let us say I had foo dot c and bar dot c I put them in the archive say lib my dot
+
+130
+00:13:00,919 --> 00:13:06,779
+a and I have some client code which is going to call foo and bar.
+
+131
+00:13:06,779 --> 00:13:13,580
+While compiling that I will do gcc whatever my program dot c.
+
+132
+00:13:13,580 --> 00:13:15,259
+So this command remains same.
+
+133
+00:13:15,259 --> 00:13:20,879
+Now you have to somehow tell the compiler on where are the other static libraries which
+
+134
+00:13:20,879 --> 00:13:23,500
+are used by this program.
+
+135
+00:13:23,500 --> 00:13:29,340
+So that is typically done by this dash capital L. Dot is indicating it is in the current
+
+136
+00:13:29,340 --> 00:13:30,340
+directory.
+
+137
+00:13:30,340 --> 00:13:36,700
+It could be anywhere but in this case what it is saying is all the static libraries used
+
+138
+00:13:36,700 --> 00:13:41,899
+by this code are in the current directory and the directory which and the library against
+
+139
+00:13:41,899 --> 00:13:47,019
+which I am trying to link is specified using small l and just the name.
+
+140
+00:13:47,019 --> 00:13:51,340
+We do not specify dash lib my.
+
+141
+00:13:51,340 --> 00:13:57,259
+That is why that convention exists because linker what compiler will do is it will prefix
+
+142
+00:13:57,259 --> 00:14:03,220
+lib and suffix dot a automatically when you give this command and then it will produce
+
+143
+00:14:03,220 --> 00:14:07,899
+a dot out and this program should actually work.
+
+144
+00:14:07,899 --> 00:14:11,740
+So can you try creating this library I will keep this command as it is.
+
+145
+00:14:11,740 --> 00:14:18,940
+So create some sample library where you put some function.
+
+146
+00:14:18,940 --> 00:14:20,820
+No it does not need to be in same location.
+
+147
+00:14:20,820 --> 00:14:36,220
+You can create it anywhere and then specify the path using dash capital L.
+
+148
+00:14:36,220 --> 00:14:37,660
+Make it just a dumb tool.
+
+149
+00:14:37,660 --> 00:14:46,660
+You can do anything with it.
+
+150
+00:14:46,659 --> 00:14:53,699
+Yes, yes, yes.
+
+151
+00:14:53,699 --> 00:14:56,100
+But you it is not make which is doing it.
+
+152
+00:14:56,100 --> 00:14:59,079
+It is your make file which needs to specify.
+
+153
+00:14:59,079 --> 00:15:06,539
+So whatever is your lib my.a as the target in make you need to say it depends on these
+
+154
+00:15:06,539 --> 00:15:11,220
+many objects and then it will do whatever you want it to do.
+
+155
+00:15:11,220 --> 00:15:19,220
+Make is not I mean make the way make works it is it simply has list of dependencies and
+
+156
+00:15:19,220 --> 00:15:20,340
+that.
+
+157
+00:15:20,340 --> 00:15:28,660
+So if you say my lib my.a depends on foo.o bar.o xyz.o as soon as any of the prerequisite
+
+158
+00:15:28,660 --> 00:15:31,660
+changes it will do whatever command you have mentioned.
+
+159
+00:15:31,659 --> 00:15:47,059
+And it did not get the use case.
+
+160
+00:16:17,059 --> 00:16:30,579
+Now simply try one minor modification in the final command which you are using which is
+
+161
+00:16:30,579 --> 00:16:36,339
+specify the dash L before myproc.c.
+
+162
+00:16:36,339 --> 00:16:43,459
+So the only difference between this command and prior command is the dash L my was specified
+
+163
+00:16:43,459 --> 00:16:44,459
+after myproc.c.
+
+164
+00:16:44,860 --> 00:16:51,139
+Try to specify it before and see what happens.
+
+165
+00:16:51,139 --> 00:16:58,300
+Sorry undefined reference.
+
+166
+00:16:58,300 --> 00:17:03,460
+So I am still giving everything same to the linker but linker is saying now foo or bar
+
+167
+00:17:03,460 --> 00:17:09,500
+is undefined.
+
+168
+00:17:09,500 --> 00:17:11,539
+So this results in error.
+
+169
+00:17:11,539 --> 00:17:28,899
+Any idea why?
+
+170
+00:17:28,899 --> 00:17:35,460
+So essentially the reason this happens is because of an optimization of how linker works.
+
+171
+00:17:35,460 --> 00:17:41,059
+It is not really optimization which linker is doing it is optimization which linker does
+
+172
+00:17:41,579 --> 00:17:45,099
+for faster processing of the program.
+
+173
+00:17:45,099 --> 00:17:55,899
+Now imagine what happens is if you give libc.a it has 1500 object files.
+
+174
+00:17:55,899 --> 00:17:57,339
+We can see that.
+
+175
+00:17:57,339 --> 00:18:06,039
+So let us say I do.
+
+176
+00:18:06,039 --> 00:18:08,240
+So I have this.
+
+177
+00:18:08,240 --> 00:18:15,119
+I could list how many objects it has using a command called art and if I simply pipe
+
+178
+00:18:15,119 --> 00:18:21,220
+that to wc dash L I get 1503.
+
+179
+00:18:21,220 --> 00:18:27,399
+So it is saying that libc has 1500 objects.
+
+180
+00:18:27,400 --> 00:18:35,800
+Now if linker has to read all the 1500 objects and libc is fairly common.
+
+181
+00:18:35,800 --> 00:18:38,720
+Libc is used by almost every program.
+
+182
+00:18:38,720 --> 00:18:45,160
+So if linker has to process all 1500 objects then you can imagine it is going to slow things
+
+183
+00:18:45,160 --> 00:18:52,560
+down because linker will say this object has these things so let me put that in memory
+
+184
+00:18:52,560 --> 00:18:55,040
+and do whatever I need to do.
+
+185
+00:18:55,039 --> 00:19:01,599
+So what linker does is linker only extracts the required objects.
+
+186
+00:19:01,599 --> 00:19:06,759
+So linker does not want to pull in all the things which are not needed.
+
+187
+00:19:06,759 --> 00:19:09,240
+Linker wants to take only things which are used.
+
+188
+00:19:09,240 --> 00:19:14,960
+For example if the client code is only using link list and not trees why do you want to
+
+189
+00:19:14,960 --> 00:19:16,720
+pull in the code for trees?
+
+190
+00:19:16,720 --> 00:19:22,399
+It is unnecessary going to waste memory when the program is loaded at run time.
+
+191
+00:19:22,560 --> 00:19:28,080
+What linkers algorithm is for resolving references is something like this.
+
+192
+00:19:28,080 --> 00:19:33,840
+So whatever is the command line which you have given to the linker, linker will scan
+
+193
+00:19:33,840 --> 00:19:35,940
+the .o file.
+
+194
+00:19:35,940 --> 00:19:40,000
+What linker has to do if you think about it conceptually linker gets multiple files as
+
+195
+00:19:40,000 --> 00:19:41,600
+the input.
+
+196
+00:19:41,600 --> 00:19:48,680
+So what linker will do is start scanning them from left to right in the command line order
+
+197
+00:19:48,680 --> 00:19:52,680
+and it keeps the information of whatever is undefined in that.
+
+198
+00:19:52,680 --> 00:20:01,799
+So for example when I give main.c it will say foo is undefined, bar is undefined.
+
+199
+00:20:01,799 --> 00:20:09,240
+Then when it encounters the next file it checks whether this file defines foo or bar.
+
+200
+00:20:09,240 --> 00:20:13,400
+And then if so then it says that this file is useful for linking.
+
+201
+00:20:13,400 --> 00:20:16,200
+Let me take this.
+
+202
+00:20:16,200 --> 00:20:18,560
+Does that make sense?
+
+203
+00:20:18,559 --> 00:20:26,000
+So linker will only use the object files which are trying to help define some things which
+
+204
+00:20:26,000 --> 00:20:29,679
+were previously undefined.
+
+205
+00:20:29,679 --> 00:20:32,679
+So that forms an ordering between the things.
+
+206
+00:20:32,679 --> 00:20:38,700
+So in the example which we tried earlier what we did we told linker that first compile my
+
+207
+00:20:38,700 --> 00:20:43,839
+.c and then take lib my .a.
+
+208
+00:20:43,839 --> 00:20:51,240
+So linker said when it is compiling main.c it encountered that foo and bar are external.
+
+209
+00:20:51,240 --> 00:20:58,359
+So I need someone to specify their definition and lib my .a specified their definition.
+
+210
+00:20:58,359 --> 00:21:03,519
+So lib my .a was actually used and linked.
+
+211
+00:21:03,519 --> 00:21:11,220
+In the earlier in the other case what happened is first linker scanned and lib my .a.
+
+212
+00:21:11,220 --> 00:21:16,839
+Linker says lib my .a does not have anything unresolved because it had foo and bar defined
+
+213
+00:21:16,839 --> 00:21:20,460
+and foo and bar are not the main functions which I care about.
+
+214
+00:21:20,460 --> 00:21:27,779
+Then it went to my proc.c and my proc.c says foo and bar are external.
+
+215
+00:21:27,779 --> 00:21:34,059
+But linker didn't remember the fact that prior objects defined it because if it has to remember
+
+216
+00:21:34,059 --> 00:21:39,539
+then it has to read all the things which were specified.
+
+217
+00:21:39,539 --> 00:21:45,980
+And then when my proc.c was compiled linker assumed that someone else after this will
+
+218
+00:21:45,980 --> 00:21:51,259
+provide me the definition but nothing else was there on the command line after that and
+
+219
+00:21:51,259 --> 00:21:54,980
+then it failed with unresolved reference.
+
+220
+00:21:54,980 --> 00:21:56,599
+Does that make sense?
+
+221
+00:21:56,599 --> 00:21:59,659
+So it's a lazy searching which is being done by linker.
+
+222
+00:21:59,659 --> 00:22:01,899
+So it will search only on demand.
+
+223
+00:22:01,899 --> 00:22:07,779
+So whenever it takes an object file it records all the undefined things and assumes that
+
+224
+00:22:08,019 --> 00:22:12,420
+subsequent things will define it.
+
+225
+00:22:12,420 --> 00:22:17,819
+So order of the arguments on the command line do matter for linker.
+
+226
+00:22:17,819 --> 00:22:26,259
+In most cases it does not matter like in the typical Linux commands doing ls-l versus ls-l-a
+
+227
+00:22:26,259 --> 00:22:33,619
+does not matter the order in which you specify the flags but for linker it does matter.
+
+228
+00:22:33,619 --> 00:22:37,420
+Now what if there are circular dependencies?
+
+229
+00:22:37,420 --> 00:22:47,420
+So you have say linked list.c and you have tree.c and tree.c calls something in linked
+
+230
+00:22:47,420 --> 00:22:51,900
+list.c and linked list.c calls something in tree.c.
+
+231
+00:22:51,900 --> 00:22:56,500
+How will you solve that problem?
+
+232
+00:22:56,579 --> 00:23:10,099
+Okay but what if it's there?
+
+233
+00:23:10,099 --> 00:23:14,900
+So the good software designing practices you should avoid putting circular dependencies
+
+234
+00:23:14,900 --> 00:23:16,619
+between two libraries.
+
+235
+00:23:16,619 --> 00:23:22,900
+So that's a design principle but what happens if it is there?
+
+236
+00:23:23,300 --> 00:23:28,100
+See what is happening is linker is forcing you to specify a particular order.
+
+237
+00:23:28,100 --> 00:23:34,660
+So if lip.c you put first then whatever is undefined in lip.c will get resolved by a
+
+238
+00:23:34,660 --> 00:23:38,180
+library which is specified after that.
+
+239
+00:23:38,180 --> 00:23:48,860
+But if subsequent library has some dependency on the prior thing it will not get resolved.
+
+240
+00:23:48,859 --> 00:23:55,500
+So essentially the trick is linker allows you to specify same library multiple times.
+
+241
+00:23:55,500 --> 00:24:01,259
+So it's not unnecessary that one library has to specify only once.
+
+242
+00:24:01,259 --> 00:24:11,939
+So you can say gcc myproc.c –la –lb –la.
+
+243
+00:24:11,939 --> 00:24:18,259
+So first when it encounters –la it will try to resolve whatever was undefined in myproc.c.
+
+244
+00:24:18,259 --> 00:24:30,059
+from that then whatever was undefined in lib.b will get resolved by the subsequent –la
+
+245
+00:24:30,059 --> 00:24:32,379
+which was specified.
+
+246
+00:24:32,379 --> 00:24:35,339
+But having said that it's still a bad practice.
+
+247
+00:24:35,339 --> 00:24:37,059
+So don't do such things.
+
+248
+00:24:37,059 --> 00:24:43,140
+It's just that there is a workaround available if you have that for some specific reason
+
+249
+00:24:43,140 --> 00:24:49,300
+where you cannot avoid circular dependence.
+
+250
+00:24:49,300 --> 00:24:55,200
+Now some of the things which help you analyze archive files.
+
+251
+00:24:55,200 --> 00:25:04,060
+So if you do aart of whatever library you have it lists all the objects which were present
+
+252
+00:25:04,060 --> 00:25:05,060
+in that.
+
+253
+00:25:05,060 --> 00:25:07,860
+So let's see what all is there in lip.c.
+
+254
+00:25:07,859 --> 00:25:18,379
+So if I do this see I can see there is something called as vprintf.so and blah blah blah.
+
+255
+00:25:18,379 --> 00:25:19,740
+So scanf.
+
+256
+00:25:19,740 --> 00:25:25,579
+So you can now know that scanf code was written in a separate source file than printf source
+
+257
+00:25:25,579 --> 00:25:27,339
+code.
+
+258
+00:25:27,339 --> 00:25:37,839
+So aart command is listing all the objects which were part of the sample of the archive.
+
+259
+00:25:37,839 --> 00:25:42,639
+You can list down all the symbols which were present in an archive using command called
+
+260
+00:25:42,639 --> 00:25:43,639
+nm.
+
+261
+00:25:43,639 --> 00:25:47,399
+Remember I told you there is a command called nm yesterday.
+
+262
+00:25:47,399 --> 00:25:55,240
+We didn't use it but you can use it on this.
+
+263
+00:25:55,240 --> 00:25:57,379
+So this is defining all the symbols.
+
+264
+00:25:57,379 --> 00:26:07,679
+So for example you can say there will be a symbol for printf here or malloc for example.
+
+265
+00:26:08,519 --> 00:26:14,240
+So all the symbols in the archive you can list using nm command.
+
+266
+00:26:14,240 --> 00:26:24,160
+Now for linker to work whenever an archive is given linker doesn't want to read the entire
+
+267
+00:26:24,160 --> 00:26:25,920
+ELF file.
+
+268
+00:26:25,920 --> 00:26:32,039
+You remember yesterday to be able to read the ELF file you had to read the ELF header
+
+269
+00:26:32,240 --> 00:26:38,879
+then you had to read get the section header table then you had to get to the symbol table.
+
+270
+00:26:38,879 --> 00:26:43,680
+So it takes time to be able to read an ELF file.
+
+271
+00:26:43,680 --> 00:26:54,759
+So every archive has something called as an index which you can display using nm-s.
+
+272
+00:26:54,759 --> 00:27:03,599
+So index is simply saying which symbol is defined in which object file.
+
+273
+00:27:03,599 --> 00:27:09,200
+So it says that init-first.o defines libc init-first.
+
+274
+00:27:09,200 --> 00:27:14,839
+So now whenever linker is using archive it doesn't have to read all the ELFs it simply
+
+275
+00:27:14,839 --> 00:27:22,359
+reads the archive index to figure out whatever is unresolved is it getting satisfied by init-first.o
+
+276
+00:27:22,359 --> 00:27:23,960
+or not.
+
+277
+00:27:23,960 --> 00:27:30,259
+But if so then it will read init-first.o and make it part of the linking process.
+
+278
+00:27:30,259 --> 00:27:32,440
+Does that make sense?
+
+279
+00:27:32,440 --> 00:27:35,039
+So these are some of the things which are present in the archive.
+
+280
+00:27:35,039 --> 00:27:41,279
+I am not going to go into details of how archive itself stores all the ELFs as in what is the
+
+281
+00:27:41,279 --> 00:27:44,799
+binary format of the archive.
+
+282
+00:27:44,799 --> 00:27:49,840
+Yes.
+
+283
+00:27:49,840 --> 00:27:53,240
+So the question is is libc a static library?
+
+284
+00:27:53,240 --> 00:27:56,079
+So libc comes in both form static and dynamic.
+
+285
+00:27:56,079 --> 00:27:59,039
+What I am showing here is the static version of it.
+
+286
+00:27:59,039 --> 00:28:05,220
+But in most common cases what whenever you are compiling your programs etc by default
+
+287
+00:28:05,220 --> 00:28:09,640
+the shared version of the libc is used.
+
+288
+00:28:09,640 --> 00:28:13,400
+And we will get into details of what is a shared library those who don't know what it
+
+289
+00:28:13,400 --> 00:28:16,120
+is.
+
+290
+00:28:16,120 --> 00:28:19,720
+But you can specify something called as static.
+
+291
+00:28:19,720 --> 00:28:32,519
+So there is a command line option called dash static to the GCC to link against libc statically.
+
+292
+00:28:32,519 --> 00:28:35,920
+Any questions so far on things which we have seen?
+
+293
+00:28:35,920 --> 00:28:57,080
+We will get into details of how dynamic libraries work.
+
+294
+00:28:57,080 --> 00:29:02,120
+So what are the disadvantages of static libraries?
+
+295
+00:29:02,239 --> 00:29:08,559
+Now one of the things is you have to remember is after you are done linking a static library
+
+296
+00:29:08,559 --> 00:29:16,679
+the executable which is produced the code from the library was actually part of your
+
+297
+00:29:16,679 --> 00:29:18,479
+application.
+
+298
+00:29:18,480 --> 00:29:38,519
+So to see that let us say so I have this mylib.a.
+
+299
+00:29:38,559 --> 00:29:42,160
+So it defines some symbols.
+
+300
+00:29:42,160 --> 00:29:44,720
+Let me actually create new one.
+
+301
+00:29:44,720 --> 00:29:59,519
+Why is this so slow?
+
+302
+00:30:59,519 --> 00:31:18,759
+Is someone running some cron jobs on these machines user 9, user 2, user 1?
+
+303
+00:31:18,759 --> 00:31:26,920
+Do you know are these users here?
+
+304
+00:31:26,920 --> 00:31:45,920
+It has slowed down the machine a lot anyways.
+
+305
+00:32:56,920 --> 00:33:25,920
+So here I have created a program with simply.
+
+306
+00:35:25,920 --> 00:35:35,440
+So here I have code which was essentially doing so unfortunately the machine is has
+
+307
+00:35:35,440 --> 00:35:37,639
+become really slow.
+
+308
+00:35:37,639 --> 00:35:43,760
+So there is some client code which calls function foo and then there is some sample.c which
+
+309
+00:35:43,760 --> 00:35:46,800
+I have created a static library.
+
+310
+00:35:46,800 --> 00:35:56,680
+Now if you look at the code which is present in a.out you will actually see the foo is
+
+311
+00:35:56,680 --> 00:35:59,400
+also part of the same executable.
+
+312
+00:35:59,400 --> 00:36:07,840
+That means what linker did when it created the after linking the created the executable
+
+313
+00:36:07,840 --> 00:36:13,280
+all the things which were present in the static libraries which were needed were also pulled
+
+314
+00:36:13,280 --> 00:36:15,900
+in as part of the executable.
+
+315
+00:36:15,900 --> 00:36:22,180
+So the executable does not have any dependency post creation on the library.
+
+316
+00:36:22,180 --> 00:36:27,900
+That is why it is called a static library because the dependencies results statically.
+
+317
+00:36:27,900 --> 00:36:36,579
+Now one of the problems is for common libraries like libc every code will have I mean if you
+
+318
+00:36:36,579 --> 00:36:43,619
+link statically against a library like libc every executable which you will produce will
+
+319
+00:36:43,619 --> 00:36:48,599
+have code for printf copied into it.
+
+320
+00:36:48,599 --> 00:36:56,460
+So it will occupy lot of space on the disk and everyone will have a copy of printf code
+
+321
+00:36:56,460 --> 00:36:59,599
+which may or may not be the best alternative.
+
+322
+00:36:59,599 --> 00:37:05,319
+Furthermore the biggest problem is let us say there is some bug fix which is done in
+
+323
+00:37:05,319 --> 00:37:10,799
+a static library then every user needs to re link their application with the updated
+
+324
+00:37:10,799 --> 00:37:11,799
+library.
+
+325
+00:37:11,800 --> 00:37:17,039
+For example let us say you had distributed your data structure library to your friend
+
+326
+00:37:17,039 --> 00:37:24,200
+and he started using it entire college started using it and then you realize that there is
+
+327
+00:37:24,200 --> 00:37:26,720
+some bug in your tree code.
+
+328
+00:37:26,720 --> 00:37:29,840
+So you have to redistribute your library.
+
+329
+00:37:29,840 --> 00:37:34,920
+Now simply placing that library is not sufficient.
+
+330
+00:37:34,920 --> 00:37:43,280
+Every user needs to rebuild their application to take the updated fix which you have done.
+
+331
+00:37:43,280 --> 00:37:51,900
+Now imagine every time some bug is fixed in libc and every program in the universe needs
+
+332
+00:37:51,900 --> 00:37:57,880
+to be recompiled then that is going to be a messy situation.
+
+333
+00:37:57,880 --> 00:38:05,280
+That is why static libraries have a problem with respect to distribution and updates which
+
+334
+00:38:05,280 --> 00:38:10,480
+the library author may want to give to the clients.
+
+335
+00:38:10,480 --> 00:38:16,039
+And how to overcome both of these fundamental things so shared libraries will help us solve
+
+336
+00:38:16,039 --> 00:38:17,039
+this.
+
+337
+00:38:17,039 --> 00:38:19,840
+We will see them a bit later today.
+
+338
+00:38:19,840 --> 00:38:21,360
+But is it clear?
+
+339
+00:38:21,360 --> 00:38:24,800
+So we saw how static libraries are created.
+
+340
+00:38:24,800 --> 00:38:31,280
+We saw how linker is kind of bit lazy in not opening up all the object files but taking
+
+341
+00:38:31,280 --> 00:38:37,120
+only things which are defined and undefined and using that information to figure out which
+
+342
+00:38:37,120 --> 00:38:40,880
+all object files to actually pull in from the archives.
+
+343
+00:38:40,880 --> 00:38:47,780
+And that requires you to specify command line and specific order.
+
+344
+00:38:47,780 --> 00:38:52,680
+So if you look at what is happening in the linker as such.
+
+345
+00:38:52,719 --> 00:38:56,079
+So in nutshell linker is trying to do something like this.
+
+346
+00:38:56,079 --> 00:38:59,399
+So linker is reading all the inputs which were given to it.
+
+347
+00:38:59,399 --> 00:39:04,399
+It will keep recording all the metadata in terms of what are the sections defined in
+
+348
+00:39:04,399 --> 00:39:09,279
+this, what all symbols exist, what all relocations exist and so on.
+
+349
+00:39:09,279 --> 00:39:16,239
+Then it will do symbol resolution which we saw yesterday where it has to categorize every
+
+350
+00:39:16,239 --> 00:39:23,479
+symbol as strong or weak and then replace all the weak symbols with a strong symbol.
+
+351
+00:39:23,479 --> 00:39:28,899
+And it will duplicate, error on duplicate strong symbols when they are present.
+
+352
+00:39:28,899 --> 00:39:32,959
+And then it will lay out all the sections where it will take all the text sections from various
+
+353
+00:39:32,959 --> 00:39:36,459
+objects file, put them together to form a segment.
+
+354
+00:39:36,459 --> 00:39:41,879
+It will take all the data sections from various objects file, put them as data segment.
+
+355
+00:39:41,880 --> 00:39:46,680
+And then it will assign addresses to all of the segments which it has created.
+
+356
+00:39:46,680 --> 00:39:51,680
+Then it will do the relocation and it will write the final executable.
+
+357
+00:39:51,680 --> 00:39:54,840
+So this is what linker does in nutshell.
+
+358
+00:39:54,840 --> 00:40:00,680
+And all of this is happening statically as part of your compilation.
+
+359
+00:40:00,680 --> 00:40:05,680
+Any questions so far on linker or libraries which we have seen?
+
+360
+00:40:05,680 --> 00:40:06,680
+Yes.
+
+361
+00:40:06,679 --> 00:40:30,440
+Yes, so typically no one will link against Lipsy statically unless there are very specific
+
+362
+00:40:30,440 --> 00:40:31,440
+reasons.
+
+363
+00:40:32,200 --> 00:40:37,400
+There are specific cases where you might want to link because you might be doing something
+
+364
+00:40:37,400 --> 00:40:44,960
+very custom with that and you don't want the client side Lipsy affect your implementation.
+
+365
+00:40:44,960 --> 00:40:50,659
+See what happens is if you don't link against Lipsy statically and shared library is used
+
+366
+00:40:50,659 --> 00:40:54,559
+then you are relying on shared library which is present at the client side.
+
+367
+00:40:54,559 --> 00:40:59,360
+And if that version had some issues let's say hypothetically then it will affect your
+
+368
+00:40:59,440 --> 00:41:05,120
+library also.
+
+369
+00:41:05,120 --> 00:41:09,880
+Any other questions?
+
+370
+00:41:09,880 --> 00:41:15,960
+So far whatever we have seen everything was happening before program was being executed.
+
+371
+00:41:15,960 --> 00:41:18,840
+We never tried to run the program.
+
+372
+00:41:18,840 --> 00:41:23,240
+So now let's see the other side of the things where program actually starts running and
+
+373
+00:41:23,240 --> 00:41:26,880
+what all happens in that aspect.
+
+374
+00:41:26,880 --> 00:41:31,680
+So you remember I had told you that ELF has two views.
+
+375
+00:41:31,680 --> 00:41:35,880
+One was linking view and one was executable view.
+
+376
+00:41:35,880 --> 00:41:42,240
+So linking view had section header table and all the things in the sections.
+
+377
+00:41:42,240 --> 00:41:49,920
+Executable view is more about program header table and the segments.
+
+378
+00:41:49,920 --> 00:41:53,840
+Section header table at this stage is really optional.
+
+379
+00:41:53,840 --> 00:41:59,200
+So the executables which are produced don't need to have section header table.
+
+380
+00:41:59,200 --> 00:42:03,240
+Although in most cases you will find they do have because it simplifies some of the
+
+381
+00:42:03,240 --> 00:42:09,079
+things in the tools which are kind of trying to read the ELF.
+
+382
+00:42:09,079 --> 00:42:15,559
+So if you look into a program header so it is similar to how section headers were there
+
+383
+00:42:15,559 --> 00:42:21,280
+that from ELF header you have a offset to program header table and program header table
+
+384
+00:42:21,360 --> 00:42:24,120
+will describe each of the segments.
+
+385
+00:42:24,120 --> 00:42:29,440
+Now each of the segment essentially will and remember the segment was nothing but collection
+
+386
+00:42:29,440 --> 00:42:30,560
+of sections.
+
+387
+00:42:30,560 --> 00:42:36,400
+So we said that all the text sections are combined together to form a segment.
+
+388
+00:42:36,400 --> 00:42:42,880
+Now each of the section if you look at each of the segment has a type.
+
+389
+00:42:42,880 --> 00:42:46,720
+Type will indicate what type of segment it is.
+
+390
+00:42:46,759 --> 00:42:52,519
+Then it has offset which indicates where that segment begins in the file.
+
+391
+00:42:52,519 --> 00:42:55,919
+Then it has virtual address and physical address.
+
+392
+00:42:55,919 --> 00:43:01,039
+So this is the address at which this segment will actually be loaded.
+
+393
+00:43:01,039 --> 00:43:07,079
+So when linker says this segment begins at virtual address 100 then loader is supposed
+
+394
+00:43:07,079 --> 00:43:12,439
+to take that content and put it at address 100 in the memory.
+
+395
+00:43:12,639 --> 00:43:16,840
+In systems which have virtual addressing the physical address could be actually same as
+
+396
+00:43:16,840 --> 00:43:23,320
+virtual address because physical address is not accessible in a system with virtual memory.
+
+397
+00:43:23,320 --> 00:43:27,800
+Then there is something called as file size which is saying how much this segment occupies
+
+398
+00:43:27,800 --> 00:43:30,400
+in file.
+
+399
+00:43:30,400 --> 00:43:35,360
+Then there is something called as memory size which is essentially how much this segment
+
+400
+00:43:35,360 --> 00:43:37,960
+will occupy in memory.
+
+401
+00:43:37,960 --> 00:43:40,280
+Any idea why these two could be different?
+
+402
+00:43:40,280 --> 00:43:51,360
+Why could there be a segment which takes less space on file but more space in memory or
+
+403
+00:43:51,360 --> 00:43:57,680
+different space in memory?
+
+404
+00:43:57,680 --> 00:44:04,080
+So in what cases size of section could be different from when the section is actually
+
+405
+00:44:04,080 --> 00:44:06,400
+loaded in the memory?
+
+406
+00:44:06,400 --> 00:44:14,160
+Sorry, but that is not present in the object file.
+
+407
+00:44:14,160 --> 00:44:22,519
+So far we never saw how mallocs information was present in the object.
+
+408
+00:44:22,519 --> 00:44:30,720
+So you remember uninitialized variables and they were called BSS better safe space.
+
+409
+00:44:30,720 --> 00:44:36,000
+So those were essentially bunch of zeros and we simply said we need to simply hold the
+
+410
+00:44:36,000 --> 00:44:38,960
+size of how many zeros we want.
+
+411
+00:44:38,960 --> 00:44:44,400
+But when we need to load it in memory we can't simply say assume there are these many zeros
+
+412
+00:44:44,400 --> 00:44:45,400
+here.
+
+413
+00:44:45,400 --> 00:44:49,320
+We have to actually create those many zeros in the memory.
+
+414
+00:44:49,320 --> 00:44:54,960
+That's why the memory size can actually be different than file size.
+
+415
+00:44:54,960 --> 00:44:59,320
+And then there are flags which typically talk about the permissions.
+
+416
+00:44:59,320 --> 00:45:04,559
+You remember we had permissions like code section can be executed but not return and
+
+417
+00:45:04,559 --> 00:45:05,559
+so on.
+
+418
+00:45:05,559 --> 00:45:11,400
+And then there is section alignment which is how to align this section and what addresses.
+
+419
+00:45:11,400 --> 00:45:16,320
+Now one of the things you have to remember is not all sections which are present in the
+
+420
+00:45:16,320 --> 00:45:19,960
+elf form a segment.
+
+421
+00:45:19,960 --> 00:45:24,239
+Segments are needed for things which are actually needed for program execution.
+
+422
+00:45:24,239 --> 00:45:29,279
+For example does symbol table need to be there in memory?
+
+423
+00:45:29,279 --> 00:45:33,119
+Symbol table it just used by linker to resolve things.
+
+424
+00:45:33,119 --> 00:45:40,199
+Symbol table cannot be does not need to be loaded into the memory for execution because
+
+425
+00:45:40,199 --> 00:45:45,440
+it plays no role in the execution of the program because it was an abstraction which was created
+
+426
+00:45:45,440 --> 00:45:48,219
+for programmers.
+
+427
+00:45:48,219 --> 00:45:54,440
+So not all sections in the elf become a segment.
+
+428
+00:45:54,440 --> 00:46:03,200
+Now let's look at this code and with read elf dash el you can actually dump out the
+
+429
+00:46:03,200 --> 00:46:05,860
+program headers just like section headers.
+
+430
+00:46:05,860 --> 00:46:10,960
+So this was the section header which was there for the program and this is how program header
+
+431
+00:46:10,960 --> 00:46:12,780
+looks like.
+
+432
+00:46:12,780 --> 00:46:19,559
+So you can see that program header I mean this actually is not part of the program header
+
+433
+00:46:19,559 --> 00:46:21,519
+but this is something interesting.
+
+434
+00:46:21,519 --> 00:46:30,679
+So it says there is some address called 8048310 which is the entry point.
+
+435
+00:46:30,679 --> 00:46:37,719
+This is the actual address where the first instruction to be executed lives.
+
+436
+00:46:37,719 --> 00:46:41,639
+Is this address of main?
+
+437
+00:46:41,639 --> 00:46:43,139
+Let's try that.
+
+438
+00:46:43,139 --> 00:46:44,980
+So let me create a program.
+
+439
+00:46:44,980 --> 00:46:48,460
+So I already have this.
+
+440
+00:46:48,460 --> 00:46:56,820
+Now let's look at.
+
+441
+00:46:56,820 --> 00:47:08,579
+So if I look at main, main's address is something like this 804840D which is not same as this.
+
+442
+00:47:09,500 --> 00:47:19,559
+But let's look at a function called underscore start.
+
+443
+00:47:19,559 --> 00:47:23,719
+Underscore start has that address.
+
+444
+00:47:23,719 --> 00:47:30,400
+So what this entry point is telling is once you are done loading this elf start executing
+
+445
+00:47:30,400 --> 00:47:33,460
+program from this address.
+
+446
+00:47:33,460 --> 00:47:41,199
+Now since you know how to read elf and how to interpret elf you can simply locate this
+
+447
+00:47:41,199 --> 00:47:49,360
+field and modify it and what will happen is the elf program will start running from that
+
+448
+00:47:49,360 --> 00:47:53,880
+point.
+
+449
+00:47:53,880 --> 00:47:59,920
+So if I put here address of something which is something which I want to execute before
+
+450
+00:47:59,920 --> 00:48:09,380
+start or before main I could actually overwrite this somehow and then that function will start
+
+451
+00:48:09,380 --> 00:48:14,659
+executing.
+
+452
+00:48:14,659 --> 00:48:23,740
+Then we said that every program header or every segment has a type.
+
+453
+00:48:23,740 --> 00:48:28,700
+Now the most important type is something called as load.
+
+454
+00:48:28,699 --> 00:48:34,599
+Load is the segment which needs to be loaded into the memory.
+
+455
+00:48:34,599 --> 00:48:39,939
+So text segment for example needs to be loaded as it is from file into memory.
+
+456
+00:48:39,939 --> 00:48:46,099
+Data segment which is present in the file needs to be loaded into the memory.
+
+457
+00:48:46,099 --> 00:48:49,099
+So all the things will be of that category.
+
+458
+00:48:49,099 --> 00:48:54,500
+PH header is essentially the header which is telling link loader on how to load these
+
+459
+00:48:54,500 --> 00:48:55,960
+things.
+
+460
+00:48:55,960 --> 00:48:59,880
+And then there is few other things which we will see later.
+
+461
+00:48:59,880 --> 00:49:04,820
+But remember the load is the most important thing which is coming from your disk executable
+
+462
+00:49:04,820 --> 00:49:08,119
+file and getting loaded into the memory.
+
+463
+00:49:08,119 --> 00:49:12,920
+Then there is something called as section to segment mapping.
+
+464
+00:49:12,920 --> 00:49:18,720
+So this is essentially telling which all sections in the elf form segment.
+
+465
+00:49:18,719 --> 00:49:28,619
+So this is saying segment 02 is actually formed out of these sections which are present.
+
+466
+00:49:28,619 --> 00:49:34,039
+You don't have to worry about what these are in terms of I mean what does inter has, what
+
+467
+00:49:34,039 --> 00:49:36,480
+does not ABI has and so on.
+
+468
+00:49:36,480 --> 00:49:41,219
+But essentially what it is saying is all these sections which are present in the elf file
+
+469
+00:49:41,219 --> 00:49:43,679
+form segment number 02.
+
+470
+00:49:43,679 --> 00:49:47,779
+03 is formed by all these things and so on.
+
+471
+00:49:47,780 --> 00:49:58,300
+So you can see that using read elf dash L. So there are bunch of segments which are formed
+
+472
+00:49:58,300 --> 00:50:04,300
+by different sections within the elf.
+
+473
+00:50:04,300 --> 00:50:07,560
+Then every segment has permission.
+
+474
+00:50:07,560 --> 00:50:09,960
+So this has read and execute permission.
+
+475
+00:50:09,960 --> 00:50:12,060
+That means this is code section.
+
+476
+00:50:12,060 --> 00:50:14,120
+But you cannot write into it.
+
+477
+00:50:14,119 --> 00:50:20,239
+So if you try to write into the code segment, it will not work.
+
+478
+00:50:20,239 --> 00:50:22,759
+It will result in a secfault.
+
+479
+00:50:22,759 --> 00:50:25,639
+Similarly this has read and write permission.
+
+480
+00:50:25,639 --> 00:50:29,599
+But if you try to execute, it will actually secfault.
+
+481
+00:50:29,599 --> 00:50:36,079
+Remember yesterday we had seen example where I had my var which was defined to be a variable
+
+482
+00:50:36,079 --> 00:50:39,599
+and in the other file I said it's an external function.
+
+483
+00:50:39,599 --> 00:50:46,119
+And I tried to execute it and it didn't work because the address was in the data segment.
+
+484
+00:50:46,119 --> 00:50:51,639
+And when I actually tried to execute it, it secfaulted because the data segment didn't
+
+485
+00:50:51,639 --> 00:50:53,699
+have execute permissions.
+
+486
+00:50:53,699 --> 00:51:01,599
+If I somehow data segment had execute permission, then it would have happily continued and executed
+
+487
+00:51:01,599 --> 00:51:05,319
+that problem.
+
+488
+00:51:05,319 --> 00:51:08,960
+Does that make sense?
+
+489
+00:51:08,960 --> 00:51:14,159
+And file size and memory size we already talked about that these can actually be different.
+
+490
+00:51:14,159 --> 00:51:19,320
+In most cases file size will be smaller than memory size.
+
+491
+00:51:19,320 --> 00:51:27,320
+Any questions on the program header so far?
+
+492
+00:51:27,320 --> 00:51:31,840
+So compiler does not allow you to change them.
+
+493
+00:51:31,840 --> 00:51:34,800
+There are no options for you to make it change.
+
+494
+00:51:34,800 --> 00:51:37,539
+But since you know how to read elf file.
+
+495
+00:51:37,539 --> 00:51:40,460
+So for example you now know the structure of the elf file.
+
+496
+00:51:40,460 --> 00:51:44,579
+So you are free to go and binary edit the file and overwrite it.
+
+497
+00:51:44,579 --> 00:51:48,579
+For example what you can simply do is you can write a program which will read the elf
+
+498
+00:51:48,579 --> 00:51:55,579
+file, examine all the things, overwrite some of the things and write back a binary file
+
+499
+00:51:55,579 --> 00:51:59,179
+with different permissions or different these things.
+
+500
+00:51:59,179 --> 00:52:02,259
+And it will actually do what you want.
+
+501
+00:52:02,259 --> 00:52:06,820
+So that's the power of knowing the details because you can do something interesting which
+
+502
+00:52:06,820 --> 00:52:11,320
+was otherwise in default case not possible.
+
+503
+00:52:11,320 --> 00:52:22,019
+So for example you can change the entry point address and see what happens.
+
+504
+00:52:22,019 --> 00:52:26,740
+It may not work.
+
+505
+00:52:26,740 --> 00:52:32,100
+So whatever I am saying there are equal counterparts in the security side which try to prevent
+
+506
+00:52:32,100 --> 00:52:34,600
+those things from happening.
+
+507
+00:52:34,599 --> 00:52:43,480
+So it's not that just like things on the hacking side have evolved, same things have
+
+508
+00:52:43,480 --> 00:52:45,179
+evolved on the security side.
+
+509
+00:52:45,179 --> 00:52:50,000
+So they have equal counter measures to be able to do that.
+
+510
+00:52:50,000 --> 00:52:53,279
+And we will see some of them as we get later.
+
+511
+00:52:53,279 --> 00:52:59,900
+But essentially the idea is if you have a raw system which does not have all these things
+
+512
+00:53:00,119 --> 00:53:10,280
+then you can actually see these things happening and you can try them for good reasons.
+
+513
+00:53:10,280 --> 00:53:12,320
+Then abstraction of process.
+
+514
+00:53:12,320 --> 00:53:19,840
+So we just saw that there is executable which has various information for loader on how
+
+515
+00:53:19,840 --> 00:53:20,840
+to do things.
+
+516
+00:53:20,840 --> 00:53:22,200
+We will see loader a bit later.
+
+517
+00:53:22,200 --> 00:53:27,000
+We will kind of first start with abstraction of process and then get into details of other
+
+518
+00:53:27,000 --> 00:53:28,119
+things.
+
+519
+00:53:28,119 --> 00:53:31,900
+So can someone tell me what is a process?
+
+520
+00:53:31,900 --> 00:53:37,460
+Must have learned in operating systems course.
+
+521
+00:53:37,460 --> 00:53:39,139
+So that is the standard definition.
+
+522
+00:53:39,139 --> 00:53:44,139
+So process is instance of the running program.
+
+523
+00:53:44,139 --> 00:53:49,440
+And each program whatever you have runs in context of some process.
+
+524
+00:53:49,440 --> 00:53:54,500
+And context essentially will be all the dynamic state associated with the process.
+
+525
+00:53:54,500 --> 00:53:59,880
+So all the data associated with the process and so on will form the context.
+
+526
+00:53:59,880 --> 00:54:05,920
+And why we have process as abstraction is because it kind of gives you two abstractions.
+
+527
+00:54:05,920 --> 00:54:11,280
+Two key things are enabled by having a model of process.
+
+528
+00:54:11,280 --> 00:54:15,280
+One is it gives you a logical control flow.
+
+529
+00:54:15,280 --> 00:54:21,639
+What that means is it creates an illusion that every program which is running on the
+
+530
+00:54:22,179 --> 00:54:27,940
+has exclusive use of the CPU.
+
+531
+00:54:27,940 --> 00:54:33,440
+And this is provided by operating systems kernel by doing context switching.
+
+532
+00:54:33,440 --> 00:54:38,400
+But it gives you an illusion that when your program is running only your program is running.
+
+533
+00:54:38,400 --> 00:54:44,480
+But we knew when editor got slow editor was not the only thing running and someone had
+
+534
+00:54:44,480 --> 00:54:49,099
+a cron job running which was sucking all the CPU.
+
+535
+00:54:49,099 --> 00:54:54,259
+And the other thing processes as abstraction provide is the private address space.
+
+536
+00:54:54,259 --> 00:55:01,719
+So just like processors as a resource process abstraction also gives an impression that
+
+537
+00:55:01,719 --> 00:55:06,500
+the entire memory is available to only my program.
+
+538
+00:55:06,500 --> 00:55:11,420
+And this is actually provided by virtual memory.
+
+539
+00:55:11,420 --> 00:55:14,239
+Now this is how things are.
+
+540
+00:55:14,259 --> 00:55:21,759
+So if you look at illusion every process thinks that I have exclusive use of CPU and memory.
+
+541
+00:55:21,759 --> 00:55:26,419
+And CPU has a register so I have exclusive use of them.
+
+542
+00:55:26,419 --> 00:55:35,839
+What is really happening though is every process gets CPU and memory only for chunk of time.
+
+543
+00:55:35,839 --> 00:55:43,000
+So whenever the time for context switch comes the operating system will have to save all
+
+544
+00:55:43,000 --> 00:55:53,099
+the state of the current program into the memory and then switch to the other process
+
+545
+00:55:53,099 --> 00:55:55,960
+and load back its context.
+
+546
+00:55:55,960 --> 00:56:02,159
+So context switching is nothing but load all the state of the earlier process which was
+
+547
+00:56:02,159 --> 00:56:08,480
+stopped and before you do that you have to save the state of the current process so that
+
+548
+00:56:08,599 --> 00:56:14,280
+when you resume it later it will start executing from the same point.
+
+549
+00:56:14,280 --> 00:56:20,240
+So logically this is what is happening where process A runs for some time then process
+
+550
+00:56:20,240 --> 00:56:27,760
+B comes then process C comes then process A comes and then process C comes.
+
+551
+00:56:27,760 --> 00:56:33,880
+But as a programmer or as a user of a system what you will see is process A is running
+
+552
+00:56:33,880 --> 00:56:39,440
+continuously, process B is running continuously, process C is running continuously without
+
+553
+00:56:39,440 --> 00:56:43,480
+any interruptions.
+
+554
+00:56:43,480 --> 00:56:44,480
+Any questions so far?
+
+555
+00:56:44,480 --> 00:56:50,000
+I am kind of not going into all the details of operating system theories on how processes
+
+556
+00:56:50,000 --> 00:56:53,440
+are and so on.
+
+557
+00:56:53,440 --> 00:56:55,480
+So how do you create process?
+
+558
+00:56:55,480 --> 00:57:01,240
+Now this again is an implementation dependent thing.
+
+559
+00:57:01,239 --> 00:57:05,799
+One of the common models is something called as fork EXEC model which is what is used on
+
+560
+00:57:05,799 --> 00:57:07,479
+Linux.
+
+561
+00:57:07,479 --> 00:57:11,500
+Windows has completely different ways to handle processes.
+
+562
+00:57:11,500 --> 00:57:18,979
+So what forks API does is it creates a copy of the current process.
+
+563
+00:57:18,979 --> 00:57:25,759
+So whenever I fork something I am creating an identical copy of that.
+
+564
+00:57:26,280 --> 00:57:32,920
+The copy which is created has its own address space.
+
+565
+00:57:32,920 --> 00:57:40,480
+And what will happen is fork will return 0 to the child process and return child's process
+
+566
+00:57:40,480 --> 00:57:42,600
+ID to the parent process.
+
+567
+00:57:42,600 --> 00:57:48,160
+So once you call fork you are calling it once but the function is actually returning twice
+
+568
+00:57:48,160 --> 00:57:50,020
+logically.
+
+569
+00:57:50,020 --> 00:57:54,720
+Because once it is returning to the parent process and once it is returning to the child
+
+570
+00:57:54,719 --> 00:57:58,039
+process.
+
+571
+00:57:58,039 --> 00:58:07,439
+So if you look at this code, once I do fork the PID there are two copies of code now running
+
+572
+00:58:07,439 --> 00:58:08,439
+simultaneously.
+
+573
+00:58:08,439 --> 00:58:15,839
+PID will be 0 when the child process is running and PID will be actual ID of the child when
+
+574
+00:58:15,839 --> 00:58:18,039
+the parent process is running.
+
+575
+00:58:18,039 --> 00:58:24,639
+So if I check if PID is 0 and print this then child process will print hello from child
+
+576
+00:58:24,759 --> 00:58:29,719
+and the parent process will print hello from parent.
+
+577
+00:58:29,719 --> 00:58:31,679
+Does that make sense?
+
+578
+00:58:31,679 --> 00:58:38,039
+And there is not much use of executing same program twice.
+
+579
+00:58:38,039 --> 00:58:43,639
+So although we forked created a copy of it I really wanted to do something different.
+
+580
+00:58:43,639 --> 00:58:48,359
+I don't want child to keep doing the same thing as parent was doing.
+
+581
+00:58:48,359 --> 00:58:53,239
+So there is a different function called exec which will actually change the code in the
+
+582
+00:58:53,239 --> 00:58:55,119
+child process.
+
+583
+00:58:55,119 --> 00:58:59,799
+So anytime you have to create a process you have to go through this model where the parent
+
+584
+00:58:59,799 --> 00:59:09,559
+process has to fork a child and exec will actually replace the child code.
+
+585
+00:59:09,559 --> 00:59:11,199
+So logically this is what is happening.
+
+586
+00:59:11,199 --> 00:59:16,319
+So parent is running, parent has its own stack, its own data and its own code.
+
+587
+00:59:16,319 --> 00:59:20,179
+So let's assume parent was the bash which was running.
+
+588
+00:59:20,179 --> 00:59:21,439
+I do a fork.
+
+589
+00:59:21,440 --> 00:59:26,760
+So whenever you execute command ls for example on the shell this is what is happening behind
+
+590
+00:59:26,760 --> 00:59:27,760
+the scenes.
+
+591
+00:59:27,760 --> 00:59:33,320
+The terminal is going to bash is actually going to call a fork function.
+
+592
+00:59:33,320 --> 00:59:38,240
+So parent will continue doing execution of the bash.
+
+593
+00:59:38,240 --> 00:59:48,280
+A child will be created which is also exactly same but child will then execute exec function
+
+594
+00:59:48,280 --> 00:59:56,680
+which will replace the entire content and child is now executing ls.
+
+595
+00:59:56,680 --> 00:59:59,519
+Is this clear to everyone?
+
+596
+00:59:59,519 --> 01:00:08,200
+So everything starts from fork and then you keep replacing content of the process using
+
+597
+01:00:08,200 --> 01:00:15,360
+exec and that's how you run a new program or create a new process.
+
+598
+01:00:15,360 --> 01:00:19,920
+Any questions so far?
+
+599
+01:00:19,920 --> 01:00:42,000
+So quiz what will be output of this code?
+
+600
+01:00:42,000 --> 01:00:48,039
+So one answer is two will be printed by parent process and four and three will be printed
+
+601
+01:00:48,039 --> 01:00:54,300
+by child process.
+
+602
+01:00:54,300 --> 01:01:03,480
+The sequence is not known but you know parent will print this and child will print this.
+
+603
+01:01:03,480 --> 01:01:18,960
+One other thing is sequence in which parent and child will run is kind of non deterministic.
+
+604
+01:01:18,960 --> 01:01:20,599
+Does everyone get that?
+
+605
+01:01:20,599 --> 01:01:27,480
+So remember what happened is when child started executing it had its own copy of stack.
+
+606
+01:01:27,480 --> 01:01:32,420
+So the x variable which is actually allocated on stack cannot be modified.
+
+607
+01:01:32,420 --> 01:01:37,539
+The parent stack was not modified by the child.
+
+608
+01:01:37,539 --> 01:01:43,800
+So when child did plus plus x it modified its own stack not the stack of the parent
+
+609
+01:01:43,800 --> 01:01:44,800
+process.
+
+610
+01:01:44,800 --> 01:01:51,000
+That's why this became four and it printed four and the child then decremented it and
+
+611
+01:01:51,000 --> 01:01:52,519
+printed three.
+
+612
+01:01:52,519 --> 01:01:57,079
+If you look at the parent, parent was not at all affected by this code and simply came
+
+613
+01:01:57,679 --> 01:01:58,679
+here and printed two.
+
+614
+01:01:58,679 --> 01:02:02,599
+Now let's look at virtual memory.
+
+615
+01:02:02,599 --> 01:02:11,739
+So process as I told you also provides illusion of actually saying that every program has
+
+616
+01:02:11,739 --> 01:02:14,679
+access to the entire memory.
+
+617
+01:02:14,679 --> 01:02:22,480
+Now if you have a machine with 32 bit address or 64 bit address you can at max get 2 raise
+
+618
+01:02:22,480 --> 01:02:24,380
+to n bytes of addresses.
+
+619
+01:02:24,380 --> 01:02:30,420
+So if you have 32 bit machine you get up to 4 GB memory and if you have 64 bit machine
+
+620
+01:02:30,420 --> 01:02:36,019
+you get up to 2 raise to 64 bytes memory.
+
+621
+01:02:36,019 --> 01:02:44,099
+So you have this is your memory from 0 0 0 to whatever f f f f f depending on width of
+
+622
+01:02:44,099 --> 01:02:46,380
+the address.
+
+623
+01:02:46,380 --> 01:02:55,380
+Now one thing is you want to have private address for every process because you don't
+
+624
+01:02:55,380 --> 01:02:57,920
+want accidentally to modify these things.
+
+625
+01:02:57,920 --> 01:03:03,680
+So just like we saw in the prior example you don't want child to accidentally write stack
+
+626
+01:03:03,680 --> 01:03:05,860
+of parent.
+
+627
+01:03:05,860 --> 01:03:13,920
+So you want to ensure that you create separation between the processes in terms of memory access.
+
+628
+01:03:13,920 --> 01:03:20,180
+So you don't want accidentally one process to modify something of the other process because
+
+629
+01:03:20,180 --> 01:03:23,659
+it will cause other process to malfunction.
+
+630
+01:03:23,659 --> 01:03:25,740
+Does everyone get that?
+
+631
+01:03:25,740 --> 01:03:31,960
+Now do we have 2 raise to n bytes of physical memory?
+
+632
+01:03:31,960 --> 01:03:37,840
+Maybe you have 4 GB RAM but 2 raise to 64 is just too much to ask for.
+
+633
+01:03:37,840 --> 01:03:39,840
+So you don't have that much.
+
+634
+01:03:39,840 --> 01:03:44,140
+Now you certainly don't have that much RAM for every process.
+
+635
+01:03:44,140 --> 01:03:51,280
+So you cannot say my P1 has 4 GB RAM, my P2 has 4 GB RAM, my P3 has 4 GB RAM and so on.
+
+636
+01:03:51,280 --> 01:03:56,800
+So you will have some memory but you certainly don't have sufficient to get all the addresses.
+
+637
+01:03:56,800 --> 01:04:03,760
+Furthermore you don't have really sufficient memory to have completely separate memory
+
+638
+01:04:03,760 --> 01:04:07,420
+for each of the process.
+
+639
+01:04:07,420 --> 01:04:19,180
+So address space is essentially the layout of how the memory is organized for each process.
+
+640
+01:04:19,180 --> 01:04:25,680
+So every process which we saw will have this kind of a memory map.
+
+641
+01:04:25,680 --> 01:04:28,440
+Now this again is implementation specific.
+
+642
+01:04:28,440 --> 01:04:31,340
+So this is again for x86 Linux.
+
+643
+01:04:31,340 --> 01:04:36,099
+x86 64 Linux will have something different, Windows will have something different and
+
+644
+01:04:36,099 --> 01:04:37,099
+so on.
+
+645
+01:04:37,219 --> 01:04:40,099
+So all these things are kind of implementation specific.
+
+646
+01:04:40,099 --> 01:04:46,299
+But if you look at the Linux, what Linux says its code segment always starts at this address.
+
+647
+01:04:46,299 --> 01:04:50,339
+Remember this address we saw somewhere in the ELF.
+
+648
+01:04:50,339 --> 01:04:53,139
+So this is where the code segment starts.
+
+649
+01:04:53,139 --> 01:04:58,480
+Then you have all the data segment which has initialized variables and then you have BSS
+
+650
+01:04:58,480 --> 01:05:02,099
+segment which is all the uninitialized variables.
+
+651
+01:05:02,099 --> 01:05:05,299
+And these are all loaded from the executable.
+
+652
+01:05:05,300 --> 01:05:11,220
+So the executable file which you had, had the information for these segments.
+
+653
+01:05:11,220 --> 01:05:18,180
+So these are directly copied from the executable and loaded at these addresses.
+
+654
+01:05:18,180 --> 01:05:23,300
+So wherever code segment ends the data segment starts, wherever data segment ends BSS segment
+
+655
+01:05:23,300 --> 01:05:25,880
+starts.
+
+656
+01:05:25,880 --> 01:05:28,380
+Then you have heap.
+
+657
+01:05:28,380 --> 01:05:31,120
+Does everyone know what is heap?
+
+658
+01:05:31,119 --> 01:05:38,639
+So typically when you do dynamic memory allocation using malloc or new kind of functions, you
+
+659
+01:05:38,639 --> 01:05:40,519
+are allocating memory from heap.
+
+660
+01:05:40,519 --> 01:05:46,119
+You are not allocating them from stack, you are not allocating it from data segment.
+
+661
+01:05:46,119 --> 01:05:51,039
+So that all memory comes from this region called heap.
+
+662
+01:05:51,039 --> 01:05:55,920
+And then we have something called as memory mapped region for shared library which we
+
+663
+01:05:55,920 --> 01:05:58,960
+will see later when we actually see the shared libraries.
+
+664
+01:05:58,960 --> 01:06:03,720
+And then you have stack which is actually growing down.
+
+665
+01:06:03,720 --> 01:06:11,679
+And then you have the upper 1 GB space in Linux 32 is reserved by the kernel.
+
+666
+01:06:11,679 --> 01:06:18,360
+So kernel actually has upper 1 GB addresses reserved for its own use.
+
+667
+01:06:18,360 --> 01:06:25,360
+Now every process which is getting created, although will have different content in memory,
+
+668
+01:06:25,360 --> 01:06:28,920
+every process has different data, every process has different code, every process has different
+
+669
+01:06:28,920 --> 01:06:29,920
+stack.
+
+670
+01:06:29,920 --> 01:06:35,480
+The layout of how memory is organized itself is going to be same.
+
+671
+01:06:35,480 --> 01:06:40,920
+So every process will have its code at this, every process will have its stack just below
+
+672
+01:06:40,920 --> 01:06:44,720
+the kernel address space and so on.
+
+673
+01:06:44,720 --> 01:06:45,720
+Does that make sense?
+
+674
+01:06:45,720 --> 01:06:46,720
+Yes.
+
+675
+01:06:46,719 --> 01:07:01,239
+Yes, I mean it is a specification by ABI, but linker puts all these addresses.
+
+676
+01:07:01,239 --> 01:07:07,099
+Remember in the program header we had virtual address and physical address fields.
+
+677
+01:07:07,099 --> 01:07:11,919
+So those fields will be populated by linker using this layout.
+
+678
+01:07:11,920 --> 01:07:23,139
+So that's why data segment does not have a fixed stack, code segment has a fixed stack.
+
+679
+01:07:23,139 --> 01:07:27,800
+And depending on how much size code segment takes, the data segment will be after that
+
+680
+01:07:27,800 --> 01:07:30,159
+and the BSS segment will be after that.
+
+681
+01:07:30,159 --> 01:07:35,340
+So linker is responsible for only laying out these three things because information of
+
+682
+01:07:35,340 --> 01:07:41,440
+stack is not present in the executable, information of heap is not present in the executable.
+
+683
+01:07:41,440 --> 01:07:47,200
+No, assembler does not.
+
+684
+01:07:47,200 --> 01:07:52,800
+This is where the linker, the fact that linker has to take all the things together and merge
+
+685
+01:07:52,800 --> 01:07:55,240
+them together is this reason.
+
+686
+01:07:55,240 --> 01:07:57,099
+Imagine something like this.
+
+687
+01:07:57,099 --> 01:08:02,119
+So you had a linker which didn't concatenate all the text sections.
+
+688
+01:08:02,119 --> 01:08:06,119
+Then what will happen is you will create holes here.
+
+689
+01:08:06,119 --> 01:08:10,460
+And that becomes inefficient because what happens is there are some APIs which allow
+
+690
+01:08:10,480 --> 01:08:15,840
+you to load these segments very quickly from the executable using a technique called as
+
+691
+01:08:15,840 --> 01:08:16,840
+memory mapped files.
+
+692
+01:08:16,840 --> 01:08:19,319
+I don't know how many of you are aware.
+
+693
+01:08:19,319 --> 01:08:25,199
+So there is an API called as Mmap which essentially allows you to read something from disk and
+
+694
+01:08:25,199 --> 01:08:27,500
+map it into the memory.
+
+695
+01:08:27,500 --> 01:08:35,319
+So what linker does is linker will arrange segments in such a way that they can be Mmapped
+
+696
+01:08:35,319 --> 01:08:37,779
+in one shot.
+
+697
+01:08:37,779 --> 01:08:43,399
+Linker doesn't want loader to do Mmap multiple times because if it creates holes then loader
+
+698
+01:08:43,399 --> 01:08:49,899
+will have to take portion from here, other portion from here, other portion from here.
+
+699
+01:08:49,899 --> 01:09:00,179
+So this layout of the lower part is actually decided at link time not at the assembly time.
+
+700
+01:09:00,179 --> 01:09:06,819
+Now kernel space is obviously part of the process but it does not mean that the process
+
+701
+01:09:06,859 --> 01:09:09,019
+can actually access it.
+
+702
+01:09:09,019 --> 01:09:15,019
+So process, if you start accessing this address in your program on Linux 32 you will actually
+
+703
+01:09:15,019 --> 01:09:19,920
+get a secfork because you don't have permission to access these.
+
+704
+01:09:19,920 --> 01:09:26,019
+If you have studied the processor architectures especially 80386 and later there is something
+
+705
+01:09:26,019 --> 01:09:29,819
+called as privilege for every code.
+
+706
+01:09:29,819 --> 01:09:35,539
+So this is running at ring 0 or ring 1 and user code is running at outer rings which
+
+707
+01:09:35,539 --> 01:09:37,220
+have lower privileges.
+
+708
+01:09:37,220 --> 01:09:42,739
+So you cannot go from outer privilege to the inner privilege without having some interface
+
+709
+01:09:42,739 --> 01:09:43,899
+in between.
+
+710
+01:09:43,899 --> 01:09:48,899
+So what happens is the program can access this space indirectly.
+
+711
+01:09:48,899 --> 01:09:53,180
+You have to do a system call that's where kernel space will come into picture and do
+
+712
+01:09:53,180 --> 01:09:55,539
+something for you.
+
+713
+01:09:55,539 --> 01:09:58,019
+So you cannot access this directly.
+
+714
+01:09:58,019 --> 01:10:03,140
+Kernel exposes some APIs which are further abstracted by libc or something.
+
+715
+01:10:03,140 --> 01:10:07,820
+So for example whenever you have to open a file in your program what will happen is
+
+716
+01:10:07,820 --> 01:10:14,140
+libc at some point will call an API from kernel which will actually do the file handling thing
+
+717
+01:10:14,140 --> 01:10:17,820
+using the file system portion in the kernel.
+
+718
+01:10:17,820 --> 01:10:23,060
+Whenever kernel has to do some context switching the kernel space will come into picture do
+
+719
+01:10:23,060 --> 01:10:26,520
+the context switching and start the other process.
+
+720
+01:10:26,520 --> 01:10:28,380
+Does that make sense?
+
+721
+01:10:28,380 --> 01:10:31,500
+Now there is something like this which you are seeing.
+
+722
+01:10:31,539 --> 01:10:37,500
+So I have said that beyond kernel space there is a random stack offset and just before heap
+
+723
+01:10:37,500 --> 01:10:41,220
+there is random brk offset.
+
+724
+01:10:41,220 --> 01:10:43,779
+Historically this was not true.
+
+725
+01:10:43,779 --> 01:10:49,659
+Historically even stack was beginning just immediately after this address and heap was
+
+726
+01:10:49,659 --> 01:10:52,420
+immediately beginning here.
+
+727
+01:10:52,420 --> 01:10:58,659
+Now that created a problem for lot of things especially security because what happened
+
+728
+01:10:58,659 --> 01:11:04,899
+is you know deterministically every time the program is run the stack is at this location,
+
+729
+01:11:04,899 --> 01:11:09,659
+heap is at this location and so on and that was universally true for all the programs
+
+730
+01:11:09,659 --> 01:11:13,340
+which were running on linux 32 bit.
+
+731
+01:11:13,340 --> 01:11:19,659
+And that created lot of security problems because you can very easily write code which
+
+732
+01:11:19,659 --> 01:11:23,579
+can assume those addresses and do something interesting.
+
+733
+01:11:23,579 --> 01:11:27,019
+So they added something which is randomized.
+
+734
+01:11:27,020 --> 01:11:33,860
+So they add some offset here every time you run a program stack is not at the same position.
+
+735
+01:11:33,860 --> 01:11:38,860
+Stack will start at some different offsets and similarly heap will start at some different
+
+736
+01:11:38,860 --> 01:11:39,900
+offsets.
+
+737
+01:11:39,900 --> 01:11:44,860
+This is called address space layout randomization or ASLR.
+
+738
+01:11:44,860 --> 01:11:49,860
+This is not that effective in 32 bit linux because what happens is there is not much
+
+739
+01:11:49,860 --> 01:11:55,580
+address space to do much with it because you can't have large random offsets because your
+
+740
+01:11:55,899 --> 01:11:58,220
+address space is already constrained.
+
+741
+01:11:58,220 --> 01:12:03,619
+But on 64 bit variants where there is very large address space this actually plays much
+
+742
+01:12:03,619 --> 01:12:05,619
+interesting role.
+
+743
+01:12:05,619 --> 01:12:10,220
+Most of the systems which you will have will have ASLR enabled.
+
+744
+01:12:10,220 --> 01:12:13,100
+I think kernel 2.6 or something started it.
+
+745
+01:12:13,100 --> 01:12:19,859
+So most of the recent distributions should have ASLR enabled.
+
+746
+01:12:19,859 --> 01:12:25,779
+Now what are the problems with respect to the memory management which we need to solve.
+
+747
+01:12:25,779 --> 01:12:31,099
+We said that this is the address map which we want to create for every process.
+
+748
+01:12:31,099 --> 01:12:38,099
+But we still have to we still know that we don't have sufficient memory and we cannot
+
+749
+01:12:38,099 --> 01:12:43,339
+we need to ensure that there could be multiple processes active at the same time.
+
+750
+01:12:43,339 --> 01:12:47,339
+So how do we fit everything into the actual physical memory we have.
+
+751
+01:12:47,819 --> 01:12:53,180
+We don't have that much memory but we want to have multiple things running.
+
+752
+01:12:53,180 --> 01:12:57,020
+And where are the different address spaces allocated.
+
+753
+01:12:57,020 --> 01:13:00,060
+So I said that code segment will be here.
+
+754
+01:13:00,060 --> 01:13:04,180
+Now everyone cannot get that address in the physical memory.
+
+755
+01:13:04,180 --> 01:13:10,819
+The 8c0 address all the programs cannot start at that address because physically there is
+
+756
+01:13:10,819 --> 01:13:13,180
+only one that address.
+
+757
+01:13:13,180 --> 01:13:19,940
+So how do I allocate different portions of the address space in the physical memory.
+
+758
+01:13:19,940 --> 01:13:22,980
+Then how do we protect data from each other.
+
+759
+01:13:22,980 --> 01:13:28,539
+You don't want accidentally process p1 to write into p2 data and so on.
+
+760
+01:13:28,539 --> 01:13:31,619
+And can we actually share the data.
+
+761
+01:13:31,619 --> 01:13:36,140
+Let's say we don't want accidentally to share modify the data.
+
+762
+01:13:36,140 --> 01:13:41,659
+But if two processes do want to share the data how can you do that.
+
+763
+01:13:41,659 --> 01:13:45,979
+So these are some of the things which we will actually see.
+
+764
+01:13:45,979 --> 01:13:49,899
+So virtual memory is essentially an indirection.
+
+765
+01:13:49,899 --> 01:13:54,059
+Has anyone heard of fundamental theorem in software engineering.
+
+766
+01:13:54,059 --> 01:14:00,180
+So it's a theorem which says that every problem in computer science can be solved by additional
+
+767
+01:14:00,180 --> 01:14:03,659
+level of indirection.
+
+768
+01:14:03,659 --> 01:14:05,500
+And we'll see some examples of that.
+
+769
+01:14:05,500 --> 01:14:12,539
+So virtual memory most of these problems which we have are all solved by just creating one
+
+770
+01:14:12,539 --> 01:14:15,619
+level of indirection.
+
+771
+01:14:15,619 --> 01:14:18,699
+So virtual memory creates something like this.
+
+772
+01:14:18,699 --> 01:14:23,699
+So every process does not access the memory directly.
+
+773
+01:14:23,699 --> 01:14:27,539
+There is an indirection in between of mapping.
+
+774
+01:14:27,539 --> 01:14:34,220
+So every process actually has some mapping which will get it to the physical memory.
+
+775
+01:14:34,220 --> 01:14:41,300
+And this is what and every process what it views is actually virtual memory.
+
+776
+01:14:41,300 --> 01:14:47,780
+Now address spaces so every process gets its own address space that we already saw.
+
+777
+01:14:47,780 --> 01:14:51,619
+And the address space will actually be 0 to 2 raise to n.
+
+778
+01:14:51,619 --> 01:14:56,020
+So on Linux 32 it will be 0 to 2 raise to 32.
+
+779
+01:14:56,020 --> 01:14:59,860
+On Linux 64 it will be 0 to 2 raise to 64.
+
+780
+01:14:59,859 --> 01:15:04,659
+The physical address can actually be smaller than that which could be m depending on how
+
+781
+01:15:04,659 --> 01:15:09,859
+much RAM you actually have 2 GB 4 GB and so on.
+
+782
+01:15:09,859 --> 01:15:14,859
+Now every byte in the physical memory actually has only one address because physical memory
+
+783
+01:15:14,859 --> 01:15:15,859
+is fixed.
+
+784
+01:15:15,859 --> 01:15:17,979
+There is no illusion you can create.
+
+785
+01:15:17,979 --> 01:15:22,659
+So every physical memory has just one address.
+
+786
+01:15:22,659 --> 01:15:30,699
+But every location in the physical memory can have one or more virtual addresses.
+
+787
+01:15:30,699 --> 01:15:32,859
+Does that make sense?
+
+788
+01:15:32,859 --> 01:15:38,699
+Because physical memory is there I might refer to the same location using two different virtual
+
+789
+01:15:38,699 --> 01:15:42,139
+addresses.
+
+790
+01:15:42,139 --> 01:15:43,479
+So this is how it works.
+
+791
+01:15:43,479 --> 01:15:48,720
+You have process 1's virtual address space, process 2's virtual address space.
+
+792
+01:15:48,720 --> 01:15:56,340
+Some of the addresses in the process 1 map to some location in physical memory.
+
+793
+01:15:56,340 --> 01:16:04,520
+And some of the locations can actually be even on the disk which is called as swap space.
+
+794
+01:16:04,520 --> 01:16:07,039
+Have you heard of this term swap space earlier?
+
+795
+01:16:07,039 --> 01:16:12,720
+Whenever you were say installing Linux or something it asks you how much swap space
+
+796
+01:16:12,720 --> 01:16:14,400
+to keep.
+
+797
+01:16:14,400 --> 01:16:18,579
+And the typical guideline was keep it twice of the RAM size.
+
+798
+01:16:18,579 --> 01:16:27,199
+The swap space is actually used to do some lazy thing which we will see a bit later on
+
+799
+01:16:27,199 --> 01:16:30,359
+why we have disk also.
+
+800
+01:16:30,359 --> 01:16:35,699
+But essentially you can think of it this way that your physical memory is actually extended
+
+801
+01:16:35,699 --> 01:16:39,680
+by having disk also saving some stuff.
+
+802
+01:16:39,680 --> 01:16:42,420
+Now how does actually things work?
+
+803
+01:16:42,420 --> 01:16:47,920
+So CPU actually never looks at physical address.
+
+804
+01:16:47,920 --> 01:16:54,039
+So all the addresses which we saw so far, all the pointers which are pointing to everything
+
+805
+01:16:54,039 --> 01:16:56,840
+is pointing to virtual memory.
+
+806
+01:16:56,840 --> 01:17:05,600
+There is no way for you as a programmer to get access to physical address of something.
+
+807
+01:17:05,600 --> 01:17:12,300
+So whenever I say ptr is equal to and b it is not physical address of b which is stored
+
+808
+01:17:12,300 --> 01:17:13,300
+in the pointer.
+
+809
+01:17:13,300 --> 01:17:19,000
+So it is virtual address of b which is stored in the pointer.
+
+810
+01:17:19,000 --> 01:17:26,020
+And what happens is as CPU is executing its various instruction internally it will send
+
+811
+01:17:26,020 --> 01:17:32,500
+the virtual address which it is getting to a unit called as mmu which has a responsibility
+
+812
+01:17:32,500 --> 01:17:37,000
+of translating that to physical address and then the physical memory will actually be
+
+813
+01:17:37,000 --> 01:17:39,920
+accessed.
+
+814
+01:17:39,920 --> 01:17:46,560
+And there is no bypass which is available for you from CPU directly to physical address.
+
+815
+01:17:46,560 --> 01:17:48,640
+Does that make sense?
+
+816
+01:17:48,640 --> 01:17:51,680
+Now why we have virtual memory?
+
+817
+01:17:51,680 --> 01:17:55,420
+So we have created this thing what does it buy us?
+
+818
+01:17:55,420 --> 01:18:02,140
+So it allows us to efficiently use the main memory and it does it by couple of ways.
+
+819
+01:18:02,140 --> 01:18:09,900
+One is every process now has the virtual address space which is private to its own
+
+820
+01:18:09,900 --> 01:18:15,100
+and there is this mapping function which is mapping it to physical memory.
+
+821
+01:18:15,100 --> 01:18:18,300
+Now this mapping function can keep changing.
+
+822
+01:18:18,300 --> 01:18:26,900
+For example first time when I look up address 0 it might be mapped to physical address 500.
+
+823
+01:18:27,659 --> 01:18:34,460
+Later it might actually be mapped to physical address 10000.
+
+824
+01:18:34,460 --> 01:18:40,859
+And this happens behind the scenes because what memory management unit and operating
+
+825
+01:18:40,859 --> 01:18:46,899
+system together are they doing is they are constantly swapping in what goes what actually
+
+826
+01:18:46,899 --> 01:18:50,339
+resides in physical memory at every time.
+
+827
+01:18:50,339 --> 01:18:56,019
+So it is not that when your program starts running everything needed for the program
+
+828
+01:18:56,140 --> 01:18:58,780
+is present in the physical memory.
+
+829
+01:18:58,780 --> 01:19:03,280
+It will be brought into the physical memory only on demand.
+
+830
+01:19:03,280 --> 01:19:08,940
+So whenever you access something it is brought on demand.
+
+831
+01:19:08,940 --> 01:19:15,060
+Now what happens is because of this not everything of a program is always in memory and that
+
+832
+01:19:15,060 --> 01:19:18,520
+is where the swap space comes into picture.
+
+833
+01:19:18,520 --> 01:19:24,860
+So whenever you have something of a program which is not being used you will put that
+
+834
+01:19:24,859 --> 01:19:30,539
+into the swap space and that is why you free up the physical memory.
+
+835
+01:19:30,539 --> 01:19:35,619
+And the only time you will run out of the physical memory is when your swap space is
+
+836
+01:19:35,619 --> 01:19:41,139
+full and your main memory is also full.
+
+837
+01:19:41,139 --> 01:19:42,500
+Does that make sense?
+
+838
+01:19:42,500 --> 01:19:48,759
+You will run out of physical memory only when your swap space is full and your RAM is full.
+
+839
+01:19:48,759 --> 01:19:54,099
+As long as your RAM is full but you still have space in swap your programs will keep
+
+840
+01:19:54,220 --> 01:19:55,220
+running.
+
+841
+01:19:55,220 --> 01:20:01,860
+They will run very slow because processor and MMU has to constantly swap in and swap
+
+842
+01:20:01,860 --> 01:20:07,420
+out but it will still functionally run.
+
+843
+01:20:07,420 --> 01:20:15,220
+The other thing which this does virtual memory is it simplifies lot of job for programmer
+
+844
+01:20:15,220 --> 01:20:17,620
+linkers compilers.
+
+845
+01:20:17,620 --> 01:20:22,660
+Imagine if you are living in a world where there was no virtual memory then what would
+
+846
+01:20:22,659 --> 01:20:30,260
+happen is programmer had to write programs where it cannot assume the entire address
+
+847
+01:20:30,260 --> 01:20:32,699
+space is available.
+
+848
+01:20:32,699 --> 01:20:35,019
+Linker cannot do the address space layout.
+
+849
+01:20:35,019 --> 01:20:40,539
+So most of the things will get delayed to the loader and loader will become bottleneck.
+
+850
+01:20:40,539 --> 01:20:44,819
+As of now loader actually is fairly straightforward because loader simply has to take whatever
+
+851
+01:20:44,819 --> 01:20:51,380
+linker has done at link time and simply load it into the memory and that too on demand
+
+852
+01:20:51,500 --> 01:20:54,460
+it does not do it by default always.
+
+853
+01:20:54,460 --> 01:21:00,699
+So that simplifies the overall time you need to spend at load time which is more critical
+
+854
+01:21:00,699 --> 01:21:04,539
+because load time is when your application is actually running.
+
+855
+01:21:04,539 --> 01:21:11,340
+You do not want slow startup for your application and then it provides isolation of the address
+
+856
+01:21:11,340 --> 01:21:18,619
+spaces because everything in virtual memory has permissions associated with it and as
+
+857
+01:21:18,619 --> 01:21:25,420
+soon as someone tries to dereference it you get a problem because imagine everyone is
+
+858
+01:21:25,420 --> 01:21:28,180
+trying to get the virtual address.
+
+859
+01:21:28,180 --> 01:21:30,599
+No one has access to physical address.
+
+860
+01:21:30,599 --> 01:21:35,439
+So how will you access physical memory of another process?
+
+861
+01:21:35,439 --> 01:21:41,579
+There is no way for you to know where is the data of some process stored physically in
+
+862
+01:21:41,579 --> 01:21:46,619
+the RAM and even if you knew it is at this particular address there is no way for you
+
+863
+01:21:46,619 --> 01:21:54,420
+to write to that address because you can only generate virtual addresses in your program.
+
+864
+01:21:54,420 --> 01:22:00,220
+So every program can only generate virtual address and virtual address may map to different
+
+865
+01:22:00,220 --> 01:22:03,699
+physical address in different processes.
+
+866
+01:22:03,699 --> 01:22:16,180
+So there is no way for you to actually access physical memory of other process.
+
+867
+01:22:16,180 --> 01:22:18,579
+So this mapping will get to that.
+
+868
+01:22:18,579 --> 01:22:22,340
+So how does the actual translation happens?
+
+869
+01:22:22,340 --> 01:22:30,020
+So this is what happens is the CPU generated address is always a virtual address.
+
+870
+01:22:30,020 --> 01:22:35,220
+So what CPUs typically do is they split this address into two parts.
+
+871
+01:22:35,220 --> 01:22:39,240
+There is a page number and then there is a page offset.
+
+872
+01:22:39,240 --> 01:22:44,360
+So you can think of it this way that your entire virtual address space is divided into
+
+873
+01:22:44,359 --> 01:22:47,239
+a series of pages.
+
+874
+01:22:47,239 --> 01:22:51,479
+Typically the page size is 4 KB or 4 MB.
+
+875
+01:22:51,479 --> 01:22:56,460
+So you can imagine the virtual address space is split into set of pages.
+
+876
+01:22:56,460 --> 01:23:02,939
+The page offset gives offset within the page and the page number gives the page number.
+
+877
+01:23:02,939 --> 01:23:07,319
+So every address is translated to that.
+
+878
+01:23:07,319 --> 01:23:12,880
+So you need some function which will translate the virtual address into physical address
+
+879
+01:23:13,100 --> 01:23:17,260
+And this is done using a page table.
+
+880
+01:23:17,260 --> 01:23:23,319
+So every process has a page table which is set up by operating system.
+
+881
+01:23:23,319 --> 01:23:28,900
+And page table holds mapping that this page maps to this physical memory location, this
+
+882
+01:23:28,900 --> 01:23:32,779
+page maps to this physical memory location and so on.
+
+883
+01:23:32,779 --> 01:23:38,880
+So to see in diagram, so let's say you have these many pages.
+
+884
+01:23:38,880 --> 01:23:44,420
+What this says is this page is mapped to this address in the physical memory.
+
+885
+01:23:44,420 --> 01:23:49,440
+This page table itself will be configured by the operating system.
+
+886
+01:23:49,440 --> 01:23:55,039
+But once it is configured processor and the memory subsystem can fetch these addresses
+
+887
+01:23:55,039 --> 01:23:56,579
+from the physical memory.
+
+888
+01:23:56,579 --> 01:24:02,579
+So it's a task which is done by both operating systems and processor together and that's
+
+889
+01:24:02,579 --> 01:24:06,760
+why you learn typically virtual memory in operating system course as well as the processor
+
+890
+01:24:06,760 --> 01:24:11,180
+course because both of them are playing some role with it.
+
+891
+01:24:11,180 --> 01:24:14,420
+Setting up page table is job of the operating system.
+
+892
+01:24:14,420 --> 01:24:19,960
+Actual using page table and reading the addresses and getting data from memory is done by the
+
+893
+01:24:19,960 --> 01:24:22,220
+processor.
+
+894
+01:24:22,220 --> 01:24:26,340
+Now some of the virtual addresses might not map to anything.
+
+895
+01:24:26,340 --> 01:24:27,739
+So those are null.
+
+896
+01:24:27,739 --> 01:24:31,699
+And if you try to access these addresses, you will get a sec fault.
+
+897
+01:24:31,699 --> 01:24:35,940
+So the reason you get sec fault is for two things.
+
+898
+01:24:35,939 --> 01:24:44,039
+You are trying to access a virtual address which is not allocated to any physical address.
+
+899
+01:24:44,039 --> 01:24:47,000
+That's when you get a sec fault.
+
+900
+01:24:47,000 --> 01:24:53,960
+You are trying to access a page which has permissions marked which are not for your
+
+901
+01:24:53,960 --> 01:24:54,960
+case.
+
+902
+01:24:54,960 --> 01:25:00,000
+For example, if you try to access a page which lives in the kernel space, then the permissions
+
+903
+01:25:00,000 --> 01:25:04,639
+of that will be set up such that user program cannot access.
+
+904
+01:25:04,640 --> 01:25:09,940
+Now let's go back to the quiz which we were discussing yesterday.
+
+905
+01:25:09,940 --> 01:25:15,440
+What we said is if you return address of a variable on the stack to the caller function
+
+906
+01:25:15,440 --> 01:25:24,940
+and the caller function tries to access it, it will still be able to print it although
+
+907
+01:25:24,940 --> 01:25:28,240
+it's logically incorrect thing to do.
+
+908
+01:25:28,240 --> 01:25:32,100
+Now why you didn't get a sec fault in that case?
+
+909
+01:25:32,100 --> 01:25:40,220
+You are trying to access memory which you are not supposed to access.
+
+910
+01:25:40,220 --> 01:25:46,280
+And the reason was even when the stack pointer was moved, it's not that the page for that
+
+911
+01:25:46,280 --> 01:25:47,900
+was marked as null.
+
+912
+01:25:47,900 --> 01:25:52,680
+To give an example, let's do this.
+
+913
+01:25:52,680 --> 01:25:58,300
+So let's say I have some code.
+
+914
+01:25:58,300 --> 01:26:16,480
+So let's say I declare an array of 4 kb.
+
+915
+01:26:16,479 --> 01:26:42,559
+And let me access arr of 0, arr of 1, arr of 4095.
+
+916
+01:26:42,559 --> 01:26:44,639
+It worked.
+
+917
+01:26:44,720 --> 01:26:50,440
+Now let's try accessing something.
+
+918
+01:26:50,440 --> 01:27:04,480
+This is outside the array.
+
+919
+01:27:04,480 --> 01:27:09,240
+I still didn't get any sec fault.
+
+920
+01:27:09,239 --> 01:27:15,439
+Let's try to access this.
+
+921
+01:27:15,439 --> 01:27:24,819
+I still didn't get any sec fault.
+
+922
+01:27:24,819 --> 01:27:26,939
+I got sec fault.
+
+923
+01:27:26,939 --> 01:27:35,319
+The reason most likely is this offset falls into a next page which was not allocated.
+
+924
+01:27:35,319 --> 01:27:46,239
+So whenever you do access memory which is outside some logical object, you are not guaranteed
+
+925
+01:27:46,239 --> 01:27:47,319
+to get a sec fault.
+
+926
+01:27:47,319 --> 01:27:50,880
+In fact, sec fault is a good thing because then you can realize there is some bug in
+
+927
+01:27:50,880 --> 01:27:52,639
+your program.
+
+928
+01:27:52,639 --> 01:27:59,239
+This was much more bad because what happens is let's say I was reading this somehow,
+
+929
+01:27:59,239 --> 01:28:01,359
+then it gave me something.
+
+930
+01:28:01,359 --> 01:28:06,399
+And this is much more harder bug to find in your program than when you get a sec fault
+
+931
+01:28:06,399 --> 01:28:10,719
+because when you get a sec fault, you know that this is the point where it got sec fault.
+
+932
+01:28:10,719 --> 01:28:14,319
+So let me check if I'm trying to access something illegal.
+
+933
+01:28:14,319 --> 01:28:24,039
+In this case, there was no easy way for me to identify that I was trying to access something
+
+934
+01:28:24,039 --> 01:28:28,239
+which was illegal for me to access.
+
+935
+01:28:28,239 --> 01:28:31,899
+So these kind of bugs are very hard.
+
+936
+01:28:31,899 --> 01:28:37,639
+Now there is one tool which I don't know if it is installed on this.
+
+937
+01:28:37,639 --> 01:28:54,399
+If you run your program under a command called, so Valgrind is not running.
+
+938
+01:28:54,399 --> 01:28:57,819
+So even Valgrind couldn't catch this.
+
+939
+01:28:57,819 --> 01:29:03,539
+So there is a tool called Valgrind which essentially can detect some sort of logical bugs in your
+
+940
+01:29:03,539 --> 01:29:06,119
+program, especially with respect to memory.
+
+941
+01:29:06,119 --> 01:29:11,539
+So if you are trying to access memory which was not allocated or if you are trying to
+
+942
+01:29:11,539 --> 01:29:18,340
+look at heap and dereference a dangling pointer and those kind of things, those are all detected
+
+943
+01:29:18,340 --> 01:29:19,340
+by Valgrind.
+
+944
+01:29:19,340 --> 01:29:21,460
+But even Valgrind is of no help here.
+
+945
+01:29:21,460 --> 01:29:27,380
+So these kind of bugs are going to be nightmare, especially if they happen in a large software.
+
+946
+01:29:27,380 --> 01:29:33,859
+So always be, don't try to write such codes.
+
+947
+01:29:33,859 --> 01:29:39,659
+And then some of the addresses can actually be mapped into the disk.
+
+948
+01:29:39,659 --> 01:29:44,560
+Now what happens is you must have heard of something called as a page fault.
+
+949
+01:29:44,560 --> 01:29:47,779
+How many of you have heard this term, page fault?
+
+950
+01:29:47,779 --> 01:29:53,300
+Now what happens is if your address is actually in the physical memory, then processor will
+
+951
+01:29:53,300 --> 01:29:57,940
+happily go and execute and get data from that address.
+
+952
+01:29:57,940 --> 01:30:04,940
+But if the address is present in the swap area, if address is mapped onto the disk,
+
+953
+01:30:04,940 --> 01:30:09,980
+then you need to, the event is called as page fault.
+
+954
+01:30:09,980 --> 01:30:14,140
+And that's where again operating systems come into picture and operating system will
+
+955
+01:30:14,140 --> 01:30:21,220
+read that data from the disk and bring it back into the physical memory.
+
+956
+01:30:21,220 --> 01:30:22,840
+Does that make sense?
+
+957
+01:30:22,840 --> 01:30:28,159
+So all of this essentially allowed you to efficiently utilize memory because remember
+
+958
+01:30:28,159 --> 01:30:34,680
+we were keeping things in physical RAM, only things which were needed.
+
+959
+01:30:34,680 --> 01:30:36,560
+We didn't keep everything.
+
+960
+01:30:36,560 --> 01:30:43,039
+And whenever we tried to access something which was not in RAM, but in the disk, operating
+
+961
+01:30:43,039 --> 01:30:46,840
+system came into picture, brought something from the disk into the memory.
+
+962
+01:30:46,840 --> 01:30:51,720
+And then it may do something like a page replacement if it doesn't have, sorry, if
+
+963
+01:30:51,720 --> 01:30:55,020
+it doesn't have space in the RAM.
+
+964
+01:30:55,020 --> 01:30:59,720
+So only when you run out of physical RAM and the disk is when you have a problem because
+
+965
+01:30:59,720 --> 01:31:04,819
+then there is no way operating system can put in some data.
+
+966
+01:31:04,819 --> 01:31:10,720
+And if you try to access something which is not mapped at all, not mapped to RAM or not
+
+967
+01:31:10,720 --> 01:31:14,860
+mapped to physical disk, then you get a set fault.
+
+968
+01:31:14,859 --> 01:31:21,739
+In all other cases, program will silently do something.
+
+969
+01:31:21,739 --> 01:31:24,460
+And how many page tables you need?
+
+970
+01:31:24,460 --> 01:31:27,019
+Correct.
+
+971
+01:31:27,019 --> 01:31:30,619
+So you need one page table per process.
+
+972
+01:31:30,619 --> 01:31:37,420
+So every page table has a process, every process has a page table which essentially tells how
+
+973
+01:31:37,420 --> 01:31:43,219
+to map virtual address space of this process to the physical memory.
+
+974
+01:31:43,220 --> 01:31:45,039
+Does that make sense?
+
+975
+01:31:45,039 --> 01:31:50,539
+Now obviously the address translation is a costly activity.
+
+976
+01:31:50,539 --> 01:31:52,500
+And this is what happens in that.
+
+977
+01:31:52,500 --> 01:31:59,380
+So page table, how does processor know where is page table for process P1?
+
+978
+01:31:59,380 --> 01:32:04,460
+Or how does it know where is process for page process P2?
+
+979
+01:32:04,460 --> 01:32:06,980
+So there is a special register.
+
+980
+01:32:07,259 --> 01:32:13,179
+In x86 there is a register called CR3 which actually holds the page table address.
+
+981
+01:32:13,179 --> 01:32:20,099
+But essentially this register actually holds the address of the page table of the current
+
+982
+01:32:20,099 --> 01:32:21,099
+process.
+
+983
+01:32:21,099 --> 01:32:24,019
+And remember page table itself is also stored in memory.
+
+984
+01:32:24,019 --> 01:32:29,359
+So page table is not something which has magical storage on the CPU.
+
+985
+01:32:29,359 --> 01:32:32,299
+Page table is also stored in RAM.
+
+986
+01:32:32,300 --> 01:32:37,940
+So this will actually hold the address of the page table.
+
+987
+01:32:37,940 --> 01:32:42,220
+And page table will have whether it is a valid page or not.
+
+988
+01:32:42,220 --> 01:32:48,539
+And then it will have a table which will essentially say that this virtual address maps to this
+
+989
+01:32:48,539 --> 01:32:50,699
+physical address.
+
+990
+01:32:50,699 --> 01:32:53,380
+Does that make sense?
+
+991
+01:32:53,380 --> 01:32:59,980
+Now the translation itself is costly because what will happen is every time you are trying
+
+992
+01:32:59,979 --> 01:33:04,899
+to access any memory location you have to first do the address translation.
+
+993
+01:33:04,899 --> 01:33:09,579
+That means you have to first read something from memory because you need to at least read
+
+994
+01:33:09,579 --> 01:33:12,119
+the page table itself.
+
+995
+01:33:12,119 --> 01:33:15,119
+So it is going to be a costly activity.
+
+996
+01:33:15,119 --> 01:33:21,639
+Now what happens is most of the times if there is a rule 80-20, most of the time is spent
+
+997
+01:33:21,639 --> 01:33:25,559
+in the 80% of the code because you will have loops and everything.
+
+998
+01:33:25,680 --> 01:33:30,320
+So most of the addresses generated could be together or related.
+
+999
+01:33:30,320 --> 01:33:35,539
+So what you will have is you will create a cache of address translation.
+
+1000
+01:33:35,539 --> 01:33:41,980
+So whenever a process, whenever an address translation happens that virtual address 5
+
+1001
+01:33:41,980 --> 01:33:48,080
+maps to physical address 100, you store that mapping into a cache which is called as TLB
+
+1002
+01:33:48,080 --> 01:33:50,680
+translation look-aside buffer.
+
+1003
+01:33:50,680 --> 01:33:56,579
+So what happens is every time you are going to translate you first look up whether this
+
+1004
+01:33:56,579 --> 01:34:01,560
+is present in the cache and if it is present you use that information directly.
+
+1005
+01:34:01,560 --> 01:34:07,440
+Otherwise you go via your normal page table translation mechanisms.
+
+1006
+01:34:07,440 --> 01:34:12,180
+Is it clear to everyone on how virtual memory works?
+
+1007
+01:34:12,180 --> 01:34:18,840
+So just to summarize virtual memory gave us a way to create illusion of entire address
+
+1008
+01:34:18,840 --> 01:34:20,900
+space being available.
+
+1009
+01:34:20,900 --> 01:34:26,020
+It allows us to efficiently utilize the physical resources because we keep only things which
+
+1010
+01:34:26,020 --> 01:34:29,600
+are needed in the physical RAM.
+
+1011
+01:34:29,600 --> 01:34:36,739
+And it allowed us to isolate data of two processes because no one can access physical memory.
+
+1012
+01:34:36,739 --> 01:34:43,119
+There is no way for a process to access other process data.
+
+1013
+01:34:43,119 --> 01:34:50,000
+And the address translation itself has a cache to make it fast.
+
+1014
+01:34:50,000 --> 01:34:55,680
+Now quiz, so let's say we started off with one of the requirements that if two process
+
+1015
+01:34:55,680 --> 01:35:00,119
+do want to share data, how will you do that?
+
+1016
+01:35:00,119 --> 01:35:01,279
+What can you do?
+
+1017
+01:35:01,279 --> 01:35:08,899
+So let's say there is some data which two processes want to share a physical copy.
+
+1018
+01:35:08,899 --> 01:35:09,899
+What will you do?
+
+1019
+01:35:09,899 --> 01:35:15,059
+How will you configure the virtual memory page tables so that both of them share the
+
+1020
+01:35:15,059 --> 01:35:21,059
+same data?
+
+1021
+01:35:21,059 --> 01:35:29,619
+So what he is saying is, so let's say virtual address 100 to 200 are reserved for that data.
+
+1022
+01:35:29,619 --> 01:35:31,839
+But does that really matter?
+
+1023
+01:35:31,839 --> 01:35:35,619
+Because virtual addresses will be translated to physical address.
+
+1024
+01:35:35,619 --> 01:35:49,840
+Correct.
+
+1025
+01:35:49,840 --> 01:35:54,159
+So what you will instead do is, see virtual address does not matter whether virtual address
+
+1026
+01:35:54,159 --> 01:35:56,559
+is same or different does not matter.
+
+1027
+01:35:56,559 --> 01:35:59,979
+What matters is the physical address needs to be same.
+
+1028
+01:35:59,979 --> 01:36:08,039
+So you can say process P1's address 100 maps to physical memory location 5 and process
+
+1029
+01:36:08,039 --> 01:36:14,159
+P2's location 10,000 maps to location 5.
+
+1030
+01:36:14,159 --> 01:36:16,699
+And this is how you can share say kernel data.
+
+1031
+01:36:16,699 --> 01:36:19,079
+See kernel, there is only one kernel.
+
+1032
+01:36:19,079 --> 01:36:20,819
+There are no multiple kernels.
+
+1033
+01:36:20,819 --> 01:36:26,339
+Now you don't want to create duplicate data of kernel for every process.
+
+1034
+01:36:26,340 --> 01:36:33,020
+So what you will do is every process page table will have that kernel's data lives
+
+1035
+01:36:33,020 --> 01:36:37,279
+at this physical memory location.
+
+1036
+01:36:37,279 --> 01:36:40,159
+And they could actually be at different virtual addresses.
+
+1037
+01:36:40,159 --> 01:36:41,159
+That does not matter.
+
+1038
+01:36:41,159 --> 01:36:46,920
+Virtual address is merely going to be translated to a physical address.
+
+1039
+01:36:46,920 --> 01:36:48,980
+Is that clear?
+
+1040
+01:36:48,980 --> 01:36:55,199
+Now when we say arrays are contiguous, are they contiguous in virtual memory or are they
+
+1041
+01:36:55,739 --> 01:37:05,019
+contiguous in physical memory or both of them?
+
+1042
+01:37:05,019 --> 01:37:18,220
+How many of you think they are contiguous in both physical and virtual memory?
+
+1043
+01:37:18,220 --> 01:37:30,900
+How many of you think they are contiguous only in physical memory?
+
+1044
+01:37:30,900 --> 01:37:41,020
+How many of you think they are contiguous only in virtual memory?
+
+1045
+01:37:41,020 --> 01:37:45,340
+Let's look at, so let's try to build this.
+
+1046
+01:37:45,340 --> 01:37:51,119
+So let's hypothetically assume they were supposed to be contiguous in physical memory.
+
+1047
+01:37:51,119 --> 01:37:56,100
+Then what happens is if you have a very large array, that means you need that much contiguous
+
+1048
+01:37:56,100 --> 01:37:58,300
+space in physical memory.
+
+1049
+01:37:58,300 --> 01:38:03,400
+So every time you need to bring that array, you need to have that much contiguous space
+
+1050
+01:38:03,400 --> 01:38:04,760
+in RAM.
+
+1051
+01:38:04,760 --> 01:38:11,300
+Now that fundamentally goes against the principle of efficiently utilizing physical memory.
+
+1052
+01:38:11,300 --> 01:38:20,320
+Because you don't want to create large contiguous chunks because then that forms a constraint.
+
+1053
+01:38:20,320 --> 01:38:24,500
+Because see whenever you have to look for free memory in the physical space, you have
+
+1054
+01:38:24,500 --> 01:38:27,739
+to find a contiguous chunk of that much.
+
+1055
+01:38:27,739 --> 01:38:35,199
+So that's design wise doesn't sound really promising that we don't want them to be contiguous
+
+1056
+01:38:35,199 --> 01:38:38,060
+in physical memory.
+
+1057
+01:38:38,060 --> 01:38:43,580
+Can they be non-contiguous in virtual memory?
+
+1058
+01:38:43,580 --> 01:38:47,340
+Can they be non-contiguous in virtual memory?
+
+1059
+01:38:47,340 --> 01:38:50,340
+Why not?
+
+1060
+01:38:50,340 --> 01:38:52,500
+Correct.
+
+1061
+01:38:52,500 --> 01:38:58,220
+So the entire indexing operation or pointer plus plus operation which you do relies on
+
+1062
+01:38:58,220 --> 01:39:01,060
+the fact that addresses are contiguous.
+
+1063
+01:39:01,060 --> 01:39:04,400
+So it has to be contiguous in virtual address space.
+
+1064
+01:39:04,399 --> 01:39:12,979
+So every time you have a big array, it's not that you are contiguously allocating that
+
+1065
+01:39:12,979 --> 01:39:20,479
+much physical memory, you are contiguously allocating that much virtual memory.
+
+1066
+01:39:20,479 --> 01:39:23,479
+And yes.
+
+1067
+01:39:23,479 --> 01:39:28,759
+Correct.
+
+1068
+01:39:29,760 --> 01:39:38,239
+So for example, if your array fits within one page like 4kb, then it will be contiguous.
+
+1069
+01:39:38,239 --> 01:39:40,360
+Now how will you do the mapping?
+
+1070
+01:39:40,360 --> 01:39:47,140
+You just need to say that address 0 to address 4k maps to this physical location.
+
+1071
+01:39:47,140 --> 01:39:51,739
+Address 4k plus 1 plus something maps to some other physical location.
+
+1072
+01:39:51,739 --> 01:39:58,500
+So the addresses in the physical space can be non-contiguous for an array.
+
+1073
+01:39:58,500 --> 01:40:01,880
+Now this is where the interesting part comes in.
+
+1074
+01:40:01,880 --> 01:40:05,699
+Does cache work on physical address or virtual address?
+
+1075
+01:40:05,699 --> 01:40:11,380
+So when we say there is L1 cache, you must have learned L1 cache, L2 cache and so on.
+
+1076
+01:40:11,380 --> 01:40:14,060
+So what is the principle of cache?
+
+1077
+01:40:14,060 --> 01:40:20,100
+That when I fetch something, I will fetch data contiguous to it because it might be
+
+1078
+01:40:20,100 --> 01:40:21,460
+accessed.
+
+1079
+01:40:21,460 --> 01:40:24,899
+So that's the spatial locality principle of the cache.
+
+1080
+01:40:24,899 --> 01:40:30,179
+So when I'm talking about spatial locality, am I talking about physical memory or am I
+
+1081
+01:40:30,179 --> 01:40:34,379
+talking about virtual memory?
+
+1082
+01:40:34,379 --> 01:40:37,859
+How many of you think virtual?
+
+1083
+01:40:37,859 --> 01:40:44,139
+How many of you think physical?
+
+1084
+01:40:44,140 --> 01:40:48,140
+Can you debate with each other and come up with a conclusion?
+
+1085
+01:41:14,140 --> 01:41:19,140
+So that might or might not actually be the legal thing.
+
+1086
+01:41:19,140 --> 01:41:24,140
+Now with that, your data graph is the base from you.
+
+1087
+01:41:24,140 --> 01:41:27,140
+Otherwise, it is not the physical memory address.
+
+1088
+01:41:27,140 --> 01:41:41,140
+So I think physically, your physical access is putting a physical address on the data
+
+1089
+01:41:41,140 --> 01:41:42,140
+and fetching data.
+
+1090
+01:41:42,140 --> 01:41:50,140
+So I think it is not just bringing that data but some more data along with it.
+
+1091
+01:41:50,140 --> 01:41:52,140
+So I think it is physical in that sense.
+
+1092
+01:41:52,140 --> 01:41:53,140
+OK.
+
+1093
+01:41:53,140 --> 01:41:55,140
+You have counterpoint to that.
+
+1094
+01:41:55,140 --> 01:42:01,140
+So if I have to hardware the cache, you can change what would be a data object.
+
+1095
+01:42:01,140 --> 01:42:06,140
+OK.
+
+1096
+01:42:06,140 --> 01:42:09,140
+Why?
+
+1097
+01:42:09,140 --> 01:42:20,140
+That's an interesting point.
+
+1098
+01:42:20,140 --> 01:42:24,140
+Can you say why you want TLB after cache?
+
+1099
+01:42:24,140 --> 01:42:47,140
+Any other points?
+
+1100
+01:42:47,140 --> 01:42:49,140
+Let's try to play both ways.
+
+1101
+01:42:49,140 --> 01:42:51,140
+So we'll derive what is the right answer.
+
+1102
+01:42:51,140 --> 01:42:54,140
+So let's say it works on physical memory.
+
+1103
+01:42:54,140 --> 01:42:55,140
+OK.
+
+1104
+01:42:55,140 --> 01:42:57,140
+Let's go with their solution.
+
+1105
+01:42:57,140 --> 01:43:05,140
+So what we are trying to say is whenever a memory access happens, first we will do the address translation.
+
+1106
+01:43:05,140 --> 01:43:06,140
+Right?
+
+1107
+01:43:06,140 --> 01:43:12,140
+Because for cache to work at physical address, first the address translation must happen.
+
+1108
+01:43:12,140 --> 01:43:13,140
+Right?
+
+1109
+01:43:13,140 --> 01:43:17,140
+So you must be able to translate virtual address to physical address.
+
+1110
+01:43:17,140 --> 01:43:22,140
+And then cache will look whether that physical addresses data is present in the cache or not.
+
+1111
+01:43:22,140 --> 01:43:23,140
+Right?
+
+1112
+01:43:23,140 --> 01:43:29,140
+And then if it is present, it will give you that.
+
+1113
+01:43:29,140 --> 01:43:32,140
+What are the downsides with that approach?
+
+1114
+01:43:32,140 --> 01:43:37,140
+Let's say you were doing the system design and he came up with this idea.
+
+1115
+01:43:37,140 --> 01:43:43,140
+What is the problem with this in terms of is there any correctness problem?
+
+1116
+01:43:43,140 --> 01:43:44,140
+Let's start with that.
+
+1117
+01:43:44,140 --> 01:43:50,140
+Is there any functional issue which can arise if the cache was supposed to work on physical address?
+
+1118
+01:43:50,140 --> 01:43:59,140
+OK.
+
+1119
+01:43:59,140 --> 01:44:04,140
+Then I mean same virtual address in different processes.
+
+1120
+01:44:04,140 --> 01:44:05,140
+Correct.
+
+1121
+01:44:05,140 --> 01:44:06,140
+Correctness.
+
+1122
+01:44:06,140 --> 01:44:09,140
+So everyone agrees there is no correctness issue with that scheme.
+
+1123
+01:44:09,140 --> 01:44:10,140
+Right?
+
+1124
+01:44:10,140 --> 01:44:15,140
+So if cache was supposed to work on physical address, there is no correctness issue.
+
+1125
+01:44:15,140 --> 01:44:18,140
+What are the performance issues with that?
+
+1126
+01:44:18,140 --> 01:44:19,140
+Correct.
+
+1127
+01:44:19,140 --> 01:44:22,140
+So address translation is the biggest problem.
+
+1128
+01:44:22,140 --> 01:44:24,140
+So what is the problem?
+
+1129
+01:44:24,140 --> 01:44:29,140
+So if cache was supposed to work on physical address, there is no correctness issue.
+
+1130
+01:44:29,140 --> 01:44:30,140
+Correct.
+
+1131
+01:44:30,140 --> 01:44:38,140
+So address translation is the biggest heavy weight because I wanted something to be looked
+
+1132
+01:44:38,140 --> 01:44:44,140
+up faster, but address translation is sitting in between and address translation itself
+
+1133
+01:44:44,140 --> 01:44:48,140
+may involve reading of the page table which goes to the memory and comes back and so on.
+
+1134
+01:44:48,140 --> 01:44:50,140
+So there is some performance issue.
+
+1135
+01:44:50,140 --> 01:44:52,140
+Now let's try to look at your side.
+
+1136
+01:44:52,140 --> 01:44:57,140
+So he's saying caches should be virtual address based.
+
+1137
+01:44:57,140 --> 01:44:58,140
+Right?
+
+1138
+01:44:58,140 --> 01:45:01,140
+What are the functional issues with that?
+
+1139
+01:45:01,140 --> 01:45:04,140
+Are there any functional issues with that?
+
+1140
+01:45:04,140 --> 01:45:05,140
+Correct.
+
+1141
+01:45:05,140 --> 01:45:10,140
+So this is a problem.
+
+1142
+01:45:10,140 --> 01:45:11,140
+OK.
+
+1143
+01:45:11,140 --> 01:45:17,140
+Two processes may have same virtual address which maps to two different locations in the
+
+1144
+01:45:17,140 --> 01:45:18,140
+cache.
+
+1145
+01:45:18,140 --> 01:45:27,140
+So address 500 in P1 might actually mean data X and address 500 in P2 might mean data Y.
+
+1146
+01:45:27,140 --> 01:45:37,140
+So if cache stores 500 holds data X, then that is incorrect in context of process P2.
+
+1147
+01:45:37,140 --> 01:45:38,140
+OK.
+
+1148
+01:45:38,140 --> 01:45:41,140
+So is this viable solution?
+
+1149
+01:45:41,140 --> 01:45:42,140
+Correct.
+
+1150
+01:45:42,140 --> 01:45:50,140
+So when you do a context switch, you can flush the cache and that will solve this problem.
+
+1151
+01:45:50,140 --> 01:45:51,140
+OK.
+
+1152
+01:45:52,140 --> 01:45:57,140
+So process context switch now has additional overhead of flushing the cache also.
+
+1153
+01:45:57,140 --> 01:46:00,140
+But if you do that, then there is no correctness issue.
+
+1154
+01:46:00,140 --> 01:46:07,140
+Are there any other issues?
+
+1155
+01:46:07,140 --> 01:46:08,140
+OK.
+
+1156
+01:46:08,140 --> 01:46:18,140
+What is the advantage compared to that scheme?
+
+1157
+01:46:18,140 --> 01:46:24,140
+So if you have a context switch, you have to fetch whatever was available.
+
+1158
+01:46:24,140 --> 01:46:28,140
+It might have been contiguous or it may not have been contiguous.
+
+1159
+01:46:28,140 --> 01:46:29,140
+Sorry?
+
+1160
+01:46:29,140 --> 01:46:30,140
+Correct.
+
+1161
+01:46:30,140 --> 01:46:35,140
+So address translation is saved.
+
+1162
+01:46:35,140 --> 01:46:36,140
+Right?
+
+1163
+01:46:36,140 --> 01:46:43,140
+So on this side, you have advantage because do we need to flush cache in case of context
+
+1164
+01:46:43,140 --> 01:46:46,140
+switch if you have a physical cache?
+
+1165
+01:46:46,140 --> 01:46:47,140
+Right?
+
+1166
+01:46:47,140 --> 01:46:55,140
+So you have advantage of no cache flush with their scheme and you have advantage of no
+
+1167
+01:46:55,140 --> 01:46:57,140
+address translation with your scheme.
+
+1168
+01:46:57,140 --> 01:46:58,140
+OK.
+
+1169
+01:46:58,140 --> 01:47:01,140
+So which one is better?
+
+1170
+01:47:01,140 --> 01:47:10,140
+It's not because see as soon as you flush the cache, it means all the references which
+
+1171
+01:47:10,140 --> 01:47:15,140
+are made now cannot be in cache and they have to go to wrap.
+
+1172
+01:47:15,140 --> 01:47:20,140
+So you have to again populate the cache with the cache entries.
+
+1173
+01:47:20,140 --> 01:47:22,140
+So it is equally bad.
+
+1174
+01:47:22,140 --> 01:47:23,140
+OK.
+
+1175
+01:47:23,140 --> 01:47:26,140
+Now what is actually done?
+
+1176
+01:47:26,140 --> 01:47:27,140
+OK.
+
+1177
+01:47:27,140 --> 01:47:29,140
+So we do both.
+
+1178
+01:47:29,140 --> 01:47:30,140
+OK.
+
+1179
+01:47:30,140 --> 01:47:31,140
+We do both.
+
+1180
+01:47:31,140 --> 01:47:38,140
+So have you heard of something called as on die cache, which is typically L1.
+
+1181
+01:47:38,140 --> 01:47:39,140
+Right?
+
+1182
+01:47:39,140 --> 01:47:43,140
+So L1 typically is virtually indexed.
+
+1183
+01:47:43,140 --> 01:47:48,140
+L2, L3, L4 are physically indexed.
+
+1184
+01:47:48,140 --> 01:47:49,140
+OK.
+
+1185
+01:47:49,140 --> 01:47:55,140
+The reason you do that is because L1 is on die.
+
+1186
+01:47:55,140 --> 01:47:59,140
+MMU is actually off the die.
+
+1187
+01:47:59,140 --> 01:48:00,140
+OK.
+
+1188
+01:48:00,140 --> 01:48:08,140
+So you don't want L1 to have to look up address translation and do that.
+
+1189
+01:48:08,140 --> 01:48:09,140
+OK.
+
+1190
+01:48:09,140 --> 01:48:12,140
+So you want L1 to work with virtual addresses.
+
+1191
+01:48:12,140 --> 01:48:18,140
+But beyond L2, which is off die, you are anyway given hope that you have to do memory access
+
+1192
+01:48:18,140 --> 01:48:19,140
+to some extent.
+
+1193
+01:48:19,140 --> 01:48:23,140
+So you better do the address translation.
+
+1194
+01:48:23,140 --> 01:48:24,140
+OK.
+
+1195
+01:48:24,140 --> 01:48:25,140
+Yes.
+
+1196
+01:48:25,140 --> 01:48:30,140
+TLB is in the MMU.
+
+1197
+01:48:30,140 --> 01:48:39,140
+So it is off die.
+
+1198
+01:48:39,140 --> 01:48:40,140
+OK.
+
+1199
+01:48:40,140 --> 01:48:41,140
+So you have to do address translation.
+
+1200
+01:48:41,140 --> 01:48:42,140
+Correct.
+
+1201
+01:48:42,140 --> 01:48:45,140
+Now processors are a bit more smart.
+
+1202
+01:48:45,140 --> 01:48:46,140
+OK.
+
+1203
+01:48:46,140 --> 01:48:52,140
+What they do is they start looking up L1 cache and they issue the address translation also
+
+1204
+01:48:52,140 --> 01:48:53,140
+to happen.
+
+1205
+01:48:53,140 --> 01:48:58,140
+So by the time L1 lookup happens, you would have address translation also done.
+
+1206
+01:48:58,140 --> 01:49:01,140
+And you may throw it away or you may use it.
+
+1207
+01:49:01,140 --> 01:49:06,140
+So processors try to do things parallelly when it comes to translation versus L1 lookup.
+
+1208
+01:49:06,140 --> 01:49:07,140
+Yes.
+
+1209
+01:49:07,140 --> 01:49:11,140
+So TLB is kind of fused within the address translation itself.
+
+1210
+01:49:11,140 --> 01:49:16,140
+So if you already have an address translation done, you use that.
+
+1211
+01:49:16,140 --> 01:49:17,140
+OK.
+
+1212
+01:49:17,140 --> 01:49:20,140
+Now some processors also go a bit further.
+
+1213
+01:49:20,140 --> 01:49:21,140
+OK.
+
+1214
+01:49:21,140 --> 01:49:26,140
+So what you have, the problem which we had with L1 is every time the context switch happens,
+
+1215
+01:49:26,140 --> 01:49:28,140
+you had to do cache flush.
+
+1216
+01:49:28,140 --> 01:49:31,140
+So you had to flush L1 cache.
+
+1217
+01:49:32,140 --> 01:49:35,140
+Some processors have something called as process identifier.
+
+1218
+01:49:35,140 --> 01:49:36,140
+OK.
+
+1219
+01:49:36,140 --> 01:49:43,140
+Which is essentially, so process identifier plus virtual address is used as the indexing
+
+1220
+01:49:43,140 --> 01:49:45,140
+scheme into the L1.
+
+1221
+01:49:45,140 --> 01:49:50,140
+So what will happen is everything you will, it is not a function of just virtual address.
+
+1222
+01:49:50,140 --> 01:49:53,140
+It is also a function of process identifier.
+
+1223
+01:49:53,140 --> 01:49:54,140
+OK.
+
+1224
+01:49:54,140 --> 01:49:57,140
+So you have to do cache flush.
+
+1225
+01:49:57,140 --> 01:49:58,140
+OK.
+
+1226
+01:49:58,140 --> 01:50:01,140
+So that is the process identifier.
+

@@ -1,0 +1,83 @@
+ Program Life Cycle Overview:
+	1. Writing the high-level source code (C/C++/Java).
+	2. Preprocessing: Blind string replacements using hash directives like #include, #ifdef, etc.
+	3. Compilation: Conversion of preprocessed source into assembly code; heavy analysis and optimization.
+	4. Assembly: Translation of assembly code into object files (binary); handling directives like .string and .text.
+	5. Linking: Combining object files and static libraries into executables; resolving symbols and references.
+	6. Execution: Running the final executable using the Operating System's loader, managing shared libraries, and dealing with memory management.
+
+Terminology:
+	- Dot text: Instruction representations in assembly.
+	- Dot data: Data declarations in assembly.
+	- Type: Representing data types in assembly.
+	- Labels: Identifiers in assembly.
+
+x86 Architecture:
+	- General Purpose Registers: EAX, EBX, ECX, EDX, ESI, EDI, ESP, and EBP.
+	- Special Registers: ESP (Stack Pointer), EBP (Base Pointer), and FLAGS.
+	- Syntax Formats: Intel and AT&T.
+	- Addressing Modes: Base, Indexed, Scaled Indexed, Displacement, and Register Indirect.
+
+Function Implementation Details:
+	- Entry Point: Initial starting point of the function (underscore start).
+	- Parameters: Input arguments passed to the function.
+	- Local Variables: Memory allocated within the function.
+	- Body: Sequence of instructions carried out inside the function.
+
+Function Call Mechanism:
+	- Control Transfer: Using jump or call instructions.
+	- Passing Parameters: Through stack or registers.
+	- Return Value: Using registers or stack.
+	- Context Restoration: Updating the base pointer (EBP) and stack pointer (ESP).
+	- Frame Pointer: Serves as a reference point for variable access within the stack frame.
+
+Static vs Automatic Storage Classes:
+	- Static: Persists throughout the lifetime of the program and shares the same memory space between multiple instances.
+	- Auto: Allocated upon entering the function and freed upon exiting the function. Has distinct memory space for each instance.
+
+Activation Records:
+	- Contains information regarding the function's metadata, including arguments, locals, and return address.
+	- Types: Stack Frames, Heap Frames, and Display Frames.
+
+Link Time Optimization:
+	- Tradeoffs: Increased linking time, reduced compiler scheduling, and potential difficulties in reversing changes introduced by the linker.
+
+Loader Component:
+	- Part of the OS responsible for loading executables into memory and managing dynamic libraries.
+	- Reads the executable file from disk, loads it into memory, and starts executing the first instruction (underscore start).
+	- Manages shared libraries, ensuring the correct version is mapped into the process memory.
+	- Supports Position Independent Code (PIC) for efficient sharing of code segments amongst processes.
+
+Relocatable Object Files:
+	- Produced by the compiler and assembled by the assembler.
+	- Contains machine code, data, and symbol tables.
+	- Includes relocation entries describing how to fixup absolute addresses at load time.
+
+Static Libraries:
+	- Archived collections of object files.
+	- Linked to executables at compile time.
+	- Provides increased efficiency by avoiding redundancy when multiple binaries depend on the same library.
+
+Dynamic Linking:
+	- Postponing symbol resolution until runtime.
+	- Supported on UNIX-based systems via dlopen(), dlsym(), and dlclose() APIs.
+	- Simplifies deployment and maintenance of applications.
+
+Virtual Memory Management:
+	- Separation of logical and physical memory addresses.
+	- Page table mapping physical pages to virtual pages.
+	- Protection mechanisms preventing illegal memory accesses.
+	- Demand paging allowing delayed fetching of pages from secondary storage devices.
+
+Language Features Implementation:
+	- Exception Handling: Using setjmp() and longjmp().
+	- Thread Local Storage: Using thread\_local keyword.
+	- Attribute Specification: __attribute__((aligned)) and __attribute__((packed)).
+	- Interprocedural Analyses: Constant Propagation, Dead Code Elimination, Common Subexpression Elimination, Loop Unrolling, etc.
+
+Performance Considerations:
+	- Cache Utilization: Aligning data structs and minimizing stride distance.
+	- Register Usage: Minimizing register pressure and maximizing reuse.
+	- Branch Prediction: Placement of conditional branches and prediction hints.
+	- Vectorization: Leveraging SIMD capabilities provided by CPUs and GPUs.
+	- Locality of Reference: Accessing nearby data items and minimizing irregular memory accesses.

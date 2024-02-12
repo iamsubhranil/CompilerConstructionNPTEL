@@ -1,0 +1,2612 @@
+1
+00:00:00,000 --> 00:00:10,720
+So, as I mentioned in the last class, now we are going to focus on optimizations for
+
+2
+00:00:10,720 --> 00:00:15,759
+memory hierarchy and parallelization, specifically vectorization that is the one that thing that
+
+3
+00:00:15,759 --> 00:00:20,559
+you are going to focus on. Similar techniques can be done for parallelization as well, but
+
+4
+00:00:20,559 --> 00:00:24,280
+we will not talk about it right in this slide ok.
+
+5
+00:00:24,679 --> 00:00:30,480
+Now the idea is to exploit more performance and then try to do some of these optimizations.
+
+6
+00:00:30,480 --> 00:00:36,039
+One important thing that you are going to see today, I mean important thing that you
+
+7
+00:00:36,039 --> 00:00:40,280
+are going to see in this lecture as opposed to some other thing that we discussed, we
+
+8
+00:00:40,280 --> 00:00:44,159
+will have to come back and ask the question where are these optimizations going to be
+
+9
+00:00:44,159 --> 00:00:48,939
+done or when are these optimizations going to be done. Because some of these optimizations
+
+10
+00:00:49,140 --> 00:00:55,699
+need to be done at a higher level rather than at the machine code or at the intermediate
+
+11
+00:00:55,699 --> 00:01:01,099
+code level. So, we will talk about that towards the end and then say why that is important
+
+12
+00:01:01,099 --> 00:01:08,379
+for this ok. The idea here is again to exploit higher performance and possibly exploit parallelism
+
+13
+00:01:08,379 --> 00:01:13,819
+and locality in loops, that is really why we are talking about these techniques.
+
+14
+00:01:14,299 --> 00:01:18,899
+We already talked about instruction level parallelism in the earlier class, today we
+
+15
+00:01:18,899 --> 00:01:23,979
+will talk more about data level parallelism. Thread level parallelism is something similar,
+
+16
+00:01:23,979 --> 00:01:29,019
+task level parallelism is something I have sliced, but I do not think we will be able
+
+17
+00:01:29,019 --> 00:01:34,780
+to cover that in this lecture. We will also very briefly talk about exploiting data locality
+
+18
+00:01:34,780 --> 00:01:40,579
+ok. So, as I mentioned earlier data level parallelism is exploited by vector machines,
+
+19
+00:01:40,579 --> 00:01:47,659
+M D machines, sub-word parallelism and GPUs we saw that ok. Again I am going to skip
+
+20
+00:01:47,659 --> 00:01:53,099
+this example, because we have already seen this in the previous lecture. If you have
+
+21
+00:01:53,099 --> 00:01:58,620
+a piece of code which is like this right, then for the vectorized machine which we have
+
+22
+00:01:58,620 --> 00:02:03,939
+not seen the code would look something like this if the vector length is 64 right. Again
+
+23
+00:02:03,939 --> 00:02:08,900
+this is still a high level representation of the code, but what it says is that for
+
+24
+00:02:08,900 --> 00:02:15,980
+elements j to j plus 63 or totally 64 elements right the vector operation would be performed.
+
+25
+00:02:15,980 --> 00:02:20,099
+Then again for the next set of vector, then again for the next set of vector and so on.
+
+26
+00:02:20,099 --> 00:02:26,659
+Whereas, if it is an AVX kind of a code, then you are going to do it for 16 or right 8 or
+
+27
+00:02:26,659 --> 00:02:32,980
+whatever number of operations in parallel using this v move and v add v multiply kind
+
+28
+00:02:32,979 --> 00:02:39,899
+of instructions ok. If it is a GPU kind of a situation, then it is going to be in the
+
+29
+00:02:39,899 --> 00:02:44,899
+form of a CUDA kernel well I am not saying that the compiler is going to generate this,
+
+30
+00:02:44,899 --> 00:02:49,219
+but in order for you to exploit the data level parallelism right you may have to write as
+
+31
+00:02:49,219 --> 00:02:54,699
+a programmer this kind of a CUDA code which essentially talks about data level parallelism.
+
+32
+00:02:54,699 --> 00:03:00,699
+So, talking about thread or task level parallelism typically this is exploited in the multi core
+
+33
+00:03:00,699 --> 00:03:05,539
+architecture all other processors are already multi core they have multiple processors in
+
+34
+00:03:05,539 --> 00:03:13,500
+that ok. And this multi processor architecture can be either a shared memory system or a
+
+35
+00:03:13,500 --> 00:03:18,979
+distributed memory or message processing system. In the case of a shared memory system the
+
+36
+00:03:18,979 --> 00:03:24,739
+different cores that you have in the processor they share a common memory right and there
+
+37
+00:03:24,739 --> 00:03:29,699
+is hardware abstraction for sharing this memory. Whereas, in the case of a distributed memory
+
+38
+00:03:29,699 --> 00:03:36,099
+architecture different machines or different processors have their own local memory and
+
+39
+00:03:36,099 --> 00:03:41,539
+they communicate with other processors by means of messages which is send receive messages
+
+40
+00:03:41,539 --> 00:03:47,459
+and they do not share common memory right they have to explicitly send data by means
+
+41
+00:03:47,459 --> 00:03:53,859
+of messages or receive data as messages ok. For the shared memory machine and multi core
+
+42
+00:03:53,860 --> 00:04:00,100
+architecture typically you use open MP kind of a programming model whereas, for the distributed
+
+43
+00:04:00,100 --> 00:04:05,900
+memory machine you use MPI of course, it is possible to write your MPI code and run it
+
+44
+00:04:05,900 --> 00:04:12,540
+on a multi core architecture also right ok. If you have not seen an open MP code this
+
+45
+00:04:12,540 --> 00:04:17,420
+is how an open MP code would look like it essentially has what are called pragmas which
+
+46
+00:04:17,420 --> 00:04:23,220
+are compiler directives right and these compiler directives are being looked at by the compiler
+
+47
+00:04:23,340 --> 00:04:29,380
+the compiler understands that this piece of code is actually can be executed in parallel
+
+48
+00:04:29,380 --> 00:04:36,100
+right and that parallel code essentially says that you have to execute this for n elements
+
+49
+00:04:36,100 --> 00:04:41,300
+and let us say that there are four processors or four processes or in this particular case
+
+50
+00:04:41,300 --> 00:04:46,780
+four threads that are there then each one of the threads can actually execute one fourth
+
+51
+00:04:46,779 --> 00:04:53,019
+of the task right in parallel. So, execution would proceed something like this roughly
+
+52
+00:04:53,019 --> 00:04:58,779
+right the first thread will do for the first one fourth of the data element the second
+
+53
+00:04:58,779 --> 00:05:03,939
+thread would do for the second one fourth and so on and all of them would execute these
+
+54
+00:05:03,939 --> 00:05:09,619
+statements in parallel, but they can kind of execute them at their own speed it is not
+
+55
+00:05:09,619 --> 00:05:14,939
+like a SIMD machine where everybody is executing the same instruction at a given point in time
+
+56
+00:05:14,939 --> 00:05:21,779
+right this code or this processor has to execute this sequence of instructions right
+
+57
+00:05:21,779 --> 00:05:27,300
+for n by four elements it will execute in its own way as fetch decode execute and so
+
+58
+00:05:27,300 --> 00:05:30,459
+on. Whereas, some other processor would execute
+
+59
+00:05:30,459 --> 00:05:35,300
+the next one fourth or the next one fourth and so on and they will all do instruction
+
+60
+00:05:35,300 --> 00:05:41,740
+fetch decode and execute individually that means that they fetch decode instruction separately
+
+61
+00:05:41,939 --> 00:05:47,420
+and because of that they can actually operate in different speeds that is possible you should
+
+62
+00:05:47,420 --> 00:05:53,100
+not be thinking that this is also same as SIMD or SIMD architecture here they are actually
+
+63
+00:05:53,100 --> 00:05:59,460
+executing individual pieces of code by themselves right.
+
+64
+00:05:59,460 --> 00:06:04,699
+But here one thing that we can notice is that in this particular case as I mentioned earlier
+
+65
+00:06:04,699 --> 00:06:09,819
+the programmer gives certain directives to the compiler saying that this piece of code
+
+66
+00:06:09,860 --> 00:06:16,139
+can be executed in parallel and this for loop can be split across four threads or eight
+
+67
+00:06:16,139 --> 00:06:21,500
+threads or whatever number of threads and the task can be executed in parallel why does
+
+68
+00:06:21,500 --> 00:06:28,500
+he say that because right these are independent tasks right when we talk about instruction
+
+69
+00:06:30,740 --> 00:06:35,100
+level parallelism we talked about independent instruction when you talk about thread level
+
+70
+00:06:35,100 --> 00:06:39,980
+or task level parallelism you have to think in terms of these tasks being independent
+
+71
+00:06:39,980 --> 00:06:45,740
+of each other that means that performing the operation ai is equal to ai plus s for the
+
+72
+00:06:45,740 --> 00:06:51,900
+first one fourth of the element is definitely independent from performing for the next one
+
+73
+00:06:51,900 --> 00:06:57,860
+fourth and for the next one fourth and so on. Therefore, they can be done in parallel right
+
+74
+00:06:57,860 --> 00:07:04,860
+and the programmer has made the compiler job easy by specifying that these are parallel
+
+75
+00:07:05,260 --> 00:07:10,220
+that means that compiler need not have to analyze whether they are parallel or not correct
+
+76
+00:07:10,220 --> 00:07:15,820
+the compiler was told look this is parallel go ahead and parallelize it right.
+
+77
+00:07:15,820 --> 00:07:21,900
+So openMP allows you to specify allows the programmer to specify this therefore, that
+
+78
+00:07:21,900 --> 00:07:26,660
+the compiler does not have to do really do anything but supposing you are given this
+
+79
+00:07:26,660 --> 00:07:33,660
+piece of code as a sequential C code can you analyze this and find out that this is a parallel
+
+80
+00:07:34,060 --> 00:07:40,420
+task and I can execute this in parallel or I can put these directives like this so that
+
+81
+00:07:40,420 --> 00:07:46,780
+my openMP program will execute them in parallel that is the job of a compiler right if a sequential
+
+82
+00:07:46,780 --> 00:07:52,900
+code was given only this part of the code was given can we analyze this and then find
+
+83
+00:07:52,900 --> 00:07:58,820
+out that these are independent tasks and they can be executed in parallel right.
+
+84
+00:07:58,860 --> 00:08:04,620
+In general the task is a very hard task right taking completely sequential program and parallelizing
+
+85
+00:08:04,620 --> 00:08:11,300
+this right we have only had limited success but certain part of the code can be analyzed
+
+86
+00:08:11,300 --> 00:08:16,579
+and definitely that can be parallelized right this is possibly an easier task to do this
+
+87
+00:08:16,579 --> 00:08:21,860
+particular example okay. So in this talk what we are going to do is
+
+88
+00:08:21,860 --> 00:08:27,379
+that given a piece of code which is like this how do we generate code for vector machine
+
+89
+00:08:27,459 --> 00:08:32,860
+how do we generate code for let us say a parallel machine or how do we generate right how do
+
+90
+00:08:32,860 --> 00:08:38,379
+we identify whether locality is being exploited or not how do we modify this loop so that
+
+91
+00:08:38,379 --> 00:08:43,299
+locality can be exploit that is essentially what we are going to focus on what is required
+
+92
+00:08:43,299 --> 00:08:48,379
+to understand this how do we change those things or how do we generate code for those
+
+93
+00:08:48,379 --> 00:08:52,620
+things that is really what we are going to focus on and because we are going to focus
+
+94
+00:08:52,620 --> 00:08:58,340
+on that primarily we are going to focus on array variables and loops right because that
+
+95
+00:08:58,340 --> 00:09:02,500
+is where most of the time is spent in the code we have a sequence of code like a is
+
+96
+00:09:02,500 --> 00:09:08,659
+equal to b plus c something something right and not inside a loop then very little time
+
+97
+00:09:08,659 --> 00:09:13,740
+is going to be spent on that part of the code and that may not be really exciting okay.
+
+98
+00:09:13,740 --> 00:09:18,659
+So our focus is going to be on arrays and what we are going to talk very briefly is
+
+99
+00:09:18,659 --> 00:09:25,219
+about array dependence analysis how to identify what kind of dependences exist in program
+
+100
+00:09:25,219 --> 00:09:32,259
+okay and how do we figure out what part of the program are independent and can be executed
+
+101
+00:09:32,259 --> 00:09:38,059
+in parallel okay and then what kind of loop transformations can be done and when these
+
+102
+00:09:38,059 --> 00:09:42,740
+loop transformations are legal to be done so that you can transform the loop from for
+
+103
+00:09:43,740 --> 00:09:49,259
+example we saw in the case of caches that having for j for i loop is a bad thing you
+
+104
+00:09:49,259 --> 00:09:54,899
+want to change it to for i for j right that is that transformation is called loop interchange
+
+105
+00:09:54,899 --> 00:10:00,220
+when can we do loop interchange transform is it legal to do that right those are things
+
+106
+00:10:00,220 --> 00:10:05,500
+that we are going to study right of course all of this is going to be used for parallelizing
+
+107
+00:10:05,500 --> 00:10:11,019
+and vectorizing the code okay. Let us formally define what is data dependence
+
+108
+00:10:11,220 --> 00:10:16,220
+since you are going to be talking about array variables and when I say array variables what
+
+109
+00:10:16,220 --> 00:10:23,139
+do I mean one array can have several elements and you are going to talk about dependences
+
+110
+00:10:23,139 --> 00:10:30,139
+okay so we say that there is a dependence from statement s 1 to statement s 2 if both
+
+111
+00:10:30,740 --> 00:10:36,019
+s 1 and s 2 access the same memory location same array location both of them are accessing
+
+112
+00:10:36,019 --> 00:10:43,019
+a of i or both of them are accessing b of i j right that particular location right and
+
+113
+00:10:44,220 --> 00:10:50,139
+if there is a feasible runtime execution path from s 1 to s 2 that is fine okay and one
+
+114
+00:10:50,139 --> 00:10:55,659
+of these operations is a write and the other one can be either a write or a read this is
+
+115
+00:10:55,659 --> 00:11:01,139
+when we say that there is a dependence right we are not interested in a read to read dependence
+
+116
+00:11:01,139 --> 00:11:05,980
+we are always interested in the read to write write to write or write to read right those
+
+117
+00:11:05,980 --> 00:11:10,659
+are the dependences that we talk right. Now let us look at these dependences earlier
+
+118
+00:11:10,659 --> 00:11:14,899
+we looked at the dependences in the form of instruction now let us look at it in the form
+
+119
+00:11:14,899 --> 00:11:21,899
+of statements right and then talk about dependences between these statements right look at the
+
+120
+00:11:22,460 --> 00:11:29,460
+code on the left hand side right now can you see any raw dependence here right so this
+
+121
+00:11:31,539 --> 00:11:38,539
+is read after write true dependence there is a dependence from s 1 to s 2 on which variable
+
+122
+00:11:41,500 --> 00:11:48,500
+x i j x i j is being written here and the same value is being read here any other dependence
+
+123
+00:11:50,299 --> 00:11:57,299
+that you see there is an output dependence x i j to x i j and therefore, there is an
+
+124
+00:11:58,139 --> 00:12:05,139
+anti dependence okay anything else that you see any other dependences okay let us see
+
+125
+00:12:07,779 --> 00:12:14,779
+what I see right this is fine flow dependence or true dependence anti dependence that is
+
+126
+00:12:16,819 --> 00:12:23,819
+fine output dependence okay right we are only seeing some of the simple dependences I will
+
+127
+00:12:24,379 --> 00:12:31,379
+ask you the question what about from this x i comma j plus 1 to this x i comma j is
+
+128
+00:12:35,140 --> 00:12:42,140
+there a dependence anti dependence this is a read that is a write okay for example, let
+
+129
+00:12:43,060 --> 00:12:49,060
+us take i is equal to 4 and j is equal to 5 so this is going to read the value i is
+
+130
+00:12:49,059 --> 00:12:56,059
+equal to 4 j is equal to 5 we are going to read the value 5 comma 6 right after that
+
+131
+00:12:57,219 --> 00:13:04,219
+you are going to execute the statement i is equal to 4 j is equal to 6 and this will also
+
+132
+00:13:04,579 --> 00:13:11,579
+be 4 comma 6 so is there an anti dependence from here to here what about from here to
+
+133
+00:13:11,580 --> 00:13:18,580
+here from this y i j in statement s 2 to the statement y i comma j minus 1 just use
+
+134
+00:13:26,340 --> 00:13:33,340
+some examples and then figure out right the value produced by y i j is going to be read
+
+135
+00:13:34,340 --> 00:13:41,340
+in the iteration y i comma j plus 1 right so there is a true dependence from s 2 to
+
+136
+00:13:43,420 --> 00:13:50,420
+s 1 right there is a true dependence any other thing I think that is all we have covered
+
+137
+00:13:52,259 --> 00:13:59,259
+all the occurrences of x y right so all of this are dependences earlier we were dealing
+
+138
+00:13:59,659 --> 00:14:06,659
+with scalar variables now we are dealing with arrays non scalar variables so not only you
+
+139
+00:14:07,620 --> 00:14:12,939
+see dependences which are within the same iteration but you would also see dependences
+
+140
+00:14:12,939 --> 00:14:19,299
+which are across iterations just like what we saw in software pipelining correct we saw
+
+141
+00:14:19,299 --> 00:14:25,779
+a similar situation what is being created in the jth iteration is being consumed in
+
+142
+00:14:25,779 --> 00:14:31,299
+the j plus 1th iteration of course here it is a two dimensional loop so we are talking
+
+143
+00:14:31,299 --> 00:14:38,299
+about i j i comma j plus 1 what is consumed in the i jth iteration is written in the i
+
+144
+00:14:39,819 --> 00:14:46,819
+j plus 1th iteration it is also possible that there is a dependence on the i side ok let
+
+145
+00:14:46,939 --> 00:14:53,939
+see whether you see that over here right what is produced by x what is produced by state
+
+146
+00:14:55,779 --> 00:15:02,779
+statement s 2 in the i jth iteration is going to be consumed by statement s 3 in the i plus
+
+147
+00:15:03,259 --> 00:15:09,019
+1 comma jth iteration right that is after all j iterations for i is over you are going
+
+148
+00:15:09,019 --> 00:15:16,019
+to go i plus 1 and that corresponding j you will have a dependence right so when we talk
+
+149
+00:15:16,939 --> 00:15:23,939
+about array data dependence analysis we are talking about identifying all of them correct
+
+150
+00:15:24,940 --> 00:15:31,940
+now because there is a dependence from this statement to this statement in the jth iteration
+
+151
+00:15:32,460 --> 00:15:39,460
+correct so can i execute statement s 2 sorry statement s 1 s 2 s 3 of i jth iteration in
+
+152
+00:15:41,260 --> 00:15:48,260
+parallel with statement s 1 s 2 s 3 of i j plus 1th iteration can i execute them yes
+
+153
+00:15:48,259 --> 00:15:55,259
+no maybe again i will repeat there is a dependence from statement s 2 to statement s 1 what is
+
+154
+00:16:00,860 --> 00:16:07,860
+produced by statement s 2 in the i jth iteration is going to be used by this in the i comma
+
+155
+00:16:07,860 --> 00:16:13,980
+j plus 1th iteration so the question is can we execute these two iterations in parallel
+
+156
+00:16:13,980 --> 00:16:19,700
+no whenever there is a dependence you cannot unless you put appropriate synchronization
+
+157
+00:16:19,700 --> 00:16:24,539
+otherwise they cannot execute in parallel so these are not independent operations if
+
+158
+00:16:24,539 --> 00:16:29,899
+i look at s 1 s 2 s 3 together as one group of statements and this one group of statement
+
+159
+00:16:29,899 --> 00:16:36,539
+is dependent on that one group of statement so i cannot execute them in parallel right
+
+160
+00:16:36,539 --> 00:16:42,300
+so to do analysis like this is essentially what is what is the framework that we are
+
+161
+00:16:42,299 --> 00:16:49,299
+going to talk in this lecture it is actually fairly i mean somewhat involved mathematics
+
+162
+00:16:49,500 --> 00:16:56,500
+involved in this but we will try to keep it to a minimum level because a i am very tired
+
+163
+00:16:56,500 --> 00:17:03,500
+b softer length session right so we will not go into all of that we will only talk about
+
+164
+00:17:03,659 --> 00:17:08,259
+what is really required so each statement in a loop is executed several times because
+
+165
+00:17:08,259 --> 00:17:14,619
+it is inside a loop right and that is possible to have a dependence from a statement to itself
+
+166
+00:17:14,619 --> 00:17:21,259
+okay we have not seen that example here for example if this statement says c of i plus
+
+167
+00:17:21,259 --> 00:17:28,259
+y of i comma j minus 1 then from i j statement to i j plus 1th iteration there is a dependency
+
+168
+00:17:29,299 --> 00:17:35,140
+so a statement can have a dependency with itself right and then there are so many dependencies
+
+169
+00:17:35,140 --> 00:17:40,259
+not just the number of dependencies that i talked about just look at these two dependencies
+
+170
+00:17:40,259 --> 00:17:46,700
+right now i said that i jth iteration to i j plus 1th iteration if i actually enumerate
+
+171
+00:17:46,700 --> 00:17:53,700
+this for all values of i and j correct it will be n cross n isn't it it is just one
+
+172
+00:17:55,420 --> 00:18:00,140
+dependence that you are talking about but then if you enumerate it for all values of
+
+173
+00:18:00,140 --> 00:18:06,060
+i and j it is n square dependencies that you are talking about right so we want a compact
+
+174
+00:18:06,060 --> 00:18:12,100
+representation for this otherwise i have to say that 3 4th it means iteration 3 comma
+
+175
+00:18:12,100 --> 00:18:19,100
+4 is dependent on iteration 3 comma 5 or the other way around right or iteration 3 comma
+
+176
+00:18:19,340 --> 00:18:26,340
+5 is dependent on 3 comma 6 3 comma 7 3 comma 8 whatever it is like that we have to say
+
+177
+00:18:26,339 --> 00:18:31,339
+all of them so we need a compact representation for that so let us see how we are going to
+
+178
+00:18:31,339 --> 00:18:37,220
+do that and the dependencies can be either loop carried or loop independent we will give
+
+179
+00:18:37,220 --> 00:18:42,459
+examples we have already given examples but we will also see more examples of them okay
+
+180
+00:18:42,459 --> 00:18:47,899
+so before we define this let us define two terms one called the iteration space iteration
+
+181
+00:18:47,899 --> 00:18:54,339
+vector and iteration space if you have a n way nested loop that means for i for j for
+
+182
+00:18:54,699 --> 00:19:01,699
+l like that right then that loop is going to be when one iteration of that loop is executing
+
+183
+00:19:02,699 --> 00:19:07,299
+right you have one value for the first let us talk about a two dimensional a two way
+
+184
+00:19:07,299 --> 00:19:14,299
+nested loop i comma j i going from 1 to n j going from 1 to n right then for each value
+
+185
+00:19:14,299 --> 00:19:21,299
+of i comma j i have one iteration for example 3 4 is one iteration 5 7 is another iteration
+
+186
+00:19:22,299 --> 00:19:29,299
+right 23 is another iteration as long as n is greater than 20 all of these are points
+
+187
+00:19:29,980 --> 00:19:34,980
+in the iteration space right that is really what we are talking about right iteration
+
+188
+00:19:34,980 --> 00:19:40,659
+space is the set of all possible iteration vectors iteration vector is essentially the
+
+189
+00:19:40,659 --> 00:19:47,659
+index value index value for a particular iteration right we will also talk about what is called
+
+190
+00:19:47,820 --> 00:19:54,019
+the lexicographic ordering since you are talking about nested loops correct in the nested loop
+
+191
+00:19:54,019 --> 00:20:00,340
+you can say that i jth iteration i j plus 1th iteration which one is earlier which one
+
+192
+00:20:00,340 --> 00:20:07,340
+is later i j is earlier i j plus 1 is later this is the lexicographic ordering correct
+
+193
+00:20:08,460 --> 00:20:15,460
+i jth iteration i plus 1 jth iteration which one is earlier i j is earlier i plus 1 j is
+
+194
+00:20:16,460 --> 00:20:23,460
+later right let us do one more i jth iteration right i minus 1 j plus 1 i minus 1 j plus
+
+195
+00:20:30,380 --> 00:20:35,259
+1 is earlier the other one is later just like you have a sequence of letters you try to
+
+196
+00:20:35,259 --> 00:20:41,380
+do lexicographic ordering of that right that is really what we are talking about so when
+
+197
+00:20:41,380 --> 00:20:46,580
+you specify the loop the order in which it is going to execute right all of this is essentially
+
+198
+00:20:46,580 --> 00:20:52,700
+the lexicographic order in all of this what we are assuming is that you have a loop nest
+
+199
+00:20:52,700 --> 00:20:58,500
+n and the loop nest is typically written in what is called the canonical form for i is
+
+200
+00:20:58,500 --> 00:21:04,700
+equal to 1 to n for j is equal to 1 to n for k is equal to 1 to n it is not like for i
+
+201
+00:21:04,700 --> 00:21:10,460
+is equal to 1 to n for j is equal to n down to 0 it is not like that because when you
+
+202
+00:21:10,460 --> 00:21:15,660
+do things like that this lexicographic ordering will have a different interpretation so let
+
+203
+00:21:15,660 --> 00:21:20,019
+us assume for the time being everything is in the canonical form that means always going
+
+204
+00:21:20,019 --> 00:21:27,019
+from 1 to n in steps of 1 actually in mathematics this is basically said well let me not go
+
+205
+00:21:29,340 --> 00:21:36,340
+into the definition because i mean few people got an idea of what it is so for example let
+
+206
+00:21:36,819 --> 00:21:43,819
+us look at this loop right i going from 1 to 4 j going from 1 to 6 so what is an iteration
+
+207
+00:21:44,899 --> 00:21:51,899
+vector for this 1 3 4 2 these are all iteration vector what is the iteration space for this
+
+208
+00:21:52,980 --> 00:21:59,980
+how many points are there in the iteration space 24 right from 1 1 to 4 6 right those
+
+209
+00:21:59,980 --> 00:22:06,980
+points are being put in here there are some red arrows blue arrows and dotted arrows
+
+210
+00:22:10,180 --> 00:22:15,539
+let us see what they are correct so as i mentioned earlier where you are always going to talk
+
+211
+00:22:15,539 --> 00:22:20,259
+about these loops in the loop nest in what is called the normalized form or canonical
+
+212
+00:22:20,259 --> 00:22:25,339
+form which is always going from 1 to n or 1 to m they need not have to be same they
+
+213
+00:22:25,339 --> 00:22:32,339
+can be different like what you have but always going from some 1 to k right ok now this is
+
+214
+00:22:32,699 --> 00:22:39,699
+the iteration space you can see that i going from 1 to 4 j going from 1 to 6 what is the
+
+215
+00:22:40,740 --> 00:22:47,740
+iteration order the iteration order or the lexicographic ordering in this is this like
+
+216
+00:22:48,740 --> 00:22:55,740
+this right that is the dotted arrow correct for i is equal to 1 j is going to go from
+
+217
+00:22:56,420 --> 00:23:03,420
+1 to 6 and then i will increase to 2 j will go from 1 to 6 then i will increase to 3 j
+
+218
+00:23:03,900 --> 00:23:10,900
+will go from 1 to 6 that is the lexicographic ordering right therefore between this which
+
+219
+00:23:11,860 --> 00:23:18,860
+one is earlier which one is later obviously this is earlier this is later right so if
+
+220
+00:23:18,860 --> 00:23:25,860
+i have said yeah let us say 4 2 and then 4 2 and 5 1 which one is earlier 4 2 is earlier
+
+221
+00:23:32,380 --> 00:23:38,740
+ok of course 5 1 is not here because i cannot go to 5 but anyway right ok this blue arrows
+
+222
+00:23:38,740 --> 00:23:43,380
+and red arrows i think they are not really important but anyway i will briefly tell you
+
+223
+00:23:43,380 --> 00:23:49,940
+they talk about the various dependences that are there in this program ok now let us just
+
+224
+00:23:49,940 --> 00:23:56,940
+try to look at one or two of them this arrow here right if this element is x i j it says
+
+225
+00:23:58,180 --> 00:24:05,180
+that x i j is dependent on x i minus 1 j is that such a dependency such a dependency is
+
+226
+00:24:06,060 --> 00:24:13,060
+there for y correct so this dependency is possibly for this dependence between them
+
+227
+00:24:16,220 --> 00:24:23,220
+correct what about this let us look at this again right if this is x i j this is x i j
+
+228
+00:24:25,980 --> 00:24:32,980
+minus 1 got it the red arrows are anti-dependence ok so this is x i j minus 1 j is there any
+
+229
+00:24:35,380 --> 00:24:42,380
+so that must be this one ok there is some loop independent dependent that is not being
+
+230
+00:24:42,860 --> 00:24:48,180
+shown here because loop independent dependence is within this each one of them is one iteration
+
+231
+00:24:48,180 --> 00:24:55,180
+of the loop ok right so typically whenever we talk about iteration space this is what
+
+232
+00:24:55,180 --> 00:25:02,180
+we say iteration space and we also got an idea of what is a lexicographic order right
+
+233
+00:25:02,900 --> 00:25:08,220
+again the same definition of data dependence we will go through this one more time we are
+
+234
+00:25:08,220 --> 00:25:12,380
+going to see one or two more times but let us see that there exists a dependence from
+
+235
+00:25:12,380 --> 00:25:19,380
+s 1 to s 2 in a loop in a loop nest if there exists two iteration vectors i and j such
+
+236
+00:25:19,700 --> 00:25:26,700
+that i is less than j that means that i happens earlier j happens later ok and there is a
+
+237
+00:25:27,380 --> 00:25:34,380
+path from s 1 to s 2 both s 1 and s 2 access the same memory location right that is s 1
+
+238
+00:25:35,860 --> 00:25:42,860
+at iteration i and s 2 at iteration j they access the same memory location again it is
+
+239
+00:25:42,860 --> 00:25:49,860
+the same point that we talked about right for example here when i talk about 3 2 right
+
+240
+00:25:50,299 --> 00:25:56,939
+y of 3 2 a value is being produced in the 3 2 iteration right that is iteration point
+
+241
+00:25:56,939 --> 00:26:03,939
+that is going to be consumed by s 1 in 3 3 because this index is j minus 1 correct so
+
+242
+00:26:07,139 --> 00:26:13,139
+that is really what we are talking about there are two statements s 1 and s 2 s 1 in iteration
+
+243
+00:26:13,140 --> 00:26:19,980
+i and s 2 in iteration j access the same memory location that is when there is a dependence
+
+244
+00:26:19,980 --> 00:26:24,980
+and in this case we assume that i happens earlier than j then it is a true dependence
+
+245
+00:26:24,980 --> 00:26:31,980
+right i mean if yeah if i is a right i mean if s 1 is a right and s 2 is a read and so
+
+246
+00:26:32,140 --> 00:26:37,140
+ok right there is a dependence here we actually are talking about just a dependence so it
+
+247
+00:26:37,140 --> 00:26:41,780
+it just says that they both access the same memory location and one of them is a right
+
+248
+00:26:41,859 --> 00:26:48,859
+that is all that you need ok ok now again the same points but now we are going to have
+
+249
+00:26:49,660 --> 00:26:56,660
+a representation for this so there are three statements s 1 and s 2 and s 3 there is a
+
+250
+00:26:57,700 --> 00:27:04,700
+two way nested loop correct there is a dependence from s 1 to s 2 because you produce a value
+
+251
+00:27:05,700 --> 00:27:12,700
+x i j which is being consumed correct now let us look at this dependence s 2 to s 1
+
+252
+00:27:14,340 --> 00:27:20,779
+you produce it in the i jth iteration and you consume it in the i j plus 1 the value
+
+253
+00:27:20,779 --> 00:27:27,779
+produced by this statement s 2 is going to be consumed by s 3 one iteration later in
+
+254
+00:27:28,180 --> 00:27:34,619
+the j dimension and zero iteration later in the i dimension correct that is why it is
+
+255
+00:27:34,619 --> 00:27:41,619
+i comma j plus 1 that is represented as a dependence distance of 0 comma 1 right now
+
+256
+00:27:45,019 --> 00:27:52,019
+let us look at s 2 s 2 produces a value y of i j that is being consumed by s 3 in i
+
+257
+00:27:52,579 --> 00:27:59,579
+minus 1 j that means it is one iteration later in the i th dimension zero iteration later
+
+258
+00:27:59,579 --> 00:28:06,579
+in the j th dimension so that is written as 1 0 whereas this is 0 0 typically 0 0 is something
+
+259
+00:28:08,460 --> 00:28:15,460
+that we do not write it means it is loop independent dependence correct it happens with the same
+
+260
+00:28:15,460 --> 00:28:22,460
+loop s 1 s 2 same loop i jth iteration i jth iteration so when the dependence is in the
+
+261
+00:28:25,620 --> 00:28:32,620
+same loop iteration same iteration that is called loop independent dependence when it
+
+262
+00:28:33,620 --> 00:28:38,660
+is across iterations it is called loop carried dependence and the loop carried dependence
+
+263
+00:28:38,660 --> 00:28:45,660
+can be in the i th dimension or j th dimension depending on that it is either 1 0 or 0 1
+
+264
+00:28:45,660 --> 00:28:52,660
+it is not even have to be 0 and 1 it can be a large value also i minus 4 i minus 8 i plus
+
+265
+00:28:52,660 --> 00:28:59,660
+3 right you could also have something like 1 minus 1 what does a 1 minus 1 dependence
+
+266
+00:29:00,660 --> 00:29:07,660
+represent correct so what happens is that the value producing the i jth is going to
+
+267
+00:29:09,180 --> 00:29:16,180
+be consumed in the i plus 1 but yeah sorry i minus 1 sorry yeah i plus 1 and j minus
+
+268
+00:29:17,940 --> 00:29:24,500
+1th iteration right that is also possible now you can think of this as having any value
+
+269
+00:29:24,500 --> 00:29:31,500
+from 0 to n or n minus 1 plus or minus right okay so this is essentially what we call as
+
+270
+00:29:31,500 --> 00:29:38,500
+the dependence distance take the vector i i mean sorry take the iteration vector i which
+
+271
+00:29:44,019 --> 00:29:48,660
+is actually a two dimensional variable i comma j take the iteration vector here which is
+
+272
+00:29:48,660 --> 00:29:53,980
+again another two dimensional vector i prime j prime whenever they access the same memory
+
+273
+00:29:53,980 --> 00:29:59,099
+location whatever are these vector values you do a vector subtraction that is essentially
+
+274
+00:29:59,099 --> 00:30:04,059
+what is the dependent distance okay mathematically that is how it is defined but intuitively
+
+275
+00:30:04,059 --> 00:30:09,939
+you people now understand what it correct the intuition is more important you can formalize
+
+276
+00:30:09,939 --> 00:30:16,939
+it as you go by okay now sometimes what we do is that we can actually specify this as
+
+277
+00:30:17,659 --> 00:30:23,659
+distance okay in terms of dependence distance vector sometimes you are only interested in
+
+278
+00:30:23,660 --> 00:30:30,060
+knowing whether it is positive or negative okay i i i will come back and then talk about
+
+279
+00:30:30,060 --> 00:30:37,060
+that okay so as i said you want to know whether the value is greater than 0 equal to 0 or
+
+280
+00:30:37,060 --> 00:30:44,060
+less than 0 if it is greater than 0 a bit confusing you put the less than sign right
+
+281
+00:30:44,300 --> 00:30:49,220
+if it is equal to 0 you put the equal sign if it is less than 0 you put the greater than
+
+282
+00:30:49,299 --> 00:30:56,299
+sign okay this kind of a representation is called a dependence direction vector direction
+
+283
+00:30:56,700 --> 00:31:01,700
+essentially says that which way it is okay that is why it is slightly on the reverse
+
+284
+00:31:01,700 --> 00:31:07,220
+direction all right we will we will always talk about it with regard to the numbers and
+
+285
+00:31:07,220 --> 00:31:13,660
+then from there move on again the same graph right i have marked all the dependences i
+
+286
+00:31:13,660 --> 00:31:19,700
+have also marked the directions whenever it is 0 we have put an equal whenever it is
+
+287
+00:31:19,700 --> 00:31:24,460
+positive we have put a less than there is nothing which is negative here therefore you
+
+288
+00:31:24,460 --> 00:31:30,620
+would not see a greater than sign this dependence is an anti-dependence okay that anti-dependence
+
+289
+00:31:30,620 --> 00:31:36,620
+you remember that x of i, j plus 1 going to x of i j that is the dependence that we are
+
+290
+00:31:37,419 --> 00:31:44,419
+that also is 0, 1 so this is the dependence distance representation 0, 1 this is the dependence
+
+291
+00:31:47,139 --> 00:31:51,659
+direction representation direction so this is called the direction vector this is called
+
+292
+00:31:51,659 --> 00:31:58,099
+the distance vector okay we will interchangeably use these things some cases it is only enough
+
+293
+00:31:58,099 --> 00:32:04,539
+to know about the direction some cases it might be required to know about the distances
+
+294
+00:32:04,539 --> 00:32:11,539
+okay so one last example in this case so let us look at this code now there is a triply
+
+295
+00:32:12,779 --> 00:32:19,779
+nested loop so it has to be a 3-tip right a i plus 1 j k is being produced and then
+
+296
+00:32:24,339 --> 00:32:31,099
+a i j k plus 1 is being consumed so what is the distance vector what is produced here
+
+297
+00:32:31,099 --> 00:32:38,099
+in the i j kth iteration is going to be consumed in the i plus 1 j k minus 1 correct so the
+
+298
+00:32:41,659 --> 00:32:48,659
+distance vector is 1 0 minus 1 and the direction vector is this okay all right we will come
+
+299
+00:32:53,779 --> 00:32:58,740
+back and then this first non-zero vector has to be less than and things like that that
+
+300
+00:32:58,740 --> 00:33:05,220
+is why I keep putting this also let us look at another example I have a two-dimensional
+
+301
+00:33:05,220 --> 00:33:12,220
+loop nest and I am accessing a single dimensional array right now what happens here right there
+
+302
+00:33:17,660 --> 00:33:24,660
+is a dependence from the i th iteration to the i plus 1 th iteration right and this iteration
+
+303
+00:33:25,660 --> 00:33:32,660
+is there for all j iterations so in this case right the first distance vector is 1 the second
+
+304
+00:33:35,779 --> 00:33:42,779
+distance vector is dash or star right so as long as you have i and i plus 1 whatever is
+
+305
+00:33:45,500 --> 00:33:51,740
+the value of j does not really matter j is in this case like do not care correct so there
+
+306
+00:33:51,740 --> 00:33:58,740
+is a dependence that is represented as 1, dash or less than, star there are also other
+
+307
+00:34:00,099 --> 00:34:04,620
+complicated things but I will not get into this in this lecture right we want to kind
+
+308
+00:34:04,620 --> 00:34:09,940
+of quickly get to some basic transformations and things like that so does this give you
+
+309
+00:34:09,940 --> 00:34:15,699
+a good picture of what dependence distance vectors are and direction vectors are any
+
+310
+00:34:15,699 --> 00:34:22,699
+confusion no okay good understood that as I mentioned earlier okay again look at the
+
+311
+00:34:23,819 --> 00:34:30,339
+same definition of dependence there is a dependence from s 1 to s 2 if s 1 is an iteration vector
+
+312
+00:34:30,339 --> 00:34:37,339
+i and s 2 in iteration j access the same memory location and if i is equal to j that is the
+
+313
+00:34:38,340 --> 00:34:45,340
+two iteration vectors are same then it means it is a loop independent dependence correct
+
+314
+00:34:46,620 --> 00:34:53,620
+that is the case of 0 0 if i is different from j then it is a loop carried dependence
+
+315
+00:34:54,140 --> 00:35:00,820
+if the iteration vector i is less than the iteration vector j and i happens to be a right
+
+316
+00:35:00,900 --> 00:35:07,900
+then it is a true dependence right if j happens to be a right then it is a war dependence
+
+317
+00:35:09,340 --> 00:35:15,539
+and so on if both of them happen to be rights then it is a war dependence okay we can define
+
+318
+00:35:15,539 --> 00:35:22,420
+that okay this is an important point let me try to spend some time on this so when i is
+
+319
+00:35:22,420 --> 00:35:28,760
+not equal to j and the distance vector has to be positive we use the word positive again
+
+320
+00:35:28,760 --> 00:35:33,400
+let us see we can go back to that example and then talk about it so whenever you talk
+
+321
+00:35:33,400 --> 00:35:40,400
+about a true dependence right well not just for true dependence even for other thing but
+
+322
+00:35:40,460 --> 00:35:44,760
+even for the other dependences you need this but let us first try to talk about it for
+
+323
+00:35:44,760 --> 00:35:51,760
+the true dependence we say that a of i j k or the value produced in the iteration i j
+
+324
+00:35:52,640 --> 00:35:59,640
+k right is going to be consumed by the iteration i i plus 1 j k minus 1 so there is a dependence
+
+325
+00:36:03,160 --> 00:36:08,760
+from that vector to this vector that is what we say but this dependence it starts with
+
+326
+00:36:08,760 --> 00:36:15,760
+a 1 0 and a minus 1 we call this vector right we call this dependence vector as positive
+
+327
+00:36:16,760 --> 00:36:23,760
+right because the first non zero element is positive in this vector the first non zero
+
+328
+00:36:25,480 --> 00:36:32,480
+element is positive right if the first non zero element is negative let us see what happens
+
+329
+00:36:33,200 --> 00:36:40,200
+right okay let us again write the following a of i j k or the value produced in the iteration
+
+330
+00:36:46,600 --> 00:36:53,600
+equal to a of i plus 1 j correct let us assume a two dimensional loop now what does this
+
+331
+00:37:02,480 --> 00:37:09,480
+mean i am talking about some statement s 1 to itself okay now if i am looking at it from
+
+332
+00:37:09,480 --> 00:37:16,480
+here to here right okay now if i am looking at it from here to here all i know is that
+
+333
+00:37:27,199 --> 00:37:34,039
+can you say something about it what can you say about this if it had been i minus 1 you
+
+334
+00:37:34,039 --> 00:37:38,840
+know that the value produced here is being consumed in the next iteration but now here
+
+335
+00:37:38,840 --> 00:37:45,840
+is the case that the value in a i j must be consumed right before the i plus 1 jth iteration
+
+336
+00:37:52,600 --> 00:37:59,600
+writes into it correct so in this case the dependence vector okay is minus 1 comma 0
+
+337
+00:37:59,599 --> 00:38:06,599
+right but that is if you are looking at it from the left hand side to the right hand
+
+338
+00:38:12,119 --> 00:38:19,119
+side right and that kind of a dependence cannot exist cannot satisfy that it is not a true
+
+339
+00:38:19,319 --> 00:38:23,199
+dependence if you think of this as a true dependence that kind of a dependence cannot
+
+340
+00:38:23,279 --> 00:38:28,960
+exist because that means that i plus 1 jth iteration has to be executed before i jth
+
+341
+00:38:28,960 --> 00:38:35,960
+iteration that is not possible so if you have a legal dependence in the legal dependence
+
+342
+00:38:36,079 --> 00:38:43,079
+the distance vector will always have the first element as first non-zero element right the
+
+343
+00:38:43,719 --> 00:38:50,719
+first non-zero element as positive okay if the first non-zero element is negative right
+
+344
+00:38:51,279 --> 00:38:57,480
+either you have talk you are talking about the dependence in the other direction correct
+
+345
+00:38:57,480 --> 00:39:00,719
+you are talking about the dependence in the other direction i am looking at a dependence
+
+346
+00:39:00,719 --> 00:39:07,719
+from here to here right from this side to this side it would have been 1 0 right so
+
+347
+00:39:08,759 --> 00:39:14,759
+any legal dependence has to be positive and by positive what we mean is that the first
+
+348
+00:39:14,760 --> 00:39:20,840
+non-zero element has to be greater than 0 i mean yeah the first non-zero element has
+
+349
+00:39:20,840 --> 00:39:27,840
+to be positive okay or we can also say in the case of dependence in the case of direction
+
+350
+00:39:27,840 --> 00:39:34,840
+vector the first non-equal sign has to be less than both are same right so is that clear
+
+351
+00:39:37,600 --> 00:39:43,040
+so whenever we talk about a dependence a true dependence that dependence i mean not in the
+
+352
+00:39:43,039 --> 00:39:47,800
+case of true dependence like flow dependence what i meant to say is that whenever you talk
+
+353
+00:39:47,800 --> 00:39:54,119
+about a dependence in a particular direction if it is positive then that is a dependence
+
+354
+00:39:54,119 --> 00:39:59,119
+if it is negative then you are actually reversing the dependence that is really what is happen
+
+355
+00:39:59,119 --> 00:40:05,119
+okay okay now we will talk about loop transformations there are several loop transformations that
+
+356
+00:40:05,119 --> 00:40:10,199
+are possible right initially i will tell you what the loop transformation is and later
+
+357
+00:40:10,199 --> 00:40:15,719
+on you can figure out where it is useful you also have to see whether these loop transformations
+
+358
+00:40:15,719 --> 00:40:21,359
+are legal to be performed anything is legal only if it satisfies all the dependences otherwise
+
+359
+00:40:21,359 --> 00:40:28,359
+it is not legal okay let us look at it first thing is loop unrolling do we know this right
+
+360
+00:40:30,719 --> 00:40:37,719
+so essentially it is duplicating the loop body multiple times okay so unrolling it twice
+
+361
+00:40:38,119 --> 00:40:45,119
+essentially means this right is loop unrolling legal loop unrolling is always legal okay
+
+362
+00:40:47,279 --> 00:40:53,439
+as long as the index variable that is the counts are actually taken care of in the proper
+
+363
+00:40:53,439 --> 00:41:00,439
+way right it is always legal right where do you do loop unrolling we did right we did
+
+364
+00:41:01,079 --> 00:41:06,679
+loop unrolling specifically for instruction scheduling increasing the size of the basic
+
+365
+00:41:06,679 --> 00:41:13,679
+blocks right you do loop unrolling right loop rolling is the opposite of unrolling
+
+366
+00:41:15,719 --> 00:41:22,719
+correct so here is a very complex set of statement but if you look at it everywhere i have z
+
+367
+00:41:22,719 --> 00:41:29,719
+k z k plus 1 k plus 2 k plus 3 x k x k plus 1 k plus 2 k plus 3 so it is a four time unrolled
+
+368
+00:41:30,719 --> 00:41:37,719
+version right or five times unrolled version that can be rolled back into this version
+
+369
+00:41:37,839 --> 00:41:42,839
+right typically this transformation is never done but just for our understanding i put
+
+370
+00:41:42,839 --> 00:41:49,839
+that loop peeling let us look at loop peeling right now in this program or in this piece
+
+371
+00:41:50,759 --> 00:41:57,759
+of code i goes from 1 to n a of i is a of i plus a of 1 right now try to understand
+
+372
+00:41:59,719 --> 00:42:06,519
+analyze the dependence for the statements the first iteration is obviously dependent
+
+373
+00:42:06,519 --> 00:42:13,519
+on itself a of 1 what about the second iteration in the first iteration we would have produced
+
+374
+00:42:14,159 --> 00:42:21,159
+a of 1 the second iteration a of 1 is being consumed in the third iteration a of 1 is
+
+375
+00:42:21,319 --> 00:42:27,039
+being consumed in the fourth iteration a of 1 is being consumed so essentially in this
+
+376
+00:42:27,039 --> 00:42:34,039
+case what we have is that all iterations are dependent on a of 1 so we cannot execute this
+
+377
+00:42:34,559 --> 00:42:41,559
+loop in parallel or we cannot vectorize correct that is a bad thing because if i have a vectorizable
+
+378
+00:42:44,079 --> 00:42:51,079
+a processor like a v x or something available and if i have this loop i cannot vectorize
+
+379
+00:42:51,279 --> 00:42:58,279
+it right can you think of some simple transformations that can be done sorry tell me store a of
+
+380
+00:43:03,679 --> 00:43:10,679
+1 in some other but then where will you do that a of 1 writing inside that loop right
+
+381
+00:43:10,679 --> 00:43:17,679
+so you do not need to necessarily store it in a separate array just do iteration 1 outside
+
+382
+00:43:17,919 --> 00:43:24,919
+of the loop right that is what we call as peeling remove the first iteration the name
+
+383
+00:43:25,480 --> 00:43:32,480
+means what it is right do not be too surprised right so every iteration depends on iteration
+
+384
+00:43:33,000 --> 00:43:40,000
+1 so take out iteration 1 right from the loop then what you have is you have this piece
+
+385
+00:43:41,000 --> 00:43:48,000
+of code a of 1 is a of 1 plus a of 1 whereas a of i is a of i plus a of 1 now what happened
+
+386
+00:43:51,199 --> 00:43:58,199
+is that here all of these statements are dependent on this one so once you execute this serially
+
+387
+00:43:59,079 --> 00:44:06,079
+the rest of it all can be executed in parallel so you can vectorize this execution whereas
+
+388
+00:44:06,079 --> 00:44:11,799
+you cannot vectorize this execution this is loop peeling from the beginning of the iteration
+
+389
+00:44:11,799 --> 00:44:17,199
+what about loop peeling from the end of the iteration right if it is dependent on a of
+
+390
+00:44:17,199 --> 00:44:24,199
+m something like that would happen and you have to do ok alright now let us look at another
+
+391
+00:44:24,559 --> 00:44:31,559
+loop transformation called loop fission it is also called loop distribution oh boy so
+
+392
+00:44:32,239 --> 00:44:39,239
+sequence of statements right for i is equal to 1 to n right can I break these things in
+
+393
+00:44:40,599 --> 00:44:47,599
+terms of for i is equal to 1 s 1 for i is equal to 1 s 2 for i is equal to 1 to n s
+
+394
+00:44:47,599 --> 00:44:54,599
+3 for i is equal to 1 to n s 4 can I do that will that have the same meaning as this one
+
+395
+00:44:55,799 --> 00:45:00,759
+you all understand right I have 4 statements which are put in the loop and I am executing
+
+396
+00:45:00,760 --> 00:45:06,800
+this s 1 s 2 s 3 s 4 s 1 s 2 s 3 s 4 like that I am executing but what I want to do
+
+397
+00:45:06,800 --> 00:45:13,320
+is that I want to execute s 1 s 1 s 1 n times s 2 s 2 s 2 n times ok let us look at what
+
+398
+00:45:13,320 --> 00:45:20,320
+happens right so this produces a value in the ith iteration which is going to be consumed
+
+399
+00:45:20,440 --> 00:45:27,440
+by s 2 in the i plus 1th iteration so if I execute all iterations of b 2 I mean all iterations
+
+400
+00:45:28,440 --> 00:45:35,440
+of s 2 then this will take the old value of c it will not take the new value of c so obviously
+
+401
+00:45:38,440 --> 00:45:45,440
+I am breaking this dependence correct anything else that you can see this also b of i b of
+
+402
+00:45:48,360 --> 00:45:55,360
+i minus 1 correct right so if you have a loop carried dependence then you are going to have
+
+403
+00:45:55,840 --> 00:46:02,840
+a problem right but you can handle it let us see what we can do right so again we will
+
+404
+00:46:03,920 --> 00:46:10,280
+build a dependence graph and then annotate it right and then in the dependence graph
+
+405
+00:46:10,280 --> 00:46:15,120
+we will identify what are called strongly connected components all of you know about
+
+406
+00:46:15,120 --> 00:46:19,480
+strongly connected components right it is a subset of the graph where every node is
+
+407
+00:46:19,480 --> 00:46:25,639
+connected to every other node right and then combine all these strongly connected graphs
+
+408
+00:46:25,639 --> 00:46:32,639
+into a single node right and then do topological sorting right so let us see how that works
+
+409
+00:46:34,119 --> 00:46:41,119
+this is the program ok now this is the dependence ok here the distance vectors are only one
+
+410
+00:46:41,320 --> 00:46:46,599
+dimension therefore I have just represented them by a number again you can see that b
+
+411
+00:46:46,599 --> 00:46:53,599
+of i b of i minus 1 so that dependence is here c of i c of i minus 1 ok there is a dependence
+
+412
+00:46:55,079 --> 00:47:02,079
+from s 1 to s 2 to s 3 that is a loop independent dependence correct so that is also put in
+
+413
+00:47:04,599 --> 00:47:11,599
+here s 3 to s 4 and then from s 4 to itself right so all of these dependences are marked
+
+414
+00:47:12,599 --> 00:47:19,599
+in this graph now which is the strongly connected component here s 2 s 3 correct so combine
+
+415
+00:47:20,239 --> 00:47:27,239
+them into one node right then s 2 s 3 is a single node there is an edge from s 2 s 3
+
+416
+00:47:31,159 --> 00:47:38,159
+to s 1 there is an edge from s 3 to s 4 and of course there is a loop on s 4 right you
+
+417
+00:47:38,639 --> 00:47:44,480
+have marked all of them right now what do we understand from here if I understand s
+
+418
+00:47:44,480 --> 00:47:50,239
+2 s 3 together in this form together meaning that there is a single loop for that that
+
+419
+00:47:50,239 --> 00:47:57,239
+is for i is equal to 1 to n s 2 s 3 so it executes s 2 s 3 s 2 s 3 s 2 s 3 like that
+
+420
+00:47:58,359 --> 00:48:05,359
+right and then after that if I execute s 1 n times and after that if I execute s 4 n
+
+421
+00:48:05,360 --> 00:48:12,360
+times or in any order it does not really matter correct I would have met all the dependences
+
+422
+00:48:14,160 --> 00:48:21,160
+right let us see that in the next slide ok correct now does this satisfy all your dependences
+
+423
+00:48:25,240 --> 00:48:31,880
+yes because the c 1 to c c to c dependence is satisfied because this is going to be executed
+
+424
+00:48:31,880 --> 00:48:38,519
+in this way right there was a dependence from b of i to b of i minus 1 which was actually
+
+425
+00:48:38,519 --> 00:48:42,720
+loop carried and it was going backward but now what we have done is that we are going
+
+426
+00:48:42,720 --> 00:48:49,720
+to execute b first and then a later so that is going to go like this that is also taken
+
+427
+00:48:50,200 --> 00:48:57,200
+care of d of course only had a self dependence there was a loop independent dependence from
+
+428
+00:48:57,759 --> 00:49:03,439
+c to d that is also being satisfied now you have this 4 loops which was originally put
+
+429
+00:49:03,439 --> 00:49:10,439
+as a single loop you have distributed them what can you do with them right some loops
+
+430
+00:49:10,639 --> 00:49:17,639
+can be parallelized some loops cannot be parallelized right which one can be parallelized a of i
+
+431
+00:49:18,480 --> 00:49:25,480
+is equal to a of i plus b of i minus 1 can be parallelized right I think that is coming
+
+432
+00:49:28,639 --> 00:49:35,639
+over here ok just went to one more level right it can be parallelized what about this one
+
+433
+00:49:37,799 --> 00:49:44,799
+this cannot be vectorized because there is a self dependency so it cannot be this also
+
+434
+00:49:44,880 --> 00:49:50,039
+cannot be vectorized because there are two statements and one depends on the other and
+
+435
+00:49:50,039 --> 00:49:57,039
+then vice versa so that cannot be parallelized so if you are given a original loop like this
+
+436
+00:49:58,760 --> 00:50:05,760
+by analyzing all the dependences and doing these sequence of steps you can actually reduce
+
+437
+00:50:06,320 --> 00:50:13,320
+it to this right and then you can parallelize some of that so the compiler can do this no
+
+438
+00:50:14,120 --> 00:50:21,120
+longer magic correct so well defined sequence of steps that can be done ok now before we
+
+439
+00:50:21,680 --> 00:50:27,160
+go more into this now tell me where do you think it would be more appropriate to do this
+
+440
+00:50:27,160 --> 00:50:33,840
+kind of transformations or optimizations after we do register allocation instruction scheduling
+
+441
+00:50:33,840 --> 00:50:38,440
+register allocation and other things because after you do register allocation instruction
+
+442
+00:50:38,440 --> 00:50:44,320
+scheduling in what form are you seeing the loop you are seeing the loop as a sequence
+
+443
+00:50:44,320 --> 00:50:51,240
+of statements with some control branches right this structure of the loop is not really seen
+
+444
+00:50:51,240 --> 00:50:56,280
+at that level whereas if you have looked at this loop at a much earlier point in time
+
+445
+00:50:56,280 --> 00:51:01,960
+like the AST or even before that right you could have actually had information about
+
+446
+00:51:01,960 --> 00:51:06,760
+the loops and other things you could have had see for example this array accesses are
+
+447
+00:51:06,760 --> 00:51:12,320
+being looked at as B of I and C of I minus 1 whereas if you are looking at the code after
+
+448
+00:51:12,320 --> 00:51:16,760
+instruction scheduling or register allocation right we discussed at length about this in
+
+449
+00:51:16,760 --> 00:51:22,640
+the afternoon right it is going to be seen as some index you would not know I or J or
+
+450
+00:51:22,640 --> 00:51:29,000
+I minus 1 or J minus 1 nothing will be there that is the last case right so many of this
+
+451
+00:51:29,000 --> 00:51:34,440
+optimization that we talk about in terms of loop transformations they are often done at
+
+452
+00:51:34,440 --> 00:51:40,559
+the early part of the compilation okay so do not think that all optimizations have to be done after
+
+453
+00:51:40,559 --> 00:51:46,039
+the intermediate representation not necessarily and it is also not that all optimizations have
+
+454
+00:51:46,039 --> 00:51:52,360
+to be done only on the machine code or the output of the optimization has to be on the machine code
+
+455
+00:51:52,360 --> 00:51:57,320
+in this case what we have done is we have taken the original loop and then we have rewritten it
+
+456
+00:51:57,320 --> 00:52:02,720
+as another loop so in some sense this is a source to source transformation so some of these
+
+457
+00:52:02,719 --> 00:52:09,119
+optimizations may happen at a higher level it may not be in C code it may be in AST or it may be in
+
+458
+00:52:09,119 --> 00:52:15,279
+some appropriate representation but it happens at a slightly higher level if you go to the level
+
+459
+00:52:15,279 --> 00:52:20,439
+of instructions or three address code or something below that many of these information should have
+
+460
+00:52:20,439 --> 00:52:26,679
+been lost and you may not be able to do that right so you have to now understand a different
+
+461
+00:52:26,679 --> 00:52:31,399
+that something that we have not seen in the last two days right you are saying that oh take the
+
+462
+00:52:31,400 --> 00:52:36,760
+three address code do that or take the machine code do this right now you are also going to do
+
+463
+00:52:36,760 --> 00:52:43,119
+things at the higher end to optimize certainly so again depending on what optimization you want
+
+464
+00:52:43,119 --> 00:52:47,599
+to perform there is an appropriate place and representation on which you have to perform that
+
+465
+00:52:47,599 --> 00:52:55,800
+okay you are doing okay in terms of time let me just go a little bit for that so here is a nested
+
+466
+00:52:55,800 --> 00:53:01,519
+loop making things a little bit more complicated let us see what is happening here again this is
+
+467
+00:53:01,519 --> 00:53:10,280
+the code okay now we will introduce one new point here okay so again I have represented
+
+468
+00:53:10,280 --> 00:53:19,039
+the dependence distances correct so this dependence distance is 1 0 this is 1 0 this is 1 0 and this
+
+469
+00:53:19,039 --> 00:53:29,719
+is 0 1 okay that possibly is this from this C of i j to C of i, j minus 1 in all other cases it is
+
+470
+00:53:29,719 --> 00:53:40,400
+i plus 1 to i okay that you can see i plus 1 to i i plus 1 to i okay let us say that in this particular
+
+471
+00:53:40,400 --> 00:53:48,159
+loop in this nested loop I am only interested in parallelizing the innermost loop or vectorizing
+
+472
+00:53:48,319 --> 00:53:53,960
+the innermost loop typically only innermost loops are vectorized right let us say that we are only
+
+473
+00:53:53,960 --> 00:53:59,719
+interested in vectorizing the innermost loop if I look at this code and look at all the distances
+
+474
+00:53:59,719 --> 00:54:05,119
+dependence distances this I am only interested in vectorizing the innermost loop and let us say
+
+475
+00:54:05,119 --> 00:54:11,079
+the outer loop is going to be executed sequentially correct then I do not have to worry about this
+
+476
+00:54:11,079 --> 00:54:16,039
+dependence because the outer loop is going to be executed sequentially right this dependence is
+
+477
+00:54:16,039 --> 00:54:20,679
+always going to be satisfied this dependence is also going to be satisfied because the outer loop
+
+478
+00:54:20,679 --> 00:54:26,599
+is executed sequentially this self loop is also going to be satisfied so what I need to make sure
+
+479
+00:54:26,599 --> 00:54:33,440
+is that whether this is going to be satisfied or not so let us look at it so when I do this and
+
+480
+00:54:33,440 --> 00:54:41,159
+only consider vectorizing the inner loop the only dependence that I need to care about is the
+
+481
+00:54:41,159 --> 00:54:50,399
+dependence from s1 to s2 and what is the dependence s1 produces C of ij s2 consumes C of i, j-1 now
+
+482
+00:54:50,399 --> 00:55:00,639
+the question is can I do loop fission on the innermost loop I can write I can write this as
+
+483
+00:55:00,639 --> 00:55:06,639
+a for j loop I can write this as a for j loop I can write this as a for j loop as long as I
+
+484
+00:55:06,639 --> 00:55:14,079
+execute this for j loop after this for j loop this dependence is satisfied correct so when you
+
+485
+00:55:14,079 --> 00:55:20,559
+are looking at vectorizing the innermost loop you can actually ignore all dependences which
+
+486
+00:55:20,559 --> 00:55:27,000
+are on the outer loop okay correct all dependences which are on the outer loop can be ignored and
+
+487
+00:55:27,000 --> 00:55:33,119
+now your dependence graph has become like this there are no strongly connected components so
+
+488
+00:55:33,119 --> 00:55:40,319
+nothing needs to be merged right as long as you satisfy this ordering of s1 followed by s2 they
+
+489
+00:55:40,319 --> 00:55:47,079
+can be distributed and they can be executed in any order only thing is s2 has to be executed after
+
+490
+00:55:47,079 --> 00:55:58,719
+s1 I could have first executed s3 then s1 then s2 that is also possible right so I have shown this
+
+491
+00:55:59,599 --> 00:56:04,599
+representation form that is why you do not see an inner for loop right so I have distributed it and
+
+492
+00:56:04,599 --> 00:56:11,199
+I have shown it in the vector representation which essentially means for j is equal to 1 to n C for j
+
+493
+00:56:11,199 --> 00:56:19,159
+is equal to 1 to n this for j is equal to 1 to n okay now each one of this loop can now be vectorized
+
+494
+00:56:19,159 --> 00:56:29,639
+so you can do AVX on that or whatever okay right so again it is possible because we did loop fission
+
+495
+00:56:29,639 --> 00:56:36,399
+on that okay there are additional optimizations that you can do to enable you to do vectorization
+
+496
+00:56:36,399 --> 00:56:44,759
+we will do one or two of them okay yeah let us see this one so let us say statement s1
+
+497
+00:56:44,760 --> 00:56:54,120
+writes x of i statement s2 uses x of i and x of i plus 1 okay so in this case what happens
+
+498
+00:56:54,120 --> 00:57:00,640
+is that there is a dependence from s1 to s2 true dependence from s1 to s2 which is loop independent
+
+499
+00:57:00,640 --> 00:57:10,320
+there is a var dependence from s2 to s1 which is loop carried correct because this value has to be
+
+500
+00:57:10,320 --> 00:57:17,400
+consumed before the next iteration executes otherwise you will overwrite this right so in
+
+501
+00:57:17,400 --> 00:57:22,559
+this kind of a situation you can neither write I mean you can either distribute or you cannot
+
+502
+00:57:22,559 --> 00:57:28,400
+distribute this loop with s1 as the first statement or s2 as the first statement because there is a
+
+503
+00:57:28,400 --> 00:57:37,880
+dependence from s1 to s2 there is a anti dependence from s2 to s1 correct so this essentially causes
+
+504
+00:57:37,880 --> 00:57:45,280
+a problem and what you need to do is that you kind of need to use another array for x instead
+
+505
+00:57:45,280 --> 00:57:52,840
+of one this thing so let me show you what you do you first copy x of i into an array called t of i
+
+506
+00:57:52,840 --> 00:58:02,599
+right and then do the statement s1 which modifies x of i then do the statement s2 using the copied
+
+507
+00:58:02,599 --> 00:58:09,920
+array right you can see that this has the same semantics of this right you originally you are
+
+508
+00:58:09,920 --> 00:58:18,639
+writing x of i using that value of x of i and using the old value of x of i plus 1 correct the
+
+509
+00:58:18,639 --> 00:58:26,679
+old value of x of i plus 1 is being copied into t of i right now I am using t of i and x of i where
+
+510
+00:58:27,159 --> 00:58:35,500
+is the new value so new value plus old value divided by 2 I am able to do that now I can do
+
+511
+00:58:35,500 --> 00:58:41,679
+fission of this and then I can parallelize all three statements right again the only need to
+
+512
+00:58:41,679 --> 00:58:49,319
+make sure that s naught happens before s2 s1 happens before s2 right that is the dependence
+
+513
+00:58:49,320 --> 00:59:03,960
+that I have to preserve yeah if you want to parallelize that you have to have a blocking
+
+514
+00:59:03,960 --> 00:59:10,640
+mechanism but such blocking mechanisms are expensive to implement okay so oftentimes you
+
+515
+00:59:10,640 --> 00:59:15,880
+say it cannot be parallelized see if you want to do blocking for every iteration it will
+
+516
+00:59:15,880 --> 00:59:21,039
+essentially become sequential right therefore you say it is not possible whereas now by doing
+
+517
+00:59:21,039 --> 00:59:26,720
+this copying I am just saying that I can do them in parallel I do not know whether you got the
+
+518
+00:59:26,720 --> 00:59:38,480
+answer that you are looking for no so let us look at this so this is what we have transformed it
+
+519
+00:59:38,480 --> 00:59:46,240
+correct now I can execute all statements of s naught in parallel nothing prevents me I can copy
+
+520
+00:59:46,240 --> 00:59:52,199
+this entire xra into tra with a shift without a shift also I could have done but with a shift
+
+521
+00:59:52,199 --> 00:59:59,159
+is what I have done correct I could do for all the n elements in parallel right after I finish
+
+522
+00:59:59,159 --> 01:00:09,759
+this right I do s1 again I do all the values of x of i in parallel that means that this code
+
+523
+01:00:09,759 --> 01:00:17,440
+can also be vectorized right after that I do s2 that code can also be vectorized so there is no
+
+524
+01:00:17,440 --> 01:00:23,239
+blocking now the moment I have renamed this variable or copied this variable into another
+
+525
+01:00:23,239 --> 01:00:30,719
+array I broke one of these dependences I broke this anti-dependence in terms of this true
+
+526
+01:00:30,719 --> 01:00:39,919
+dependence and this copied array so now it now you can actually topologically sort this graph s0 s1 s2
+
+527
+01:00:39,919 --> 01:00:44,959
+topologically sort this graph so there is no problem once you can topologically sort you can
+
+528
+01:00:44,959 --> 01:00:50,639
+actually do loop distribution and the moment you do loop distribution each one of those distributed
+
+529
+01:00:50,639 --> 01:00:56,039
+loops can be vectorized right as long as there is no other dependency which prevents it to vectorize
+
+530
+01:00:56,039 --> 01:01:05,559
+right so it can be vectorized okay one last transformation for vectorization is this one
+
+531
+01:01:05,559 --> 01:01:12,400
+let us look at it here I have a variable t a scalar variable t a scalar variable t which
+
+532
+01:01:12,400 --> 01:01:19,339
+is some a of i plus c of i minus 1 then that scalar variable t is also being used in the
+
+533
+01:01:19,340 --> 01:01:25,820
+next statement again I have the same situation that there is a dependence and there is an
+
+534
+01:01:25,820 --> 01:01:35,420
+anti-dependence correct now again I can break this by making this t of i making this t from
+
+535
+01:01:35,420 --> 01:01:42,140
+a scalar to a array so this is called scalar expansion so instead of having one variable t
+
+536
+01:01:42,140 --> 01:01:48,340
+I have an array of variable the moment I put this as an array of variable only the true dependence
+
+537
+01:01:48,340 --> 01:01:54,220
+remains the anti-dependence has gone because for each iteration I have a new temporary right
+
+538
+01:01:54,220 --> 01:02:01,579
+that is essentially what it is so this can also be parallelized okay now let us come to the familiar
+
+539
+01:02:01,579 --> 01:02:08,500
+things so here is a loop where I say for i is equal to 1 to m for j is equal to 1 to n do blah
+
+540
+01:02:08,500 --> 01:02:19,900
+blah okay now can I interchange the i and j loop here do not worry what it is going to how it is
+
+541
+01:02:19,900 --> 01:02:31,420
+going to help but can I interchange right and write it like this let us look at let us look
+
+542
+01:02:31,420 --> 01:02:38,740
+at the dependence right x of i j is equal to x of i minus 1 j right so the dependence here is
+
+543
+01:02:38,740 --> 01:02:51,619
+1 0 right now if you interchange the loop put j i the dependence is going to become 0 1 right now
+
+544
+01:02:51,619 --> 01:02:58,420
+the question to ask is that is 0 1 the legal dependence vector what did I say about legal
+
+545
+01:02:58,420 --> 01:03:07,099
+dependence vector the first non-zero element has to be positive is 0 1 illegal vector or not yes
+
+546
+01:03:07,099 --> 01:03:13,579
+therefore it is possible to do interchange on this that is essentially what the previous
+
+547
+01:03:13,579 --> 01:03:18,059
+slide was trying to tell you in mathematics okay I was just trying to give you the intuition
+
+548
+01:03:18,059 --> 01:03:24,139
+behind it so in this case loop interchange is possible so now tell me where loop interchange
+
+549
+01:03:24,139 --> 01:03:35,659
+is not possible so if instead of having x i j is equal to x i minus 1 j if I have x i minus 1
+
+550
+01:03:35,659 --> 01:03:45,539
+j minus 1 that is not a problem a plus 1 that is very good right if I have here as x i minus 1
+
+551
+01:03:45,539 --> 01:03:52,819
+j plus 1 then what happens is that I have a 1 minus 1 dependence and when I permute them I have
+
+552
+01:03:52,820 --> 01:04:00,300
+a minus 1 plus 1 and the first non-zero element is negative therefore it is not a legal vector so
+
+553
+01:04:00,300 --> 01:04:06,980
+we are violating some dependences so that is not possible okay now let us also see pictorially what
+
+554
+01:04:06,980 --> 01:04:16,780
+is happening here okay the same example right x i j right i minus 1 j right now see this is how
+
+555
+01:04:16,780 --> 01:04:26,260
+the loop is executing correct the dependence is from x i j to x i minus 1 j that means that for
+
+556
+01:04:26,260 --> 01:04:32,740
+the same j value but the previous i value right what is being produced in i j is consumed in i
+
+557
+01:04:32,740 --> 01:04:41,100
+plus 1 j so the dependence is this blue arrow right this was our original execution order now
+
+558
+01:04:41,100 --> 01:04:46,140
+if I want to execute in the other order am I satisfying the dependences or not is what you
+
+559
+01:04:46,139 --> 01:04:55,259
+need to see right if you do loop interchange this is what it is are you satisfying the
+
+560
+01:04:55,259 --> 01:05:02,339
+dependences or not right so if you are going this way this dependence is satisfied if you
+
+561
+01:05:02,339 --> 01:05:07,699
+are going this way also that dependence is satisfied so there is no problem right of
+
+562
+01:05:07,699 --> 01:05:12,900
+course you cannot be checking it like this this is for our understanding the way to check is look
+
+563
+01:05:12,900 --> 01:05:19,139
+at the dependence vector permute them and then see if the permutation does not result in a
+
+564
+01:05:19,139 --> 01:05:27,539
+illegal vector then it is a possible thing okay so here is your example for a case where interchange
+
+565
+01:05:27,539 --> 01:05:34,660
+is not permissible right as you can see I have okay this is actually an anti-dependence from
+
+566
+01:05:34,660 --> 01:05:39,019
+here to here that is what we are talking about that is why the arrow is red rather than blue
+
+567
+01:05:39,980 --> 01:05:48,739
+so the anti-dependence vector here is 1, minus 1 right that is anti-dependence because we are
+
+568
+01:05:48,739 --> 01:05:54,500
+seeing it from here to here okay it is only an anti-dependence there is no true dependence here
+
+569
+01:05:54,500 --> 01:06:04,739
+all right now if I interchange the loop look at look at the execution order right when I am
+
+570
+01:06:04,739 --> 01:06:09,659
+executing this element I am using the value of this element which I have not even visited
+
+571
+01:06:09,659 --> 01:06:16,459
+that means it is a old value correct so that is why I call it as anti-dependence right now
+
+572
+01:06:16,459 --> 01:06:28,459
+if I do loop interchange which order am I going then what happens now I am using the new value
+
+573
+01:06:28,460 --> 01:06:37,300
+which means that I have violated my anti-dependence so it is not a valid transformation so the
+
+574
+01:06:37,300 --> 01:06:41,619
+anti-dependence here is actually 1, minus 1 which is same as what we discussed earlier
+
+575
+01:06:41,619 --> 01:06:50,019
+and that anti-dependence is a right cannot be satisfied when you do a loop interchange okay
+
+576
+01:06:50,019 --> 01:06:57,619
+there you go right so this is the mathematics behind this transformation can be represented
+
+577
+01:06:57,619 --> 01:07:02,539
+as a matrix and then you can multiply it with the dependence vector and then you see whether
+
+578
+01:07:02,539 --> 01:07:08,139
+the resulting thing is this which I kind of explained as look at it as permutation of the
+
+579
+01:07:08,139 --> 01:07:13,099
+bits and then you will get permutation of the vectors and you will get okay now let us look
+
+580
+01:07:13,099 --> 01:07:19,539
+at this example and then see if I still want to perform a loop interchange can I do that right
+
+581
+01:07:19,539 --> 01:07:26,420
+in this case I do what is called loop interchange and reversal right let us see what that is
+
+582
+01:07:26,420 --> 01:07:35,340
+okay so I have done the J loop and then the I loop I have done the interchange but now what
+
+583
+01:07:35,340 --> 01:07:43,700
+I am doing is that for the J loop I am going from n minus 1 to 1 that means that this is the order
+
+584
+01:07:43,700 --> 01:07:53,300
+that I am so for J is equal to 5 I goes from 1 to 4 and then for J is equal to 4 I goes from 1 to 4
+
+585
+01:07:53,300 --> 01:08:00,380
+and so on now is that anti-dependence is satisfied yes so now what was happening is that you had that
+
+586
+01:08:00,380 --> 01:08:07,019
+1 minus 1 vector you did a permutation which resulted in minus 1 comma 1 which is not legal
+
+587
+01:08:07,019 --> 01:08:13,300
+then you did one more transformation which is the loop reversal and loop reversal has this effect
+
+588
+01:08:13,300 --> 01:08:20,500
+of changing the order so that minus 1 1 has now become again 1 comma minus 1 so you were okay with
+
+589
+01:08:21,020 --> 01:08:24,539
+that okay again I do not want to go into all the mathematics because it will take quite a bit of
+
+590
+01:08:24,539 --> 01:08:31,859
+time to do that again I think I am going to skip all of this parallelization because we do not have
+
+591
+01:08:31,859 --> 01:08:39,060
+time for this I was trying to hide this but when it crashed it did not necessarily save this so a
+
+592
+01:08:39,060 --> 01:08:43,859
+lot of things about parallelization I will leave the slides with you you can have a look at them
+
+593
+01:08:43,859 --> 01:08:51,539
+I just want to cover one aspect of locality before we close okay so again as we mentioned
+
+594
+01:08:51,539 --> 01:08:56,939
+why do we want to do loop interchange right loop interchange is typically done when you want to
+
+595
+01:08:56,939 --> 01:09:04,179
+exploit locality right morning we saw that example right where you had this i j and you have this
+
+596
+01:09:04,179 --> 01:09:10,299
+two-dimensional array and the loop was written J i right and you are accessing B of j comma i
+
+597
+01:09:10,420 --> 01:09:17,300
+and you are going right column wise which was bad right improve your locality what you could
+
+598
+01:09:17,300 --> 01:09:22,060
+have done is you can do a loop interchange but you can do a loop interchange only if it is legal
+
+599
+01:09:22,060 --> 01:09:27,699
+now let us look at this example of matrix multiplication right which is another interesting
+
+600
+01:09:27,699 --> 01:09:33,500
+example right so in the matrix multiplication what you have is that you have two inner loops
+
+601
+01:09:33,500 --> 01:09:43,739
+right and you are trying to access let us look at this right why array is being accessed i comma
+
+602
+01:09:43,739 --> 01:09:50,180
+k right and k varies faster that means that you are going to access this in the row major order
+
+603
+01:09:50,180 --> 01:09:58,500
+there is no problem whereas z array is going to be accessed as z k j k array is varying faster
+
+604
+01:09:58,500 --> 01:10:05,060
+than the j array sorry the k index is varying faster than the j index that means that you
+
+605
+01:10:05,060 --> 01:10:14,300
+are going column wise so this is going to have lower locality not only that both of these arrays
+
+606
+01:10:14,300 --> 01:10:19,859
+are going to be repeatedly accessed because you have an outer loop also correct so if you remember
+
+607
+01:10:19,859 --> 01:10:27,140
+matrix multiplication you take each row multiply it with every column correct so first row first
+
+608
+01:10:27,140 --> 01:10:33,860
+column first row second column first row third column first row nth column right so if you go
+
+609
+01:10:33,860 --> 01:10:38,980
+access all the elements of the first row then come back and try to access the elements of the first
+
+610
+01:10:38,980 --> 01:10:46,700
+row again if it is not there in the cache then you have a conflict miss or a capacity miss depending
+
+611
+01:10:46,700 --> 01:10:52,100
+on whatever happens right so that is actually basically you just brought this entire row one
+
+612
+01:10:52,100 --> 01:10:57,180
+after another one cache block after another but then again if you want to access it it is not
+
+613
+01:10:57,180 --> 01:11:02,780
+there for you right that kind of a situation is not what you want to end up it so trying to access
+
+614
+01:11:02,780 --> 01:11:07,700
+it column wise you can at least understand because you go column wise you are actually
+
+615
+01:11:07,700 --> 01:11:14,140
+filling in new block every time so you will go n new blocks before you come back to the same block
+
+616
+01:11:14,140 --> 01:11:20,579
+again whereas when you are going row wise you are actually doing n by 4 or n by 8 depending on how
+
+617
+01:11:20,579 --> 01:11:25,659
+many elements are there it is the same set of things that you are bringing in right so let's
+
+618
+01:11:25,659 --> 01:11:30,659
+see what happens in this example again I have given all the details here I don't want to go
+
+619
+01:11:30,659 --> 01:11:37,140
+through this let's look at these two arrays right so essentially what you are trying to do is that
+
+620
+01:11:37,140 --> 01:11:46,059
+you are trying to multiply y with z that means that right ik is going to multiply it by kj right
+
+621
+01:11:46,060 --> 01:11:53,060
+now if I go through this entire set of elements and then come back here assume that this is an
+
+622
+01:11:53,060 --> 01:12:00,340
+array of 1024 elements right 1024 elements means roughly we are talking about 8k right again another
+
+623
+01:12:00,340 --> 01:12:08,020
+1024 elements here right that's another 8k 16k your cache block is gone by the time you come back
+
+624
+01:12:08,020 --> 01:12:13,900
+here even if you had all of these things in the cache right by the time you come back here something
+
+625
+01:12:13,899 --> 01:12:19,699
+would have been replaced so you would not see this again right this case of course is pretty
+
+626
+01:12:19,699 --> 01:12:26,619
+bad because you are trying to go through it column wise right instead what you can do is so this is
+
+627
+01:12:26,619 --> 01:12:32,579
+essentially how the accesses proceed right for one row you are trying to access all the columns
+
+628
+01:12:32,579 --> 01:12:40,299
+right so if you want to exploit both spatial locality and temporal locality my slides are
+
+629
+01:12:40,300 --> 01:12:47,020
+slightly out of animation slightly out of order try to do what we are trying to do take a small
+
+630
+01:12:47,020 --> 01:12:55,300
+block of elements right and another block of elements here so maybe this is an 8 cross 8 matrix
+
+631
+01:12:55,300 --> 01:13:03,460
+of this 1024 by 1024 try to do the multiplication of all of these elements with the multiplication
+
+632
+01:13:03,460 --> 01:13:11,420
+of all of these elements right where else are you going to use this you could use this with this
+
+633
+01:13:11,420 --> 01:13:17,939
+and so on similarly when you talk about this you are going to multiply it with this multiply
+
+634
+01:13:17,939 --> 01:13:23,220
+it with this and so on right so now what you are going to do is that you are going to do this
+
+635
+01:13:23,220 --> 01:13:29,500
+multiplication in what is called as a blocked multiplication right and what does that really
+
+636
+01:13:29,859 --> 01:13:38,180
+mean is this following thing right instead of i going from 1 to n in steps of 1 right actually here
+
+637
+01:13:38,180 --> 01:13:46,260
+yeah I have only done tiling for the j loop and the k loop okay the j loop is being tiled and the
+
+638
+01:13:46,260 --> 01:13:53,659
+k loop is also being tiled you can see that the j loop right goes in steps of block size and the
+
+639
+01:13:53,659 --> 01:13:59,899
+k loop also goes in steps of the block size and the internal loops go in steps of 1 so essentially
+
+640
+01:13:59,899 --> 01:14:04,099
+what we are trying to do is that we are trying to take a block of elements trying to multiply
+
+641
+01:14:04,099 --> 01:14:09,380
+with the other block of elements and trying to maximize reuse at least in one dimension that's
+
+642
+01:14:09,380 --> 01:14:15,779
+really what is important okay let's see whether we can see that here so what I need to do is that
+
+643
+01:14:15,779 --> 01:14:23,340
+once I take this I can multiply it with this right I can also multiply it with this I can also multiply
+
+644
+01:14:23,699 --> 01:14:29,579
+it with that and so on right and if I finish all of this then I would have finished using this fully
+
+645
+01:14:29,579 --> 01:14:35,900
+then I can take the next one and do things like right so that depends on the order in which you
+
+646
+01:14:35,900 --> 01:14:41,180
+are trying to do this now if you try to look at this from a loop transformation perspective right
+
+647
+01:14:41,180 --> 01:14:47,579
+what we are trying to do is that the j loop that you have here right you are essentially done what
+
+648
+01:14:47,579 --> 01:14:53,020
+is called a strip mining that means that you have instead of doing for i is equal to 1 to n you are
+
+649
+01:14:53,020 --> 01:15:00,220
+saying that let us do for i is equal to 1 to n in steps of 4 and then within that you have another
+
+650
+01:15:00,220 --> 01:15:07,540
+for loop which says i is equal to whatever current value of i plus 1 like that you are doing so that
+
+651
+01:15:07,540 --> 01:15:13,460
+goes 4 times whereas the outer things goes n by 4 times so together it has now you have a sequence
+
+652
+01:15:13,460 --> 01:15:19,780
+of loops and you are trying to do interchange of them loop interchange of them that's really what's
+
+653
+01:15:19,779 --> 01:15:23,179
+happening okay so with that I think I will stop
+

@@ -1,0 +1,44 @@
+ **Technical Terms:**
+
+* Compiler
+* Machine code
+* Abstraction
+* Interpreter
+* Byte code
+* Software tool
+* Execution
+* Virtual function table
+* Compile time
+* Run time
+* Indirect calls
+* Direct calls
+* Call graph
+* Interprocedural optimizations
+* Front end
+* Back end
+* Intermediate representation (IR)
+* Portability
+* Loop unrolling
+* Speed
+* Space
+* Power consumption
+* Energy
+* Size of the code
+
+**Notes:**
+
+A **compiler** is a tool that translates source code into machine code by reducing the level of abstraction. An **interpreter**, on the other hand, interprets or evaluates the code line by line. While both involve translation, the main differences lie in the fact that an interpreter generates byte code and usually requires a software tool to execute while a compiler directly generates machine code. Additionally, debugging is generally simpler with an interpreter due to the ability to execute line by line.
+
+An **interpreter** can perform tasks that a **compiler** cannot, primarily due to the ability to accept user input. This makes designing a language with an interpreter in mind essential, as it ensures proper handling of user input and provides opportunities for optimizations.
+
+Optimizations aim to improve program performance, whether in terms of speed, space, power consumption, or energy. Improving code size is crucial for sending code over networks, while ensuring compact code for devices with limited resources, such as watches or sensors.
+
+There are situations where an interpreter may be preferred over a compiler, despite the potential performance tradeoffs. Different languages may emphasize the use of interpreters versus compilers, depending on their intended application and desired balance between development ease and performance.
+
+When discussing compilers, it is helpful to categorize them into front ends and back ends. The front end deals with recognizing tokens and creating an IR, while the back end focuses on machine-dependent optimizations and code generation. Modern research mainly revolves around improving back-end optimizations, as front-end challenges have largely been addressed.
+
+Optimizations can be classified into several categories, including local, intra-procedural, and inter-procedural; as well as high-level and low-level optimizations. Local optimizations occur within a basic block, while intra-procedural optimizations affect an entire procedure. Inter-procedural optimizations span multiple procedures, and high-level optimizations rely on program structure, whereas low-level optimizations operate on mid and low-level IRs.
+
+Machine-independent optimizations apply to a wide range of machines, focusing on improvements that do not depend on specific machine properties. On the other hand, machine-dependent optimizations leverage machine-specific attributes to improve mapping of IR onto the target machine, resulting in reduced instruction strength and more efficient utilization of unique hardware instructions.
+
+Program analysis plays a critical role in enabling accurate optimizations. Two primary forms of analysis include may analysis and must analysis. May analysis determines information that may hold on at least one path, while must analysis guarantees information that holds across all paths. Understanding these concepts is vital for effective optimization and the development of semantically preserving transformations.
